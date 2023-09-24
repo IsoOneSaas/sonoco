@@ -1,0 +1,77 @@
+#iso-head-table td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0.2em 0.5em;
+    border: 1px ridge #ccc;
+}
+
+
+#iso-head-table td:nth-last-child(2) {
+  width: 12%;
+  text-align: right;
+  white-space: nowrap;  
+}  
+
+#iso-head-table td:nth-child(2) {
+  width: 60%;
+  text-align: center;
+}
+
+#iso-head-table td:last-child {
+  width: 12%;
+  text-align: left;
+}
+
+#iso-foot-table {
+  width: 100%
+}
+
+#iso-foot-table td {
+  width: 33%;
+  border: 1px ridge #ccc;
+  vertical-align: top;
+  padding: 1em
+}
+
+#iso-foot-table hr {
+  width: 90%;
+  text-align: center;
+  margin: 0.2em 0 0.5em 0;
+}
+
+#iso-foot-table p.name {
+  font-size: 1.1em;
+  font-weight: 700;
+}
+
+#iso-foot-table p.job {
+  font-style: italic;
+  margin-bottom: 2em;
+}
+
+#iso-foot-table p.sign {
+  min-height: 75px;
+}
+
+#iso-foot-table label {
+  font-weight: 900;
+}
+
+#iso-body-table {
+  width: 100%;
+}
+
+#iso-body-table td span {
+  font-weight: 700;
+}
+
+#iso-body-table td {
+  border: 1px ridge #ccc;
+  vertical-align: top;
+  padding: 1em
+}
+
+#iso-body-table td img {
+  margin: 0 auto;
+}   

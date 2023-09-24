@@ -1,6 +1,22 @@
-<?php
+<?php namespace App\Providers;
 
-namespace App\Providers;
+use App\Events\DocumentBack;
+use App\Events\DocumentDeleted;
+use App\Events\DocumentPublished;
+use App\Events\DocumentSent;
+use App\Events\DocumentSwitch;
+use App\Events\DocumentTracing;
+use App\Events\EmailSent;
+use App\Events\EmailDocumentEvent;
+
+use App\Listeners\BackDocumentStatus;
+use App\Listeners\DeletedDocumentStatus;
+use App\Listeners\ChangeDocumentStatus;
+use App\Listeners\PublishDocumentStatus;
+use App\Listeners\SwitchDocumentStatus;
+use App\Listeners\SetDocumentTrace;
+use App\Listeners\SendNotification;
+use App\Listeners\DocumentNotification;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -18,6 +34,30 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        DocumentSent::class => [
+            ChangeDocumentStatus::class,                      
+        ],
+        DocumentBack::class => [
+            BackDocumentStatus::class
+        ],
+        DocumentPublished::class => [
+            PublishDocumentStatus::class
+        ],
+        DocumentSwitch::class => [
+            SwitchDocumentStatus::class
+        ],        
+        DocumentDeleted::class => [
+            DeletedDocumentStatus::class,
+        ],                                
+        DocumentTracing::class => [
+            SetDocumentTrace::class
+        ],
+        EmailSent::class => [
+            SendNotification::class,
+        ],
+        EmailDocumentEvent::class => [
+            DocumentNotification::class,
+        ],                     
     ];
 
     /**

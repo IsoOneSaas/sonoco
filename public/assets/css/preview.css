@@ -1,0 +1,36 @@
+.iso-letter-portrait {
+  width: 8.5in;
+
+}
+
+.iso-letter-landscape {
+  width: 11in;
+
+}
+
+.iso-legal-portrait {
+  width: 8.5in;
+
+}
+
+.iso-legal-landscape {
+  width: 14in;
+
+}
+
+
+.iso-body {
+  margin: 48px;
+  padding: 0;
+  background-color:lightgray
+}
+
+.iso-page {
+  page-break-after: always;
+  position: relative;
+  background-color: white
+}
+
+.iso-content {
+  padding: 0 1em
+}

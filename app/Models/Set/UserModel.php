@@ -1,7 +1,7 @@
 <?php namespace App\Models\Set;
 
 use App\Models\Document\AuthorizationModel;
-//use Emadadly\LaravelUuid\Uuids;
+use Emadadly\LaravelUuid\Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,11 +10,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-//use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasRoles;
 
 class UserModel extends Authenticatable
 {
-    use HasApiTokens, HasFactory, SoftDeletes, Notifiable; //, HasRoles, Uuids;
+    use HasApiTokens, HasFactory, SoftDeletes, Notifiable, HasRoles, Uuids;
  
     protected $table = 'set_users';
     protected $primaryKey = 'user_id';
@@ -84,41 +84,41 @@ class UserModel extends Authenticatable
     /**
     * Obtiene el registro de cargos asociado con el usuario.
     */    
-    // public function jobs()
-    // {
-    //     return $this->belongsToMany(JobModel::class, 'set_job_user', 'user_id', 'job_id');
-    // }
+    public function jobs()
+    {
+        return $this->belongsToMany(JobModel::class, 'set_job_user', 'user_id', 'job_id');
+    }
 
     /**
     * Obtiene el registro de localizaciones asociado con el usuario.
     */    
-    // public function locations()
-    // {
-    //     return $this->belongsToMany(LocationModel::class, 'set_location_user', 'user_id', 'location_id');
-    // }    
+    public function locations()
+    {
+        return $this->belongsToMany(LocationModel::class, 'set_location_user', 'user_id', 'location_id');
+    }    
 
     /**
     * Obtiene el registro de localizaciones autorizadas para el administrador.
     */    
-    // public function adminLocations()
-    // {
-    //     return $this->belongsToMany(LocationModel::class, 'set_admin_location', 'user_id', 'location_id');
-    // }
+    public function adminLocations()
+    {
+        return $this->belongsToMany(LocationModel::class, 'set_admin_location', 'user_id', 'location_id');
+    }
     
     /**
     * Obtiene el registro de sistemass autorizadas para el administrador.
     */    
-    // public function adminSystems()
-    // {
-    //     return $this->belongsToMany(SystemModel::class, 'set_admin_system', 'user_id', 'system_id');
-    // } 
+    public function adminSystems()
+    {
+        return $this->belongsToMany(SystemModel::class, 'set_admin_system', 'user_id', 'system_id');
+    } 
     
     /**
     * Obtiene el registro de authorizaciones de documentos para el usuario
     */    
-    // public function authorizations(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(AuthorizationModel::class, 'user_id', 'user_id');
-    // }      
+    public function authorizations(): BelongsToMany
+    {
+        return $this->belongsToMany(AuthorizationModel::class, 'user_id', 'user_id');
+    }      
 
 } // class

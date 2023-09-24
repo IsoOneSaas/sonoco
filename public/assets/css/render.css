@@ -1,0 +1,39 @@
+#iso-head-table, #iso-foot-table {
+    width: 100%;
+    border-collapse: collapse;    
+}
+#iso-head-table td, #iso-foot-table td {
+    font-size: 0.8em;
+    padding: 0.2em;
+    border: 1px solid #000;   
+}
+
+#iso-head-table h3 {
+    font-size: 1.3em;
+}
+
+#iso-head-table h4 {
+    font-size: 1.2em;
+}
+
+#iso-head-table img {
+    height: 60px
+}
+
+#iso-foot-table p.name, #iso-foot-table p.job {
+    margin: 0 0.2em;
+    padding: 0 0.2em;
+}
+
+#iso-foot-table p.name {
+  font-size: 1em;
+}
+
+#iso-foot-table img {
+    width: 120px
+}
+
+.page-break {
+    page-break-after: always;
+}
+

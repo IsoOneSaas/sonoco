@@ -1,0 +1,102 @@
+    div.ColVis {
+        top: 0;
+        float: right;
+    }
+    .dataTables_filter {
+        margin-bottom: 0.25em
+    }
+    .custom-select {
+        padding-right: 0.5em;
+    }
+
+    .col-filter {
+        border-radius: 3px;
+        border: 1px solid #ccc; 
+        padding: 0;
+        font-size: 0.75em;
+        width: 100%;
+        padding-left: 0.5em;    
+    }
+
+    .select-filter {
+        padding-right: 1em;
+        overflow: hidden;
+        text-overflow: ellipsis;             
+    }
+
+    .pagination .page-item .page-link {
+        color: white;
+        background-color: #1e3a8a;        
+    }
+
+    .pagination .page-item.active .page-link {
+        color: black;
+    }
+
+    .disabled-link {
+        pointer-events: none;
+        background-color: #bbb;
+      }
+
+    .background-documents { 
+        background: url('../images/background_documents.jpg') no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+      }
+
+      .background-dashboard { 
+        background: url('../images/background.jpg') no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+      }
+      
+      
+    .iso-grid-bullet {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        height: 1em;
+        width: 1em;
+    }
+
+    .iso-disabled {
+        pointer-events: none;
+        cursor: default;
+        opacity: 0.6;
+    }    
+    
+    .backgroundClass { background: pink; }
+    .redColorClass { color: red; }
+    .greenColorClass { color: green; }      
+    .defaultColorClass { color: black; } 
+
+    @media (min-width: 640px){
+        table#documents-table{
+            font-size: 0.75em;
+        }
+    }
+    @media (min-width: 768px){
+        table#documents-table{
+            font-size: 0.81em;
+        }
+    }
+    @media (min-width: 1024px){
+        table#documents-table{
+            font-size: 0.86em;
+        }
+    }
+    @media (min-width: 1440px){
+        table#documents-table{
+            font-size: 0.93em;
+        }
+    }
+    @media (min-width: 1536px){
+        table#documents-table{
+            font-size: 1em;
+        }
+    }           
+

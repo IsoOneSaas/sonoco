@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Sonoco Iso-One'),
 
     /*
     |--------------------------------------------------------------------------
@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Bogota',
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'es',
 
     /*
     |--------------------------------------------------------------------------
@@ -96,7 +96,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+    'fallback_locale' => 'es',
 
     /*
     |--------------------------------------------------------------------------
@@ -168,6 +168,16 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+		
+        /*
+         * ISO-ONE Service Providers...
+         */
+		App\Providers\RepositoryServiceProvider::class,
+		Barryvdh\DomPDF\ServiceProvider::class,                      // https://github.com/barryvdh/laravel-dompdf
+		Emadadly\LaravelUuid\LaravelUuidServiceProvider::class,     // Laravel Uuid https://github.com/EmadAdly/laravel-uuid
+		Yajra\DataTables\DataTablesServiceProvider::class,			// https://yajrabox.com/docs/laravel-datatables/10.0
+		Spatie\Permission\PermissionServiceProvider::class,         // https://spatie.be/docs/laravel-permission/v5/installation-laravel
+		
     ])->toArray(),
 
     /*
@@ -183,6 +193,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'PDF' => Barryvdh\DomPDF\Facade::class,		
     ])->toArray(),
 
 ];
