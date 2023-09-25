@@ -631,15 +631,19 @@ class ToolsClass
             //if( $admin ) {
                 $documents =  DocumentModel::whereIn('status', $groupArray)->whereIn('location_id', $lids)->whereIn('system_id', $sids)->orderBy('created_at', 'desc')->take(10)->get()->unique('code');
                 $doc = $documents->last();
-                $date = Carbon::createFromTimeStamp(strtotime($doc->updated_at));
-                if(  $date > $dt->subMonth() ) {
-                    $newFrequency = 'month';
-                } elseif( $date > $dt->subMonths(6) ) {
-                    $newFrequency = 'semester';
+                if($doc) {
+                    $date = Carbon::createFromTimeStamp(strtotime($doc->updated_at));
+                    if(  $date > $dt->subMonth() ) {
+                        $newFrequency = 'month';
+                    } elseif( $date > $dt->subMonths(6) ) {
+                        $newFrequency = 'semester';
+                    } else {
+                        $newFrequency = '';
+                    }
+                    //Log::debug(['LAST' => $doc->toArray(), 'DATE' => $date, 'REF' => $dt->subMonth(), 'FREQ' => $newFrequency]);
                 } else {
                     $newFrequency = '';
                 }
-                //Log::debug(['LAST' => $doc->toArray(), 'DATE' => $date, 'REF' => $dt->subMonth(), 'FREQ' => $newFrequency]);
             } // if           
         } else {
             $documents =  DocumentModel::whereIn('status', $groupArray)->whereDate('updated_at', '>=', $date)->orderBy('created_at', 'desc')->get()->unique('code');

@@ -14,26 +14,33 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 		<style>
-			#back { 
+			#iso-background { 
 			  background: url({{ url('assets/images/background.jpg') }}) no-repeat center center fixed; 
 			  -webkit-background-size: cover;
 			  -moz-background-size: cover;
 			  -o-background-size: cover;
 			  background-size: cover;
-			}		
+			}
+            .iso-text-color-green {
+                color: rgb(119 147 60);
+            }
+            .iso-text-color-yellow {
+                color: rgb(246 206 59);
+            }            		
 		</style>
     </head>
     <body class="font-sans text-gray-3 antialiased">
-        <div id="back" class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+        <div id="iso-background" class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
                     <x-application-logo class="w-40 h-40 fill-current text-gray-500" />
                 </a>
             </div>
-			<div>Versión 4.0</div>
+			<div class="iso-text-color-green font-extrabold">Versión 4.0</div>
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
+            <div class="iso-text-color-green font-extrabold">Powered by MPR Consulting (c) 2023</div>
         </div>
     </body>
 </html>

@@ -417,8 +417,8 @@
                                 </li> -->
                                 <li>
                                     <a href="{{ route('documents.master.index') }}" class="side-menu @if( request()->route()->getName() == 'documents.master') side-menu--active @endif ">
-                                        <!-- <div class="side-menu__icon"> <x-lucide-file-spreadsheet class="w-6 h-6 text-gray-50"/> </div> -->
-                                        <div class="side-menu__icon"> <i data-lucide="file-spreadsheet"></i> </div>
+                                        
+                                        <div class="side-menu__icon"> <i data-lucide="list-ordered"></i> </div>
                                         <div class="side-menu__title"> Listado Maestro </div>
                                     </a>
                                 </li>
@@ -437,8 +437,8 @@
                                         @can('setup_parameters')
                                         <li>
                                             <a href="{{ route('documents.control.documento.index') }}" class="side-menu  @if( Str::contains( request()->route()->getName(), 'documents.control.documento') ) side-menu--active @endif ">
-                                                <!-- <div class="side-menu__icon"> <x-lucide-file-cog class="w-6 h-6 text-gray-50"/> </div> -->
-                                                <div class="side-menu__icon"> <i data-lucide="file-cog"></i> </div>
+                                                
+                                                <div class="side-menu__icon"> <i data-lucide="layout-list"></i> </div>
                                                 <div class="side-menu__title">Administrar</div>
                                             </a>
                                         </li>
@@ -447,7 +447,13 @@
                                                 <div class="side-menu__icon"> <i data-lucide="file-plus-2"></i> </div>
                                                 <div class="side-menu__title">Solicitudes</div>
                                             </a>
-                                        </li>                                        
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('documents.control.observacion.index') }}" class="side-menu  @if( Str::contains( request()->route()->getName(), 'documents.control.observacion') ) side-menu--active @endif ">
+                                                <div class="side-menu__icon"> <i data-lucide="eye"></i> </div>
+                                                <div class="side-menu__title">Observaciones</div>
+                                            </a>
+                                        </li>                                                                                
                                         @endcan                                                                               
                                         <li>
                                             <a href="{{ route('documents.control.manage.index', ['slug' => 'edit']) }}" class="side-menu @if( Str::contains( url()->current(), 'gestion/edit ') ) side-menu--active @endif ">

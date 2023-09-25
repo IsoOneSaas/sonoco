@@ -22,6 +22,7 @@
                             required autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <a href="javascript:;" id="togglePassword"><i data-lucide="eye" class="w-5 h-5">x</i></a>
         </div>
 
         <!-- Remember Me -->
@@ -44,4 +45,18 @@
             </x-primary-button>
         </div>
     </form>
+    <script type="text/javascript">
+        window.addEventListener("DOMContentLoaded", function () {
+            const togglePassword = document.querySelector("#togglePassword");
+
+            togglePassword.addEventListener("click", function (e) {
+                // toggle the type attribute
+                const type =
+                password.getAttribute("type") === "password" ? "text" : "password";
+                password.setAttribute("type", type);
+                // toggle the eye / eye slash icon
+                this.classList.toggle("bi-eye");
+            });
+        });   
+    </script>
 </x-guest-layout>

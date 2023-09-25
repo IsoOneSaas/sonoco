@@ -60,11 +60,11 @@ class DashboardRepository implements DashboardRepositoryInterface
         // }
         // Log::debug(['COUNT' => $count, 'AVG' => $avg]);
         return [
-            $count['PUBLISHED'],
-            $count['RELEASING'],
-            $count['APPROVING'],
-            $count['REVISING'],
-            $count['EDITING']
+            ( key_exists('PUBLISHED', $count) ) ? $count['PUBLISHED'] : 0,
+            ( key_exists('RELEASING', $count) ) ? $count['RELEASING'] : 0,
+            ( key_exists('APPROVING', $count) ) ? $count['APPROVING'] : 0,
+            ( key_exists('REVISING', $count) ) ? $count['REVISING'] : 0,
+            ( key_exists('EDITING', $count) ) ?  $count['EDITING'] : 0,
         ];
     } // getSettingsStatus()
 

@@ -54,7 +54,7 @@
                                 </div>                                  
                                 <div class="input-group mt-3">
                                     <div id="job-id" class="input-group-text flex"><i data-lucide="{{ trans('user.form.job.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('user.form.job.title') }}</div>
-                                    <select id="select-job"  name="job_id[]" class="form-control tom-select w-full z-50" multiple>
+                                    <select id="select-job"  name="job_id[]" class="form-control w-full" size="6" multiple>
                                         <option value=''>{{ trans('user.form.job.placeholder') }}</option>
                                         @php($previous = '')
                                         @php($n = 1) 
@@ -63,7 +63,7 @@
                                                 @if( $n != 1 )
                                                 </optgroup>
                                                 @endif
-                                                <optgroup label="{{ $job->department }}" class="text-lg">
+                                                <optgroup label="{{ $job->department }}" class="text-base">
                                                 @php($previous = $job->department)
                                             @endif   
                                             <option value={{ $job->job_id }}>{{ $job->name }}</option>
@@ -72,10 +72,10 @@
                                         </optgroup>
                                     </select>                                    
                                     <div id="input-group-6" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('user.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div>                                 
+                                </div>
                                 <div class="input-group mt-3">
                                     <div id="location-id" class="input-group-text flex"><i data-lucide="{{ trans('user.form.location.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('user.form.location.title') }}</div>                                    
-                                    <select id="select-location" name="location_id[]" class="form-control w-full z-0" multiple>
+                                    <select id="select-location" name="location_id[]" class="form-control w-full" size="6" multiple>
                                         <option value=''>{{ trans('user.form.location.placeholder') }}</option>
                                     </select>                                    
                                     <div id="input-group-7" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('user.form.location.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
@@ -101,6 +101,7 @@
 
     <script type="text/javascript">
         $(function () {
+
             $('body').on('change', '#select-job', function (e) {
                 e.preventDefault();
                 var jids = $("#select-job").val();
@@ -127,7 +128,7 @@
                     if( data.success ) { 
                         var output = '<option value="">{{ trans("user.form.location.placeholder") }}</option>';                               
                         $.each(data.list, function(i, item) {
-                            output += '<option value='+item.location_id;
+                            output += '<option class="text-base" value='+item.location_id;
                             output += ( item.selected ) ? ' selected' : '';
                             output += '>'+item.name+'</option>'; 
                         });

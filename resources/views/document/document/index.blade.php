@@ -382,12 +382,14 @@
                 if( data.filter == 0 ) {
                     // En proceso
                     $('#btn-edit').removeClass('iso-disabled');
-                    $('#btn-send').removeClass('iso-disabled');                    
+                    $('#btn-send').removeClass('iso-disabled'); 
+                    $('#btn-sight').addClass('iso-disabled');                    
                 } else {
                     // Publicado
                     $('#btn-sight').removeClass('iso-disabled');
                     $('#btn-view').removeClass('iso-disabled');
                     $('#btn-sheet').removeClass('iso-disabled');
+                    $('#btn-edit').addClass('iso-disabled'); 
                 } // if/else                
             } else {
                 console.log('NO Seleccionado');
