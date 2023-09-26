@@ -52,7 +52,7 @@
                                 <div id="grid-table">
                                     
                                     <div id="horizontal-form" class="pb-3">
-                                        <div class="preview ml-auto w-1/2">
+                                        <div class="preview ml-auto w-3/4">
                                             <div class="form-inline">
                                                 <label for="text-search" class="form-label sm:w-20 text-right">
                                                     <input type="radio" name="radio-search" value=2> Código&nbsp;&nbsp;
@@ -75,7 +75,7 @@
                                                     <option value=3>Eliminados</option>
                                                     <option value=4>Desestimado</option>
                                                 </select>
-                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                                                                      
+                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>
                                             </div>                                                                                                                                     
                                         </div>
                                     </div>                                                           

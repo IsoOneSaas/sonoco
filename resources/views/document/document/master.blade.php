@@ -69,7 +69,8 @@
                                                     <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
                                                     @endforeach                                                    
                                                     <option value="">Todos</option>
-                                                </select>                                                                                     
+                                                </select>
+                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
                                             </div>                                           
                                         </div>
                                     </div>
@@ -359,7 +360,8 @@
 
 
         // FILTROS
-        $('#system-selected, #process-selected, #location-selected').on('change', function() {
+        //$('#system-selected, #process-selected, #location-selected').on('change', function() {
+        $("#btn-search").on("click", function() {
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
@@ -379,29 +381,10 @@
             myTable.column(13).search(this.value).draw();
         });         
 
-        // Seleccionar filtro
-        // $('#system-selected').on('change', function(){
-        //     //console.log('columna: '+ $systemColumn);
-        //     //console.log('columna: '+ $systemColumn +' | value: '+ this.value);
-        //     myTable.column($systemColumn).search(this.value).draw();   
-        // }); // system-selected
-        
-        // $('#location-selected').on('change', function(){
-        //     myTable.column($locationColumn).search(this.value).draw();   
-        // }); // location-selected 
-        
-        // $('#filter-processName').on('change', function(){
-        //     //alert(this.value);
-        //     myTable.column(5).search(this.value).draw();   
-        // }); // filter-processName
-
         $('#filter-typeName').on('change', function(){
             myTable.column(6).search(this.value).draw();   
         }); // filter-typeName        
         
-        // $('#filter-code').on('keyup change clear', function(){
-        //     myTable.column(2).search(this.value).draw();  
-        // });
 
         // GEMERA EL MODAL PARA OBSERVACIONES
         $('body').on('click', '#btn-modal-suggestion', function (e) {
@@ -409,8 +392,6 @@
             $('#uploadForm')[0].reset();
             $("#modal-suggestions-open")[0].click();
         });
-
-        
                 
     }); // document
 
