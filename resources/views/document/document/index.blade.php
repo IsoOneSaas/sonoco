@@ -54,6 +54,11 @@
                                     <div id="horizontal-form" class="pb-3">
                                         <div class="preview ml-auto w-1/2">
                                             <div class="form-inline">
+                                                <label for="text-search" class="form-label sm:w-20 text-right">
+                                                    <input type="radio" name="radio-search" value=2> Código&nbsp;&nbsp;
+                                                    <input type="radio" name="radio-search" value=3 checked> Nombre
+                                                </label>
+                                                <input id="text-search" type="text" class="form-control pt-0 pb-0 mt-2 border-slate-500" aria-label="Texto" />
                                                 <label for="time-selected" class="form-label sm:w-20 text-right pt-3">Periodo:</label>
                                                 <select id="time-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Periodo">
                                                     <option value='week'>Última semana</option>
@@ -69,7 +74,8 @@
                                                     <option value=2>Cancelados</option>
                                                     <option value=3>Eliminados</option>
                                                     <option value=4>Desestimado</option>
-                                                </select>                                                                                                                                      
+                                                </select>
+                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                                                                      
                                             </div>                                                                                                                                     
                                         </div>
                                     </div>                                                           
@@ -197,6 +203,10 @@
         var currentTimeSelected = ( timeSelected === null) ? $("#time-selected").val() : timeSelected;
         var statusSelected = isoGetStorage('iso_selectStatus');
         var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected; 
+        var textSearch = isoGetStorage('iso_searchText');
+        var currentSearchText = ( textSearch === null) ? $("#text-search").val() : textSearch;
+        var radioSearch = isoGetStorage('iso_searchRadio');
+        var currentSearchRadio = ( radioSearch === null) ? $("input[name='radio-search']:checked").val() : radioSearch;
         
         // PARAMETROS
         //console.log('timeSelected: '+timeSelected);        
@@ -211,6 +221,8 @@
         
         $('#time-selected option[value="'+timeSelected+'"]').prop('selected', 'selected');
         $('#status-selected option[value='+statusSelected+']').prop('selected', 'selected');
+        $('#text-search').val(currentSearchText);
+        $("input[name='radio-search']").filter("[value="+currentSearchRadio+"]").prop('checked', true);
                 
         // DATATABLE
         var startTime = Date.now();
@@ -224,6 +236,7 @@
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
         })
         .DataTable({
+            dom: 'lrtip',
             bProcessing: true,
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsConf,
@@ -231,6 +244,7 @@
             pageLength: 10,
             order: initOrder,
             page: initPage,
+            //filter: false,
             orderClasses: false,
             responsive: true,
             stateSave: true,
@@ -405,11 +419,12 @@
         });        
 
         // FILTROS
-        $('#status-selected, #time-selected').on('change', function(){
-            // $myTable.column(9).search('').draw();
-            // $myTable.column(filterColumn).search(this.value).draw();
+        $("#btn-search").on("click", function() {
             var ts =  $("#time-selected").val();
-            var ss =  $("#status-selected").val();         
+            var ss =  $("#status-selected").val();
+            var tx =  $('#text-search').val();
+            var rs = $("input[name='radio-search']:checked").val();
+            console.log('>', ts, ss, tx, rs);
             param = {time: ts, status: ss};
             var url =  route.replace(':slug', JSON.stringify(param))
             startTime = Date.now();
@@ -417,11 +432,23 @@
 
             $myTable.ajax.url(url).load();
             $myTable.state.clear();
-            $myTable.search('').columns().search('').draw();
+            if( rs == 2 ) {
+                $myTable.column(2).search(tx);
+                $myTable.column(3).search('').draw();
+            } else {
+                $myTable.column(3).search(tx);
+                $myTable.column(2).search('').draw();
+            }
+            
+
             setStatus();
             isoSetStorage('iso_selectTime', ts);
-            isoSetStorage('iso_selectStatus', ss);                        
-        }); // status-selected
+            isoSetStorage('iso_selectStatus', ss); 
+            isoSetStorage('iso_searchText', tx);
+            isoSetStorage('iso_searchRadio', rs);
+        });
+
+
 
         $('#filter-process').on('change', function(){
             $myTable.column(5).search(this.value).draw();   
@@ -635,12 +662,7 @@
                 output += '<option value="'+key+'"';
                 output += ( statusFilter == key ) ? ' selected' : '';
                 output += '>'+key+'</option>';
-            });
-            // $myTable.column(9, { search:'applied' } ).data().unique().sort().each(function(value, index) {
-            //     //console.log(value, index);
-            //     output += '<option value="'+value+'">'+value+'</option>'; 
-            // });
-            //output += '<option value="Nuevo">Nuevo</option><option value="En edición">En edición</option><option value="En revisión">En revisión</option><option value="En aprobación">En aprobación</option><option value="En Publicación">En Publicación</option>'; 
+            }); 
         }
         $("#filter-status").html(output);
     } // statusFilter Fx

@@ -6,7 +6,7 @@
         <link href="dist/images/logo.svg" rel="shortcut icon">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="author" content="MPR Consulting">
-        <title>Error 404 - ISO-ONE</title>
+        <title>Error 500 - ISO-ONE</title>
         <!-- BEGIN: CSS Assets-->
         <link rel="stylesheet" href="{{ url('assets/css/app.css') }}" />
         <style>
@@ -26,12 +26,12 @@
             <!-- BEGIN: Error Page -->
             <div class="error-page flex flex-col lg:flex-row items-center justify-center h-screen text-center lg:text-left">
                 <div class="-intro-x lg:mr-20">
-                    <img alt="ERROR 404" class="h-48 lg:h-auto" src="{{ url('assets/images/error-illustration.svg') }}">
+                    <img alt="ERROR 500" class="h-48 lg:h-auto" src="{{ url('assets/images/500.jpg') }}">
                 </div>
                 <div class="text-white mt-10 lg:mt-0">
-                    <div class="intro-x text-8xl font-medium">404</div>
-                    <div class="intro-x text-xl lg:text-3xl font-medium mt-5">Oops. Esta página ha desaparecido.</div>
-                    <div class="intro-x text-lg mt-3">Es posible que haya escrito mal la dirección o que la página se haya movido.</div>
+                    <div class="intro-x text-8xl font-medium">500</div>
+                    <div class="intro-x text-xl lg:text-3xl font-medium mt-5">Oops. Se ha presentado un error interno de servidor.</div>
+                    <div class="intro-x text-lg mt-3">Algo ha fallado en la aplicación, pero no se preocupe, un mensaje reportando este error se ha enviado al servicio de soporte de ISO-ONE y pronto estarán resolviendo la falla.</div>
                     <!-- <button class="intro-x btn py-3 px-4 text-white border-white dark:border-darkmode-400 dark:text-slate-200 mt-10">Back to Home</button> -->
                 </div>
             </div>

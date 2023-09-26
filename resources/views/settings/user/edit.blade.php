@@ -57,7 +57,7 @@
                                 </div>                               
                                 <div class="input-group mt-3">
                                     <div id="job-id" class="input-group-text flex"><i data-lucide="{{ trans('user.form.job.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('user.form.job.title') }}</div>
-                                    <select  id="select-job" name="job_id[]" class="form-control tom-select w-full" multiple>
+                                    <select  id="select-job" name="job_id[]" class="form-control  w-full" size="6" multiple>
                                         <option value=''>{{ trans('user.form.job.placeholder') }}</option>
                                         @php($previous = '')                                        
                                         @php($n = 1) 
@@ -78,7 +78,7 @@
                                 </div>                               
                                 <div class="input-group mt-3">
                                     <div id="location-id" class="input-group-text flex"><i data-lucide="{{ trans('user.form.location.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('user.form.location.title') }}</div>                                    
-                                    <select id="select-location" name="location_id[]" class="form-control w-full z-0" multiple>
+                                    <select id="select-location" name="location_id[]" class="form-control w-full" size="6" multiple>
                                         <option value=''>{{ trans('user.form.location.placeholder') }}</option>
                                     </select>                                    
                                     <div id="input-group-7" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('user.form.location.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
@@ -106,7 +106,7 @@
         $(function () {
             var jids = $("#select-job").val();
             var uid = $("input[name='user_id']").val();
-            console.dir(jids, uid);
+            //console.dir(jids, uid);
             setLocations(uid, jids);
 
             $('body').on('change', '#select-job', function (e) {
@@ -114,7 +114,7 @@
                 var jids = $("#select-job").val();
                 var uid = $("input[name='user_id']").val();
                 if( jids.length > 0 ) {
-                    console.dir(jids, uid);
+                    //console.dir(jids, uid);
                     setLocations(uid, jids);           
                 } else {
                     $('#select-location').html('<option value="">{{ trans("user.form.location.placeholder") }}</option>');
@@ -131,15 +131,15 @@
                 //async: false,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 success: function(data) {                            
-                    console.dir(data);
+                    //console.dir(data);
                     if( data.success ) { 
                         var output = '<option value="">{{ trans("user.form.location.placeholder") }}</option>';                               
                         $.each(data.list, function(i, item) {
-                            output += '<option value='+item.location_id;
+                            output += '<option class="text-base" value='+item.location_id;
                             output += ( item.selected ) ? ' selected' : '';
                             output += '>'+item.name+'</option>'; 
                         });
-                        console.log(output);
+                        //console.log(output);
                         $('#select-location').html(output);
                     } else {
                         setSuccessNotification('error', 'Oops!', '{{ trans("user.form.location.error") }}');

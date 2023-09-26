@@ -26,7 +26,7 @@
         <div class="mobile-menu md:hidden">
             <div class="mobile-menu-bar">
                 <a href="" class="flex mr-auto">
-                    <img alt="Logo iso-one" class="h-12" src="{{ url('assets/images/logo.jpg') }}">
+                    <img alt="Logo iso-one" class="h-12" src="{{ url('/assets/images/logo.jpg') }}">
                 </a>
                 <a href="javascript:;" class="mobile-menu-toggler"> <i data-lucide="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90"></i> </a>
             </div>

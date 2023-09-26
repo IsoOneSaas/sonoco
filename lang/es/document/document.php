@@ -387,7 +387,7 @@ return [
         'infoEmpty' => '*',
         'infoFiltered' => '(_TOTAL_ filtrados de _MAX_ documentos totales)',
         'loadingRecords' => 'Cargando...',
-        'search' => 'Buscar: ',
+        'search' => 'Texto: ',
         'paginate' => [
             'next' => '>>',
             'previous' => '<<'

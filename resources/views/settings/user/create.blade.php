@@ -107,7 +107,7 @@
                 var jids = $("#select-job").val();
 
                 if( jids.length > 0 ) {
-                    console.dir(jids);                    
+                    //console.dir(jids);                    
                     setLocations(0, jids);
                 } else {
                     $('#select-location').html('<option value="">{{ trans("user.form.location.placeholder") }}</option>');
@@ -124,7 +124,7 @@
                 //async: false,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 success: function(data) {                            
-                    console.dir(data);
+                    //console.dir(data);
                     if( data.success ) { 
                         var output = '<option value="">{{ trans("user.form.location.placeholder") }}</option>';                               
                         $.each(data.list, function(i, item) {
@@ -132,7 +132,7 @@
                             output += ( item.selected ) ? ' selected' : '';
                             output += '>'+item.name+'</option>'; 
                         });
-                        console.log(output);
+                        //console.log(output);
                         //$('select[name="location_id"]').html(output);
                         $('#select-location').html(output);
                     } else {
