@@ -741,10 +741,22 @@ class DocumentRepository implements DocumentRepositoryInterface
                 $plucked = DepartmentModel::find($job->did)->locations()->pluck('set_locations.name');
                //Log::debug(['PLUCKED' => $plucked->all()]);
                 $locations = ( $plucked  && is_array($plucked->all())) ? implode(", ", $plucked->all()) : '';
-                $selected = ( in_array($job->job_id, $array_selected) ) ? 1 : 0;
-                $matched = ( $job->did == intval($did) ) ? 1 : 0;
-                $counted = $job->countUsers();
-                $grid[] = [$job->job_id, $job->name, $job->department, $locations, $selected, $matched, $counted];
+                $selected = ( in_array($job->job_id, $array_selected) ) ? 1 : 0;    // 4
+                $matched = ( $job->did == intval($did) ) ? 1 : 0;                   // 5
+                $counted = $job->countUsers();                                      // 6
+
+                // Column 7 to Order the grid
+                if( $selected == 1 ) {
+                    $column7 = ( $counted == 0 ) ? 3 : 0;
+                } else if( $counted == 0 ) {
+                    $column7 = 3;
+                } elseif( $matched == 1 ) {
+                    $column7 = 1;
+                } else {
+                    $column7 = 2;
+                }
+
+                $grid[] = [$job->job_id, $job->name, $job->department, $locations, $selected, $matched, $counted, $column7];
             } // foreach
     
            //Log::debug(['JIDS' => $jids, 'DID' => $did, 'SELECTED' => $array_selected, 'LISTA DE CARGOS*' => $jobs->toArray()]);

@@ -192,6 +192,7 @@
                                                     <th>S</th>
                                                     <th>M</th>
                                                     <th>C</th>
+                                                    <th>O</th>
                                                 </tr>
                                             </thead>  
                                             <tfoot>
@@ -199,7 +200,7 @@
                                                     <th></th>
                                                     <th><input type="text" class="col-filter" placeholder="Cargo" /></th>
                                                     <th><input type="text" class="col-filter" placeholder="Departamento" /></th>
-                                                    <th></th><th></th><th></th><th></th>                                                                                                
+                                                    <th></th><th></th><th></th><th></th><th></th>                                                                                                                                                    
                                                 </tr>
                                             </tfoot>                                                                              
                                         </table>                       
@@ -661,11 +662,11 @@
                     $jobTable = new DataTable("#jobs-table", {
                         data: dataSet,
                         columnDefs: [
-                            { targets: [4,5,6], visible: false, searchable: false },
+                            { targets: [4,5,6,7], visible: false, searchable: false },
                             //{ targets: 1, className: "dt-nowrap", },
                             { targets: 3, width: "50%", },
                         ],                        
-                        order: [[ 1, 'asc' ]],
+                        order: [[ 7, 'asc' ]],
                         select: {
                             blurable: true,
                             style: 'multi'
@@ -676,7 +677,7 @@
                             // Fitros
                             setBottomFilter($this, selects, inputs);                            
                             // columna invisible
-                            $this.columns( [0,4,5,6] ).visible( false );
+                            $this.columns( [0,4,5,6,7] ).visible( false );
                             // Modal
                             $("#modal-job-open")[0].click();
                         },
@@ -687,15 +688,11 @@
                         var data = this.data();
                         if (data[4] == 1) {
                             this.select();
-                            // Enviar al select
-                            //$("#select-job-"+tag).html('<option value='+data[0]+' selected >'+data[1]+' - '+data[2]+'</option>');
-                           
-                        }
-                        if (data[5] == 1) {
-                            $(this.node()).addClass('greenColorClass');
-                        }                          
+                        }                                                 
                         if (data[6] == 0) {
                             $(this.node()).addClass('redColorClass');
+                        } else  if (data[5] == 1) {
+                            $(this.node()).addClass('greenColorClass');
                         }                        
                     });
                 } else {

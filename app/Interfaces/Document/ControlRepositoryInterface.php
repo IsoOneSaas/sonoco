@@ -25,4 +25,6 @@ interface ControlRepositoryInterface
     public function storeChange(array $data);
     public function listChanges($hash);
     public function deleteChange($hash);
+
+    public function getApprovingStatus($hash);
 } // Interface

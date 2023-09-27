@@ -209,45 +209,51 @@ class ControlController extends Controller
      */
     public function publish($hash)
     {
-        // Determinar que flujo de publicación sigue
-        $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl);
-        $settings = $data->settings;
-        if( $data->pattern == 'FILE' ) {           
-            if( is_array($settings) && key_exists('support_file', $settings) ) {                
-                $fileName = $settings['support_file']['file'];
+        // Determina si puede publicar (documento al menos aprobado por 1)
+       if( $this->documentRepo->getApprovingStatus($hash) ) {
+
+            // Determinar que flujo de publicación sigue
+            $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl);
+            $settings = $data->settings;
+            if( $data->pattern == 'FILE' ) {           
+                if( is_array($settings) && key_exists('support_file', $settings) ) {                
+                    $fileName = $settings['support_file']['file'];
+                    // Verificar existencia de archivo
+                    if( file_exists($this->contentUrl . $fileName) ) {
+                        // Actualizar la base de datos
+                        $response = $this->documentRepo->post($hash, $fileName);
+                    } else {
+                        Log::error('ControlController::publish @ (2) File not found: '. $this->contentUrl . $fileName);
+                        $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
+                    }                
+                } else {
+                    Log::error('ControlController::publish @ No support_file in Settings');
+                    $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
+                }            
+            } else {
+                $enclosed = $this->documentRepo->getAttachment($hash, $this->contentUrl); 
+                $print = new PdfClass('document.control.render');
+                $html = $print->render($data, $enclosed);
+                $fileName = uniqid('PDF') .'.pdf';
+
+                // Configuración de la hoja
+                $setup = $this->tool->getPaperSetup($settings);
+
+                // Salvar el archivo 
+                PDF::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->masterUrl . $fileName);
+
                 // Verificar existencia de archivo
-                if( file_exists($this->contentUrl . $fileName) ) {
-                    // Actualizar la base de datos
+                if( file_exists($this->masterUrl . $fileName) ) {
+                    // Actualizar la base de datos                
                     $response = $this->documentRepo->post($hash, $fileName);
                 } else {
-                    Log::error('ControlController::publish @ (2) File not found: '. $this->contentUrl . $fileName);
+                    Log::error('ControlController::publish @ (1) File not found: '. $this->masterUrl . $fileName);
                     $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
-                }                
-            } else {
-                Log::error('ControlController::publish @ No support_file in Settings');
-                $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
-            }            
-        } else {
-            $enclosed = $this->documentRepo->getAttachment($hash, $this->contentUrl); 
-            $print = new PdfClass('document.control.render');
-            $html = $print->render($data, $enclosed);
-            $fileName = uniqid('PDF') .'.pdf';
-
-            // Configuración de la hoja
-            $setup = $this->tool->getPaperSetup($settings);
-
-            // Salvar el archivo 
-            PDF::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->masterUrl . $fileName);
-
-            // Verificar existencia de archivo
-            if( file_exists($this->masterUrl . $fileName) ) {
-                // Actualizar la base de datos                
-                $response = $this->documentRepo->post($hash, $fileName);
-            } else {
-                Log::error('ControlController::publish @ (1) File not found: '. $this->masterUrl . $fileName);
-                $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
+                }
             }
-        }
+       } else {
+            $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-approved')]);
+       }
         return $response;
     } // publish Method   
     

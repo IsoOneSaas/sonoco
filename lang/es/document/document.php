@@ -96,6 +96,7 @@ return [
                 'no-file'       => 'El archivo del documento publicado no ha sido encontrado en el servidor',
                 'no-publish'    => 'No es un documento publicado',
                 'no-history'    => 'El documento no cuenta con al menos un cambio registrado en su historial',
+                'no-approved'    => 'El documento no cuenta con al menos una aprobación para ser publicado',
                 'trace'         => ':action - REASON: :trace',
     ],       
 

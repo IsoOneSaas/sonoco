@@ -836,6 +836,27 @@ class ControlRepository implements ControlRepositoryInterface
        return ['status' => 'success', 'message' =>  trans('document/change.delete.success')]; 
     } // deleteChange
 
+    /**
+     * Determina si el documento ya ha sido aprobado (al menos por uno) para ser publicado
+     * @param  string $hash Identificador del documento 
+     * @return array   Grid para generar la tabla
+     */  
+    public function getApprovingStatus($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        $action = config('settings.document_status.approve');
+        $found = false;
+
+        $forwards = ForwardModel::where('document_id', $id)->where('action', $action)->get();
+        foreach($forwards as $forward) {
+            if( $forward->checked == 1 ) {
+                $found = true;                
+            }
+        } // foreach
+
+        return $found;
+    } // getApprovingStatus
+
 
     public function confirm2($hash) // FIXME : pasado al Trait ControlDocumentsTrait
     {
