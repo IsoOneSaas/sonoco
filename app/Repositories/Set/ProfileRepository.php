@@ -9,9 +9,12 @@ use App\Models\Set\LocationModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
 
+use Exception;
+
 use Illuminate\Support\Facades\Auth;
-//use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class ProfileRepository implements ProfileRepositoryInterface 
 {
@@ -109,7 +112,7 @@ class ProfileRepository implements ProfileRepositoryInterface
     {
         Log::debug(['UPDATE PROFILE ID' => $id, 'DATA' => $data]);
         try {
-            //DB::beginTransaction();
+            DB::beginTransaction();
             $profile = UserModel::find($id);
             if( $profile->update($data) ) {
                 $opt = $profile->options;
@@ -124,13 +127,13 @@ class ProfileRepository implements ProfileRepositoryInterface
                 ];
                 $profile->options = $options;
                 $profile->save();
-                //DB::commit();
+                DB::commit();
             } else {                
                 //DB::rollBack();
                 return ['status' => 'error', 'message' => trans('profile.update.no-success')];                
             }            
         } catch (Exception $e) {
-            //DB::rollBack();
+            DB::rollBack();
             Log::error('ProfileRepository::update Exception: '. $e->getMessage());
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('profile.update.no-success')];
         }                
@@ -138,7 +141,22 @@ class ProfileRepository implements ProfileRepositoryInterface
     } // update Method
     
  
-    
+    public function setPassword(array $data)
+    {
+        Log::debug(['SET PASSWORD ' => $data]);
+        try {
+            DB::beginTransaction();
+            $profile = UserModel::find($data['uid']);
+            $profile->password = Hash::make($data['password']); 
+            $profile->save();
+            DB::commit();             
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('ProfileRepository::setPassword Exception: '. $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('profile.password.no-success')];
+        }                
+        return ['success' => true, 'message' => trans('profile.password.success')];                   
+    } // setPassword
     
 
 } // class

@@ -34,7 +34,16 @@ return [
                 'success'       => 'Archivo anexo eliminado correctamente',
                 'title'         =>  'Está seguro de eliminar el anexo con nombre ',
                 'text'          =>  'Si es eliminado, no lo podrá volver a ver.',                
-    ], 
+    ],
+    
+    'password' => [
+            'no-value'      => 'Digite una contraseña válida para ser cambiada',
+            'no-valid'      => 'La contraseña digitada no cumple con los parámetros indicados',
+            'no-repeat'     => 'Escribir la nueva contraseña en la casilla "repita la contraseña"',
+            'no-match'      => 'Las contraseñas escritas no coinciden',
+            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+            'success'       => 'Contraseña actualizada correctamente'
+    ],    
     
     'form' => [       
         'name'         =>  [

@@ -104,4 +104,50 @@ class ProfileController extends Controller
         return response()->json($response);
     } // upload Method
 
+    public function password(Request $request)
+    {
+        Log::debug(['PASSWORD PROFILE ' =>$request->all()]);
+        $input = $request->all();
+        // VALIDAR CAMBIO DE CONTRASEÑA
+        if( $input['password'] != '' ) {
+            if( $this->validPassword($input['password']) ) {
+                if( $input['passwordR'] != '' ) {
+                    if( $input['passwordR'] == $input['password'] ) {
+                        //$response = ['success' => true, 'message' => trans('profile.password.success')];
+                        $response = $this->profileRepo->setPassword($input);
+                    } else {
+                        $response = ['success' => false, 'message' => trans('profile.password.no-match')];
+                    }
+                } else {
+                    $response = ['success' => false, 'message' => trans('profile.password.no-repeat')];
+                }
+            } else {
+                $response = ['success' => false, 'message' => trans('profile.password.no-valid')];
+            }
+        } else {
+            $response = ['success' => false, 'message' => trans('profile.password.no-value')];
+        }
+        return $response;
+    } // password
+
+    private function validPassword($string)
+    {
+
+        if (strlen($string) < 8) {
+            //$passwordErr = "Your Password Must Contain At Least 8 Characters!";
+            return false;
+        }
+        elseif(!preg_match("#[0-9]+#",$string)) {
+            //$passwordErr = "Your Password Must Contain At Least 1 Number!";
+            return false;
+        }
+        elseif(!preg_match("#[A-Z]+#",$string)) {
+            //$passwordErr = "Your Password Must Contain At Least 1 Capital Letter!";
+            return false;
+        } else {
+            return true;
+        }        
+
+    }
+
 } // class

@@ -1,16 +1,12 @@
 <?php namespace App\Exceptions;
 
+//use App\Mail\ExceptionMail;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-//use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
-//use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
-use App\Mail\ExceptionMail;
-use Illuminate\Support\Facades\Log;
-
-//use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -50,43 +46,50 @@ class Handler extends ExceptionHandler
         }
         parent::report($exception);
     }
-    /**
-     * Parse the exception and send email
-     *
-     * @param Exception $exception
-     */
-    public function sendExceptionEmail(Throwable $exception)
-    {
-        try {
-            $e = FlattenException::create($exception);
-            //$handler = new SymfonyExceptionHandler();
-            $handler = new HtmlErrorRenderer(true);
-            //$html = $handler->getHtml($e);
-            $html = $handler->getBody($e);
-            Mail::queue(new ExceptionMail($html));
-        } catch (Exception $e) {
-            Log::error('Send Exception Email Exception : '. $e);
-        }
-    }
+
     /**
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @param  \Throwable  $exception
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Throwable
      */
     public function render($request, Throwable $exception)
     {
-        /**
-         * Had to put this in because it was throwing an exception if the user wasn't unauthenticated
-         */
-        if ( ! $this->shouldReport($exception)) {
-            return parent::render($request, $exception);
+        if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+            return redirect()
+                ->back()
+                ->withInput($request->except('password'))
+                ->with('errorMessage', 'Este formulario ha caducado por inactividad. Inténtalo de nuevo.');
         }
-        if(config('app.debug')) {
-            return parent::render($request, $exception);
-        }
-        return response()->view('errors.500', [], 500);
-    }
 
-}
+        return parent::render($request, $exception);
+    } // render
+
+    /**
+     * Sends an email to the developer about the exception.
+     *
+     * @return void
+     */
+    public function sendExceptionEmail(Throwable $exception)
+    {
+        try {
+            $e = FlattenException::createFromThrowable($exception);
+            $handler = new HtmlErrorRenderer(true);
+            $css = $handler->getStylesheet();
+            $content = $handler->getBody($e);
+            //Mail::queue(new ExceptionMail($html));
+            Mail::send('emails.email_exception', compact('css','content'), function ($message) {
+                $message
+                    ->to('sonoco@iso-one.com')
+                    ->subject('Exception: ' . \Request::fullUrl())
+                ;
+            });            
+        } catch (Throwable $e) {
+            Log::error('Send Exception Email Exception : '. $e);
+        }
+    } // sendExceptionEmail   
+
+} // class

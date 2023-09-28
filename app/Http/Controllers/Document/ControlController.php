@@ -60,7 +60,7 @@ class ControlController extends Controller
             'gridColOrd'    => $columnDefinition['column_order'],
             'gridColDef'    => $columnDefinition['column_json'], 
             'gridColExp'    => $columnDefinition['column_export'],
-            'gridLanguage'  => json_encode(trans('document/document.datatable')),  
+            'gridLanguage'  => json_encode(trans('document/document.datatable_grid'))            
         ]);    
     } // index Method
 

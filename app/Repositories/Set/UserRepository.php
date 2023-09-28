@@ -7,6 +7,8 @@ use App\Models\Set\LocationModel;
 use App\Models\Set\JobModel;
 use App\Models\Set\UserModel;
 
+use Exception;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

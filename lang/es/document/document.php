@@ -381,7 +381,7 @@ return [
                 ],
     ],
   
-    'datatable' => [
+    'datatable_grid' => [
         'lengthMenu' => 'Mostrar _MENU_ documentos por página',
         'zeroRecords' => '<h4>No hay documentos encontrados para la selección actual</h4>',
         'info' => 'Mostrando página _PAGE_ de _PAGES_',
@@ -489,6 +489,22 @@ return [
         ],
         'decimal' => '.',
         'thousands' => "'"
-    ],      
+    ],
+    
+    'datatable_modal' => [
+        'lengthMenu' => 'Mostrar _MENU_ observaciones por página',
+        'zeroRecords' => '<h4>No hay observaciones encontradas para la selección actual</h4>',
+        'info' => 'Mostrando página _PAGE_ de _PAGES_',
+        'infoEmpty' => '*',
+        'infoFiltered' => '(_TOTAL_ filtrados de _MAX_ observaciones totales)',
+        'loadingRecords' => 'Cargando...',
+        'search' => 'Etiqueta: ',
+        'paginate' => [
+            'next' => '>>',
+            'previous' => '<<'
+        ],
+        'decimal' => '.',
+        'thousands' => "'"
+    ],    
 
 ];

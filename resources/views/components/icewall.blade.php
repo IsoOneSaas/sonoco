@@ -370,9 +370,6 @@
                             <li>
                                 <a href="{{ route('perfil.index') }}" class="dropdown-item hover:bg-white/5"> <i data-lucide="user" class="w-4 h-4 mr-2"></i> Perfil </a>
                             </li>
-                            <li>
-                                <a href="javascript:;" class="dropdown-item hover:bg-white/5"> <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Recuperar contraseña </a>
-                            </li>
 <!--                             <li>
                                 <a href="" class="dropdown-item hover:bg-white/5"> <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i> Ayuda </a>
                             </li> -->

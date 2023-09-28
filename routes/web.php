@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('setup/roles', [\App\Http\Controllers\Set\SetupController::class, 'setupPermissionRoles']);
     Route::resource('perfil', \App\Http\Controllers\Set\ProfileController::class);
         Route::post('perfil/upload', [\App\Http\Controllers\Set\ProfileController::class, 'upload'])->name('perfil.upload');
+        Route::post('perfil/contrasena', [\App\Http\Controllers\Set\ProfileController::class, 'password'])->name('perfil.password');
 
     // PARAMETRIZACION
     Route::group(['prefix' => 'parametrizacion', 'middleware' => ['can:setup_parameters']], function () {

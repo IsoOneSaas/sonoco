@@ -21,6 +21,7 @@ class icewall extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.layouts.icewall');
+        //return view('components.layouts.icewall');
+        return view('components.icewall');
     }
 }

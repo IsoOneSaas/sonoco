@@ -186,7 +186,8 @@
     
         let columnsConf = {!! $gridColDef !!};
         let col = {{ $gridColOrd }};
-        let lang = {!! $gridLanguage !!};
+        let lang1 = {!! $gridLanguage !!};
+        let lang2 = {!! $modalLanguage !!};
         let columns = {!! $gridColExp !!};        
         let route = "{{ route('documents.control.documento.show', ':slug') }}";
         let param = [];
@@ -308,7 +309,7 @@
                 // Filtro inicial
                 //this.api().column(filterColumn).search(0).draw(); // hacia filtrado inicial
             },                                    
-            language: lang               
+            language: lang1               
         }); // datatables
         
         
@@ -546,7 +547,8 @@
                         
                         $("#modal-sightings-open")[0].click();
 
-                    } // init
+                    },
+                    language: lang2
                 }); // datatable
 
             } else {

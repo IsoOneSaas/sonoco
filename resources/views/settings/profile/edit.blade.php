@@ -59,6 +59,38 @@
 
                                 @endif
                             </div>
+
+                            <div class="intro-y box p-5 bg-primary mt-5">
+                                <div class="flex items-center">
+                                    <div class="font-medium text-lg text-white">Cambiar Contraseña</div>
+                                    <!-- <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div> -->
+                                </div>
+                                <div class="mt-4 text-white">Escriba su nueva contraseña la cual debe ser de más de 8 caracteres, contener al menos un dígito y una letra en mayúscula.</div>
+                                <div class="font-medium flex mt-0">
+                                    <form id="password-form" action="{{ route('perfil.password') }}" method="POST"  onSubmit="return false;" role="form">
+                                        @csrf
+                                        <input type="hidden" name="uid" value={{ $profile->user_id }} />
+
+                                        <div id="vertical-form" class="p-5">
+                                            <div class="preview">
+                                                <div>
+                                                    <label for="password" class="form-label text-white">Contraseña</label>
+                                                    <input id="password" type="text" name="password" class="form-control" required>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <label for="password-repeat" class="form-label text-white">Repita la contraseña</label>
+                                                    <input id="password-repeat" type="text" name="passwordR" class="form-control" required>
+                                                </div>
+                                                <div class="font-medium flex mt-5">
+                                                    <button type="button" id="btn-password-save" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Cambiar</button>
+                                                    <button type="button" id="btn-password-clear" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Limpiar</button>
+                                                </div>                                                
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>                            
+
                         </div>
                         <!-- END: Profile Menu -->
                         <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
@@ -89,7 +121,7 @@
                                                             <input id="update-profile-form-7" type="text"  name="name" class="form-control" placeholder="Digite su nombre completo" value="{{ $profile->name }}">
                                                         </div>
                                                     </div>
-                                                    <div class="col-span-12 2xl:col-span-6">
+                                                    <div class="col-span-12 2xl:col-span-6 mb-3">
                                                         <div class="mt-3 2xl:mt-0">
                                                             <label for="update-profile-form-8" class="form-label">Género</label>
                                                             <select id="update-profile-form-8" name="genre" class="form-select">
@@ -103,7 +135,6 @@
                                                             <input id="update-profile-form-9" type="text" name="birth" class="datepicker form-control" data-single-mode="true" data-auto-apply="true" data-show-week-numbers="false" {{ $pickerDefault['start'] }} data-format="{{ $pickerDefault['format'] }}"  data-min-year="{{ $pickerDefault['min'] }}"  data-max-year="{{ $pickerDefault['max'] }}" placeholder="Digite su fecha de nacimiento" value="{{ $profile->birth ?? '' }}">
                                                         </div>
                                                     </div>
-
 
                                                     <div class="col-span-12 2xl:col-span-6">
                                                         <div class="mt-3 2xl:mt-0">
@@ -200,7 +231,18 @@
             $('body').on('click', '#btn-signing-save', function (e) {
                 e.preventDefault();                
                 setSignature();
-            }); //btn-signing-ok            
+            }); //btn-signing-ok  
+            
+            $('body').on('click', '#btn-password-save', function (e) {
+                e.preventDefault();              
+                setPassword();
+            }); //btn-signing-ok    
+
+            $('body').on('click', '#btn-password-clear', function (e) {
+                e.preventDefault();              
+                $("#password-form")[0].reset();
+            }); //btn-signing-clear
+
 
         }); // document
 
@@ -253,6 +295,28 @@
                 } // success
             }); // ajax         
         } // setSignature Fx
+
+        function setPassword() {
+            var form = $("#password-form");
+            $.ajax({
+                type: form.attr("method"),
+                data: new FormData(form[0]),
+                dataType: 'json',
+                url: form.attr("action"),
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                processData: false,
+                contentType: false,                
+                success: function(json) {
+                    console.dir(json);
+                    if( json.success ) {
+                        $("#password-form")[0].reset();
+                        setSuccessNotification('success', '', json.message);                       
+                    } else {
+                        setSuccessNotification('error', 'Oops!', json.message);
+                    }                  
+                } // success
+            }); // ajax         
+        } // setPassword Fx        
 
     </script>
 
