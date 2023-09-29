@@ -5,6 +5,7 @@
         <style>{!! $css ?? '' !!}</style>
     </head>
     <body>
+        <p>[{{ $data['uid'] }}] {{ $data['name'] }} ({{ $data['role'] }}) @ {{ $data['date'] }}</p>
         {!! $content ?? '' !!}
     </body>
 </html>

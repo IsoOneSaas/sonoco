@@ -144,6 +144,7 @@ class ControlController extends Controller
         $setup = $this->tool->getPaperSetup($data->settings);       
 
         //Log::debug($html);
+        // FIXME: Se está generando error al no encontrar la Facada
         $pdf = PDF::loadHTML($html)->setPaper($setup['size'], $setup['orientation']);
         if( $pdf ) {
             $fileName = Str::slug($data->name, '_');

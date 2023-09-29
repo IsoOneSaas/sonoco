@@ -197,66 +197,70 @@ class UserRepository implements UserRepositoryInterface
      */     
     public function getLocations(array $data) 
     {
-        $jids = $data['jids'];
-        $uid = $data['uid'];
-        $admin = Auth::user();
-        $userLocations = [];
-        //Log::debug(['UID' => $uid, 'JIDS' => $jids]);
 
-        // Localizaciones del administrador
-        //Log::debug(['USER' => $admin->name]);
-        $adminLocations = $this->tool->getAdminAuthorizedLocations($admin);        
+        if( key_exists('jids', $data) ) {
 
-        // Localizaciones del usuario (por los cargos)
-        foreach( $jids as $jid ) {
-            $job = JobModel::find($jid);            
-            if($job) {                
-                $departments = $job->department;
-                if($departments) {
-                    
-                    foreach($departments as $department) {
-                        //Log::debug(['DPTO' => $department->toArray()]);
-                        $did = $department->department_id;
-                        $locations = LocationModel::join('set_location_department', function($query) {
-                            $query->on('set_location_department.location_id', '=', 'set_locations.location_id');
-                        })
-                        ->join('set_departments', function($query) use($did) {
-                            $query->on('set_departments.department_id', '=', 'set_location_department.department_id');
-                            $query->where('set_departments.department_id', $did);
-                        })
-                        ->get(['set_locations.location_id']);
-                        if($locations) {
-                            foreach($locations as $location) {
-                                $userLocations[] = $location->location_id;
-                            } // foreach
-                        } // if
-                    } // foreach 
-                } // if $deparment
-            } // if $job           
-        } // foreach
-        
-        if( (count($adminLocations) > 0 ) && (count($userLocations) > 0 ) ) {
-            $result = array_intersect($adminLocations, array_unique($userLocations));
-            //Log::debug(['ADMIN LOCATIONS' => $adminLocations, 'USER Locations' => array_unique($userLocations), 'RESULT' => $result]); 
-            if( count($result) > 0 ) {
-                // Localizaciones según configuración
-                $locations = LocationModel::whereIn('location_id', $result)->orderBy('name')->get(['location_id','name']);
-                if( $uid > 0 ) {
-                    // Localizaciones seleccionadas 
-                    $user = UserModel::find($uid);
-                    $plucked = $user->locations->pluck('location_id');                    
-                    //Log::debug(['SELECTED' => $plucked->all()]);
-                    foreach($locations as $location) {
-                        $location->selected = ( in_array($location->location_id, $plucked->all()) ) ? true : false;
-                    } // foreach
-                } //if uid
-
-                return [
-                    'success' => true,
-                    'list' => $locations,
-                ];                
+            $jids = $data['jids'];
+            $uid = $data['uid'];
+            $admin = Auth::user();
+            $userLocations = [];
+            //Log::debug(['UID' => $uid, 'JIDS' => $jids]);
+    
+            // Localizaciones del administrador
+            //Log::debug(['USER' => $admin->name]);
+            $adminLocations = $this->tool->getAdminAuthorizedLocations($admin);        
+    
+            // Localizaciones del usuario (por los cargos)
+            foreach( $jids as $jid ) {
+                $job = JobModel::find($jid);            
+                if($job) {                
+                    $departments = $job->department;
+                    if($departments) {
+                        
+                        foreach($departments as $department) {
+                            //Log::debug(['DPTO' => $department->toArray()]);
+                            $did = $department->department_id;
+                            $locations = LocationModel::join('set_location_department', function($query) {
+                                $query->on('set_location_department.location_id', '=', 'set_locations.location_id');
+                            })
+                            ->join('set_departments', function($query) use($did) {
+                                $query->on('set_departments.department_id', '=', 'set_location_department.department_id');
+                                $query->where('set_departments.department_id', $did);
+                            })
+                            ->get(['set_locations.location_id']);
+                            if($locations) {
+                                foreach($locations as $location) {
+                                    $userLocations[] = $location->location_id;
+                                } // foreach
+                            } // if
+                        } // foreach 
+                    } // if $deparment
+                } // if $job           
+            } // foreach
+            
+            if( (count($adminLocations) > 0 ) && (count($userLocations) > 0 ) ) {
+                $result = array_intersect($adminLocations, array_unique($userLocations));
+                //Log::debug(['ADMIN LOCATIONS' => $adminLocations, 'USER Locations' => array_unique($userLocations), 'RESULT' => $result]); 
+                if( count($result) > 0 ) {
+                    // Localizaciones según configuración
+                    $locations = LocationModel::whereIn('location_id', $result)->orderBy('name')->get(['location_id','name']);
+                    if( $uid > 0 ) {
+                        // Localizaciones seleccionadas 
+                        $user = UserModel::find($uid);
+                        $plucked = $user->locations->pluck('location_id');                    
+                        //Log::debug(['SELECTED' => $plucked->all()]);
+                        foreach($locations as $location) {
+                            $location->selected = ( in_array($location->location_id, $plucked->all()) ) ? true : false;
+                        } // foreach
+                    } //if uid
+    
+                    return [
+                        'success' => true,
+                        'list' => $locations,
+                    ];                
+                } // if
             } // if
-        } // if
+        } // if key
 
         return [
             'success' => false,

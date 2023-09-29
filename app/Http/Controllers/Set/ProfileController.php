@@ -15,6 +15,7 @@ class ProfileController extends Controller
     //private $tool;
     private $pickerFormat;
     private $imagePath;
+    private $imageURI;
 
     public function __construct(ProfileRepositoryInterface $profileRepository) 
     {
@@ -32,6 +33,7 @@ class ProfileController extends Controller
             'Y'     => 'YYYY',
         ];
         $this->imagePath = public_path() .'/tenants/sonoco/images/';
+        $this->imageURI = '/tenants/sonoco/images/';
     }       
     /**
      * Display a listing of the resource.
@@ -72,7 +74,7 @@ class ProfileController extends Controller
             if( ($extension == 'jpg') || ($extension == 'jpeg') ) {
                 $file_name =  'avatar_'. $input['uid'] .'.'. $extension;    //
                 if( $file->move($this->imagePath, $file_name) ) {
-                    return response()->json(['success'=> true, 'url' => $this->imagePath . $file_name, 'message' => trans('profile.upload.success') ]);
+                    return response()->json(['success'=> true, 'url' => $this->imageURI . $file_name, 'message' => trans('profile.upload.success') ]);
                 } else {
                     return response()->json(['success'=> false, 'message' => trans('profile.upload.no-move') ]);
                 }                
@@ -87,26 +89,29 @@ class ProfileController extends Controller
 
     public function upload(Request $request)
     {
-        $response = ['success' => true, 'message' => 'Testing...'];
+        $response = ['success' => false, 'message' => 'No se encontró imagen'];
         $input = $request->all(); 
         //Log::debug(['UPLOAD PROFILE ' => $input]);
-        $image_parts = explode(";base64,", $input['signed']);
-        $image_type_aux = explode("image/", $image_parts[0]);
-        $image_type = $image_type_aux[1];
-        $image_base64 = base64_decode($image_parts[1]);
 
-        $file_name =  'signature_'. $input['uid'] .'.'. $image_type;
-        if( file_put_contents($this->imagePath . $file_name, $image_base64) ) {
-            return response()->json(['success'=> true, 'url' => $this->imagePath . $file_name, 'message' => trans('profile.store.success') ]);
-        } else {
-            return response()->json(['success'=> false, 'message' => trans('profile.store.no-success') ]);
-        }
+        if( $input['signed'] !== null ) {
+            $image_parts = explode(";base64,", $input['signed']);
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1];
+            $image_base64 = base64_decode($image_parts[1]);
+    
+            $file_name =  'signature_'. $input['uid'] .'.'. $image_type;
+            if( file_put_contents($this->imagePath . $file_name, $image_base64) ) {
+                return response()->json(['success'=> true, 'url' => $this->imageURI . $file_name, 'message' => trans('profile.store.success') ]);
+            } else {
+                return response()->json(['success'=> false, 'message' => trans('profile.store.no-success') ]);
+            }
+        } // if
         return response()->json($response);
     } // upload Method
 
     public function password(Request $request)
     {
-        Log::debug(['PASSWORD PROFILE ' =>$request->all()]);
+        //Log::debug(['PASSWORD PROFILE ' =>$request->all()]);
         $input = $request->all();
         // VALIDAR CAMBIO DE CONTRASEÑA
         if( $input['password'] != '' ) {

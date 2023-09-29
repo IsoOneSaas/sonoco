@@ -32,7 +32,7 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        $user = AUTH::user();
+        $user = Auth::user();
         if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
             $template = 'document.dashboard_admin';
             $admin = [

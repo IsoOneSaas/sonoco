@@ -22,7 +22,7 @@
                             <div class="intro-y box mt-5">
                                 <div class="relative flex items-center p-5">
                                     <div class="w-12 h-12 image-fit">
-                                        <img alt="Midone - HTML Admin Template" class="rounded-full" src="{{ url($profile->avatar) }}">
+                                        <img id="avatar-tiny" alt="Avatar" class="rounded-full" src="{{ url($profile->avatar) }}">
                                     </div>
                                     <div class="ml-4 mr-auto">
                                         <div class="font-medium text-base">{{ $profile->name }}</div>
@@ -260,10 +260,8 @@
                     //console.dir(json);
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
-                        // $("#avatar-img").attr('src', json.url).load( function() {
-                        //     $(this).width(this.width).height(this.height).appendTo('#avatar-img');
-                        // })
                         $("#avatar-img").attr('src', json.url);
+                        $("#avatar-tiny").attr('src', json.url);
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  
@@ -287,8 +285,7 @@
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
                         $("#sign-img").attr('src', json.url);
-                        $signaturePad.clear();
-                        $("#signature64").val('');                        
+                        $signaturePad.clear();                                                
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  

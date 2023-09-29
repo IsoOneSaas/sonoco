@@ -98,166 +98,174 @@ class ControlRepository implements ControlRepositoryInterface
         try {
             $document = DocumentModel::find($id);
 
-            $document->hash = $hash;
-            $document->slug = $slug; // Important!! (requerido en metodo "send")
-            $document->page = 1;
-            $document->pdf = false;
-            $document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
-            // Obtener el tipo de documento
-            $type = TypeModel::find($document->type_id);
-            $document->type = ($type) ? $type->name : '';
+            if( $document ) {
 
-            // Obtener el proceso del documento
-            $process = ProcessModel::find($document->process_id);
-            $document->process = ($process) ? $process->name : '';
+                $document->hash = $hash;
+                $document->slug = $slug; // Important!! (requerido en metodo "send")
+                $document->page = 1;
+                $document->pdf = false;
+                $document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
+                // Obtener el tipo de documento
+                $type = TypeModel::find($document->type_id);
+                $document->type = ($type) ? $type->name : '';
 
-            // Obtener el requisito del documento
-            $system = SystemModel::find($document->system_id);
-            $document->system = ($system) ? $system->name : '';  
-            
-            // Obtener las plabras claves
-            $tags_array = [];
-            $tags = TagModel::where('document_id', $id)->orderBy('class')->get();
-            foreach($tags as $tag) {
-                $tags_array[$tag->class][] = $tag->tag;
-            }
-            $document->tags = $tags_array;
+                // Obtener el proceso del documento
+                $process = ProcessModel::find($document->process_id);
+                $document->process = ($process) ? $process->name : '';
 
-            // Obtener los responsables : edicion
-            $document->usersEdit = $this->getFooterSigns('edit', $id, $urlImg);            
+                // Obtener el requisito del documento
+                $system = SystemModel::find($document->system_id);
+                $document->system = ($system) ? $system->name : '';  
+                
+                // Obtener las plabras claves
+                $tags_array = [];
+                $tags = TagModel::where('document_id', $id)->orderBy('class')->get();
+                foreach($tags as $tag) {
+                    $tags_array[$tag->class][] = $tag->tag;
+                }
+                $document->tags = $tags_array;
 
-            // Obtener los responsables : revisión
-            $document->usersReview = $this->getFooterSigns('review', $id, $urlImg);
+                // Obtener los responsables : edicion
+                $document->usersEdit = $this->getFooterSigns('edit', $id, $urlImg);            
 
-            // Obtener los responsables : aprobación
-            $document->usersApprove = $this->getFooterSigns('approve', $id, $urlImg); 
+                // Obtener los responsables : revisión
+                $document->usersReview = $this->getFooterSigns('review', $id, $urlImg);
 
-            // Obtener datos del archivo soporte si existe
-            $support = $this->tool->getDocumentSettings('support_file', $document->settings);
-            if($support) {
-                if( is_array($support) ) {
-                    $document->mime = ( key_exists('mime', $support) ) ? $this->tool->getFileMimeName($support['mime']) : 'other';                    
-                    $document->support = $support;
-                } else {
-                    $url = $this->contentUrl . $support;
-                    if(file_exists($url)) {
-                        $path = pathinfo($url);
-                        $document->mime = $this->tool->getFileMimeName($path['extension']);
-                        $document->support = ['file' => $support, 'size' => round( filesize($url), 0)];
+                // Obtener los responsables : aprobación
+                $document->usersApprove = $this->getFooterSigns('approve', $id, $urlImg); 
+
+                // Obtener datos del archivo soporte si existe
+                $support = $this->tool->getDocumentSettings('support_file', $document->settings);
+                if($support) {
+                    if( is_array($support) ) {
+                        $document->mime = ( key_exists('mime', $support) ) ? $this->tool->getFileMimeName($support['mime']) : 'other';                    
+                        $document->support = $support;
                     } else {
-                        $document->mime = 'other';
-                        $document->support = ['file' => $support, 'size' => 0]; 
+                        $url = $this->contentUrl . $support;
+                        if(file_exists($url)) {
+                            $path = pathinfo($url);
+                            $document->mime = $this->tool->getFileMimeName($path['extension']);
+                            $document->support = ['file' => $support, 'size' => round( filesize($url), 0)];
+                        } else {
+                            $document->mime = 'other';
+                            $document->support = ['file' => $support, 'size' => 0]; 
+                        }
+                    }
+                    $document->url = 'assets/images/mimes/'. $document->mime .'.png';
+                }
+                //Log::debug(['SUPPORT' =>    $support]);
+
+                // Obtener el documento (si no encuentra contenido en document_content, crea la plantilla)
+                $found = ContentModel::where('document_id', $id)->where('version', $document->version)->first();
+                //Log::debug(['CONTENT' =>   $found]);
+                if( $found ) {
+                    // Utiliza el contenido de la tabla
+                    $document->content = $this->tool->contentRender($found->content);
+                    
+                } elseif( $document->status == config('settings.document_status.create') ) {
+                    // Coloca la plantilla para un documento nuevo
+                    $type = TypeModel::find($document->type_id);
+                    //Log::debug(['TYPE' => $type->template->content]);
+                    $document->content = ($type->template) ? $type->template->content : '';
+
+                } else {
+                    //Log::info('Contenido Vacío...');
+                    // contenido vacio
+                    $document->content = '';
+                    // Validar si existe documento PDF
+                    //Log::debug(['FILE: '. $document->filename, 'EXT' => substr($document->filename, -3, 3)]);
+                    if( !$support && ($document->filename !== null) && (substr($document->filename, -3, 3) == 'pdf') ) {
+                        Log::debug('PDF: '. $document->filename);
+                        if( file_exists($urlPdf . $document->filename) ) {
+                            $document->pdf = 'tenants/sonoco/documents/master/'. $document->filename .'#toolbar=0&view=FitH,100';
+                            Log::debug('PDF: '. $document->pdf);
+                            //tenants/sonoco/documents/master/DOC5afb5c67105e7.pdf#toolbar=0&view=FitH,100'
+                        } 
+                    }               
+                }
+                
+
+                // Comentario del documento  TODO: Validar si es disclamer para tener diferente tratamiento
+                $previousAction = $this->tool->getPreviousAction($document->status);
+                $disc = DisclaimerModel::where('document_id', $document->document_id)->where('user_id', Auth::user()->user_id)->where('action', $previousAction)->first(['comment']);
+                $document->comment = ($disc) ? $disc->comment : '';
+
+                // Color de Estado
+                $document->color = 'bg-default';
+                $total = ForwardModel::where('document_id', $id)->where('action', $document->status)->count();
+                $checked = ForwardModel::where('document_id', $id)->where('action', $document->status)->where('checked', 1)->count();
+                //Log::debug(['STATUS' => $document->status, 'CHECKED' => $checked, 'TOTAL' => $total]);
+                if( $total == $checked ) {
+                    $document->color = 'bg-success';
+                } else {
+                    $document->color = 'bg-danger';
+                }            
+
+                // Estado del control
+                $statusTexts = config('settings.document_status_texts.'. $document->status);
+                $previousAction = $this->tool->getPreviousDocumentAction($document->status);
+                $previousAction = $this->tool->getPreviousDocumentAction($previousAction);
+
+                // Textos Send
+                $action = ''; // default to admin
+                $document->statusTitle = $statusTexts['title'];
+                if( in_array($document->status, config('settings.document_status_users')) ) {
+                    $action = array_search($document->status, config('settings.document_status')); // important!
+                } // if
+                if( $slug === 'admin') {
+                    // administrador
+                    $document->sendUrl = route('documents.control.documento.index'); 
+                    $document->sendTitle =  trans('document/document.send.titleAdmin', [ 'verb' => $statusTexts['verb'] ]) .'?';
+                    if( ($action == 'approve') && ($document->color == 'bg-success') ) {
+                        $document->sendText = trans('document/document.send.textPub', ['status' => $statusTexts['status'], 'action' => $statusTexts['action'] ]);
+                    } else {
+                        $document->sendText = trans('document/document.send.textAdmin', ['status' => $statusTexts['status'], 'action' => $statusTexts['action'] ]);
+                    }                            
+                } else {
+                    // usuario
+                    $document->sendUrl = route('documents.control.manage.index', ['slug' => $action]);
+                    $document->sendTitle =  trans('document/document.send.titleUser', [ 'actual' => $statusTexts['actual'] ]) .'?';                      
+                    $document->sendText = trans('document/document.send.textUser', ['action' => $statusTexts['action'] ]);                             
+                }            
+
+                // Textos Back           
+                if($previousAction == '') {
+                    $document->backUrl = false;
+                    $document->backTitle = '';
+                    $document->backText =  '';
+                } else {
+                    $str = config('settings.document_status_texts.'. $previousAction);
+                    if( $slug === 'admin') {
+                        $document->backUrl = route('documents.control.documento.index');                
+                        $document->backTitle = trans('document/document.back.titleAdmin', [ 'verb' => $str['verb'] ]) .'?';
+                        $document->backText = trans('document/document.back.textAdmin', ['status' => $str['status'], 'action' => $str['action'] ]);
+                    } else {
+                        $document->backUrl = route('documents.control.manage.index', ['slug' => $action]);
+                        $document->backTitle = trans('document/document.back.titleUser', [ 'status' => $str['status'] ]) .'?';
+                        $document->backText = trans('document/document.back.textUser', ['status' => $str['status'], 'action' => $str['action'] ]);
                     }
                 }
-                $document->url = 'assets/images/mimes/'. $document->mime .'.png';
-            }
-            //Log::debug(['SUPPORT' =>    $support]);
 
-            // Obtener el documento (si no encuentra contenido en document_content, crea la plantilla)
-            $found = ContentModel::where('document_id', $id)->where('version', $document->version)->first();
-            //Log::debug(['CONTENT' =>   $found]);
-            if( $found ) {
-                // Utiliza el contenido de la tabla
-                $document->content = $this->tool->contentRender($found->content);
-                
-            } elseif( $document->status == config('settings.document_status.create') ) {
-                // Coloca la plantilla para un documento nuevo
-                $type = TypeModel::find($document->type_id);
-                //Log::debug(['TYPE' => $type->template->content]);
-                $document->content = ($type->template) ? $type->template->content : '';
+                // History
+                $change = $document->changes()->where('user_uid', $uid)->first();
+                $document->change = ($change) ? $change->text : '';
 
-            } else {
-                //Log::info('Contenido Vacío...');
-                // contenido vacio
-                $document->content = '';
-                // Validar si existe documento PDF
-                //Log::debug(['FILE: '. $document->filename, 'EXT' => substr($document->filename, -3, 3)]);
-                if( !$support && ($document->filename !== null) && (substr($document->filename, -3, 3) == 'pdf') ) {
-                    Log::debug('PDF: '. $document->filename);
-                    if( file_exists($urlPdf . $document->filename) ) {
-                        $document->pdf = 'tenants/sonoco/documents/master/'. $document->filename .'#toolbar=0&view=FitH,100';
-                        Log::debug('PDF: '. $document->pdf);
-                        //tenants/sonoco/documents/master/DOC5afb5c67105e7.pdf#toolbar=0&view=FitH,100'
-                    } 
-                }               
-            }
-            
+                // Validar si tiene historia
+                $document->history = $document->changes()->count();
 
-            // Comentario del documento  TODO: Validar si es disclamer para tener diferente tratamiento
-            $previousAction = $this->tool->getPreviousAction($document->status);
-            $disc = DisclaimerModel::where('document_id', $document->document_id)->where('user_id', Auth::user()->user_id)->where('action', $previousAction)->first(['comment']);
-            $document->comment = ($disc) ? $disc->comment : '';
-
-            // Color de Estado
-            $document->color = 'bg-default';
-            $total = ForwardModel::where('document_id', $id)->where('action', $document->status)->count();
-            $checked = ForwardModel::where('document_id', $id)->where('action', $document->status)->where('checked', 1)->count();
-            //Log::debug(['STATUS' => $document->status, 'CHECKED' => $checked, 'TOTAL' => $total]);
-            if( $total == $checked ) {
-                $document->color = 'bg-success';
-            } else {
-                $document->color = 'bg-danger';
-            }            
-
-            // Estado del control
-            $statusTexts = config('settings.document_status_texts.'. $document->status);
-            $previousAction = $this->tool->getPreviousDocumentAction($document->status);
-            $previousAction = $this->tool->getPreviousDocumentAction($previousAction);
-
-            // Textos Send
-            $action = ''; // default to admin
-            $document->statusTitle = $statusTexts['title'];
-            if( in_array($document->status, config('settings.document_status_users')) ) {
-                $action = array_search($document->status, config('settings.document_status')); // important!
-            } // if
-            if( $slug === 'admin') {
-                // administrador
-                $document->sendUrl = route('documents.control.documento.index'); 
-                $document->sendTitle =  trans('document/document.send.titleAdmin', [ 'verb' => $statusTexts['verb'] ]) .'?';
-                if( ($action == 'approve') && ($document->color == 'bg-success') ) {
-                    $document->sendText = trans('document/document.send.textPub', ['status' => $statusTexts['status'], 'action' => $statusTexts['action'] ]);
-                } else {
-                    $document->sendText = trans('document/document.send.textAdmin', ['status' => $statusTexts['status'], 'action' => $statusTexts['action'] ]);
-                }                            
-            } else {
-                // usuario
-                $document->sendUrl = route('documents.control.manage.index', ['slug' => $action]);
-                $document->sendTitle =  trans('document/document.send.titleUser', [ 'actual' => $statusTexts['actual'] ]) .'?';                      
-                $document->sendText = trans('document/document.send.textUser', ['action' => $statusTexts['action'] ]);                             
-            }            
-
-            // Textos Back           
-            if($previousAction == '') {
-                $document->backUrl = false;
-                $document->backTitle = '';
-                $document->backText =  '';
-            } else {
-                $str = config('settings.document_status_texts.'. $previousAction);
-                if( $slug === 'admin') {
-                    $document->backUrl = route('documents.control.documento.index');                
-                    $document->backTitle = trans('document/document.back.titleAdmin', [ 'verb' => $str['verb'] ]) .'?';
-                    $document->backText = trans('document/document.back.textAdmin', ['status' => $str['status'], 'action' => $str['action'] ]);
-                } else {
-                    $document->backUrl = route('documents.control.manage.index', ['slug' => $action]);
-                    $document->backTitle = trans('document/document.back.titleUser', [ 'status' => $str['status'] ]) .'?';
-                    $document->backText = trans('document/document.back.textUser', ['status' => $str['status'], 'action' => $str['action'] ]);
+                // Return to the index
+                if( $slug == 'admin') {
+                    $document->indexUrl = route('documents.control.documento.index');
+                } else { 
+                    $document->indexUrl = route('documents.control.manage.index', $action);
                 }
-            }
-
-            // History
-            $change = $document->changes()->where('user_uid', $uid)->first();
-            $document->change = ($change) ? $change->text : '';
-
-            // Validar si tiene historia
-            $document->history = $document->changes()->count();
-
-            // Return to the index
-            if( $slug == 'admin') {
-                $document->indexUrl = route('documents.control.documento.index');
-            } else { 
-                $document->indexUrl = route('documents.control.manage.index', $action);
-            }
-            $document->action = $action;
+                $document->action = $action;
+            } else {
+                $document =  new DocumentModel;
+                $document->version = 0;
+                $document->hash = '';
+                $document->content = '<h1>'. trans('document/document.get.no-success') .'</h1>';                
+            } // if $document
             
         } catch (ErrorException $e) {
             Log::error('ControlRepository::get Exception: '. $e->getMessage());

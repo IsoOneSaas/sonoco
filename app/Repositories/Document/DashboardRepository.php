@@ -121,18 +121,19 @@ class DashboardRepository implements DashboardRepositoryInterface
         $tracks = DB::table('document_tracing')->select('document_id', DB::raw('count(*) as total'))->where('user_uid', $uid)->where('trace', 'LIKE', '%OPEN%')->groupBy('document_id')->orderBy('total', 'desc')->get();
         foreach($tracks as $track) {            
             $document = DocumentModel::find($track->document_id);
-            // Publicación
-            //Log::debug(['ID' => $track->document_id]);
-            $status = $document->status()->where('action', $target)->first(['return_date']);
-            if( $status ) {
-                $dt = Carbon::createFromTimeStamp(strtotime($status->return_date)); 
-                $published = $dt->diffForHumans();
-                
-                $hash = $this->tool->setIdHash($track->document_id);
-                $link = route('documents.master.render', $hash);
-    
-                $tracing_array[] = [$document->code, '<a href="'. $link .'">'. $document->name . '</a>', $document->version, $published, $track->total]; 
-            } // if
+            if( $document ) {
+                // Publicación
+                $status = $document->status()->where('action', $target)->first(['return_date']);
+                if( $status ) {
+                    $dt = Carbon::createFromTimeStamp(strtotime($status->return_date)); 
+                    $published = $dt->diffForHumans();
+                    
+                    $hash = $this->tool->setIdHash($track->document_id);
+                    $link = route('documents.master.render', $hash);
+        
+                    $tracing_array[] = [$document->code, '<a href="'. $link .'">'. $document->name . '</a>', $document->version, $published, $track->total]; 
+                } // if $status
+            } // if $document
         } // foreach
         //Log::debug(['UID' => $uid, 'NAME' => $document->name, 'FREQUENCY' => $tracing_array]);
         return $tracing_array;

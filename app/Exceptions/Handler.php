@@ -1,8 +1,10 @@
 <?php namespace App\Exceptions;
 
 //use App\Mail\ExceptionMail;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -80,15 +82,22 @@ class Handler extends ExceptionHandler
             $handler = new HtmlErrorRenderer(true);
             $css = $handler->getStylesheet();
             $content = $handler->getBody($e);
+            $user = Auth::user();
+            $data = [
+                'uid' => $user->user_id,
+                'name' => $user->name,
+                'role' => $user->role,
+                'date' => Carbon::now()->format('Y-m-d H:i:s'),
+            ];
             //Mail::queue(new ExceptionMail($html));
-            Mail::send('emails.email_exception', compact('css','content'), function ($message) {
+            Mail::send('emails.email_exception', compact('css','content','data'), function ($message) {
                 $message
                     ->to('sonoco@iso-one.com')
                     ->subject('Exception: ' . \Request::fullUrl())
                 ;
             });            
         } catch (Throwable $e) {
-            Log::error('Send Exception Email Exception : '. $e);
+            Log::error('Handler::sendExceptionEmail Exception: '. $e);
         }
     } // sendExceptionEmail   
 

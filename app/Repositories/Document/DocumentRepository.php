@@ -211,7 +211,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     }
                                     
                     $review_array = $this->saveForwarding(config('settings.document_status.review'), $data['deadline_review'], $data['link_review']);
-                    if( $edit_array ) {
+                    if( $review_array ) {
                         //Log::debug(['REVIEW ARRAY' => $review_array]);
                         if( $idExisting) {
                             ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.review'))->delete();
@@ -224,7 +224,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     }                
                                     
                     $approve_array = $this->saveForwarding(config('settings.document_status.approve'), $data['deadline_approve'], $data['link_approve']);
-                    if( $edit_array ) {
+                    if( $approve_array ) {
                         //Log::debug(['APPROVE ARRAY' => $approve_array]);
                         if( $idExisting) {
                             ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.approve'))->delete();
