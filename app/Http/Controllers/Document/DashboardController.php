@@ -33,25 +33,53 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = Auth::user();
-        if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
-            $template = 'document.dashboard_admin';
-            $admin = [
-                'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
-                'SPR'   => $this->dashRepo->getSuggestionStatus(),
-                'OPR'   => $this->dashRepo->getSightingsStatus(),
-            ];
+        // TODO: dasboard to GUEST / SUPER
+        if($user) {
+            if( $user->hasAnyRole('MASTER','SUPER') ) {
+                $template = 'document.dashboard_master';
+                $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];                
+                $admin = [
+                    'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
+                    'SPR'   => $this->dashRepo->getSuggestionStatus(),
+                    'OPR'   => $this->dashRepo->getSightingsStatus(),
+                ];
+                $docs_object = '';
+            } elseif( $user->hasRole('ADMIN') ) {
+                $template = 'document.dashboard_admin';
+                $badge = [
+                    'master' => $this->tool->getBadgeMasterCount(),
+                    'edit' => $this->setControlBadge('edit'),
+                    'review' => $this->setControlBadge('review'),
+                    'approve' => $this->setControlBadge('approve'),
+                ];
+                $admin = [
+                    'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
+                    'SPR'   => $this->dashRepo->getSuggestionStatus(),
+                    'OPR'   => $this->dashRepo->getSightingsStatus(),
+                ];
+                $docs_object = $this->dashRepo->getFavorityDocuments();
+            } else {
+                $template = 'document.dashboard_user';
+                $badge = [
+                    'master' => $this->tool->getBadgeMasterCount(),
+                    'edit' => $this->setControlBadge('edit'),
+                    'review' => $this->setControlBadge('review'),
+                    'approve' => $this->setControlBadge('approve'),
+                ];                
+                $admin = [];
+                $docs_object = $this->dashRepo->getFavorityDocuments();
+            }
         } else {
-            $template = 'document.dashboard_user';
-            $admin = [];
+            return redirect('login')->with(Auth::logout());
         }
 
         return view($template, [
-            'badgeEdit' => $this->setControlBadge('edit'),
-            'badgeReview' => $this->setControlBadge('review'),
-            'badgeApprove' => $this->setControlBadge('approve'),
-            'badgeMaster' => $this->tool->getBadgeMasterCount(),
+            'badgeEdit' => $badge['edit'],
+            'badgeReview' => $badge['review'],
+            'badgeApprove' => $badge['approve'],
+            'badgeMaster' => $badge['master'],
             'status' => $admin,
-            'documents' => $this->dashRepo->getFavorityDocuments(),
+            'documents' => $docs_object,
             
         ]);
     } // index method

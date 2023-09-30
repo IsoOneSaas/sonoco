@@ -408,6 +408,7 @@
         }); // document
 
         function renderTable() {
+            let lang = {!! $modalLanguage !!};
             $route = $route.replace(':id', $did);
 
             if ( $.fn.DataTable.isDataTable('#example') ) {
@@ -472,7 +473,8 @@
                             }
                         });                        
 
-                    } // init
+                    }, // init
+                    language: lang
                 }); // datatable
         } // renderTable
 

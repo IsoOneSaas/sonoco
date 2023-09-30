@@ -393,7 +393,7 @@
             $beforeRow = data.document_id;
 
             if( $selectedRow ) {
-                console.log('Seleccionado '+$beforeRow);
+                //console.log('Seleccionado '+$beforeRow);
                 if( data.filter == 0 ) {
                     // En proceso
                     $('#btn-edit').removeClass('iso-disabled');
@@ -407,7 +407,7 @@
                     $('#btn-edit').addClass('iso-disabled'); 
                 } // if/else                
             } else {
-                console.log('NO Seleccionado');
+                //console.log('NO Seleccionado');
                 if( data.filter == 0 ) {
                     $('#btn-edit').addClass('iso-disabled');    
                     $('#btn-send').addClass('iso-disabled');
@@ -425,7 +425,7 @@
             var ss =  $("#status-selected").val();
             var tx =  $('#text-search').val();
             var rs = $("input[name='radio-search']:checked").val();
-            console.log('>', ts, ss, tx, rs);
+            //console.log('>', ts, ss, tx, rs);
             param = {time: ts, status: ss};
             var url =  route.replace(':slug', JSON.stringify(param))
             startTime = Date.now();
@@ -482,12 +482,13 @@
             e.preventDefault();
             var rowdata = $myTable.rows('.selected').data()[0];
             var route = "{{ route('documents.master.sightings', ':id') }}";
-
             $('#example').dataTable().fnDestroy();
 
             if (rowdata === undefined || rowdata === null) {
+                console.dir(rowdata);
                 setSimpleNotification("{{ trans('document/document.grid.row_sight') }}");
             } else if( rowdata.control == 'show' ) {                
+                console.dir(rowdata);
                 route = route.replace(':id', rowdata.document_id);
 
                 var ourTable = $('#example').DataTable({

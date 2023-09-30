@@ -61,7 +61,8 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            //'driver' => 'eloquent',
+            'driver' => 'customuserprovider',   // Modificado 30.09.23 Para restringir por is_active
             'model' => App\Models\Set\UserModel::class,
         ],
 

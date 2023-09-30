@@ -1,8 +1,10 @@
 <?php namespace App\Providers;
 
-
+use Illuminate\Auth\CustomUserProvider; // Nuevo
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
+
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,7 +23,11 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        $this->registerPolicies();
 
+        \Illuminate\Support\Facades\Auth::provider('customuserprovider', function($app, array $config) {
+            return new CustomUserProvider($app['hash'], $config['model']);
+        });
 
 
     }

@@ -84,9 +84,9 @@ class Handler extends ExceptionHandler
             $content = $handler->getBody($e);
             $user = Auth::user();
             $data = [
-                'uid' => $user->user_id,
-                'name' => $user->name,
-                'role' => $user->role,
+                'uid' => ($user) ? $user->user_id : 'N/A',
+                'name' => ($user) ? $user->name : 'N/A',
+                'role' => ($user) ? $user->role : 'N/A',
                 'date' => Carbon::now()->format('Y-m-d H:i:s'),
             ];
             //Mail::queue(new ExceptionMail($html));

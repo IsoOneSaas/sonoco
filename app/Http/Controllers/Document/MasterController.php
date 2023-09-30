@@ -102,6 +102,7 @@ class MasterController extends Controller
             'document' => $data,
             'attachment' => $attachment,
             'types'     => $types,
+            'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
         ]);         
     } // edit Method
 
