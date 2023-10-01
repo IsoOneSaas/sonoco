@@ -56,7 +56,8 @@ class DocumentModelController extends Controller
         $patterns = config('settings.document_format_pattern');
         $gridJobsLanguage = json_encode(trans('document/document.datatable_jobs'));
         $gridUsersLanguage = json_encode(trans('document/document.datatable_users'));
-        return view('document.document.create', compact('systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage'));
+        $default = 0; // algun cambio modificar también el metodo ->setNew
+        return view('document.document.create', compact('systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage', 'default'));
     } // create Method
 
     /**
@@ -211,7 +212,7 @@ class DocumentModelController extends Controller
      */
     public function setNew($slug) : View
     {
-        Log::debug(['SLUG' => $slug]);
+        // Method = created
         $systems = $this->documentRepo->systems(null);
         $locations = $this->documentRepo->locations(null);
         $types = $this->documentRepo->types(null);
@@ -219,7 +220,11 @@ class DocumentModelController extends Controller
         $patterns = config('settings.document_format_pattern');
         $gridJobsLanguage = json_encode(trans('document/document.datatable_jobs'));
         $gridUsersLanguage = json_encode(trans('document/document.datatable_users'));
-        return view('document.document.create', compact('systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage'));
+        // adecuación del slug
+        $default = json_decode( urldecode($slug), true);
+        $default = json_encode($default);
+        Log::debug(['SLUG ARRAY' => $default]);
+        return view('document.document.create', compact('systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage', 'default'));
     } // create Method
     
     /**

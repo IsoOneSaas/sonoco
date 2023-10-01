@@ -482,15 +482,14 @@
             e.preventDefault();
             var rowdata = $myTable.rows('.selected').data()[0];
             var route = "{{ route('documents.master.sightings', ':id') }}";
+            var status = $("#status-selected").val();
             $('#example').dataTable().fnDestroy();
 
             if (rowdata === undefined || rowdata === null) {
-                console.dir(rowdata);
                 setSimpleNotification("{{ trans('document/document.grid.row_sight') }}");
-            } else if( rowdata.control == 'show' ) {                
-                console.dir(rowdata);
+            //} else if( rowdata.control == 'show' ) {
+            } else if( status != 0 ) {
                 route = route.replace(':id', rowdata.document_id);
-
                 var ourTable = $('#example').DataTable({
                     processing: true,
                     serverSide: true,

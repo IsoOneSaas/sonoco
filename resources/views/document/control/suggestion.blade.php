@@ -139,11 +139,10 @@
                         url: route.replace(':id', id),
                         type: 'GET',
                         dataType: 'json',                
-                        success: function(code) {
-                            
+                        success: function(json) {
+                            console.dir(json);
                             var uri = "{{ route('documents.control.new', ':code') }}"
-                            uri = uri.replace(':code', code);
-                            alert(uri);
+                            uri = uri.replace(':code', json.code);
                             location.href = uri;
                         } // success
                     }); // ajax                    

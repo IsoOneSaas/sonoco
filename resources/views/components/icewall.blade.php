@@ -370,9 +370,9 @@
                             <li>
                                 <a href="{{ route('perfil.index') }}" class="dropdown-item hover:bg-white/5"> <i data-lucide="user" class="w-4 h-4 mr-2"></i> Perfil </a>
                             </li>
-<!--                             <li>
-                                <a href="" class="dropdown-item hover:bg-white/5"> <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i> Ayuda </a>
-                            </li> -->
+                            <li>
+                                <a href="https://iso-one.com/soporte/open.php?e={{ Auth::user()->email }}" target="_blank" class="dropdown-item hover:bg-white/5"> <i data-lucide="life-buoy" class="w-4 h-4 mr-2"></i> Soporte </a>
+                            </li>                            
                             <li>
                                 <hr class="dropdown-divider border-white/[0.08]">
                             </li>

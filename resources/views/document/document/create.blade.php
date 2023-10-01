@@ -56,7 +56,7 @@
 
                                 <div class="input-group mt-3">
                                     <div id="system" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.system.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.system.title') }}</div>
-                                    <select name="system_id" class="form-control w-full" required>
+                                    <select name="system_id" id="system-id" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.system.placeholder') }}</option>
                                         @foreach($systems as $system)   
                                         <option value="{{ $system->system_id }}" {{ old('system_id', isset($document) ? $document->system_id : 0 ) == $system->system_id ? 'selected ' : '' }}>{{ $system->name }}</option>
@@ -321,6 +321,13 @@
     var $jobTable, $userTable;
     var $isSaved = true;
     $(function () {
+        var json = {!! $default !!};
+
+        console.dir(json);
+        if( json != 0 ) {
+            $("input[name='name']").val(json.name);
+            $("#system-id option[value='"+json.sid+"']").attr('selected', true);
+        }
 
         // BTN SALIR
         $('#btn-exit').on("click", function() {
