@@ -117,6 +117,7 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
+                                    <img id="loading-modal-document-1" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-document-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
                                     <button id="btn-document-ok" type="button" class="btn btn-primary w-20">Confirmar</button>
                                     <a id="modal-document-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-document" class="">.</a>
@@ -164,9 +165,11 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
+                                    <img id="loading-modal-user-1" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-user-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
                                     <button id="btn-user-ok" type="button" class="btn btn-primary w-20">Confirmar</button>
                                     <a id="modal-user-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-user" class="">.</a>
+                                    
                                 </div>
                                 <!-- END: Modal Footer -->
                             </div>
@@ -211,7 +214,7 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
-                                    <!-- <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button> -->
+                                    <img id="loading-modal-document-2" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-document-valid-close" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button>
                                     <a id="modal-document-valid-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-document-valid" class="">.</a>
                                     <a id="modal-document-valid-close" href="javascript:;" data-tw-dismiss="modal" class="">.</a>
@@ -255,10 +258,10 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
-                                    <!-- <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button> -->
+                                    <img id="loading-modal-user-2" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-user-valid-close" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button>
                                     <a id="modal-user-valid-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-user-valid" class="">.</a>
-                                    <a id="modal-user-valid-close" href="javascript:;" data-tw-dismiss="modal" class="">.</a>
+                                    <a id="modal-user-valid-close" href="javascript:;" data-tw-dismiss="modal" class="">.</a>                                    
                                 </div>
                                 <!-- END: Modal Footer -->
                             </div>
@@ -326,6 +329,7 @@
 
             $("#json-docs").val('');            
             $("#modal-document-open")[0].click();
+            $("#loading-modal-document-1").show(); 
 
             // Generar la tabla
             $.ajax({
@@ -359,7 +363,7 @@
                                 // columna invisible
                                 $this.columns( [1] ).visible( false );
                                 // Modal
-                                
+                                $("#loading-modal-document-1").hide(); 
                             },
                             language: lang                      
                         }); // datatable
@@ -434,6 +438,7 @@
 
                 // Abrir Modal
                 $("#modal-document-valid-open")[0].click();
+                $("#loading-modal-document-2").show(); 
 
                 // Generar la tabla
                 $.ajax({
@@ -455,7 +460,8 @@
                                 initComplete: function () {
                                     var $this = this.api();
                                     // Fitros
-                                    setBottomFilter($this, selects, inputs);                                                                
+                                    setBottomFilter($this, selects, inputs);
+                                    $("#loading-modal-document-2").hide();                                                                 
                                 },
                                 language: lang                      
                             }); // datatable
@@ -487,6 +493,7 @@
 
             $("#json-users").val('');             
             $("#modal-user-open")[0].click();
+            $("#loading-modal-user-1").show();
 
             // Generar la tabla
             $.ajax({
@@ -517,7 +524,8 @@
                                 setBottomFilter($this, selects, inputs);                            
                                 // columna invisible
                                 //$this.columns( [1] ).visible( false );
-                                // Modal                                
+                                // Modal
+                                $("#loading-modal-user-1").hide();                                
                             },
                             language: lang                      
                         }); // datatable
@@ -582,6 +590,7 @@
 
                 // Abrir Modal
                 $("#modal-user-valid-open")[0].click();
+                $("#loading-modal-user-2").show(); 
 
                 // Generar la tabla
                 $.ajax({
@@ -603,7 +612,8 @@
                                 initComplete: function () {
                                     var $this = this.api();
                                     // Fitros
-                                    setBottomFilter($this, selects, inputs);                                                                
+                                    setBottomFilter($this, selects, inputs); 
+                                    $("#loading-modal-user-2").hide();                                                                
                                 },
                                 language: lang                      
                             }); // datatable

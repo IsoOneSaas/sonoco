@@ -825,8 +825,8 @@
                     var reviewOutput = '';
                     var approveOutput = '';
                     var n;
-                    //console.log('=== ARRAY JOBS ===');
-                    //console.dir(editJobs);
+                    // console.log('=== ARRAY JOBS ===');
+                    // console.dir(editJobs);
                     $.each(data, function(i, job) {
                         n = job.job_id.toString();
                         //console.log('check: '+ job.job_id);
@@ -864,8 +864,8 @@
                     var reviewOutput = '';
                     var approveOutput = '';
                     var n;
-                    //console.log('=== ARRAY USERS ===');
-                    //console.dir(editUsers);
+                    // console.log('=== ARRAY USERS ===');
+                    // console.dir(editUsers);
                     $.each(data, function(i, user) {
                         n = user.user_id.toString();
                         //console.log('check: '+ user.user_id);

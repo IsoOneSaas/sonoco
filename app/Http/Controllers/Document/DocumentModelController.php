@@ -95,8 +95,8 @@ class DocumentModelController extends Controller
       $patterns = config('settings.document_format_pattern');
       $gridJobsLanguage = json_encode(trans('document/document.datatable_jobs'));
       $gridUsersLanguage = json_encode(trans('document/document.datatable_users'));
-
-      return view('document.document.create', compact('document','systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage'));
+      $default = 0; // algun cambio modificar también el metodo ->setNew
+      return view('document.document.create', compact('document','systems', 'locations', 'types', 'patterns', 'classes', 'gridJobsLanguage', 'gridUsersLanguage','default'));
     }
 
     /**

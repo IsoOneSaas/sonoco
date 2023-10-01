@@ -36,6 +36,7 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
+            <img id="img-loading" alt="Cargando..." class="h-12 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}" style="display:none">
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     {{ __('Olvidó su contraseña?') }}
@@ -64,7 +65,15 @@
         }
 
         password.focus()
-        })  
+        })
+
+        const showImageButton = document.getElementById("btn-login");
+        const myImage = document.getElementById("img-loading");        
+          
+        window.onbeforeunload = function() {
+            myImage.style.display = "block";
+        }
+
     </script>    
 
 </x-guest-layout>

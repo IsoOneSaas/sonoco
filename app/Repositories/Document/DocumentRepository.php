@@ -606,7 +606,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         } elseif( is_integer($data) ) {
             // Formato antiguo en donde se guardaba valores enteros
             Log::debug('Formato antiguo');
-            $array_result['jobs'][] = $data;
+            $array_result['jobs'][] = strval($data);
             // Encontrar los usuarios en la tabla <document_forwards>
             $fwds = ForwardModel::where('document_id', $did)->where('action', $action)->get(['user_uid']);
             if( $fwds ) {
@@ -615,7 +615,10 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $user = UserModel::where('user_uid', $fwd->user_uid)->first();
                     if($user) {
                         $array_result['users'][] = $user->user_id;
-                        $array[$user->user_id] = $data;
+                        $array[$user->user_id] = strval($data);
+                    } else {
+                        // Buscar el nombre del usuario si está en la columna {name}
+
                     }
                 }
                 $array_result['link'] = $array;
