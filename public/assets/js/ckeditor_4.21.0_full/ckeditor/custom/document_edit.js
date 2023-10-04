@@ -25,7 +25,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.allowedContent = true;
 	config.clipboard_handleImages = false; // eliminar interferencia
     config.extraPlugins = 'iso_template, iso_reference, iso_signing, uploadwidget, uploadimage';
-	config.removeButtons = 'Source,Save,NewPage,Templates,Scayt,Form,Blockquote,CreateDiv,Language,Link,Unlink,Anchor,Flash,Iframe,PageBreak,ShowBlocks,About';	
+	config.removeButtons = 'Preview,Print,Source,Save,NewPage,Templates,Scayt,Form,Blockquote,CreateDiv,Language,Link,Unlink,Anchor,Flash,Iframe,PageBreak,ShowBlocks,About';	
     config.removePlugins = 'exportpdf';
 	config.removeDialogTabs = 'image:advanced;link:advanced';
 };

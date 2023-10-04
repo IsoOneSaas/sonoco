@@ -186,9 +186,10 @@ class ControlRepository implements ControlRepositoryInterface
                 
 
                 // Comentario del documento  TODO: Validar si es disclamer para tener diferente tratamiento
-                $previousAction = $this->tool->getPreviousAction($document->status);
-                $disc = DisclaimerModel::where('document_id', $document->document_id)->where('user_id', Auth::user()->user_id)->where('action', $previousAction)->first(['comment']);
-                $document->comment = ($disc) ? $disc->comment : '';
+                //$previousAction = $this->tool->getPreviousAction($document->status);
+                //$disc = DisclaimerModel::where('document_id', $document->document_id)->where('user_id', Auth::user()->user_id)->where('action', $previousAction)->first(['comment']);
+                //$document->comment = ($disc) ? $disc->comment : '';
+                $document->comment = '';    // Modificado 03.10.2023
 
                 // Color de Estado
                 $document->color = 'bg-default';
@@ -305,9 +306,9 @@ class ControlRepository implements ControlRepositoryInterface
 
                 // Salvar Comentario si hay
                 if( !empty($data['comment']) ) {
-                    $previousAction = $this->tool->getPreviousAction($document->status);
+                    //$previousAction = $this->tool->getPreviousAction($document->status);
                     $comment = DisclaimerModel::firstOrNew(
-                        ['document_id' => $id, 'user_id' => Auth::user()->user_id, 'action' => $previousAction ]
+                        ['document_id' => $id, 'user_id' => Auth::user()->user_id, 'action' => $document->status ]
                     );    
                     $comment->comment = $data['comment'];
                     $comment->save();
@@ -826,6 +827,43 @@ class ControlRepository implements ControlRepositoryInterface
         ]);
 
     } // listChanges Method
+
+    /**
+     * Lista los comentarios para el documento
+     * @param  string $hash Identificador del documento 
+     * @return array   Grid para generar la tabla
+     */      
+    public function listComments($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        $array_output = [];
+        $n = 0;         
+        $document = DocumentModel::find($id);
+        if($document) {
+            $comments = $document->disclaimers()->orderBy('created_at', 'desc')->get();
+            foreach($comments as $comment) {
+                $user = UserModel::find($comment->user_id);
+                $sts = config('settings.document_status_texts')[$comment->action];
+                $array_output[] = [
+                    "DT_RowId" => "row_". $comment->disclaimer_id,
+                    'date' => Carbon::createFromTimeStamp(strtotime($comment->created_at))->format($this->set['date_format']),
+                    'user' => $user->name,
+                    'status' => $sts['actual'],
+                    'text' => $comment->comment,
+                ];
+                $n++;
+            } // foreach
+        }
+
+        //Log::debug(['comments' => $array_output]);                   
+        return json_encode([
+            "draw" => 1,
+            "recordsTotal" => $n,
+            "recordsFiltered"=> $n,
+            "data"=> $array_output,           
+        ]);
+
+    } // listComments Method    
 
     /**
      * Elimina un cambio del historial

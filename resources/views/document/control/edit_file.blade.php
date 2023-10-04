@@ -228,6 +228,7 @@
     
     <script type="text/javascript">
         var $herTable;
+        var $ourTable;
         var $isSaved = true;
         $(function () {
             var referrer =  document.referrer;
@@ -235,6 +236,7 @@
 
             // Inicializar
             setSupportData();
+            $("#comment").html('');
 
             // BOTON AVANZAR
             $('#btn-send').on("click", function()  {
@@ -449,7 +451,71 @@
             // GEMERA EL MODAL PARA COMENTARIOS
             $('body').on('click', '#btn-modal-back', function (e) {
                 e.preventDefault();
-                $("#comment").html($("input[name='comment']").val());
+                var hash = $("#hash").val();
+                var route = "{{ route('documents.control.comment.get', ':hash') }}";
+                var lang = {!! $set['disclaimerLang'] !!};
+
+                //$("#comment").html($("input[name='comment']").val());            
+                route = route.replace(':hash', hash);
+
+                $ourTable = $('#comments-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    retrieve: true,
+                    ajax: route,
+                    columns: [
+                        {
+                            class: 'dt-control',
+                            orderable: false,
+                            data: null,
+                            defaultContent: '',
+                        },
+                        { data: 'date' },
+                        { data: 'user' },
+                        { data: 'status' },
+                    ],
+                    order: [[1, 'desc']],
+                    paging: false,
+                    info: false,
+                    filter: false,
+                    initComplete: function () {
+                        var $this = this.api();
+                        $this.on('draw', function () {
+                            detailRows.forEach(function (id, i) {
+                                $('#' + id + ' td.dt-control').trigger('click');
+                            });
+                        });
+                        
+                        // Array to track the ids of the details displayed rows
+                        var detailRows = [];
+                        
+                        $('#comments-table tbody').on('click', 'tr td.dt-control', function () {
+                            var tr = $(this).closest('tr');
+                            var row =  $this.row(tr);
+                            var idx = detailRows.indexOf(tr.attr('id'));
+                        
+                            if (row.child.isShown()) {
+                                tr.removeClass('details');
+                                row.child.hide();
+                        
+                                // Remove from the 'open' array
+                                detailRows.splice(idx, 1);
+                            } else {
+                                tr.addClass('details');
+                                row.child(format(row.data())).show();
+                        
+                                // Add to the 'open' array
+                                if (idx === -1) {
+                                    detailRows.push(tr.attr('id'));
+                                }
+                            }
+                        });                        
+
+                    }, // init
+                    language: lang 
+                }); // datatable
+
+
                 $("#modal-back-open")[0].click();
             });
             

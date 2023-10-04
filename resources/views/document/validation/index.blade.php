@@ -145,6 +145,7 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
+                                    <img id="loading-modal-type" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-type-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
                                     <button id="btn-type-ok" type="button" class="btn btn-primary w-20">Confirmar</button>
                                     <a id="modal-type-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-type" class="">.</a>
@@ -199,6 +200,7 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
+                                    <img id="loading-modal-document" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
                                     <button id="btn-document-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
                                     <button id="btn-document-ok" type="button" class="btn btn-primary w-20">Confirmar</button>
                                     <a id="modal-document-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-document" class="">.</a>
@@ -250,6 +252,8 @@
             var lang = {!! $gridTypesLanguage !!};
             var tids = $("#type-ids").val();
 
+            $("#loading-modal-type").show(); 
+
             // Generar la tabla
             $.ajax({
                 type: 'POST',
@@ -280,6 +284,7 @@
                                 // columna invisible
                                 $this.columns( [0,3] ).visible( false );
                                 // Modal
+                                $("#loading-modal-type").hide(); 
                                 $("#modal-type-open")[0].click();
                             },
                             language: lang                      
@@ -331,7 +336,8 @@
             var dids = $("#document-ids").val();
 
             // Modal
-            $("#modal-document-open")[0].click();            
+            $("#modal-document-open")[0].click(); 
+            $("#loading-modal-document").show();         
 
             // Generar la tabla
             $.ajax({
@@ -363,6 +369,8 @@
                                 setBottomFilter($this, selects, inputs);                            
                                 // columna invisible
                                 $this.columns( [0,7] ).visible( false );
+                                // Modal
+                                $("#loading-modal-document").hide(); 
                             },
                             language: lang                      
                         }); // datatable

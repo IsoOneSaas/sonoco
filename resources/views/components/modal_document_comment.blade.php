@@ -13,10 +13,22 @@
                                         @csrf
                                         <div class="input-group mt-3">
                                             <div id="commentId" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.comment.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.comment.title') }}</div>
-                                            <textarea  class="form-control" id="comment" aria-describedby="commentId" placeholder="{{ trans('document/document.form.comment.placeholder') }}" minlength="8" rows="10"  required>{{ old('comment') }}</textarea>                                           
+                                            <textarea  class="form-control" id="comment" aria-describedby="commentId" placeholder="{{ trans('document/document.form.comment.placeholder') }}" minlength="8" rows="10"  required></textarea>                                           
                                             <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.comment.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                         </div>
-                                    </form>                                                          
+                                    </form>  
+
+                                    <table id="comments-table" class="display dataTable" style="width:100%" aria-describedby="comments-table_info">
+                                        <thead>
+                                            <tr>
+                                                <th class="dt-control sorting_disabled" rowspan="1" colspan="1" style="width: 22.9688px;"></th>
+                                                <th class="sorting" tabindex="0" aria-controls="comments-table" rowspan="1" colspan="1">Fecha</th>
+                                                <th class="sorting" tabindex="0" aria-controls="comments-table" rowspan="1" colspan="1">Usuario</th>
+                                                <th class="sorting" tabindex="0" aria-controls="comments-table" rowspan="1" colspan="1">Etapa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>                                
 
                                 </div>
                                 <!-- END: Modal Body -->

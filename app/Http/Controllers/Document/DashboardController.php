@@ -30,7 +30,7 @@ class DashboardController extends Controller
     /**
      * Show the general docboard
      */
-    public function index(): View
+    public function index()
     {
         $user = Auth::user();
         // TODO: dasboard to GUEST / SUPER
@@ -111,14 +111,29 @@ class DashboardController extends Controller
         echo 'Sent Email...';
     } 
     
-    public function contentMigration()  // /dashboard/migration/content
+    public function contentMigration()  // /documentos/dashboard/migration/content
     {
         //$contents = DB::table('document-contents')->get();
+
+        $start = 10000;
+
+        // MEXICO
+        // $table_relation = 'document-types_document-fields'; // MX
+        // $table_fields = 'a_fields_mx';
+        // $table_contents = 'a_contents_mx2';
+        // $init = 0;
+
+
+        // COLOMBIA
+        // $table_relation = 'document-types_document-fields2';
+        // $table_fields = 'document-fields2';
+        // $table_contents = 'a_contents_co';
+        // $init = 10000;
 
         $types = DB::table('document_types')->get();
         $schema_array = [];
         foreach($types as $type) {
-            $fields = DB::table('document-types_document-fields2')->where('type_id', $type->type_id)->where('value', 1)->get();
+            $fields = DB::table($table_relation)->where('type_id', $type->type_id)->where('value', 1)->get();
             if($fields) {
                 foreach($fields as $field) {
                     $schema_array[$type->type_id][] = $field->field_id; 
@@ -130,7 +145,8 @@ class DashboardController extends Controller
         $content_array = [];
         foreach( $schema_array as $key => $items ) {
             foreach($items as $item) {
-                $field = DB::table('document-fields2')->where('document-field_id', $item)->first();
+                //$field = DB::table('document-fields2')->where('document-field_id', $item)->first(); // CO
+                $field = DB::table($table_fields)->where('document-field_id', $item)->first(); // MX
                 if( $field ) {
                     $content_array[$key][$field->order][$item] = $field->name;
                     // $key = type_id
@@ -144,9 +160,9 @@ class DashboardController extends Controller
         //$document = DocumentModel::find($did);
         
         //$documents = DocumentModel::all();
-        $start = 10000;
+        
         $documents = DocumentModel::where(function($query) use($start) {
-            $query->where('document_id', '>=', $start);
+            $query->where('document_id', '>', $start);
         })->get();
         foreach($documents as $document) {
             $found = false;
@@ -154,13 +170,15 @@ class DashboardController extends Controller
             $tid = $document->type_id;
             $label = 'NA';
 
+            $did = $document->document_id - $init;
+
             if( key_exists($tid, $content_array) ) {
 
                 $orden = $content_array[$tid];
                 
                 foreach($orden as $i => $field) {
                     foreach($field as $fid => $title) {
-                        $content = DB::table('document-contents2')->where('document_id', $document->document_id)->where('version', $document->version)->where('document-field_id', $fid)->first();
+                        $content = DB::table($table_contents)->where('document_id', $did)->where('version', $document->version)->where('document-field_id', $fid)->first();
                         if($content) {
                             $found = true;
                             $label = 'FA';
@@ -178,7 +196,7 @@ class DashboardController extends Controller
                 } // foreach
 
                 if(!$found) {
-                    $content = DB::table('document-contents2')->where('document_id', $document->document_id)->where('version', $document->version)->where('document-field_id', 0)->first();
+                    $content = DB::table($table_contents)->where('document_id', $did)->where('version', $document->version)->where('document-field_id', 0)->first();
                     if($content) {
                         // Log::debug('=*=*= CAMPO UNICO =*=*=');                
                         // Log::debug($content->content);
@@ -214,5 +232,59 @@ class DashboardController extends Controller
         } // foreach
 
     } // Method
+
+    public function updateMigration1($table) // /documentos/dashboard/migration/update
+    {
+        $n = 0;
+        $m = 0;
+        $data = DB::table('a_'.$table)->get();
+        
+        foreach($data->toArray() as $record) {
+            //$doc = DocumentModel::firstOrNew(['document_id' => $record->document_id]);
+            //Log::debug(['DATA' => (array)$record]);
+            $doc = DocumentModel::find($record->document_id);
+            if( $doc ) {                
+                if ( $doc->updated_at == $record->updated_at ) {
+                    Log::debug('*** Documento ya actualizado: '. $record->document_id .' @ '. $record->updated_at);
+                } else {
+                    //$doc->fill($record)->save();
+                    //$doc->update((array)$record);
+                    Log::debug('ACTUALIZADO '. $record->document_id .' | '. $doc->updated_at .' TO '. $record->updated_at);
+                    $m++;
+                }
+            } else {
+                Log::debug('*** Documento no Encontrado: '. $record->document_id);
+            }
+            $n++;
+        }
+        Log::debug('======= TOTAL: '. $n .' Efectivo: '. $m .' ==========================');
+    }
+
+    public function updateMigration($table) // /documentos/dashboard/migration/update
+    {
+        $n = 0;
+        $m = 0;
+        $data = DB::table('a_'.$table)->get();
+        
+        foreach($data->toArray() as $record) {
+            //$doc = DocumentModel::firstOrNew(['document_id' => $record->document_id]);
+            //Log::debug(['DATA' => (array)$record]);
+            $doc = DocumentModel::find($record->document_id);
+            if( $doc ) {                
+                if ( $doc->updated_at == $record->updated_at ) {
+                    Log::debug('*** Documento ya actualizado: '. $record->document_id .' @ '. $record->updated_at);
+                } else {
+                    //$doc->fill($record)->save();
+                    //$doc->update((array)$record);
+                    Log::debug('ACTUALIZADO '. $record->document_id .' | '. $doc->updated_at .' TO '. $record->updated_at);
+                    $m++;
+                }
+            } else {
+                Log::debug('*** Documento no Encontrado: '. $record->document_id);
+            }
+            $n++;
+        }
+        Log::debug('======= TOTAL: '. $n .' Efectivo: '. $m .' ==========================');
+    }    
 
 } // Class

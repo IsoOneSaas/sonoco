@@ -88,6 +88,7 @@ class ControlController extends Controller
         $blade = 'document.control.edit_'. strtolower($document->pattern);
         $gridTemplatesLanguage =  json_encode(trans('document/document.datatable_templates'));
         $gridReferencesLanguage =  json_encode(trans('document/document.datatable_references'));
+        $gridDisclaimersLanguage =  json_encode(trans('document/disclaimer.datatable'));
         $path = $this->getSignature();
 
         //Log::debug(['CONTENT:' => $document->content]);
@@ -97,6 +98,7 @@ class ControlController extends Controller
             'disabled' => str_contains($path, 'blank'),
             'templatesLang' => $gridTemplatesLanguage,
             'referencesLang' => $gridReferencesLanguage,
+            'disclaimerLang'  => $gridDisclaimersLanguage,
         ];
         //Log::debug(['SET' => $set]);
         return view($blade, compact('document', 'set', 'flow')); // ,'templates'
@@ -362,6 +364,14 @@ class ControlController extends Controller
     {
         return $this->documentRepo->listChanges($hash);
     } // getChanges
+
+    /**
+     * Get list of users comments to the document
+     */    
+    public function getComments($hash)
+    {
+        return $this->documentRepo->listComments($hash);
+    } // getComments   
 
     /**
      * delete a history of changes to the document

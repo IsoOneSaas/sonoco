@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('dashboard', [\App\Http\Controllers\Document\DashboardController::class, 'index'])->name('documents.dashboard');
         Route::get('dashboard/test/email', [\App\Http\Controllers\Document\DashboardController::class, 'testEmail'])->name('documents.test.email');
         Route::get('dashboard/migration/content', [\App\Http\Controllers\Document\DashboardController::class, 'contentMigration'])->name('documents.test.content');
+        Route::get('dashboard/migration/update/{slug}', [\App\Http\Controllers\Document\DashboardController::class, 'updateMigration'])->name('documents.test.update');
 
         // SETTINGS
         Route::group(['prefix' => 'ajustes', 'as' => 'documents.settings.'], function () {
@@ -115,7 +116,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('gestion/ckeditor/image', [\App\Http\Controllers\Document\ControlController::class, 'uploadImage'])->name('manage.ckeditor.upload'); 
 
             Route::post('gestion/historial', [\App\Http\Controllers\Document\ControlController::class, 'setChange'])->name('change.store'); // Store change
-            Route::get('gestion/historial/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'getChanges'])->name('change.get'); // Store change
+            Route::get('gestion/historial/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'getChanges'])->name('change.get'); // 
+            Route::get('gestion/comentarios/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'getComments'])->name('comment.get'); //
             Route::get('gestion/historial/eliminar/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'deleteChange'])->name('change.delete'); // Store change
 
             Route::get('gestion/plantillas/listado', [\App\Http\Controllers\Document\ControlController::class, 'setTemplates'])->name('manage.template.set'); // Generra listado plantillas
