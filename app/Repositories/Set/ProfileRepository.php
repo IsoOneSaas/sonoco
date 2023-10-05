@@ -4,6 +4,7 @@
 
 use App\Classes\ToolsClass;
 use App\Interfaces\Set\ProfileRepositoryInterface;
+use App\Models\Document\SettingModel;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\SystemModel;
@@ -129,7 +130,7 @@ class ProfileRepository implements ProfileRepositoryInterface
                 $profile->save();
                 DB::commit();
             } else {                
-                //DB::rollBack();
+                DB::rollBack();
                 return ['status' => 'error', 'message' => trans('profile.update.no-success')];                
             }            
         } catch (Exception $e) {
@@ -144,12 +145,21 @@ class ProfileRepository implements ProfileRepositoryInterface
     public function setPassword(array $data)
     {
         Log::debug(['SET PASSWORD ' => $data]);
+        $date = now()->format('Y-m-d H:i:s');
         try {
             DB::beginTransaction();
             $profile = UserModel::find($data['uid']);
             $profile->password = Hash::make($data['password']); 
-            $profile->save();
-            DB::commit();             
+            if( $profile->save() ) {
+                // Guardar registro de cambio
+                $set = SettingModel::find(1);
+                $set->settings = $this->tool->updateSettings($set->settings, ['password_change' => $date]);
+                $set->save();                
+                DB::commit(); 
+            } else {
+                DB::rollBack();
+                return ['status' => 'error', 'message' => trans('profile.password.no-success')];  
+            }                        
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('ProfileRepository::setPassword Exception: '. $e->getMessage());

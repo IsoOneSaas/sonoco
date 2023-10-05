@@ -285,6 +285,25 @@ class DashboardController extends Controller
             $n++;
         }
         Log::debug('======= TOTAL: '. $n .' Efectivo: '. $m .' ==========================');
+    } 
+    
+    public function setPermissions() //documentos/dashboard/migration/permissions
+    {
+        // ROLES ID
+        $roles_array = [];
+        $roles = DB::table('set_roles')->get();
+        foreach($roles as $role) {
+            //$name = strtolower($role->name);
+            $roles_array[$role->name] = $role->id;
+        }
+
+        $users = UserModel::all();
+        foreach($users as $user) {
+            $role_id = $roles_array[$user->role];
+            Log::debug(['UID' => $user->user_id, 'NAME' => $user->name, 'ROLE_ID' => $role_id, 'ROLE' => $user->role]);
+
+            $user->assignRole($user->role);
+        }
     }    
 
 } // Class

@@ -42,21 +42,22 @@
                                         <br>
                                     @endforeach                                    
                                 </div>
-                                @if( $profile->hasRole('ADMIN') )
-                                                               
-                                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-                                    <h2 class="font-medium text-base mr-auto">Administrador - Localizaciones</h2> 
-                                    @foreach($profile->adminLocations as $location)
-                                    <a class="flex items-center mt-3" href="javascript:;"> <i data-lucide="box" class="w-4 h-4 mr-2"></i> {{ $location }} </a>
-                                    @endforeach
-                                </div>
-                                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-                                    <h2 class="font-medium text-base mr-auto">Administrador - Requisitos</h2> 
-                                    @foreach($profile->adminSystems as $system)
-                                    <a class="flex items-center mt-3" href="javascript:;"> <i data-lucide="settings" class="w-4 h-4 mr-2"></i> {{ $system }} </a>
-                                    @endforeach
-                                </div>
 
+                                @if( in_array($profile->role, config('settings.roles_admin')) )
+                                    @if( $profile->hasRole('ADMIN') )                                                               
+                                    <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
+                                        <h2 class="font-medium text-base mr-auto">Administrador - Localizaciones</h2> 
+                                        @foreach($profile->adminLocations as $location)
+                                        <a class="flex items-center mt-3" href="javascript:;"> <i data-lucide="box" class="w-4 h-4 mr-2"></i> {{ $location }} </a>
+                                        @endforeach
+                                    </div>
+                                    <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
+                                        <h2 class="font-medium text-base mr-auto">Administrador - Requisitos</h2> 
+                                        @foreach($profile->adminSystems as $system)
+                                        <a class="flex items-center mt-3" href="javascript:;"> <i data-lucide="settings" class="w-4 h-4 mr-2"></i> {{ $system }} </a>
+                                        @endforeach
+                                    </div>
+                                    @endif
                                 @endif
                             </div>
 

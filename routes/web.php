@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('dashboard/test/email', [\App\Http\Controllers\Document\DashboardController::class, 'testEmail'])->name('documents.test.email');
         Route::get('dashboard/migration/content', [\App\Http\Controllers\Document\DashboardController::class, 'contentMigration'])->name('documents.test.content');
         Route::get('dashboard/migration/update/{slug}', [\App\Http\Controllers\Document\DashboardController::class, 'updateMigration'])->name('documents.test.update');
+        Route::get('dashboard/migration/permissions', [\App\Http\Controllers\Document\DashboardController::class, 'setPermissions'])->name('documents.test.auth');
 
         // SETTINGS
         Route::group(['prefix' => 'ajustes', 'as' => 'documents.settings.'], function () {

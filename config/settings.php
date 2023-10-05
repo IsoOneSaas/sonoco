@@ -30,6 +30,7 @@ return [
    ],
    
    'roles_select_documents' => ['USER','ADMIN'],   
+   'roles_admin' => ['SUPER','MASTER','ADMIN'],
 
 
      /*******************************************************************************
