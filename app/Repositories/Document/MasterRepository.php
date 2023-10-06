@@ -683,7 +683,7 @@ class MasterRepository implements MasterRepositoryInterface
         // foreach($codes as $code) {
         //     $document = DocumentModel::where('code', $code)->where('status', $target)->latest()->first();            
 
-        $documents = $this->tool->setPublishedDocumentsCollection(true);
+        $documents = $this->tool->setPublishedDocumentsCollection('user', true);
         foreach($documents as $document) {
 
             //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
@@ -757,7 +757,7 @@ class MasterRepository implements MasterRepositoryInterface
         set_time_limit(3600);
 
 
-        $documents = $this->tool->setPublishedDocumentsCollection(true, null, $params);
+        $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
         foreach($documents as $document) {
 
             //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);

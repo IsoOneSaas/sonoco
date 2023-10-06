@@ -95,7 +95,7 @@ class DashboardRepository implements DashboardRepositoryInterface
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
         $n = 0;
-        $documents = $this->tool->setPublishedDocumentsCollection(false);
+        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
 
         foreach($documents as $document) {
             $sightings = $document->sightings()->orderBy('date', 'desc')->get();

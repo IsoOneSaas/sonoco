@@ -140,9 +140,11 @@ class ToolsClass
     {
         $array_data = [];
         $roles = config('settings.permissions_byadmin_show.'. $role);
-        foreach( $roles as $item ) {
-            $array_data[$item] = config('settings.roles.'. $item);
-        }
+        if($roles) {
+            foreach( $roles as $item ) {
+                $array_data[$item] = config('settings.roles.'. $item);
+            } // foreach
+        } // if
         return $array_data;
     } // roles Method
 
@@ -301,9 +303,11 @@ class ToolsClass
 
             $dptos = $plucked->all(); 
         }
-        Log::debug(['DEPARTMENTS ADMIN' => array_unique($dptos)]);
+        //Log::debug(['DEPARTMENTS ADMIN' => array_unique($dptos)]);
         return array_unique($dptos); 
     } // setDepartmentsFilter
+
+
 
 
     /**
@@ -735,7 +739,7 @@ class ToolsClass
         //Log::debug(['DPTOS' => count($dptos)]);
         $plucked = DocumentModel::where('status', $target)->whereIn('department_id', $dptos)->pluck('code');
         $codes = $plucked->all();
-        Log::debug(['COUNT 0' => count($codes)]);
+        //Log::debug(['COUNT 0' => count($codes)]);
         return array_unique($codes); 
     } //
 
@@ -752,7 +756,7 @@ class ToolsClass
         // Códigos para Agregar
         $plucked = AuthorizationModel::where('user_id', $uid)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')->pluck('document_id');
         if($plucked && ( count($plucked->all()) > 0 ) ) {
-            Log::debug(['YES' => $plucked->all()]);
+            //Log::debug(['YES' => $plucked->all()]);
             $plucked = DocumentModel::findMany($plucked->all())->pluck('code');
             foreach($plucked->all() as $code) {
                 array_push($codes, $code);
@@ -765,7 +769,7 @@ class ToolsClass
         // Códigos para eliminar
         $plucked = AuthorizationModel::where('user_id', $uid)->where('permissions', 'LIKE', '%"view":0%')->pluck('document_id');
         if($plucked && ( count($plucked->all()) > 0 ) ) {
-            Log::debug(['NO' => $plucked->all()]);
+            //Log::debug(['NO' => $plucked->all()]);
             $plucked = DocumentModel::findMany($plucked->all())->pluck('code');
             foreach($plucked->all() as $code) {
                 if (($key = array_search($code, $codes)) !== false) {
@@ -781,19 +785,61 @@ class ToolsClass
         return $codes;
     } 
     
-    /** ***ACTUAL DE LISTADO MAESTRO *************************************************
-     * Obtiene el listado de documentos publicados y autorizados para ser visualizados
+    /**  BEGIN *** ACTUAL DE LISTADO MAESTRO ************************************************* */
+    
+    /**
+     * Obtiene el listado de identificadores de departamentos PARA EL LISTADO MAESTRO
+     * @return array    Arreglo unidimensional de los ids de departamentos
+     */       
+    private function setDepartmentsToMaster($id)    
+    {
+        $dptos = [];
+        if( $id !== null ) {
+            $user = UserModel::find($id);
+        } else {
+            $user = Auth::user(); 
+        }
+        
+        if( $user->hasAnyRole('MASTER','SUPER') ) {
+            // Webamster
+            $plucked = DepartmentModel::all()->pluck('department_id');
+            $dptos = $plucked->all();
+        } else {
+            // USERS & ADMIN
+            // cargos del usuarios
+            $jobs = $user->jobs->pluck('job_id');
+            // Departamentos para los cargos
+            $plucked = DepartmentModel::
+            join('set_department_job', function($query) use($jobs) {
+                $query->on('set_department_job.department_id', '=', 'set_departments.department_id');
+                $query->whereIn('set_department_job.job_id', $jobs);
+            })
+            ->pluck('set_departments.department_id');
+
+            $dptos = $plucked->all(); 
+        }
+        Log::debug(['DEPARTMENTS MASTER' => array_unique($dptos)]);
+        return array_unique($dptos); 
+    } // setDepartmentsToMaster   
+
+     /** Obtiene el listado de documentos publicados y autorizados para ser visualizados
+     *  @param  string $role tipo de usuario  admin/user
      * @param  boolean $auth = true si se filtra los documentos que han sido o no autorizados
      * @param  integer $uid si es null -> el usuario activo, si e != null -> el usuario con el identificador dado
      * @return collection    objeto con las propiedades de los documentos
      */ 
-    public function setPublishedDocumentsCollection($auth, $uid = null, $params = null)
+    public function setPublishedDocumentsCollection($role, $auth, $uid = null, $params = null)
     {
-        Log::debug(['AUTH' => $auth, 'UID' => $uid, 'PARAMS' => $params]);
+        //Log::debug(['AUTH' => $auth, 'UID' => $uid, 'PARAMS' => $params]);
         $target = config('settings.document_status.publish');
         //$uid = ($uid === null) ? Auth::user()->user_id : $uid;
         //Log::debug(['UID' => $uid]);
-        $dptos = $this->setDepartmentsFilter($uid);
+        if( $role = 'admin' ) {
+            $dptos = $this->setDepartmentsFilter($uid);
+        } else {
+            $dptos = $this->setDepartmentsToMaster($uid);
+        }
+        
         if( $params === null ) {
             $documents =  DocumentModel::where('status', $target)->whereIn('department_id', $dptos)->orderBy('created_at', 'desc')->get()->unique('code');
         } else {
@@ -822,8 +868,9 @@ class ToolsClass
                 }
             }
 
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);
+            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);
             $documents =  DocumentModel::where('status', $target)->whereIn('department_id', $dptos)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');
+            //$documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');
         } // if/else params
         
 
@@ -841,7 +888,7 @@ class ToolsClass
             $n = 0;
             $plucked = AuthorizationModel::where('user_id', $uid)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')->pluck('document_id');
             if($plucked && ( count($plucked->all()) > 0 ) ) {
-                Log::debug(['YES' => $plucked->all()]);
+                //Log::debug(['YES' => $plucked->all()]);
                 foreach($plucked->all() as $did) {
                     if( !$documents->contains('document_id', $did) ) {
                         if( $params === null ) {
@@ -861,7 +908,7 @@ class ToolsClass
                             }                            
                         }
                         if( $new ) {
-                            Log::debug(['ADDED ID' => $new->document_id, 'CODE' => $new->code, 'STATUS' => $new->status]);
+                            //Log::debug(['ADDED ID' => $new->document_id, 'CODE' => $new->code, 'STATUS' => $new->status]);
                             $documents->push($new);
                             $n++;
                         }                        
@@ -876,10 +923,10 @@ class ToolsClass
             $dids = $plucked->all();
             $total = count($dids);
             if($plucked && ( $total > 0 ) ) {
-                Log::debug(['NO' => $dids]);
+                //Log::debug(['NO' => $dids]);
                 foreach($documents as $key => $document) {
                     if( in_array($document->document_id, $dids) ) {
-                        Log::debug(['DELETED ID' => $document->document_id, 'CODE' => $document->code, 'STATUS' => $document->status]);
+                        //Log::debug(['DELETED ID' => $document->document_id, 'CODE' => $document->code, 'STATUS' => $document->status]);
                         $documents->forget($key);
                         $n++;
                     } // if
@@ -892,10 +939,12 @@ class ToolsClass
         }
 
         Log::debug('== Número de documentos final: '. $documents->count());
-
-
         return $documents;
     } // setPublishedDocumentsCollection
+
+
+    /** END *** ACTUAL DE LISTADO MAESTRO ************************************************* */
+
 
     /**
      * Obtiene el listado de indicadores de usuarios que tienen privilegio de ver el documento dado
@@ -1029,7 +1078,7 @@ class ToolsClass
         $user = Auth::user();
         $uid = $user->user_id;
         $params = ['sid' => '', 'pids' => [''], 'lids' => ['']];
-        $docs = $this->setPublishedDocumentsCollection(true, $uid, $params);
+        $docs = $this->setPublishedDocumentsCollection('user', true, $uid, $params);
         return $docs->count();
     } // getBadgeMasterCount
 

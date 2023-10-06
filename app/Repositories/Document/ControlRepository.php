@@ -573,7 +573,7 @@ class ControlRepository implements ControlRepositoryInterface
         $target = config('settings.document_status.publish');
         //$dids = $this->tool->setPublishedDocuments();
         //$documents = DocumentModel::findMany(array_keys($dids));
-        $documents = $this->tool->setPublishedDocumentsCollection(false);
+        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
          if($documents) {
             $success = true;
             foreach($documents as $document) {

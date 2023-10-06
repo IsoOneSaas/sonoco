@@ -50,7 +50,7 @@ class ValidationRepository implements ValidationRepositoryInterface
     {
         //$dids = $this->tool->setPublishedDocuments();
         //return DocumentModel::whereIn('document_id', array_keys($dids))->orderBy('code', 'asc')->get();
-        return $this->tool->setPublishedDocumentsCollection(false);
+        return $this->tool->setPublishedDocumentsCollection('admin', false);
     }
 
     /**
@@ -144,7 +144,7 @@ class ValidationRepository implements ValidationRepositoryInterface
         //$dids = $this->tool->setPublishedDocuments();
         //Log::debug(['DATA' => $data, 'DIDS' => $dids]);
         //$documents = DocumentModel::findMany(array_keys($dids));
-        $documents = $this->tool->setPublishedDocumentsCollection(false);
+        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
          if( $documents ) {
             $success = true;
             foreach($documents as $document) {

@@ -51,7 +51,7 @@
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>Id</th>
-                                                <th class="whitespace-nowrap">Nombre</th>
+                                                <th>Nombre</th>
                                                 <th>Sistemas</th>
                                                 <th>Localizaciones</th>
                                                 <th>H</th>

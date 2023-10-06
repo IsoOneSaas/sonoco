@@ -39,7 +39,9 @@ class AuthorizationModelController extends Controller
         $input = $request->all();
         //Log::debug(['STORE AUTH ' => $input]);
         // Validar datos
-        if( ( count($input['document_ids']) == 0 ) || ( count($input['user_ids']) == 0 ) ) {
+        if( !key_exists('document_ids', $input) || !key_exists('user_ids', $input) ) {
+            $response = ['status' => 'error', 'message' => trans('document/authorization.update.no-valid')];
+        } elseif( ( count($input['document_ids']) == 0 ) || ( count($input['user_ids']) == 0 ) ) {
             $response = ['status' => 'error', 'message' => trans('document/authorization.update.no-valid')];
         } elseif( ($input['document_ids'][0] === null) || ($input['user_ids'][0] === null) ) {
             $response = ['status' => 'error', 'message' => trans('document/authorization.update.no-valid')];

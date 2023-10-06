@@ -43,7 +43,11 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
        return $user;
     }  // get
 
-
+    /**
+     * Recupera el listado de DOCUMENTOS para el modal de selección
+     * @param  array $data registros seleccionados
+     * @return json    registros para generar el grid
+     */ 
     public function getDocuments(array $data)
     {
         Log::debug(['GET DOCUMENTS DATA' => $data]);
@@ -56,7 +60,7 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
         //$codes = $this->tool->setPublishedCodes(); 
 
 
-        $documents = $this->tool->setPublishedDocumentsCollection(false);
+        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
         foreach($documents as $document) {        
         
 
@@ -110,7 +114,7 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
 
         //$documents = $this->tool->setPublishedDocumentsCollection(true, $id);
         $params = ['sid' => '', 'pids' => [''], 'lids' => ['']];
-        $documents = $this->tool->setPublishedDocumentsCollection(true, $id, $params); 
+        $documents = $this->tool->setPublishedDocumentsCollection('user', true, $id, $params); 
         foreach($documents as $document) {            
 
 
@@ -154,6 +158,7 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
     {
         $success = false;
         $grid = [];
+        $departments_array = [];
         $jids = $this->tool->setJobsFilter(); // cargos de acuerdo a los permisos del administrador/webmaster
 
         $plucked = UserModel::where('set_users.is_active', 1)
