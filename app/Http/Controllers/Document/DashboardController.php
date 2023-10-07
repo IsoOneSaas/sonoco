@@ -35,6 +35,10 @@ class DashboardController extends Controller
         $user = Auth::user();
         // TODO: dasboard to GUEST / SUPER
         if($user) {
+
+            ini_set('max_execution_time', 3600);
+            set_time_limit(3600);
+
             if( $user->hasAnyRole('MASTER','SUPER') ) {
                 $template = 'document.dashboard_master';
                 $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];                
@@ -48,6 +52,7 @@ class DashboardController extends Controller
                 $template = 'document.dashboard_admin';
                 $badge = [
                     'master' => $this->tool->getBadgeMasterCount(),
+                    //'master' => 0,
                     'edit' => $this->setControlBadge('edit'),
                     'review' => $this->setControlBadge('review'),
                     'approve' => $this->setControlBadge('approve'),
@@ -55,7 +60,9 @@ class DashboardController extends Controller
                 $admin = [
                     'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
                     'SPR'   => $this->dashRepo->getSuggestionStatus(),
+                    //'SPR'   => 0,
                     'OPR'   => $this->dashRepo->getSightingsStatus(),
+                    //'OPR'   => 0,
                 ];
                 $docs_object = $this->dashRepo->getFavorityDocuments();
             } else {

@@ -24,7 +24,8 @@ Route::get('/', [\App\Http\Controllers\Auth\AuthenticatedSessionController::clas
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/dashboard', [\App\Http\Controllers\Document\DashboardController::class, 'index'])->name('dashboard');
+//Route::get('/dashboard', [\App\Http\Controllers\Document\DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,4 +1,4 @@
-<?php namespace App\Http\Controllers\Document;
+<?php namespace App\Http\Controllers;
 
 use App\Classes\ToolsClass;
 use App\Interfaces\Document\DashboardRepositoryInterface;
@@ -27,10 +27,15 @@ class DashboardController extends Controller
         $this->tool = $Tools;
     } 
 
+    public function index(): View
+    {
+        return view('dashboard.intro');
+    }    
+
     /**
      * Show the general docboard
      */
-    public function index(): View
+    public function index2(): View
     {
         $user = AUTH::user();
         if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
