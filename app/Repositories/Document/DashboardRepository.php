@@ -146,14 +146,16 @@ class DashboardRepository implements DashboardRepositoryInterface
         
         foreach($jobs as $job) {
             $dpto = $job->department;
-            $department = DepartmentModel::find($dpto[0]->department_id);
-            $locations = $department->locations;
-            foreach($locations as $location) {
-                if( in_array($location->location_id, $adminLids) ) {
-                    $exists = true;
-                    break;
-                } // if                
-            } // foreach
+            if( is_array($dpto) && key_exists(0, $dpto)) {
+                $department = DepartmentModel::find($dpto[0]->department_id);
+                $locations = $department->locations;
+                foreach($locations as $location) {
+                    if( in_array($location->location_id, $adminLids) ) {
+                        $exists = true;
+                        break;
+                    } // if                
+                } // foreach
+            } // if
         } // foreach
 
         //Log::debug(['UID' => $user->user_id, 'EXIST' => $exists]);

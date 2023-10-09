@@ -51,8 +51,8 @@ class DashboardController extends Controller
             } elseif( $user->hasRole('ADMIN') ) {
                 $template = 'document.dashboard_admin';
                 $badge = [
-                    'master' => $this->tool->getBadgeMasterCount(),
-                    //'master' => 0,
+                    //'master' => $this->tool->getBadgeMasterCount(),
+                    'master' => '_',
                     'edit' => $this->setControlBadge('edit'),
                     'review' => $this->setControlBadge('review'),
                     'approve' => $this->setControlBadge('approve'),

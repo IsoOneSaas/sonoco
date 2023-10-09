@@ -818,9 +818,24 @@ class ToolsClass
 
             $dptos = $plucked->all(); 
         }
-        Log::debug(['DEPARTMENTS MASTER' => array_unique($dptos)]);
+        //Log::debug(['DEPARTMENTS MASTER' => array_unique($dptos)]);
         return array_unique($dptos); 
-    } // setDepartmentsToMaster   
+    } // setDepartmentsToMaster  
+    
+    private function setProcessesFromJobs($user)
+    {
+        $ids_array = [];
+        $plucked = $user->jobs->pluck('job_id');
+        if( $plucked ) {
+            //Log::debug(['JOBS ID' => $plucked->all()]);
+            foreach($plucked->all() as $jid) {
+                $plucked = DB::table('document_job_process')->where('job_id', $jid)->where('auth', 1)->pluck('process_id');
+                $ids_array = array_merge($ids_array, $plucked->all());
+            } // foreach
+        } // if
+        return array_unique($ids_array);
+        //$ids = DB::table('document_job_process')->where('job_id', $job->job_id)->where('auth', 1)->pluck('process_id');
+    } // setProcessesFromJobs
 
      /** Obtiene el listado de documentos publicados y autorizados para ser visualizados
      *  @param  string $role tipo de usuario  admin/user
@@ -830,18 +845,17 @@ class ToolsClass
      */ 
     public function setPublishedDocumentsCollection($role, $auth, $uid = null, $params = null)
     {
-        //Log::debug(['AUTH' => $auth, 'UID' => $uid, 'PARAMS' => $params]);
         $target = config('settings.document_status.publish');
-        //$uid = ($uid === null) ? Auth::user()->user_id : $uid;
-        //Log::debug(['UID' => $uid]);
-        if( $role = 'admin' ) {
+        Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
+        
+        if( $role == 'admin' ) {
             $dptos = $this->setDepartmentsFilter($uid);
         } else {
             $dptos = $this->setDepartmentsToMaster($uid);
         }
         
         if( $params === null ) {
-            $documents =  DocumentModel::where('status', $target)->whereIn('department_id', $dptos)->orderBy('created_at', 'desc')->get()->unique('code');
+            $documents =  DocumentModel::where('status', $target)->orderBy('created_at', 'desc')->get()->unique('code');
         } else {
             if( $params['sid'] == '' ) {
                 $plucked = SystemModel::all()->pluck('system_id');
@@ -854,12 +868,21 @@ class ToolsClass
                 $pids = ProcessModel::all()->pluck('process_id');
                 $lids = LocationModel::all()->pluck('location_id');
             } else {
-                // Procesos
-                if( in_array('', $params['pids']) ) {                    
-                    $pids = $this->getOwnProcessesByJob($user);                    
+                // Procesos 
+                if( in_array('', $params['pids']) ) {               
+                    // Procesos conforme su cargo     
+                    $pids1 = $this->getOwnProcessesByJob($user); 
+                    //Log::debug(['PIDS 1' => $pids1]); 
+                    // Procesos de la tabla de relaciones con cargos                  
+                    $pids2 = $this->setProcessesFromJobs($user);
+                    //Log::debug(['PIDS 2' => $pids2]);
+                    // Concatenar
+                    $pids = array_unique(array_merge($pids1, $pids2));
+                    //Log::debug(['PIDS' => $pids]);
                 } else {
                     $pids = $params['pids'];
                 }
+                
                 // Localizaciones
                 if( in_array('', $params['lids']) ) {
                     $lids = $this->getOwnLocationsByUser($user);
@@ -868,9 +891,8 @@ class ToolsClass
                 }
             }
 
-            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);
-            $documents =  DocumentModel::where('status', $target)->whereIn('department_id', $dptos)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');
-            //$documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);            
+            $documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');            
         } // if/else params
         
 
