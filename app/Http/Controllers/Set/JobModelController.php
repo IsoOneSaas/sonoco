@@ -52,7 +52,8 @@ class JobModelController extends Controller
     {
         $prejobs = $this->jobRepo->jobs(null);
         $departments = $this->jobRepo->departments(null);
-        return view('settings.job.create', compact('prejobs','departments'));
+        $processes = $this->jobRepo->processes(null);
+        return view('settings.job.create', compact('prejobs','departments','processes'));
     } // Create Method
 
     /**
@@ -73,7 +74,8 @@ class JobModelController extends Controller
         //Log::debug(['EDIT DEPARTMENT ' => $job->toArray()]);
         $prejobs = $this->jobRepo->jobs($job->pre_id);
         $departments = $this->jobRepo->departments($job->department);
-        return view('settings.job.edit', compact('job','prejobs','departments'));
+        $processes = $this->jobRepo->processes($job->job_id);
+        return view('settings.job.edit', compact('job','prejobs','departments','processes'));
     }
 
     /**

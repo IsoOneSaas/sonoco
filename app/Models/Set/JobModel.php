@@ -32,6 +32,22 @@ class JobModel extends Model
     public function countUsers()
     {
         return $this->belongsToMany(UserModel::class, 'set_job_user', 'job_id', 'user_id')->count();
-    }      
+    } 
+    
+    /**
+    * Obtiene el registro de procesos asociados (permiso de proceso) con el cargo
+    */    
+    public function processes()
+    {
+        return $this->belongsToMany(ProcessModel::class, 'set_job_process', 'job_id', 'process_id');
+    }
+    
+    /**
+    * Obtiene el registro de procesos asociados con el cargo CON autorización (auth = 1)
+    */    
+    public function processesAuth()
+    {
+        return $this->belongsToMany(ProcessModel::class, 'set_job_process', 'job_id', 'process_id')->wherePivot('auth', '=', 1);
+    }     
 
 } // class

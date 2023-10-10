@@ -61,7 +61,17 @@
                                         </optgroup>                                        
                                     </select>                                    
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('job.form.pre_id.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div>                                                                                                                                  
+                                </div>
+                                <div class="input-group mt-3">
+                                    <div id="process-id" class="input-group-text flex"><i data-lucide="{{ trans('job.form.process.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('job.form.process.title') }}</div>
+                                    <select multiple  id="process-id" name="process_id[]" class="form-control tom-select w-full">
+                                        <option value=''>{{ trans('job.form.process.placeholder') }}</option>
+                                        @foreach($processes as $process)   
+                                        <option value={{ $process->process_id }} >{{ $process->name }}</option>
+                                        @endforeach
+                                    </select>                                    
+                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('job.form.process.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                </div>                                                                                                                                                                   
                             </form>
                         </div>
                     </div>

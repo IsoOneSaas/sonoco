@@ -4,8 +4,10 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Set\JobRepositoryInterface;
 use App\Models\Set\JobModel;
 use App\Models\Set\DepartmentModel;
+use App\Models\Set\ProcessModel;
+use Exception;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class JobRepository implements JobRepositoryInterface 
 {
@@ -89,6 +91,33 @@ class JobRepository implements JobRepositoryInterface
     } // departments Method
 
     /**
+     * Recupera el listado de procesos y si estos han sido relacionados con cargo
+     * @param  integer $id Identificador del cargo seleccionado
+     * @return collection    Datos de la consulta
+     */       
+    public function processes($id)
+    {
+        if( $id === null ) {
+            $pids = [];
+        } else {
+            $job = JobModel::find($id);
+            $plucked = $job->processesAuth()->pluck('set_processes.process_id');
+            $pids = $plucked->toArray();
+        }
+        //Log::debug(['JID' => $id , 'PIDS' => $pids->toArray()]);
+        $processes = ProcessModel::orderBy('name')->get(['process_id', 'name']);
+        if( $processes ) {
+            foreach($processes as $process) {
+                $process->selected = ( in_array($process->process_id, $pids) ) ? true : false;
+            }
+            //Log::debug(['PROCESSES' => $processes->toArray()]);   
+            return $processes;
+        } else {
+            return new ProcessModel;
+        }             
+    } // processes Method    
+
+    /**
      * Guarda los datos del formulario en la base de datos como nuevo registro
      * @param  collection $data datos del formulario
      * @return json    Resultado del método
@@ -100,8 +129,17 @@ class JobRepository implements JobRepositoryInterface
             DB::beginTransaction();
              $job = new JobModel($data);
              if( $job->save() ) {
-                // Tabla pivote
+                // Tabla pivote departamento
                 $job->department()->attach($data['department_id']);
+                // tabla pivote procesos
+                $processes = ProcessModel::all();
+                $auth_array = [];
+                foreach($processes as $process) {
+                    $auth = ( key_exists('process_id', $data) && in_array($process->process_id, $data['process_id']) ) ? 1 : 0;
+                    $auth_array[$process->process_id] = ['auth' => $auth];
+                }
+                //Log::debug(['AUTH ARRAY' => $auth_array]);
+                $job->processes()->attach($auth_array);
                 DB::commit();
              } else {
                 DB::rollBack();
@@ -139,7 +177,17 @@ class JobRepository implements JobRepositoryInterface
             DB::beginTransaction();
             $job = JobModel::find($id);
             if( $job->update($data) ) {
+                // Departamento
                 $job->department()->sync($data['department_id']);
+                // Permisos de Proceso
+                $processes = ProcessModel::all();
+                $auth_array = [];
+                foreach($processes as $process) {
+                    $auth = ( key_exists('process_id', $data) && in_array($process->process_id, $data['process_id']) ) ? 1 : 0;
+                    $auth_array[$process->process_id] = ['auth' => $auth];
+                }
+                //Log::debug(['AUTH ARRAY' => $auth_array]);
+                $job->processes()->sync($auth_array);
                 DB::commit();
             } else {                
                 DB::rollBack();

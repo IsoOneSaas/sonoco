@@ -5,6 +5,7 @@ interface JobRepositoryInterface
     public function select();
     public function jobs($data);
     public function departments($data);
+    public function processes($id);
     public function get($hash);
     public function store(array $data);
     public function update($id, array $data);

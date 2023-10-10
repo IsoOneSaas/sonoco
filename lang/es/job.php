@@ -52,7 +52,13 @@ return [
                             'title'         => 'Departamento',
                             'placeholder'   => 'Seleccione un departamento',
                             'tooltip'       => 'Requerido. Seleccione el departamento de la lista',
-            ],                 
+        ],
+        'process'  =>  [
+                            'icon'          => 'lock',
+                            'title'         => 'Permisos',
+                            'placeholder'   => 'Seleccione los procesos con permiso',
+                            'tooltip'       => 'Seleccione los procesos que tengan permiso para este cargo',
+        ],                 
     ],    
 
     'request' => [
