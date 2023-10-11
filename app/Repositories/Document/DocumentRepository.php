@@ -153,7 +153,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-       Log::debug(['STORE DOCUMENT DATA' => $data]);
+       //Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
 
@@ -197,6 +197,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     } // if
 
                     // SAVE FORWARDING
+                    $data['link_edit'] = $this->normalizeLinks($data['link_edit']);
                     $edit_array = $this->saveForwarding(config('settings.document_status.edit'), $data['deadline_edit'], $data['link_edit']);
                     if( $edit_array ) {
                         //Log::debug(['EDIT ARRAY' => $edit_array]);
@@ -209,7 +210,8 @@ class DocumentRepository implements DocumentRepositoryInterface
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'editar'])];
                     }
-                                    
+                        
+                    $data['link_review'] = $this->normalizeLinks($data['link_review']);
                     $review_array = $this->saveForwarding(config('settings.document_status.review'), $data['deadline_review'], $data['link_review']);
                     if( $review_array ) {
                         //Log::debug(['REVIEW ARRAY' => $review_array]);
@@ -222,7 +224,8 @@ class DocumentRepository implements DocumentRepositoryInterface
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'revisar'])];
                     }                
-                                    
+                           
+                    $data['link_approve'] = $this->normalizeLinks($data['link_approve']);
                     $approve_array = $this->saveForwarding(config('settings.document_status.approve'), $data['deadline_approve'], $data['link_approve']);
                     if( $approve_array ) {
                         //Log::debug(['APPROVE ARRAY' => $approve_array]);
@@ -305,7 +308,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */       
     public function delete(array $data)
     {
-        Log::debug(['REQUEST IN DESTROY' => $data]);        
+        //Log::debug(['REQUEST IN DESTROY' => $data]);        
         $id = $this->tool->getIdHash($data['hash']);
         try {
             DB::beginTransaction();
@@ -333,7 +336,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */       
     public function obsolete(array $data)
     {
-        Log::debug(['REQUEST IN OBSOLETE' => $data]);        
+        //Log::debug(['REQUEST IN OBSOLETE' => $data]);        
         $id = $this->tool->getIdHash($data['hash']);
         try {
             DB::beginTransaction();
@@ -362,7 +365,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */       
     public function version($url, array $data)
     {
-        Log::debug(['REQUEST IN VERSION' => $data]); 
+        //Log::debug(['REQUEST IN VERSION' => $data]); 
         $id = $this->tool->getIdHash($data['hash']);
         $hash = $data['hash'];
         try {
@@ -384,7 +387,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                 $join->whereNull('document_status.return_by');
             })->count();
 
-            Log::debug(['DIDS' => $dids, 'count' => $countDocuments]);
+            //Log::debug(['DIDS' => $dids, 'count' => $countDocuments]);
 
             if( $countDocuments == 0 ) { //
                 // VERIFICAR QUE NO EXISTE YA LA VERSION
@@ -597,7 +600,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $jArray = json_decode($data, true);
         if( is_array($jArray)  ) {
             // Formato nuevo con la información en un json 
-            Log::debug('Formato nuevo');           
+            //Log::debug('Formato nuevo');           
             foreach( $jArray[0] as $user => $job ) {
                 $array_result['users'][] = strval($user);
                 $array_result['jobs'][] = strval($job);
@@ -605,7 +608,7 @@ class DocumentRepository implements DocumentRepositoryInterface
             $array_result['link'] = json_encode($jArray);            
         } elseif( is_integer($data) ) {
             // Formato antiguo en donde se guardaba valores enteros
-            Log::debug('Formato antiguo');
+            //Log::debug('Formato antiguo');
             $array_result['jobs'][] = strval($data);
             // Encontrar los usuarios en la tabla <document_forwards>
             $fwds = ForwardModel::where('document_id', $did)->where('action', $action)->get(['user_uid']);
@@ -624,7 +627,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                 $array_result['link'] = $array;
             }            
         } else {
-            Log::debug('No se encuentra dato');
+            Log::info('No se encuentra dato');
         }
         return $array_result;
     } // foundResponsibles
@@ -960,7 +963,7 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
         $forward = [];
         $array = json_decode($links, true);
-       //Log::debug(['LINKS' => $links, 'ARRAY' => $array[0]]);
+        //Log::debug(['LINKS' => $links, 'FIXED' => $normalizedLink,'ARRAY' => $array[0]]);
         if( $array[0] && is_array($array[0]) ) {
             foreach($array[0] as $uid => $jid ) {
                 $dt0 = Carbon::today();
@@ -1002,6 +1005,13 @@ class DocumentRepository implements DocumentRepositoryInterface
             return false;
         }        
     } // aveForwarding
+
+    private function normalizeLinks($str)
+    {
+        $normalized_targets = array('\\','"[', ']"');
+        $normalized_correct = array('','[', ']'); 
+        return str_replace($normalized_targets, $normalized_correct, $str);
+    }
 
     /**
      * Determina si se está repitiendo la creación de un documento

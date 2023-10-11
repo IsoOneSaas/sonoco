@@ -288,7 +288,7 @@ class ControlRepository implements ControlRepositoryInterface
      */    
     public function store($id, array $data) 
     {
-       Log::debug(['STORE DOCUMENT ID' => $id, 'DATA'=> $data]);
+       //Log::debug(['STORE DOCUMENT ID' => $id, 'DATA'=> $data]);
        try {
             DB::beginTransaction();
 

@@ -161,8 +161,9 @@
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.class.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
                                     <div id="tags" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.tags.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.tags.title') }}</div>
-                                    <input type="text" name="tags" value="{{ old('tags', isset($document) ? $document->tags : '') }}" class="form-control col-span-6" placeholder="{{ trans('document/document.form.tags.placeholder') }}" aria-label="Etiquetas">                                                                      
-                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.tags.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    <input type="text" name="tags" value="{{ old('tags', isset($document) ? $document->tags : '') }}" class="form-control col-span-6" placeholder="{{ trans('document/document.form.tags.placeholder') }}" aria-label="Etiquetas">
+                                    <div id="input-group-111" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$('input[name=tags]').val('')"></i></a> </div>
+                                    <div id="input-group-112" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.tags.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>                                
 
                             </form>                                                            
@@ -303,20 +304,7 @@
     <script src="{{ url('assets/js/datatables/Select-1.6.2/js/dataTables.select.min.js') }}"></script>
     <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>    
     <script src="{{ url('assets/js/iso.js') }}"></script>    
-
-
-@if ($errors->any())
-    <script>
-        setSuccessNotification('error', 'Oops!', '{{ $errors->first() }}');
-    </script>
-@endif 
-
-@if ($message = Session::get('error'))
-    <script>
-        setSuccessNotification('error', 'Oops!', '{{ $message }}');
-    </script> 
-@endif
-    
+  
 <script type="text/javascript">
     var $jobTable, $userTable;
     var $isSaved = true;
@@ -432,6 +420,8 @@
             } else {
                 var linkTitle = "{{ trans('document/document.grid.jobs.approve_title') }}";
             }
+            // Limpiar Filtros
+            $("#jobs-table .col-filter").val('');
                         
             if(did > 0) {
                 $("#status").val(tag);
@@ -499,6 +489,9 @@
             } else {
                 var linkTitle = "{{ trans('document/document.grid.users.approve_title') }}";
             }
+            // Limpiar
+            $("#users-table .col-filter").val('');
+
             if(jids.length > 0) {
                 $("#status").val(tag);
                 // Personalización del modal

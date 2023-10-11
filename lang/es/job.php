@@ -55,7 +55,7 @@ return [
         ],
         'process'  =>  [
                             'icon'          => 'lock',
-                            'title'         => 'Permisos',
+                            'title'         => '+ Procesos',
                             'placeholder'   => 'Seleccione los procesos con permiso',
                             'tooltip'       => 'Seleccione los procesos que tengan permiso para este cargo',
         ],                 

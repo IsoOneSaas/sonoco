@@ -692,7 +692,7 @@ class ToolsClass
                 ];  
             }         
         }
-        Log::debug(['FILTERED USER IDS' => $dids]);
+        //Log::debug(['FILTERED USER IDS' => $dids]);
         return $dids;        
     } // setDocumentByStatusForUser
 

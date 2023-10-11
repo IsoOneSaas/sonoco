@@ -68,7 +68,7 @@
                                 </div>
 
                                 <div class="input-group mt-3">
-                                    <div id="process-id" class="input-group-text flex"><i data-lucide="{{ trans('job.form.process.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('job.form.process.title') }}</div>
+                                    <div id="process-id" class="input-group-text flex w-52"><i data-lucide="{{ trans('job.form.process.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('job.form.process.title') }}</div>
                                     <select multiple  id="process-id" name="process_id[]" class="form-control tom-select w-full">
                                         <option value=''>{{ trans('job.form.process.placeholder') }}</option>
                                         @foreach($processes as $process)   
