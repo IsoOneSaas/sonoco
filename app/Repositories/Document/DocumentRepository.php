@@ -153,7 +153,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-       //Log::debug(['STORE DOCUMENT DATA' => $data]);
+       Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
 
@@ -244,6 +244,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                         $document->settings = $this->tool->updateSettings($document->settings, $params);                  
                     } // if
                     $document->flow = $this->set['control_flow'];
+                    Log::debug(['DOCUMENT TO SAVE' => $document->toArray()]);
                     $document->save();
                         
                     if( $idExisting) {
@@ -283,7 +284,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function update($id, array $data) 
     {
-       ////Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
+        Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
         try {
             DB::beginTransaction();
             $document = DocumentModel::find($id);

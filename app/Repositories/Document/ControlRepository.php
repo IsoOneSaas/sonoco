@@ -15,14 +15,15 @@ use App\Models\Document\DisclaimerModel;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\LinkModel;
-use App\Models\Document\SuggestionModel;
+use App\Models\Document\StatusModel;
+//use App\Models\Document\SuggestionModel;
 use App\Models\Document\TagModel;
 use App\Models\Document\TemplateModel;
 use App\Models\Document\TypeModel;
 
-use App\Models\Set\DepartmentModel;
+//use App\Models\Set\DepartmentModel;
 use App\Models\Set\JobModel;
-use App\Models\Set\LocationModel;
+//use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
@@ -104,7 +105,10 @@ class ControlRepository implements ControlRepositoryInterface
                 $document->slug = $slug; // Important!! (requerido en metodo "send")
                 $document->page = 1;
                 $document->pdf = false;
-                $document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
+                //$document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
+				// Obtener fecha de publicación
+				$status = StatusModel::where('document_id', $id)->where('action', $document->status)->orderBy('created_at', 'desc')->first();
+				$document->date = Carbon::createFromTimeStamp(strtotime($status->action_date))->format($this->set['date_format']);                
                 // Obtener el tipo de documento
                 $type = TypeModel::find($document->type_id);
                 $document->type = ($type) ? $type->name : '';

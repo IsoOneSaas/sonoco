@@ -1,17 +1,12 @@
 #iso-head-table td {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding: 0.2em 0.5em;
-    border: 1px ridge #ccc;
+  padding: 0.2em 0.5em;
+  border: 1px ridge #ccc;
 }
-
 
 #iso-head-table td:nth-last-child(2) {
   width: 12%;
   text-align: right;
-  white-space: nowrap;  
-}  
+} 
 
 #iso-head-table td:nth-child(2) {
   width: 60%;
