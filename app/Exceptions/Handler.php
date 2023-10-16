@@ -83,19 +83,21 @@ class Handler extends ExceptionHandler
             $css = $handler->getStylesheet();
             $content = $handler->getBody($e);
             $user = Auth::user();
-            $data = [
-                'uid' => ($user) ? $user->user_id : 'N/A',
-                'name' => ($user) ? $user->name : 'N/A',
-                'role' => ($user) ? $user->role : 'N/A',
-                'date' => Carbon::now()->format('Y-m-d H:i:s'),
-            ];
-            //Mail::queue(new ExceptionMail($html));
-            Mail::send('emails.email_exception', compact('css','content','data'), function ($message) {
-                $message
-                    ->to('sonoco@iso-one.com')
-                    ->subject('Exception: ' . \Request::fullUrl())
-                ;
-            });            
+            if( $user ) {
+                $data = [
+                    'uid' => ($user) ? $user->user_id : 'N/A',
+                    'name' => ($user) ? $user->name : 'N/A',
+                    'role' => ($user) ? $user->role : 'N/A',
+                    'date' => Carbon::now()->format('Y-m-d H:i:s'),
+                ];
+                //Mail::queue(new ExceptionMail($html));
+                Mail::send('emails.email_exception', compact('css','content','data'), function ($message) {
+                    $message
+                        ->to('sonoco@iso-one.com')
+                        ->subject('Exception: ' . \Request::fullUrl())
+                    ;
+                }); 
+            }           
         } catch (Throwable $e) {
             Log::error('Handler::sendExceptionEmail Exception: '. $e);
         }

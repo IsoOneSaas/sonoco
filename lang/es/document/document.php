@@ -300,6 +300,10 @@ return [
                             'text' => 'Salve el documento antes de ',
                             'button' => 'Enterado'
                 ],
+                'file' => [
+                        'text' => 'Carge el documento soporte antes de ',
+                        'button' => 'Enterado'
+                ],                
                 'empty' => [
                             'text' => 'No puede salvar un documento vacío',
                             'button' => 'Enterado'

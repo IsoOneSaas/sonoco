@@ -158,13 +158,13 @@ class ControlController extends Controller
 
 
     /**
-     * Logic to status changing of a document.
+     * Logic to status changing of a document.  /gestion/enviar/{slug}/{hash}
      */
     public function send($slug, $hash)
     {
         $user = auth()->user();
         //if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
-        Log::debug(['USER ' => $user->name, 'ROLE' => $user->role, 'SLUG' => $slug]);
+        Log::debug(['USER ' => $user->name, 'ROLE' => $user->role, 'SLUG' => $slug, 'HASH' => $hash]);
         if( $slug == 'admin' ) {
             // administración del documento
             if( $this->set['control_forced'] ) {

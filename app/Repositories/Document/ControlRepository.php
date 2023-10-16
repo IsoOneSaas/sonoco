@@ -106,7 +106,7 @@ class ControlRepository implements ControlRepositoryInterface
                 $document->page = 1;
                 $document->pdf = false;
                 //$document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
-				// Obtener fecha de publicación
+				// Obtener fecha de publicación // FIXME: validar si está bien
 				$status = StatusModel::where('document_id', $id)->where('action', $document->status)->orderBy('created_at', 'desc')->first();
 				$document->date = Carbon::createFromTimeStamp(strtotime($status->action_date))->format($this->set['date_format']);                
                 // Obtener el tipo de documento
@@ -725,7 +725,7 @@ class ControlRepository implements ControlRepositoryInterface
             ];
         } // foreach
 
-        Log::debug(['DID' => $did, 'FLOW STEPS' => $grid_array, 'USERS' => $list_array]);
+        //Log::debug(['DID' => $did, 'FLOW STEPS' => $grid_array, 'USERS' => $list_array]);
         
         return [
             'steps' => $grid_array,

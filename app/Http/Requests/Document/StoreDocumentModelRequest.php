@@ -55,7 +55,7 @@ class StoreDocumentModelRequest extends FormRequest
             //'code'          => 'required|min:2|unique:documents,code,'.$this->document_id.',document_id',
             'code'          => 'required|min:2',
             'name'          => 'required|min:8|regex:'. config('settings.document_name_pattern'),
-            'version'       => 'required|integer',
+            'version'       => 'required|integer|min:1',
             'system_id'     => 'required|integer|min:1',
             'location_id'     => 'required|integer|min:1',
             'department_id'     => 'required|integer|min:1',

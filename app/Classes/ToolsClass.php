@@ -996,7 +996,7 @@ class ToolsClass
         } // foreach
 
         Log::debug('== Número de usuarios iniciales: '. count($users_array));
-        Log::debug(['USERS 0 ' => $users_array]);
+        //Log::debug(['USERS 0 ' => $users_array]);
 
         if( $did !== null ) {
             // Usuarios que tienen permiso para el documento
@@ -1021,7 +1021,7 @@ class ToolsClass
 
         $users_array = array_unique($users_array);
         Log::debug('== Número de usuarios después de eliminar: '. count($users_array));
-        Log::debug(['USERS 2 ' => $users_array]);
+        //Log::debug(['USERS 2 ' => $users_array]);
 
         return $users_array;
     } // 

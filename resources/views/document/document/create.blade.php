@@ -16,7 +16,7 @@
 
                     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
                         <h2 class="text-lg font-medium mr-auto">
-                            Configurar Documento
+                            <img id="loading-image" alt="Cargando..." class="h-12 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"> Configurar Documento
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <button type="submit" form="document-form" class="btn btn-primary shadow-md mr-2" title="Salvar Formulario"> <i data-lucide="save" class="w-5 h-5"></i> </button>
@@ -27,6 +27,7 @@
                     <!-- BEGIN: Form -->
                     <div class="intro-y box p-5 mt-5">
                         <div>
+                            
                             <form id="document-form" action="{{ route('documents.control.documento.store') }}" method="POST">
                                 @csrf
                                 @if( isset($document) ) 
@@ -115,7 +116,7 @@
                                     </select>
                                     <button id="btn-modal-job" data-id="edit" class="btn btn-primary shadow-md mr-2" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>
                                     <select multiple id="select-user-edit" name="user_edit_id[]" class="form-control w-full ml-2" required>
-                                        <option value=''>{{ trans('document/document.form.user_edit.placeholder') }}</option>
+                                        <option value=''>{{ trans('document/document.form.user_edit.placeholder') }}</option>                                        
                                     </select>
                                     <button id="btn-modal-user" data-id="edit" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="users" class="w-4 h-4"></i></button>
 
@@ -878,8 +879,11 @@
                     $("#select-user-edit").html(editOutput);
                     $("#select-user-review").html(reviewOutput);
                     $("#select-user-approve").html(approveOutput);
+                    $("#loading-image").hide();
                 } // success
             }); // ajax            
+        } else {
+            $("#loading-image").hide();
         } // if
     } // setupOld()    
 

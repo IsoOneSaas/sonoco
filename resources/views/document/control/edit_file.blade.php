@@ -58,7 +58,7 @@
                             @include('document/document/head_default')
                         </div>
                         <div class="bg-success text-white shadow-lg pt-1 pb-1 flex width-full justify-center">
-                        {{ $document->statusTitle ?? '' }}
+                            {{ $document->statusTitle ?? '' }}
                         </div>
                         @if( isset($document->support['file']) )
                         <div id="document-sheet">
@@ -92,17 +92,17 @@
                         </div>
                         @include('document/document/footer_default')
 
-                        <form>
-                            <input type="hidden" id="hash" value="{{ old('hash', $document->hash) }}">
-                            <input type="hidden" name="version" value={{ old('version', $document->version) }} >
-                        </form>
-
                         @else
                         <div class="text-center w-full p-8">
                             <h1 class="text-xl pb-4">Configure el archivo soporte para el documento</h1>
                             <a id="btn-modal-support" href="javascript:;" class="btn btn-success"> <i data-lucide="link" class="w-8 h-8 mr-2"></i> Soporte </a>
                         </div>
                         @endif
+
+                        <form>
+                            <input type="hidden" id="hash" name="hash" value="{{ old('hash', $document->hash) }}">
+                            <input type="hidden" name="version" value={{ old('version', $document->version) }} >
+                        </form>                        
 
                     </div>
                     <!-- END: Editor -->
@@ -243,7 +243,7 @@
                 var hash = $("#hash").val();
                 var exit;
 
-                if( hash == '') {
+                if( (typeof hash === 'undefined') || (hash == '') ) {
                     setSimpleNotification("{{ trans('document/document.get.no-success') }}");
                 } else {
                     exit = checkExit('enviar');                    
@@ -659,12 +659,26 @@
         } // setSupportData
 
         function checkExit(txt) {
+            var role = "{{ $document->status }}";
             var file = "{{ $document->support['file'] ?? '' }}";
-            if( (file == "") || !$isSaved ) {
+            var goal = "{{ config('settings.document_status.create') }}";
+
+            if( !$isSaved ) {
                 swal("{{ trans('document/document.swal.saved.text') }}"+txt, {
                     button: "{{ trans('document/document.swal.saved.button') }}",
                 });
                 return false;
+            } else {
+                if( role == goal ) {
+                    return true;
+                } else {
+                    if( file == "" ) {
+                        swal("{{ trans('document/document.swal.file.text') }}"+txt, {
+                            button: "{{ trans('document/document.swal.file.button') }}",
+                        });
+                        return false;                        
+                    }
+                }
             }
             return true;
         } // checkExit

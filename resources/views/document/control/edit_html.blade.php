@@ -307,7 +307,7 @@
                 var hash = $("#hash").val();
                 var exit;
 
-                if( hash == '') {
+                if( (typeof hash === 'undefined') || (hash == '') ) {
                     setSimpleNotification("{{ trans('document/document.get.no-success') }}");
                 } else {
                     exit = checkExit('enviar');                    

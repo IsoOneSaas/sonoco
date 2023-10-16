@@ -398,7 +398,8 @@
                     // En proceso
                     $('#btn-edit').removeClass('iso-disabled');
                     $('#btn-send').removeClass('iso-disabled'); 
-                    $('#btn-sight').addClass('iso-disabled');                    
+                    $('#btn-sight').addClass('iso-disabled');
+                    $('#btn-sheet').removeClass('iso-disabled');                    
                 } else {
                     // Publicado
                     $('#btn-sight').removeClass('iso-disabled');
@@ -411,6 +412,7 @@
                 if( data.filter == 0 ) {
                     $('#btn-edit').addClass('iso-disabled');    
                     $('#btn-send').addClass('iso-disabled');
+                    $('#btn-sheet').addClass('iso-disabled');
                 } else {
                     $('#btn-sight').addClass('iso-disabled'); 
                     $('#btn-view').addClass('iso-disabled');
