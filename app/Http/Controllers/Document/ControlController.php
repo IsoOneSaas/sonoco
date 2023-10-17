@@ -99,6 +99,7 @@ class ControlController extends Controller
             'templatesLang' => $gridTemplatesLanguage,
             'referencesLang' => $gridReferencesLanguage,
             'disclaimerLang'  => $gridDisclaimersLanguage,
+            'dateFormat'    => 'YYYY-MM-DD',    // FIXME: Debe ser generado a partir de la configuración general
         ];
         //Log::debug(['SET' => $set]);
         return view($blade, compact('document', 'set', 'flow')); // ,'templates'

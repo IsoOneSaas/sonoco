@@ -158,13 +158,14 @@
                                         @foreach($classes as $topic)
                                         <option value="{{ $topic }}">
                                         @endforeach                                       
-                                    </datalist>                                    
-                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.class.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </datalist>
+                                    <div id="input-group-102" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$('#select-classes').val('')"></i></a> </div>                                    
+                                    <div id="input-group-104" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.class.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
                                     <div id="tags" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.tags.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.tags.title') }}</div>
-                                    <input type="text" name="tags" value="{{ old('tags', isset($document) ? $document->tags : '') }}" class="form-control col-span-6" placeholder="{{ trans('document/document.form.tags.placeholder') }}" aria-label="Etiquetas">
-                                    <div id="input-group-111" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$('input[name=tags]').val('')"></i></a> </div>
-                                    <div id="input-group-112" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.tags.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    <select multiple id="select-tags" name="tags[]" class="form-control col-span-6"></select>
+                                    <div id="input-group-114" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$selectize.clear()"></i></a> </div>
+                                    <div id="input-group-116" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.tags.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>                                
 
                             </form>                                                            
@@ -292,6 +293,7 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Select-1.6.2/css/select.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/css/selectize.css') }}" />
     <style>
         #jobs-table td, #jobs-table th, #jobs-table label, #users-table td, #users-table th, #users-table label { font-size: 0.85em; padding: 0.2em }
         #jobs-table td, #users-table td { cursor: pointer }
@@ -304,19 +306,64 @@
     <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ url('assets/js/datatables/Select-1.6.2/js/dataTables.select.min.js') }}"></script>
     <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>    
+    <script src="{{ url('assets/js/selectize.min.js') }}"></script>
     <script src="{{ url('assets/js/iso.js') }}"></script>    
   
 <script type="text/javascript">
     var $jobTable, $userTable;
-    var $isSaved = true;
+    var $isSaved = true;  
+    var $selectize; 
     $(function () {
         var json = {!! $default !!};
-
-        console.dir(json);
+        //console.dir(json);
         if( json != 0 ) {
             $("input[name='name']").val(json.name);
             $("#system-id option[value='"+json.sid+"']").attr('selected', true);
         }
+        
+        var $select = $('#select-tags').selectize({
+            theme: 'contacts',
+            persist: false,
+            maxItems: null,
+            valueField: 'email',
+            labelField: 'name',
+            searchField: ['name', 'email'],
+            // options: [
+            //     {email: 'Clave1'},
+            //     {email: 'Clave2'},
+            //     {email: 'Clave3'}
+            // ],
+            render: {
+                item: function(item) {
+                    return '<div>' +
+                        (item.name ? '<span class="name">' + item.name + '</span>' : '') +
+                        (item.email ? '<span class="email">' + item.email + '</span>' : '') +
+                    '</div>';
+                },
+                option: function(item) {
+                    var label = item.name || item.email;
+                    var caption = item.name ? item.email : null;
+                    return '<div>' +
+                        '<span class="label">' + label + '</span>' +
+                        (caption ? '<span class="caption">' + caption + '</span>' : '') +
+                    '</div>';
+                }
+            },
+            create: function(input) {
+                var words = input.split(' ');
+                if( words.length == 1 ) {
+                    return {
+                        email : input,
+                        name  : ''
+                    };                    
+                }                
+                setSuccessNotification('error', 'Oops!', "La etiqueta debe ser una sólo palabra");                    
+                return false;
+            }
+        });
+
+       $selectize = $select[0].selectize;
+
 
         // BTN SALIR
         $('#btn-exit').on("click", function() {
@@ -386,8 +433,8 @@
         $('body').on('change', '#select-classes', function (e) {
             var val = $(this).val();            
             if( val != '') {
-                setTags(val);
-            }            
+                setTags(val, null);
+            }  // if         
         });        
 
         // Obtiene el código automático del documento
@@ -617,7 +664,7 @@
         }); // ajax  
     } // setCode
 
-    function setTags(className) {
+    function setTags(className, tagsName) {
         //console.log('className: '+className);
         $.ajax({
             url: '/documentos/control/documento/etiquetas/'+className,
@@ -628,7 +675,18 @@
                 //console.dir(json);
                 if(json.success) {
                     //console.log('=== AJAX TAGS');
-                    $("input[name='tags']").val(json.tags);
+                    //$("input[name='tags']").val(json.tags);
+                    console.dir(json.tags);
+                    $selectize.clearOptions();
+                    $selectize.addOption(json.tags);
+
+                    // $.each(json.tags, function(i, tag) {
+                    //     //console.log(tag.email, tag);
+                    //     $selectize.addOption(tag.email, {email: tag.email});
+                    // });
+                    if( tagsName !== null  ) {
+                        $selectize.setValue(tagsName);
+                    }                    
                 }
             } // success
         }); // ajax    
@@ -791,6 +849,9 @@
         var proc = "{{ old('process_id', isset($document) ? $document->process_id : '' ) }}";
         var code = "{{ isset($document) ? $document->code : '' }}";
         var seri = "{{ isset($document) ? $document->serial : '' }}";
+        var className = "{{ old('class', isset($document) ? $document->class : '' ) }}";
+        var str = "{{ old('tags', isset($document) ? $document->tags : '' ) }}";
+        var tags = new Array();
         //console.log('*** SETUP');
 
         if( dpto != '')  {
@@ -804,6 +865,12 @@
                 $("input[name='serial']").val(seri);
             }
 
+            // Etiquetas
+            //console.log('*** TAGS -------');
+            tags = str.split(",");
+            //console.dir(tags);
+            setTags(className, tags);
+            
             // cargos
             $.ajax({
                 url: '/documentos/control/documento/selector/cargos',

@@ -72,7 +72,8 @@ class StoreDocumentModelRequest extends FormRequest
 
             'class'             => 'nullable|single_word', 
            //'tags'              => 'required_if:class,!=,""|key_words',
-           'tags'              => 'required_with:class|min:2|key_words'
+           //'tags'              => 'required_with:class|min:2|key_words'
+           'tags'              => 'required_with:class|array|min:1'
 
         ];
     }
@@ -135,6 +136,7 @@ class StoreDocumentModelRequest extends FormRequest
              'user_approve_id.integer'      => trans('document/document.request.user_approve_id.format'),
 
              'tags.required_with'         => trans('document/document.request.tags.required_with'),
+             'tags.array'                 => trans('document/document.request.tags.required_with'),
              'tags.min'                 => trans('document/document.request.tags.required_with'),
              'tags.key_words'         => trans('document/document.request.tags.key_words'),
 

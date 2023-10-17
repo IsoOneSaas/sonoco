@@ -39,7 +39,7 @@ class DocumentModelController extends Controller
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
-            'gridLanguage' => json_encode(trans('document/document.datatable')),
+            'gridLanguage' => json_encode(trans('document/document.datatable_grid')),
             'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
         ]);    
     } // index Method
@@ -65,8 +65,9 @@ class DocumentModelController extends Controller
      */
     public function store(StoreDocumentModelRequest $request) : RedirectResponse     // 
     {
-        //Log::debug(['STORE DOCUMENT ' => $request->all()]);
+        Log::debug(['STORE DOCUMENT CONFIG ' => $request->all()]);
         $response = $this->documentRepo->store($request->all());
+        //$response = ['status' => 'error', 'message' => 'Testing...'];
         if( $response['status'] == 'error' ) {
             return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']); 
         }

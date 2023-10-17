@@ -195,13 +195,13 @@ return [
                             'icon'          => 'award',
                             'title'         => 'Categoría',
                             'placeholder'   => 'Digite o seleccione una categoría existente',
-                            'tooltip'       => 'Primero escriba una nueva categoría o seleccione una existente de la lista; luego digite tantas etiquetas como desee, estas debe estar separadas por una coma.  Las etiquetas son una sóla palabra.',
+                            'tooltip'       => 'Escriba una nueva categoría o seleccione una existente de la lista que aparece al pulsar sobre el cajón.  La Categoría es una única palabra.',
         ],                         
         'tags'  =>  [
                             'icon'          => 'tag',
                             'title'         => 'Etiquetas',
                             'placeholder'   => 'Digite la etiqueta',
-                            'tooltip'       => 'Primero escriba una nueva categoría o seleccione una existente de la lista; luego digite tantas etiquetas como desee, estas debe estar separadas por una coma.  Las etiquetas son una sóla palabra.',
+                            'tooltip'       => 'Digite una nueva etiqueta y luego pulse sobre la palabra "agregar" que aparece en la parte inferior, o seleccione una o varias etiquetas existentes que aparecen en la lista de selección si ha seleccionado una categoría. Cada etiqueta es una única palabra.',
         ],                
         'deadline'  =>  [
                             'icon'          => 'alarm-check',

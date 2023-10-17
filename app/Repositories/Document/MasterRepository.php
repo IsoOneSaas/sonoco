@@ -209,6 +209,13 @@ class MasterRepository implements MasterRepositoryInterface
         return response()->json($response);         
     }
 
+    /**
+     * Recupera los datos para generar la ficha del documento
+     * @param  string $hash Hash del identificador del documento
+     * @param  string $imageUrl Ruta del los archivos de imagen
+     * @param  string $fileUrl Ruta del los archivos anexos
+     * @return collection    Datos de la consulta
+     */       
     public function getDataSheet($hash, $imageUrl, $fileUrl)
     {
         $id = $this->tool->getIdHash($hash);
@@ -267,7 +274,7 @@ class MasterRepository implements MasterRepositoryInterface
             $name = config('settings.document_status_texts.'.$item->action);
             $status_array[ $name['actual'] ][] = [
                 'avatar' => $this->setAvatar($item->user_uid, $imageUrl),
-                'name' => ($user) ? $user->name : '',
+                'name' => $item->name,
                 'job' => $item->job,
                 'date' => $this->setStatusDate($item),
                 'checked' => ($item->checked == 1) ? 'checked' : '',
@@ -338,7 +345,7 @@ class MasterRepository implements MasterRepositoryInterface
             $change->date = Carbon::createFromTimeStamp(strtotime($change->updated_at))->format($this->set['date_format']);          
         }
         $document->CHANGES = $changes;
-        Log::debug(['CHANGES' => $changes->toArray()]);        
+        //Log::debug(['CHANGES' => $changes->toArray()]);        
 
         // NUEVA VERSION
         $doc = DocumentModel::where('code', $document->code)->orderBy('version', 'desc')->first();
@@ -356,7 +363,7 @@ class MasterRepository implements MasterRepositoryInterface
         } // foreach
         $document->versions = $versions;
 
-        Log::debug(['**DOCUMENT' => $document->toArray()]);
+        //Log::debug(['**DOCUMENT' => $document->toArray()]);
 
         return $document;        
     }

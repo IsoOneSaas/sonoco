@@ -87,6 +87,9 @@
                                     </div>
                                 </div>
                                 <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
+                                    <h2 class="text-lg text-center">{{ $data->code }}</h2>
+                                </div>
+                                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
                                     <div class="flex items-center mt-0" href=""> <i data-lucide="flag" class="w-4 h-4 mr-2"></i> {{ $data->setNameSystem }} </div>
                                     <div class="flex items-center mt-5" href=""> <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> {{ $data->setNameLocation }} </div>                                    
                                     <div class="flex items-center mt-5" href=""> <i data-lucide="compass" class="w-4 h-4 mr-2"></i> {{ $data->setNameProcess }} </div>

@@ -34,6 +34,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
 
     /**
      * Recupera listado de sugerencias
+     * @param  string $scope Identificador de la sugerencia
      * @return json   Json para generar el grid
      */       
     public function getSuggestions($scope)
@@ -57,14 +58,14 @@ class SuggestionRepository implements SuggestionRepositoryInterface
         if( $scope == 'all' ) {
             $hints = SuggestionModel::orderBy('created_at', 'desc')->whereIn('system_id', $adminSids)->get();
         } else {
-            $hints = SuggestionModel::whereIn('system_id', $adminSids)->where('status', $scope)->orderBy('created_at', 'desc')->get();
+            $hints = SuggestionModel::whereIn('system_id', $adminSids)->where('status', intval($scope))->orderBy('created_at', 'desc')->get();
         }
         
         foreach($hints as $hint) {
             $user = UserModel::where('user_uid', $hint->user_uid)->first();
 
             if($user) {
-                //Log::debug(['UID' => $hint->user_uid, 'USER' => $user->name]);             
+                //Log::debug(['SCOPE' => $scope, 'UID' => $hint->user_uid, 'USER' => $user->name]);             
            
                 if( $this->isLocation($user, $adminLids) ) {
                     $system = SystemModel::find($hint->system_id);
@@ -207,17 +208,26 @@ class SuggestionRepository implements SuggestionRepositoryInterface
         $exists = false;
         $jobs = $user->jobs;
         
-        foreach($jobs as $job) {
-            $dpto = $job->department;
-            $department = DepartmentModel::find($dpto[0]->department_id);
-            $locations = $department->locations;
-            foreach($locations as $location) {
-                if( in_array($location->location_id, $adminLids) ) {
-                    $exists = true;
-                    break;
-                } // if                
+        if( $jobs ) {
+            foreach($jobs as $job) {
+                $dpto = $job->department;
+                if( $dpto && is_array($dpto) && key_exists(0, $dpto) ) {
+                    $department = DepartmentModel::find($dpto[0]->department_id);
+                    if($department) {
+                        $locations = $department->locations;
+                        if($locations) {
+                            foreach($locations as $location) {
+                                if( in_array($location->location_id, $adminLids) ) {
+                                    $exists = true;
+                                    break;
+                                } // if                
+                            } // foreach
+                        } // if $locations
+                    } // if $department
+                } // if dpto
             } // foreach
-        } // foreach
+        } // if jobs
+
 
         //Log::debug(['UID' => $user->user_id, 'EXIST' => $exists]);
         return $exists;

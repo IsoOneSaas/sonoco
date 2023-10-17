@@ -193,7 +193,9 @@
         let param = [];
         let filterColumn = 13;
         //let initPage = 1;
-        //let initOrder =  [[ col, 'desc']];  
+        //let initOrder =  [[ col, 'desc']]; 
+        console.dir(lang1);
+        
         // ACONDICIONAMIENTO        
         var sCol = isoGetStorage('control_returnCol');
         var sDir = isoGetStorage('control_returnDir');        

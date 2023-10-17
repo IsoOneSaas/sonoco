@@ -125,7 +125,7 @@
                                         <input type="hidden" name="route" value="support" />
                                         <div class="input-group mt-3">
                                             <div id="date" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/link.form.date.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/link.form.date.title') }}</div>
-                                            <input type="text" name="date" class="datepicker form-control  w-full" aria-describedby="date" placeholder="{{ trans('document/link.form.date.placeholder') }}"  data-single-mode="true" data-date-format="YYYY MM" required>
+                                            <input type="text" name="date" class="datepicker form-control  w-full" aria-describedby="date" placeholder="{{ trans('document/link.form.date.placeholder') }}"  data-single-mode="true" data-date-format="{{ $set['dateFormat'] }}" required>
                                             <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/link.form.date.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                         </div>
                                         <div id="upload-zone" >

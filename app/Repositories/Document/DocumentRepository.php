@@ -180,10 +180,10 @@ class DocumentRepository implements DocumentRepositoryInterface
 
                     // SAVE TAGS
                     if( !empty($data['class']) ) {
-                        $tags_array = explode(',', $data['tags']);
+                        //$tags_array = explode(',', $data['tags']);
                         //Log::debug(['TAGS' => $tags_array]);                 
-                        if( count($tags_array) > 0 ) {
-                            foreach($tags_array as $tag) {                        
+                        if( count($data['tags']) > 0 ) {
+                            foreach($data['tags'] as $tag) {                        
                                 $tags[] = [
                                     'class' => trim($data['class']),
                                     'tag' => trim($tag)
@@ -575,10 +575,12 @@ class DocumentRepository implements DocumentRepositoryInterface
         // OBTENER ETIQUETAS     
         $plucked = $document->tags()->pluck('tag');
         if( $plucked && is_array($plucked->all()) ) {
-            $document->tags = implode(', ', $plucked->all());
+            $document->tags = implode(',', $plucked->all());
+            //$document->tags = $plucked->all();
             if( strlen($document->tags) > 0 ) {
                 //Log::debug(['ID' => $id, 'TAGS' => $document->tags]);
                 $document->class = $document->tags()->first('class')->class;  
+                //$document->tags = json_encode($document->tags);
             } else {
                 $document->tags = '';
                 $document->class = '';                
@@ -954,7 +956,12 @@ class DocumentRepository implements DocumentRepositoryInterface
         $plucked = TagModel::where('class', $str)->pluck('tag');        
         if($plucked) {
            //Log::debug(['TAGAS PLUCKED' => $plucked->all(), 'IMPLODE' => implode(', ', $plucked->all())]);
-            return json_encode(array('success' => true, 'tags' => implode(', ', $plucked->all()) ));
+           $tags_array = [];
+           foreach($plucked->all() as $tag) {
+                $tags_array[] = ['email' => $tag];
+           }
+            //return json_encode(array('success' => true, 'tags' => implode(', ', $plucked->all()) ));
+            return json_encode(array('success' => true, 'tags' => $tags_array) );
         } 
         return json_encode(array('success' => false, 'message' => ''));
     } // tags Method
