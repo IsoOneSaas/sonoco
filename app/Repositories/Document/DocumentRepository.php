@@ -40,7 +40,11 @@ class DocumentRepository implements DocumentRepositoryInterface
     }
 
 
-
+    /**
+     * Obtiene los datos del gri
+     * @param  collection $data datos del formulario
+     * @return json    Resultado del método
+     */   
     public function render($slug)
     {
         $data = [];
@@ -51,91 +55,87 @@ class DocumentRepository implements DocumentRepositoryInterface
         // Parámetros recibidos
         $params = json_decode($slug, true);
 
-        //Log::debug(['RENDER ACTION' => $auto]);
-        //Log::debug(['SLUG ARRAY' => json_decode($slug, true)]);
-        //$codes = $this->tool->setCodesUnderControl();
-        //$documents = DocumentModel::whereIn('code', $codes)->orderBy('version', 'desc')->get();
-        $documents = $this->tool->setDocumentsToControl($params['time'], $params['status']);  //
-        
+        if($params) {
 
-        //Log::debug(['DOCS BEFORE' => $documents->count()]);
+            $documents = $this->tool->setDocumentsToControl($params['time'], $params['status']);  //
+            //Log::debug(['DOCS BEFORE' => $documents->count()]);
 
-        foreach($documents as $document) {
+            foreach($documents as $document) {
+                $status = $document->status()->latest()->first();
+                if( $status ) {
 
-            $status = $document->status()->latest()->first();
+                        $action = ( ($status->action == config('settings.document_status.approve')) && ($status->return_by === null) ) ? 'RELEASING' :  $status->action;
 
-            if( $status ) {
-
-                    $action = ( ($status->action == config('settings.document_status.approve')) && ($status->return_by === null) ) ? 'RELEASING' :  $status->action;
-
-                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date));
-                    $plucked = ForwardModel::where([['document_id', '=', $document->document_id], ['action', '=', $action ]])->pluck('name');
-                    
-                    // status & control
-                    if( ($document->status == config('settings.document_status.publish')) && !is_null($document->filename) ) {
-                        // Estado de publicado
-                        $data[$i]['status'] =  'Publicado';
-                        $data[$i]['control'] = 'show';
-                    } else {
-                        // Cualquier otro estado
-                        $data[$i]['status'] =  config('settings.document_status_grid.'. $action);
-                        $data[$i]['control'] = 'edit';                
-                    } 
-                                
-                    // Color
-                    $data[$i]['color'] = 2;
-                    // Display : color de estado
-                    if( !$auto ) {
-                        // color del estado
-                        $total = ForwardModel::where('document_id', $document->document_id)->where('action', $document->status)->count();
-                        $checked = ForwardModel::where('document_id', $document->document_id)->where('action', $document->status)->where('checked', 1)->count();
-                        //Log::debug(['STATUS' => $status, 'CHECKED' => $checked, 'TOTAL' => $total]);
-                        if( $total == $checked ) {
-                            $data[$i]['color'] = 1;
+                        $dt = Carbon::createFromTimeStamp(strtotime($status->action_date));
+                        $plucked = ForwardModel::where([['document_id', '=', $document->document_id], ['action', '=', $action ]])->pluck('name');
+                        
+                        // status & control
+                        if( ($document->status == config('settings.document_status.publish')) && !is_null($document->filename) ) {
+                            // Estado de publicado
+                            $data[$i]['status'] =  'Publicado';
+                            $data[$i]['control'] = 'show';
                         } else {
-                            $data[$i]['color'] = 0;
+                            // Cualquier otro estado
+                            $data[$i]['status'] =  config('settings.document_status_grid.'. $action);
+                            $data[$i]['control'] = 'edit';                
+                        } 
+                                    
+                        // Color
+                        $data[$i]['color'] = 2;
+                        // Display : color de estado
+                        if( !$auto ) {
+                            // color del estado
+                            $total = ForwardModel::where('document_id', $document->document_id)->where('action', $document->status)->count();
+                            $checked = ForwardModel::where('document_id', $document->document_id)->where('action', $document->status)->where('checked', 1)->count();
+                            //Log::debug(['STATUS' => $status, 'CHECKED' => $checked, 'TOTAL' => $total]);
+                            if( $total == $checked ) {
+                                $data[$i]['color'] = 1;
+                            } else {
+                                $data[$i]['color'] = 0;
+                            }
+                        } // if
+                        
+                        // FILTRO DE ESTADO
+                        if( in_array($document->status, config('settings.document_status_inprocess')) || ( $action == 'RELEASING' ) ) {
+                            $data[$i]['filter'] = 0;
+                        } elseif($document->status == config('settings.document_status.publish')) {
+                            $data[$i]['filter'] = 1;
+                        } elseif($document->status == config('settings.document_status.cancel')) {
+                            $data[$i]['filter'] = 2;
+                        } elseif($document->status == config('settings.document_status.delete')) {
+                            $data[$i]['filter'] = 3;
+                        } elseif($document->status == config('settings.document_status.deny')) {
+                            $data[$i]['filter'] = 4;
+                        } elseif($document->status == config('settings.document_status.obsolete')) {
+                            $data[$i]['filter'] = 9;                                                       
+                        } else {
+                            $data[$i]['filter'] = '';
                         }
-                    } // if
-                    
-                    // FILTRO DE ESTADO
-                    if( in_array($document->status, config('settings.document_status_inprocess')) || ( $action == 'RELEASING' ) ) {
-                        $data[$i]['filter'] = 0;
-                    } elseif($document->status == config('settings.document_status.publish')) {
-                        $data[$i]['filter'] = 1;
-                    } elseif($document->status == config('settings.document_status.cancel')) {
-                        $data[$i]['filter'] = 2;
-                    } elseif($document->status == config('settings.document_status.delete')) {
-                        $data[$i]['filter'] = 3;
-                    } elseif($document->status == config('settings.document_status.deny')) {
-                        $data[$i]['filter'] = 4;
-                    } elseif($document->status == config('settings.document_status.obsolete')) {
-                        $data[$i]['filter'] = 9;                                                       
-                    } else {
-                        $data[$i]['filter'] = '';
-                    }
-                    
-                    //Log::debug(['ID' => $document->document_id, 'DOC STATUS' => $document->status, 'STS STATUS' => $status->action, 'MOD_STATUS' => $action, 'RENDER' => $data[$i]['status'], 'FILTER' => $data[$i]['filter']]); // 
+                        
+                        //Log::debug(['ID' => $document->document_id, 'DOC STATUS' => $document->status, 'STS STATUS' => $status->action, 'MOD_STATUS' => $action, 'RENDER' => $data[$i]['status'], 'FILTER' => $data[$i]['filter']]); // 
 
-                    $data[$i]['document_id'] = $document->document_id;
+                        $data[$i]['document_id'] = $document->document_id;
 
-                    $data[$i]['DT_RowIndex'] = $i+1;
-                    $data[$i]['code'] = $document->code;
-                    $data[$i]['name'] = $document->name;
-                    $data[$i]['version'] = $document->version;
-                    $data[$i]['process'] = ($document->process) ? $document->process->name : 'N/A';
-                    $data[$i]['type']  = ($document->type) ? $document->type->name : 'N/A';
-                    $data[$i]['user']  = ( $plucked && ($plucked->all() > 0) ) ? implode(', ', $plucked->all() ) : '';
-                    $data[$i]['date']  = $dt->diffForHumans();
+                        $data[$i]['DT_RowIndex'] = $i+1;
+                        $data[$i]['code'] = $document->code;
+                        $data[$i]['name'] = $document->name;
+                        $data[$i]['version'] = $document->version;
+                        $data[$i]['process'] = ($document->process) ? $document->process->name : 'N/A';
+                        $data[$i]['type']  = ($document->type) ? $document->type->name : 'N/A';
+                        $data[$i]['user']  = ( $plucked && ($plucked->all() > 0) ) ? implode(', ', $plucked->all() ) : '';
+                        $data[$i]['date']  = $dt->diffForHumans();
 
-                    $data[$i]['hash']  = $this->tool->setIdHash($document->document_id);
-                    $data[$i]['location_id'] = $document->location_id;
-                    $data[$i]['life'] = $dt->timestamp;
+                        $data[$i]['hash']  = $this->tool->setIdHash($document->document_id);
+                        $data[$i]['location_id'] = $document->location_id;
+                        $data[$i]['life'] = $dt->timestamp;
 
-                    $i++;
+                        $i++;
 
-            } // if
+                } // if
 
-        } // foreach
+            } // foreach
+
+        } // if $params
 
         $results = [
             "sEcho" => 1,
@@ -404,13 +404,27 @@ class DocumentRepository implements DocumentRepositoryInterface
                     if( $newDocument->pattern == 'FILE' ) {
                         if( ($settings !== null) && is_array($settings) && key_exists('support_file', $settings) ) {
                             
-                            $oldFileName = $settings['support_file']['file'];
+                            
+                            if( is_array($settings['support_file']) && key_exists('file', $settings['support_file']) ) {
+                                // Nuevo Formato
+                                $oldFileName = $settings['support_file']['file'];
+                            } else {
+                                // Formato antiguo
+                                $oldFileName = $settings['support_file'];                                
+                            }
+
                             if( File::exists( $url . $oldFileName ) ) {
                                 $ext = explode(".", $oldFileName);
                                 $newFileName = uniqid('SPT') .'.'. $ext[1];
                                 // Copiar archivo con el nuevo nombre
                                 if( File::copy($url . $oldFileName, $url . $newFileName) ) {
-                                    $settings['support_file']['file'] = $newFileName;                                
+                                    $path = pathinfo($url . $newFileName);
+                                    unset($settings['support_file']);                                    
+                                    $settings['support_file'] = [
+                                        'file' => $newFileName,
+                                        'mime' => $this->tool->getFileMimeName($path['extension']),
+                                        'size' => round( filesize($url . $newFileName), 0), 
+                                    ];                                    
                                 } else {
                                     DB::rollBack();
                                     return ['status' => 'error', 'hash' =>  $data['hash'],  'message' => trans('document/document.version.no-copy')];
