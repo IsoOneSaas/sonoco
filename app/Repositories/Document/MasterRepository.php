@@ -341,7 +341,7 @@ class MasterRepository implements MasterRepositoryInterface
         $changes = $document->changes()->orderBy('updated_at', 'desc')->get();
         foreach($changes as $change) {
             $user = UserModel::where('user_uid', $change->user_uid)->first();
-            $change->author = $user->name;
+            $change->author = ($user) ? $user->name : '';
             $change->date = Carbon::createFromTimeStamp(strtotime($change->updated_at))->format($this->set['date_format']);          
         }
         $document->CHANGES = $changes;
@@ -522,12 +522,8 @@ class MasterRepository implements MasterRepositoryInterface
         return json_encode(['success' => true]);
     } // closeDocument Method
 
-    /**
-     * Insertar un nuevo observación
-     * @param  array $data Datos del formulario
-     * @return json   Resultado de la consuta
-     */     
-    public function storeSighting(array $data)  // TODO: Enviar mensaje de correo de notificación
+     /*
+    public function storeSighting(array $data)  // OBSOLETE : Se mueve a suggestionRepository
     {
        Log::debug(['STORE SIGHTING DATA' => $data]);
        try {
@@ -554,6 +550,7 @@ class MasterRepository implements MasterRepositoryInterface
         }                
         return json_encode(['status' => 'success', 'message' => trans('document/sighting.create.success')]);        
     } // storeSighting Method
+    */
 
     /**
      * Recupera listado de observaciones para el documento indicado

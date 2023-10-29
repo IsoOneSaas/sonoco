@@ -57,6 +57,7 @@
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Código</th>
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Nombre</th>
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Versión</th>                                              
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Fecha</th>
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Observaciones</th>
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"></th>
                                 </tr>
@@ -131,8 +132,8 @@
         var route = "{{ route('documents.control.observacion.show', ':slug') }}";
 
         $myTable = $('#sightings-table').DataTable({
-            processing: true,
-            serverSide: true,
+            //processing: true,
+            //serverSide: true,
             //retrieve: true,
             ajax: route.replace(':slug', scope),
             columns: [
@@ -145,14 +146,15 @@
                 { data: 'code', class: 'no-wrap' },
                 { data: 'name' },
                 { data: 'version', class: 'dt-center', width: '30px' },
+                { data: 'date', class: 'dt-center'},
                 { data: 'total', class: 'dt-center'  },
-                { data: 'control', class: 'dt-center'  },
+                { data: 'control', class: 'dt-center', orderable: false },
                 //{ data: null, class: 'dt-center', orderable: false, defaultContent: '<button><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>' },
-            ],
-            order: [[4, 'desc']],
-            paging: false,  // FIXME: No está funcionando
-            info: false,    // FIXME: No está funcionando
-            filter: false,  // FIXME: No está funcionando
+            ],           
+            order: [[5, 'desc']],
+            //paging: false,  // FIXME: No está funcionando
+            //info: false,    // FIXME: No está funcionando
+            //filter: false,  // FIXME: No está funcionando
             //scrollY: '400px',
             //scrollCollapse: true,
             language: $lang,

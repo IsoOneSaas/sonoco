@@ -14,7 +14,7 @@
     <div class="container">
         <div class="card p-6 p-lg-10 space-y-4">
             <h1 class="h3 fw-700 pl-4 pr-4 pt-4">Hola {{$userName}}</h1>
-            <p class=" pl-4 pr-4">Se ha generado una sugerencia por un nuevo documento  <em>{{$documentName}}</em>.  Favor diríjase a la aplicación tan pronto le sea posible para gestionar esta sugerencia.</p>
+            <p class=" pl-4 pr-4">Se ha generado un comentario para su documento <em>{{$documentName}}</em> ({{$documentCode}}).  Favor diríjase a la aplicación para gestionar el comentario.</p>
             <div class="row">
                 <div class="col text-center">
                     <a class="btn btn-outline-primary text-dark p-3 fw-700" href="{{$link}}">Ingresar a Iso-One</a>

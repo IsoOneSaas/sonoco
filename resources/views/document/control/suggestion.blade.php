@@ -158,8 +158,8 @@
         var route = "{{ route('documents.control.solicitud.show', ':slug') }}";
 
         $myTable = $('#suggestions-table').DataTable({
-            processing: true,
-            serverSide: true,
+            //processing: true,
+            //serverSide: true,
             //retrieve: true,
             ajax: route.replace(':slug', scope),
             columns: [
@@ -172,13 +172,13 @@
                 { data: 'date' },
                 { data: 'system' },
                 { data: 'user' },
-                { data: 'document' },
-                { data: 'checked', orderable: false },
+                { data: 'document', orderable: false },
+                { data: 'checked', orderable: false, searchable: false },
             ],
             order: [[1, 'desc']],
-            paging: false,  // FIXME: No está funcionando
-            info: false,    // FIXME: No está funcionando
-            filter: false,  // FIXME: No está funcionando
+            //paging: false,  // FIXME: No está funcionando
+            //info: false,    // FIXME: No está funcionando
+            //filter: false,  // FIXME: No está funcionando
             //scrollY: '400px',
             //scrollCollapse: true,
             language: $lang,

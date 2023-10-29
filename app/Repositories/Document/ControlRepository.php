@@ -434,6 +434,7 @@ class ControlRepository implements ControlRepositoryInterface
     {
         $n = 0;
         $id = $this->tool->getIdHash($hash);
+        Log::debug(['PUBLISHING ID=' => $id]);
         try {
             DB::beginTransaction();        
             $document = DocumentModel::find($id);

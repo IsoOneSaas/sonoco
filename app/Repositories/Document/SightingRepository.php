@@ -40,6 +40,7 @@ class SightingRepository implements SightingRepositoryInterface
     {
         $array_output = [];
         $n = 0;
+        
         $admin = Auth::user();
 
         // Documentos permitidos para el administrador
@@ -51,13 +52,17 @@ class SightingRepository implements SightingRepositoryInterface
             $plucked = $documents->pluck('document_id');
             $adminDocs = $plucked->all();
         }
+
+        //$dids = $this->getSigthingDocsIds($admin);
+
                 
         //Log::debug(['SCOPE' => $scope, 'Número de documentos filtrados: ' => count($adminDocs)]);
 
         $hints = DB::table('document_sightings')->select('document_id', DB::raw('count(*) as total'))->whereIn('document_id', $adminDocs)->groupBy('document_id')->orderBy('total','desc')->get();
         
         foreach($hints as $hint) {
-
+            $lastDate = '';
+            $m = 1;
             $document = DocumentModel::find($hint->document_id);
             $sights = SightingModel::where('document_id', $hint->document_id)->orderBy('date', 'desc')->get();
             $output = '';
@@ -68,8 +73,12 @@ class SightingRepository implements SightingRepositoryInterface
                 $userName =  ($user) ? $user->name : '';                
                 $output .= '<tr><td>'. $dateString .'</td><td>'. $userName .'</td><td>'. $sight->type .'</td><td>'. $sight->page .'</td><td>'. $sight->section .'</td><td>'. $sight->content .'</td></tr>';
                 $clicked = ( $sight->status == 1 ) ? true : $clicked;
-            }
-            $checked = ($clicked) ? ' checked' : '';
+                if( $m == 1 ) {
+                    $lastDate = $dateString;
+                }                
+                $m++;
+            } // foreach
+            $checked = ($clicked) ? ' checked' : '';            
 
             if( ( ($scope == 0) && ($clicked == false) ) || ( ($scope == 1) && ($clicked == true) ) || ($scope == 'all') ) {
                 $array_output[] = [
@@ -77,6 +86,7 @@ class SightingRepository implements SightingRepositoryInterface
                     'code' => $document->code,
                     'name' => $document->name,
                     'version' => $document->version,
+                    'date' => $lastDate,
                     'total' => $hint->total,
                     'sights' => $output,
                     'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($hint->document_id) .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>',
@@ -121,12 +131,12 @@ class SightingRepository implements SightingRepositoryInterface
      */     
     public function storeSighting(array $data, $path = null, $name = null)
     {
-       Log::debug(['STORE SUGGESTION DATA' => $data]);
+       Log::debug(['STORE SIGHTING DATA' => $data]);
        $n = 1;
        try {
             DB::beginTransaction();
-            $user = Auth::user();
-            $data['user_uid'] = $user->user_uid;
+            $data['user_uid'] = Auth::user()->user_uid;
+            $data['date'] = Carbon::now();
             $hint = new SightingModel($data);
             if( $hint->save() ) {
                 
@@ -145,26 +155,33 @@ class SightingRepository implements SightingRepositoryInterface
                         return ['status' => 'error', 'message' => trans('document/link.upload.no-exists')];
                     }                     
                 }
-                DB::commit();
+                DB::commit();             
 
                 if( key_exists('notice_new_sighting', $this->set) && $this->set['notice_new_sighting'] ) {
                     // ENVIAR EMAIL A LOS ADMINISTRADORES
+                    $document = DocumentModel::find($data['document_id']);
+
                     // Parámetros del correo
                     $settings = SettingModel::find(1);
                     $settings->source = 'sighting';
-                    $settings->document = $data['document'];
-                    $settings->link = route('documents.control.documento.index');
+                    $settings->document = $document->name;
+                    $settings->code = $document->code;
+                    $settings->link = route('documents.control.observacion.index');
 
-                    // ids de los adminsitradores relacionados con el usuario
-                    $uids = $this->getAdminIds();
+                    // ids de los adminsitradores para recibir mensaje
+                    $uids = $this->getSightingAdminIds($data['document_id']);                    
                     $admins = userModel::findMany($uids);
+
+                    //Log::debug(['AIDS' => $uids, 'SETTINGS' => $settings->toArray()]);
+
+                    // Envío de mensaje
                     foreach( $admins as $admin ) {                
                         Event::dispatch(new EmailDocumentEvent($settings, $admin));
-                        //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                        // if( (env('APP_URL') == 'http://localhost') && ($n == 5) ) {
-                        //     break;
-                        // }
-                        // $n++;
+                        /* temporal para modo desarrollo x limitación de MailTrap */
+                        if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) {
+                            break;
+                        }
+                        $n++;
                     } // foreach  
                 } // if key_exists
             } else {
@@ -173,14 +190,63 @@ class SightingRepository implements SightingRepositoryInterface
             }             
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('MasterRepository::storeSighting Exception: '. $e->getMessage());
+            Log::error('SightingRepository::storeSighting Exception: '. $e->getMessage());
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/sighting.create.no-success')];
         }                
         return ['status' => 'success', 'message' => trans('document/sighting.create.success')];        
     } // storeSighting Method 
+
+	private function getSightingAdminIds($did)
+	{
+		$admin_array = [];		
+		$temp_array = [];
+		$doc = DocumentModel::find($did);
+		//Log::debug(['LID' => $doc->location_id, 'SID' => $doc->system_id]);
+
+		// Localizaciones
+        $lid = $doc->location_id;
+        $plucked = UserModel::where('is_active', 1)->where('role', 'admin')
+            ->join('set_admin_location', function($query) use($lid) {
+                $query->on('set_admin_location.user_id', '=', 'set_users.user_id');
+                $query->where('set_admin_location.location_id', '=', $lid);
+            })
+            ->pluck('set_users.user_id');         
+        $temp_array = $plucked->all();
+		//Log::debug(['LIDS' => $temp_array]);
+
+		// Sistemas
+        $sid = $doc->system_id;
+        $plucked = UserModel::where('is_active', 1)->where('role', 'admin')
+            ->join('set_admin_system', function($query) use($sid) {
+                $query->on('set_admin_system.user_id', '=', 'set_users.user_id');
+                $query->where('set_admin_system.system_id', '=', $sid);
+            })
+            ->pluck('set_users.user_id');         
+		//Log::debug(['SIDS' => $plucked->all()]);        
+
+        // Filtro
+        foreach($plucked->all() as $key => $aid) {
+            if( in_array($aid, $temp_array) ) {
+                $admin_array[] = $aid;
+            } // if			
+        } // foreach
+	
+		return array_unique($admin_array);
+	} //getSightingAdminIds 
+    
+    private function getSigthingDocsIds($user)
+    {
+        $doc_array = [];
+        // Determinar localizaciones con permiso
+        $lids = $user->locationAdmins;
+        // Determinar sistemas con permisto
+        $sids = $user->systemAdmins;
+
+        return $doc_array;
+    } //getSigthingDocsIds
     
     
-    private function getAdminIds()
+    private function getAdminIds()  // FIXME: To Obsolete
     {
         $user = Auth::user();
         $jobs = $user->jobs;

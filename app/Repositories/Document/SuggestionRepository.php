@@ -44,21 +44,34 @@ class SuggestionRepository implements SuggestionRepositoryInterface
         $admin = Auth::user();
 
         if( $admin->can('setup_admins') ) {
-            $plucked = LocationModel::all()->pluck('location_id');
-            $adminLids = $plucked->all();
-            $plucked = SystemModel::all()->pluck('system_id');
-            $adminSids = $plucked->all();            
+            // $plucked = LocationModel::all()->pluck('location_id');
+            // $adminLids = $plucked->all();
+            // $plucked = SystemModel::all()->pluck('system_id');
+            // $adminSids = $plucked->all();
+            $plucked = UserModel::pluck('user_uid');      //FIXME: Qué pasa con los deleted      
         } else {
-            $adminLids = $this->tool->getAdminAuthorizedLocations($admin);
-            $adminSids = $this->tool->getAdminAuthorizedSystems($admin);
+            //$adminLids = $this->tool->getAdminAuthorizedLocations($admin);
+            //$adminSids = $this->tool->getAdminAuthorizedSystems($admin);            
+            // Obtiene las localizaciones del administrador
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            // Obteine el usuarios que pertenecen a las localizaciones
+            $plucked = UserModel::join('set_admin_location', function($query) use($lids) {
+                    $query->on('set_admin_location.user_id', '=', 'set_users.user_id');
+                    $query->whereIn('set_admin_location.location_id', $lids);
+                })
+                ->pluck('set_users.user_uid');  
         }
+
+        $uids = array_unique($plucked->all());
         
-        //Log::debug(['SCOPE' => $scope, 'adminLIDS' => $adminLids]);
+        Log::debug(['SCOPE' => $scope, 'UIDS' => $uids]);
 
         if( $scope == 'all' ) {
-            $hints = SuggestionModel::orderBy('created_at', 'desc')->whereIn('system_id', $adminSids)->get();
+            //$hints = SuggestionModel::orderBy('created_at', 'desc')->whereIn('system_id', $adminSids)->get();
+            $hints = SuggestionModel::orderBy('created_at', 'desc')->whereIn('user_uid', $uids)->get();
         } else {
-            $hints = SuggestionModel::whereIn('system_id', $adminSids)->where('status', intval($scope))->orderBy('created_at', 'desc')->get();
+            //$hints = SuggestionModel::whereIn('system_id', $adminSids)->where('status', intval($scope))->orderBy('created_at', 'desc')->get();
+            $hints = SuggestionModel::whereIn('user_uid', $uids)->where('status', intval($scope))->orderBy('created_at', 'desc')->get();
         }
         
         foreach($hints as $hint) {
@@ -67,7 +80,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
             if($user) {
                 //Log::debug(['SCOPE' => $scope, 'UID' => $hint->user_uid, 'USER' => $user->name]);             
            
-                if( $this->isLocation($user, $adminLids) ) {
+                //if( $this->isLocation($user, $adminLids) ) {
                     $system = SystemModel::find($hint->system_id);
                     $checked = ($hint->status == 1 ) ? ' checked' : '';
                     if( $hint->filename === null ) {
@@ -91,7 +104,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
                         'link' => $link,
                     ];
                     $n++;
-                } // if
+               //} // if
             } // if
         } // foreach;
 
@@ -145,7 +158,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
      */     
     public function storeSuggestion(array $data, $path = null, $name = null)
     {
-       Log::debug(['STORE SUGGESTION DATA' => $data]);
+       //Log::debug(['STORE SUGGESTION DATA' => $data, 'PATH' => $path, 'NAME' => $name]);
        $n = 1;
        try {
             DB::beginTransaction();
@@ -170,38 +183,66 @@ class SuggestionRepository implements SuggestionRepositoryInterface
                     }                     
                 }
                 DB::commit();
-
+                            
                 if( key_exists('notice_new_suggestion', $this->set) && $this->set['notice_new_suggestion'] ) {
                     // ENVIAR EMAIL A LOS ADMINISTRADORES
+
                     // Parámetros del correo
                     $settings = SettingModel::find(1);
                     $settings->source = 'suggestion';
-                    $settings->document = $data['document'];
-                    $settings->link = route('documents.control.documento.index');
+                    $settings->documentName = $data['document'];
+                    $settings->link = route('documents.control.solicitud.index');
 
-                    // ids de los adminsitradores relacionados con el usuario
-                    $uids = $this->getAdminIds();
+                    // ids de los adminsitradores para recibir mensaje
+                    $uids = $this->getSightingAdminIds($user);
                     $admins = userModel::findMany($uids);
+
+                    //Log::debug(['AIDS' => $uids, 'SETTINGS' => $settings->toArray()]);
+
+                    // enviar el mensaje
                     foreach( $admins as $admin ) {                
                         Event::dispatch(new EmailDocumentEvent($settings, $admin));
-                        //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                        // if( (env('APP_URL') == 'http://localhost') && ($n == 5) ) {
-                        //     break;
-                        // }
-                        // $n++;
+                        // temporal para modo desarrollo x limitación de MailTrap
+                        if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) {
+                            break;
+                        }
+                        $n++;
                     } // foreach  
-                } // if key_exists
+                } // if key_exists 
+                
             } else {
                 DB::rollBack();
                 return ['status' => 'error', 'message' => trans('document/suggestion.create.no-success')];
             }             
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('MasterRepository::storeSuggestion Exception: '. $e->getMessage());
+            Log::error('SuggestionRepository::storeSuggestion Exception: '. $e->getMessage());
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/sighting.create.no-success')];
         }                
         return ['status' => 'success', 'message' => trans('document/suggestion.create.success')];        
-    } // storeSuggestion Method 
+    } // storeSuggestion Method
+    
+	private function getSightingAdminIds($user)
+	{
+		$admin_array = [];		
+
+        // Determinar las localizaciones del usuario
+        $plucked = $user->locations->pluck('location_id');
+        $lids = $plucked->all();
+        //Log::debug(['LIDS' => $lids]);
+
+        // Determinar los administradores para la localizaciones
+        $plucked = UserModel::where('is_active', 1)->where('role', 'admin')
+            ->join('set_admin_location', function($query) use($lids) {
+                $query->on('set_admin_location.user_id', '=', 'set_users.user_id');
+                $query->whereIn('set_admin_location.location_id', $lids);
+            })
+            ->pluck('set_users.user_id');
+
+        $admin_array = $plucked->all();
+	
+		return array_unique($admin_array);
+	} //getSightingAdminIds     
     
     private function isLocation($user, $adminLids)
     {
@@ -232,8 +273,9 @@ class SuggestionRepository implements SuggestionRepositoryInterface
         //Log::debug(['UID' => $user->user_id, 'EXIST' => $exists]);
         return $exists;
     } // getAdminIds 
+
     
-    private function getAdminIds()
+    private function getAdminIds()  // OBSOLETE
     {
         $user = Auth::user();
         $jobs = $user->jobs;

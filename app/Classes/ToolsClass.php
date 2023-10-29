@@ -277,7 +277,7 @@ class ToolsClass
             // Administradores    
             $locations = $this->getAdminAuthorizedLocations($user);
             if( count($locations) > 0 ) {
-                Log::debug(['LOCATIONS ADMIN' => $locations]);
+                //Log::debug(['LOCATIONS ADMIN' => $locations]);
 
                 $plucked = DepartmentModel::
                     join('set_location_department', function($query) use($locations) {
@@ -389,7 +389,7 @@ class ToolsClass
         } elseif( $user->hasRole('ADMIN') )  {
             //Log::debug('2nd Level...');      
             $authorized = $this->getAdminAuthorizedSystems($user);
-            Log::debug(['REQUISITOS AUTORIZADOS' => $authorized]);
+            //Log::debug(['REQUISITOS AUTORIZADOS' => $authorized]);
             if( count($authorized) > 0 ) {                
                 $systems = $authorized; 
             } // if                     

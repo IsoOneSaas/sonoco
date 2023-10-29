@@ -15,7 +15,7 @@ interface MasterRepositoryInterface
 
     public function closeDocument($id, $session);
 
-    public function storeSighting(array $data);
+    //public function storeSighting(array $data);
 
     public function getSightings($id);
 

@@ -12,9 +12,10 @@ class NewDocumentAlert extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $name;
+    public $userName;
     public $set;
-    public $document;
+    public $documentName;
+    public $documentCode;
     public $link;
     public $tmp;
     public $templates;
@@ -27,11 +28,13 @@ class NewDocumentAlert extends Mailable
     {
         $this->templates = [
             'suggestion'  => 'alert_suggestion',
+            'sighting'  => 'alert_sighting',
         ];        
         
         $this->tmp = $this->templates[$model->source];
-        $this->name = $name;
-        $this->document = $model->document;
+        $this->userName = $name;
+        $this->documentName = $model->document;
+        $this->documentCode = $model->code;
         $this->link = $model->link;
         $this->set = $model->settings;
         $this->sign = $this->set['signature_edit'];

@@ -79,6 +79,20 @@ return [
                 ],                                
     ],
    
-
+    'datatable' => [
+        'lengthMenu' => 'Mostrar _MENU_ observaciones por página',
+        'zeroRecords' => '<h4>No hay observaciones encontrados para la selección actual</h4>',
+        'info' => 'Mostrando página _PAGE_ de _PAGES_',
+        'infoEmpty' => '*',
+        'infoFiltered' => '(_TOTAL_ filtrados de _MAX_ observaciones totales)',
+        'loadingRecords' => 'Cargando...',
+        'search' => 'Buscar: ',
+        'paginate' => [
+            'next' => '>>',
+            'previous' => '<<'
+        ],
+        'decimal' => '.',
+        'thousands' => "'"
+    ], 
 
 ];

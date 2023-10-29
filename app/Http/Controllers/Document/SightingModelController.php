@@ -63,7 +63,7 @@ class SightingModelController extends Controller
      */    
     public function store(Request $request)
     {
-        Log::debug(['SET SUGGESTION REQUEST: ' => $request->all()]);
+        //Log::debug(['SET SIGHTING REQUEST: ' => $request->all()]);
         $response = ['status' => 'error', 'message' => 'Testing...'];
         $msgs = '';
 

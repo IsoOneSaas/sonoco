@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 //use App\Http\Requests\Document\StoreSuggestionRequest;
 use App\Interfaces\Document\ControlRepositoryInterface;
 use App\Interfaces\Document\MasterRepositoryInterface;
-
+use App\Interfaces\Document\SightingRepositoryInterface;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,15 +19,17 @@ class MasterController extends Controller
 {
     protected $controlRepo;
     protected $documentRepo;
+    protected $sightRepo;
     private $tool;
     protected $contentUrl;    
     protected $tenantUrl;
     protected $masterUrl;  
 
-    public function __construct(MasterRepositoryInterface $documentRepository, ControlRepositoryInterface $controlRepository, ToolsClass $Tools) 
+    public function __construct(MasterRepositoryInterface $documentRepository, ControlRepositoryInterface $controlRepository, SightingRepositoryInterface $sightRepository, ToolsClass $Tools) 
     {
         $this->controlRepo = $controlRepository;
         $this->documentRepo = $documentRepository;
+        $this->sightRepo = $sightRepository;        
         $this->tool = $Tools;
         $this->contentUrl = public_path() .'/tenants/sonoco/'.  config('settings.PATH_DOC_CONTENT');
         $this->tenantUrl = 'tenants/sonoco/images';
@@ -137,9 +139,9 @@ class MasterController extends Controller
      */
     public function setSighting(Request $request)   // TODO: activa Request
     {
-        Log::debug(['SETSIGHTING REQUEST: ' => $request->all()]);
-        return $this->documentRepo->storeSighting($request->all());
-        //return json_encode(['success' => false, 'message' => 'MasterController::setSighting @ testing']);
+        //Log::debug(['SETSIGHTING REQUEST: ' => $request->all()]);
+        //return $this->documentRepo->storeSighting($request->all());
+        return $this->sightRepo->storeSighting($request->all());
     }
    
     /**
