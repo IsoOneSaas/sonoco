@@ -560,7 +560,7 @@ class ToolsClass
             $status = $document->status()->latest()->first();  // TODO: Validar si ordenar por fecha created_at es efectivo en vez de status_id            
             if( $status && in_array($status->action, $target) ) {
                 $dids[$document->document_id] = [
-                    'action' => ( ($status->action == config('settings.document_status.publish')) && ($document->filename === null) ) ? 'RELEASING' :  $status->action,
+                    'action' => ( ($status->action == config('settings.document_status.publish')) && ($document->filename !== null) ) ? 'RELEASING' :  $status->action,
                     'date' => $status->action_date,
                 ];
             }

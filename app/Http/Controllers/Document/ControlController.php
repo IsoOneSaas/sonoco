@@ -165,7 +165,7 @@ class ControlController extends Controller
     {
         $user = auth()->user();
         //if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
-        Log::debug(['USER ' => $user->name, 'ROLE' => $user->role, 'SLUG' => $slug, 'HASH' => $hash]);
+        //Log::debug(['USER ' => $user->name, 'ROLE' => $user->role, 'SLUG' => $slug, 'HASH' => $hash]);
         if( $slug == 'admin' ) {
             // administración del documento
             if( $this->set['control_forced'] ) {
@@ -176,8 +176,8 @@ class ControlController extends Controller
                 $ok = $this->confirmCheckIn($hash);
                 if($ok) {
                     // Confirmado
-                    Log::debug('--> Documento confirmado por el administrador');
-                    $response = $this->documentRepo->status($hash);
+                    Log::debug('--> Documento confirmado por el administrador'); // aquí envió a editar
+                    $response = $this->documentRepo->status($hash);             
                 } else {
                     Log::debug('--> Documento no está confirmado');
                     $response =  json_encode(['success' => false, 'message' => trans('document/document.confirm.no-success')]);
@@ -191,7 +191,7 @@ class ControlController extends Controller
                 if( $this->set['control_flow'] ) {
                     $ok = $this->confirmCheckIn($hash);
                     if($ok) { 
-                        Log::debug('--> Documento confirmado por el usuario');
+                        Log::debug('--> Documento confirmado por el usuario');  // aquí envió a revisar/aprobar
                         $response = $this->documentRepo->status($hash);                       
                     } // if confirm             
                 } // if auto
@@ -221,10 +221,11 @@ class ControlController extends Controller
             $settings = $data->settings;
             if( $data->pattern == 'FILE' ) {           
                 if( is_array($settings) && key_exists('support_file', $settings) ) {                
-                    $fileName = $settings['support_file']['file'];
+                    $fileName = ( is_array($settings['support_file']) && key_exists('file', $settings['support_file']) ) ? $settings['support_file']['file'] : $settings['support_file'];
                     // Verificar existencia de archivo
                     if( file_exists($this->contentUrl . $fileName) ) {
                         // Actualizar la base de datos
+                        //Log::debug('==> DOCUMENTO FILE PUBLICADO');
                         $response = $this->documentRepo->post($hash, $fileName);
                     } else {
                         Log::error('ControlController::publish @ (2) File not found: '. $this->contentUrl . $fileName);
@@ -248,7 +249,8 @@ class ControlController extends Controller
 
                 // Verificar existencia de archivo
                 if( file_exists($this->masterUrl . $fileName) ) {
-                    // Actualizar la base de datos                
+                    // Actualizar la base de datos
+                    //Log::debug('==> DOCUMENTO HTML PUBLICADO');                
                     $response = $this->documentRepo->post($hash, $fileName);
                 } else {
                     Log::error('ControlController::publish @ (1) File not found: '. $this->masterUrl . $fileName);

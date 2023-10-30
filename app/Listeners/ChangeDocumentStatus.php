@@ -28,7 +28,7 @@ class ChangeDocumentStatus
         $ok = false;
         $array = config('settings.document_status');
         $date = null;
-        $limited = false;
+        $limited = true;
         $roled = false;
         $current = $event->document->status()->latest()->first();
         if ($current) {
@@ -52,24 +52,28 @@ class ChangeDocumentStatus
                 $status->action_date = Carbon::now()->toDateTimeString();
             }            
             $status->save();
+            //Log::debug(['ACTUALIZACION DEL ESTADO' => $previous]);
+
 
             // Obtiene fecha de delivery
             $forward = ForwardModel::where('document_id', $event->document->document_id)->where('action', $array[$key])->first();
             $date = ($forward) ? $forward->deadline : null;
             // si se trata de un usuario y está en aprobación
-            $limited = ( $current->action == config('settings.document_status.approve') ) ? true : false;
-            $roled = ( Auth::user()->role == 'USER') ? true : false;
-
-            
+            //$limited = ( $current->action == config('settings.document_status.approve') ) ? true : false;
+            //$roled = ( Auth::user()->role == 'USER') ? true : false;
+            $limited = ( $array[$key] == config('settings.document_status.publish') ) ? true : false;            
         } // if $current
 
-
-        if( $limited && $roled ) {
-            // La publicación debe hacerla el administrador
-            Log::debug(' La publicación debe hacerla el administrador');
-        } else {
+        //Log::debug(['LIMITED' => $limited, 'ROLED' => $roled]);
+        //if( $limited && $roled ) {
+        // if( $limited ) {
+        //     // La publicación debe hacerla el administrador
+        //     Log::info(' La publicación debe hacerla el administrador');
+        // } else {
+        if( !$limited ) {            
             // Crea nuevo status
             $status = new StatusModel();
+            //Log::debug(['CREACION DEL ESTADO' => $array[$key]]);
             $status->fill([
                 'document_id'   => $event->document->document_id,
                 'action'        => $array[$key],

@@ -65,7 +65,7 @@ class DocumentModelController extends Controller
      */
     public function store(StoreDocumentModelRequest $request) : RedirectResponse     // 
     {
-        Log::debug(['STORE DOCUMENT CONFIG ' => $request->all()]);
+        //Log::debug(['STORE DOCUMENT CONFIG ' => $request->all()]);
         $response = $this->documentRepo->store($request->all());
         //$response = ['status' => 'error', 'message' => 'Testing...'];
         if( $response['status'] == 'error' ) {

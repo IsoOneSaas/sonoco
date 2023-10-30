@@ -64,7 +64,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                 $status = $document->status()->latest()->first();
                 if( $status ) {
 
-                        $action = ( ($status->action == config('settings.document_status.approve')) && ($status->return_by === null) ) ? 'RELEASING' :  $status->action;
+                        $action = ( ($status->action == config('settings.document_status.approve')) && ($status->return_by !== null) ) ? 'RELEASING' :  $status->action;
 
                         $dt = Carbon::createFromTimeStamp(strtotime($status->action_date));
                         $plucked = ForwardModel::where([['document_id', '=', $document->document_id], ['action', '=', $action ]])->pluck('name');

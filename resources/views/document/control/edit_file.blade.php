@@ -17,13 +17,13 @@
                             Gestionar Documento
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            @if( $document->status == config('settings.document_status.publish') )
+                            @if( $document->publish )
                             <a class="btn btn-success shadow-md mr-2" href="javascript:;" id="btn-publish" data-count="{{ $document->history ?? '0' }}" title="Publicar documento"><i data-lucide="book-open" class="w-5 h-5"></i></a>
                             @else
                             <a class="btn btn-secondary shadow-md mr-2" href="javascript:;" id="btn-send" title="Confirmar documento"><i data-lucide="play" class="w-5 h-5"></i></a>
+                            @endif 
                             @if( $document->backUrl )
-                            <a class="btn btn-secondary shadow-md mr-3" href="javascript:;" id="btn-back" title="Regresar documento"><i data-lucide="rewind" class="w-5 h-5"></i></a>
-                            @endif                              
+                            <a class="btn btn-secondary shadow-md mr-3" href="javascript:;" id="btn-back" title="Regresar documento"><i data-lucide="rewind" class="w-5 h-5"></i></a>                                                         
                             @endif                          
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" data-href="{{ $document->indexUrl }}" title="Regresar a la tabla" id="btn-exit"><i data-lucide="menu" class="w-5 h-5"></i></a>                               
                             <div class="dropdown ml-auto sm:ml-0">

@@ -255,8 +255,8 @@ class ControlRepository implements ControlRepositoryInterface
                 $change = $document->changes()->where('user_uid', $uid)->first();
                 $document->change = ($change) ? $change->text : '';
 
-                // Validar si tiene historia
-                $document->history = $document->changes()->count();
+                // Validar si tiene historia si versión es mayor a 1
+                $document->history = ( $document->version == 1 ) ? 1 : $document->changes()->count();
 
                 // Return to the index
                 if( $slug == 'admin') {
@@ -265,6 +265,12 @@ class ControlRepository implements ControlRepositoryInterface
                     $document->indexUrl = route('documents.control.manage.index', $action);
                 }
                 $document->action = $action;
+
+                // Forward Button (forward/publish)
+                $status = $document->status()->latest()->first();
+                $document->publish = ( ($status->action == config('settings.document_status.approve')) && ($status->return_by !== null) ) ? true :  false;                
+
+
             } else {
                 $document =  new DocumentModel;
                 $document->version = 0;
@@ -376,10 +382,10 @@ class ControlRepository implements ControlRepositoryInterface
                     Event::dispatch(new EmailSent($document, $user));
 
                     //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                    if( (env('APP_URL') == 'http://localhost') && ($n == 5) ) { // FIXME:
+                    if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
                         break;
                     }
-
+                    $n++;
                 } // foreach                
 
             } else {
@@ -458,7 +464,7 @@ class ControlRepository implements ControlRepositoryInterface
                     $uids = $this->tool->setPublishedUsers($document->department_id, $id);
 
                     //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                    $total = (  env('APP_URL') == 'http://localhost' ) ? 5 : count($uids);
+                    $total = (  env('APP_URL') == 'http://127.0.0.1:8000' ) ? 5 : count($uids);
 
                     for($i=0; $i<$total; $i++) {                
                         $user = UserModel::find($uids[$i]);
