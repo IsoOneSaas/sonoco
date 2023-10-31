@@ -29,7 +29,7 @@
                                 </div>                                
                                 <div class="input-group mt-3">
                                     <div id="name" class="input-group-text flex"><i data-lucide="{{ trans('user.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('user.form.name.title') }}</div>
-                                    <input type="text"  name="name" value="{{ old('name') }}" class="form-control  w-full" aria-describedby="name" placeholder="{{ trans('user.form.name.placeholder') }}" minlength="2" maxlength="64" required>
+                                    <input type="text"  name="name" value="{{ old('name') }}" class="form-control w-full" aria-describedby="name" placeholder="{{ trans('user.form.name.placeholder') }}" autocomplete="nope" minlength="2" maxlength="64" required>
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('user.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>
                                 <div class="input-group mt-3">
@@ -39,7 +39,7 @@
                                 </div>                                
                                 <div class="input-group mt-3">
                                     <div id="password" class="input-group-text flex"><i data-lucide="{{ trans('user.form.password.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('user.form.password.title') }}</div>
-                                    <input type="password"  name="password" value="" class="form-control  w-full" aria-describedby="password" placeholder="{{ trans('user.form.password.placeholder') }}" minlength="2" maxlength="64" required>
+                                    <input type="password"  name="password"  value="" class="form-control  w-full" aria-describedby="password" placeholder="{{ trans('user.form.password.placeholder') }}" autocomplete="new-password" minlength="2" maxlength="64" required>
                                     <div id="input-group-4" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('user.form.password.tooltip_new') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>
                                 <div class="input-group mt-3">

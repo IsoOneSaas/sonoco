@@ -177,8 +177,8 @@ class MasterRepository implements MasterRepositoryInterface
         $action = config('settings.document_status.publish');
         $n = 0;
         foreach($documents as $document) {                       
-            $status = $document->status()->where('action', $action)->first(['return_date']);
-            $dt = Carbon::createFromTimeStamp(strtotime($status->return_date));
+            $status = $document->status()->where('action', $action)->first(['action_date']);
+            $dt = Carbon::createFromTimeStamp(strtotime($status->action_date));
             $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
 
             // Arreglo a renderizar
@@ -697,8 +697,8 @@ class MasterRepository implements MasterRepositoryInterface
                 $date = '';
             } else {
                 // Publicación
-                $status = $document->status()->where('action', $target)->first(['return_date']);
-                $dt = Carbon::createFromTimeStamp(strtotime($status->return_date)); 
+                $status = $document->status()->where('action', $target)->first(['action_date']);
+                $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
                 $date = $dt->diffForHumans();
                 // Validacion
                 $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                               
@@ -771,42 +771,51 @@ class MasterRepository implements MasterRepositoryInterface
                 $date = '';
             } else {
                 // Publicación
-                $status = $document->status()->where('action', $target)->first(['return_date']);
-                $dt = Carbon::createFromTimeStamp(strtotime($status->return_date)); 
-                $date = $dt->diffForHumans();
-                // Validacion
-                $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                               
-            }
+                $status = $document->status()->where('action', $target)->first(['action_date']);
+                if($status) {
+                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
+                    $date = $dt->diffForHumans();
+                    // Validacion
+                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                     
+                } else {
+                    $val = ['date' => '', 'status' => ''];
+                    $date = false;
+                }                              
+            } // if
             
-            // Keywords
-            $output = '';
-            $tags = $document->tags;
-            if($tags) {
-                foreach($tags as $tag) {
-                    $output .= $tag->tag .' ';
+
+            if($date) {
+
+                // Keywords
+                $output = '';
+                $tags = $document->tags;
+                if($tags) {
+                    foreach($tags as $tag) {
+                        $output .= $tag->tag .' ';
+                    }
                 }
-            }
-            
-            $data[$i]['document_id'] = $document->document_id;
+                
+                $data[$i]['document_id'] = $document->document_id;
 
-            $data[$i]['DT_RowIndex'] = $i+1;
-            $data[$i]['code'] = $document->code;
-            $data[$i]['name'] = $document->name;
-            $data[$i]['version'] = $document->version;
-            $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
-            $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
-            $data[$i]['date']  = $date;
-            $data[$i]['life']  = $val['date'];
+                $data[$i]['DT_RowIndex'] = $i+1;
+                $data[$i]['code'] = $document->code;
+                $data[$i]['name'] = $document->name;
+                $data[$i]['version'] = $document->version;
+                $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
+                $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
+                $data[$i]['date']  = $date;
+                $data[$i]['life']  = $val['date'];
 
-            $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
-            $data[$i]['system_id']  = $document->system_id; 
-            $data[$i]['location_id']  = $document->location_id;
-            $data[$i]['alert']  = $val['status'];
-            $data[$i]['keys']  = $output;
+                $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
+                $data[$i]['system_id']  = $document->system_id; 
+                $data[$i]['location_id']  = $document->location_id;
+                $data[$i]['alert']  = $val['status'];
+                $data[$i]['keys']  = $output;
 
-            $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
+                $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
 
-            $i++;
+                $i++;
+            } // if $date valid
 
         } // foreach
         
