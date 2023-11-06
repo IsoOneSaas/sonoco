@@ -89,11 +89,11 @@ class MasterController extends Controller
     }
 
       /**
-     * show preview of the document in HTML format
+     * show document in HTML format (visualizar documento)
      */
     public function edit($hash) : View
     {  
-        $data = $this->controlRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl); 
+        $data = $this->controlRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl); // Repository : ControlRepository::
         $attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
         $types = config('settings.document_sightings_option_default');
         // Configuración de la hoja

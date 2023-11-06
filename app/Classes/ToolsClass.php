@@ -905,6 +905,8 @@ class ToolsClass
             $uid = $user->user_id;
         }
 
+
+
         Log::debug('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 
@@ -933,11 +935,15 @@ class ToolsClass
                                 $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
                             }                            
                         }
-                        if( $new ) {
-                            //Log::debug(['ADDED ID' => $new->document_id, 'CODE' => $new->code, 'STATUS' => $new->status]);
-                            $documents->push($new);
-                            $n++;
-                        }                        
+                        if( $new ) { 
+                            // Validar si código no está ya contenido en en la collección (se deja la versión de la collección)                           
+							$exists = $documents->firstWhere('code', $new->code);
+							if(!$exists) {
+								//Log::debug(['ADDED ID' => $new->document_id, 'CODE' => $new->code, 'STATUS' => $new->status]);
+								$documents->push($new);
+								$n++;								
+							} // if !$exists
+                        } // if $new                       
                     } // if
                 } // foreach
             } // if
@@ -983,42 +989,43 @@ class ToolsClass
         $users_array = [];
         
         $dpto = DepartmentModel::find($xid);
-        // cargos del departamento
-        $jobs = $dpto->jobs;
+        if ($dpto) {
+            // cargos del departamento
+            $jobs = $dpto->jobs;
 
-        foreach($jobs as $job) {
-            $users = $job->users;
-            foreach($users as $user) {
-                if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) ) {
-                    $users_array[] = $user->user_id;
-                }                
-            } // foreach
-        } // foreach
-
-        Log::debug('== Número de usuarios iniciales: '. count($users_array));
-        //Log::debug(['USERS 0 ' => $users_array]);
-
-        if( $did !== null ) {
-            // Usuarios que tienen permiso para el documento
-            $plucked = AuthorizationModel::where('document_id', $did)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')->pluck('user_id');
-            if( $plucked && ( count($plucked->all()) > 0 ) ) {
-                foreach($plucked->all() as $uid) {
-                    array_push($users_array, $uid);
+            foreach($jobs as $job) {
+                $users = $job->users;
+                foreach($users as $user) {
+                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) ) {
+                        $users_array[] = $user->user_id;
+                    }                
                 } // foreach
-            } // if
-            $users_array = array_unique($users_array);
-            Log::debug('== Número de usuarios después de agregar: '. count($users_array));
-            // Usuarios que NO tienen permiso para el documento
-            $plucked = AuthorizationModel::where('document_id', $did)->where('permissions', 'LIKE', '%"view":0%')->pluck('user_id');
-            if($plucked && ( count($plucked->all()) > 0 ) ) {
-                foreach($plucked->all() as $uid) {
-                    if (($key = array_search($uid, $users_array)) !== false) {
-                        unset($users_array[$key]);
-                    } // if               
-                } // foreach 
-            } // if
-        } // if
+            } // foreach
 
+            Log::debug('== Número de usuarios iniciales: '. count($users_array));
+            //Log::debug(['USERS 0 ' => $users_array]);
+
+            if( $did !== null ) {
+                // Usuarios que tienen permiso para el documento
+                $plucked = AuthorizationModel::where('document_id', $did)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')->pluck('user_id');
+                if( $plucked && ( count($plucked->all()) > 0 ) ) {
+                    foreach($plucked->all() as $uid) {
+                        array_push($users_array, $uid);
+                    } // foreach
+                } // if
+                $users_array = array_unique($users_array);
+                Log::debug('== Número de usuarios después de agregar: '. count($users_array));
+                // Usuarios que NO tienen permiso para el documento
+                $plucked = AuthorizationModel::where('document_id', $did)->where('permissions', 'LIKE', '%"view":0%')->pluck('user_id');
+                if($plucked && ( count($plucked->all()) > 0 ) ) {
+                    foreach($plucked->all() as $uid) {
+                        if (($key = array_search($uid, $users_array)) !== false) {
+                            unset($users_array[$key]);
+                        } // if               
+                    } // foreach 
+                } // if
+            } // if $did
+        } // if $dpto
         $users_array = array_unique($users_array);
         Log::debug('== Número de usuarios después de eliminar: '. count($users_array));
         //Log::debug(['USERS 2 ' => $users_array]);

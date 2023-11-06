@@ -52,14 +52,18 @@
                                 <div class="iso-page iso-{{ $size ?? 'emtpy' }}">
                             @else
                             <div class="iso-body">
-                                <div class="iso-page">                        
+                                <div class="iso-page">                      
                             @endif
                                     <div class="w-full p-2">
                                         @include('document/document/head_default')
                                         <div class="overflow-x-auto my-4">
-                                        @if($document->content != '')
-                                            <div id="html-pattern">
-                                            {!! $document->content !!}
+                                        @if($document->pattern == 'HTML')
+                                            <div id="html-pattern">    
+                                            @if( $document->content != '' )
+                                                {!! $document->content !!}
+                                            @else
+                                                &nbsp;
+                                            @endif
                                             </div>
                                         @elseif( is_string($document->url) )
                                             <div id="file-pattern">

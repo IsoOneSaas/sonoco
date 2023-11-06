@@ -522,35 +522,7 @@ class MasterRepository implements MasterRepositoryInterface
         return json_encode(['success' => true]);
     } // closeDocument Method
 
-     /*
-    public function storeSighting(array $data)  // OBSOLETE : Se mueve a suggestionRepository
-    {
-       Log::debug(['STORE SIGHTING DATA' => $data]);
-       try {
-            DB::beginTransaction();
-            $data['user_uid'] = Auth::user()->user_uid;
-            $data['date'] = Carbon::now();
-            $sight = new SightingModel($data);
-            if( $sight->save() ) {
-                DB::commit();
-                // TODO: Enviar correo 
-                if( key_exists('notice_new_sighting', $this->set) && $this->set['notice_new_sighting'] ) {
-                    //
-                }
 
-
-            } else {
-                DB::rollBack();
-                return json_encode(['status' => 'error', 'message' => trans('document/sighting.create.no-success')]);
-            }             
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('MasterRepository::storeSighting Exception: '. $e->getMessage());
-            return json_encode(['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/sighting.create.no-success')]);
-        }                
-        return json_encode(['status' => 'success', 'message' => trans('document/sighting.create.success')]);        
-    } // storeSighting Method
-    */
 
     /**
      * Recupera listado de observaciones para el documento indicado
@@ -875,6 +847,34 @@ class MasterRepository implements MasterRepositoryInterface
         }    
    } // seStatusDate
 
+     /*
+    public function storeSighting(array $data)  // OBSOLETE : Se mueve a suggestionRepository
+    {
+       Log::debug(['STORE SIGHTING DATA' => $data]);
+       try {
+            DB::beginTransaction();
+            $data['user_uid'] = Auth::user()->user_uid;
+            $data['date'] = Carbon::now();
+            $sight = new SightingModel($data);
+            if( $sight->save() ) {
+                DB::commit();
+                // TODO: Enviar correo 
+                if( key_exists('notice_new_sighting', $this->set) && $this->set['notice_new_sighting'] ) {
+                    //
+                }
 
+
+            } else {
+                DB::rollBack();
+                return json_encode(['status' => 'error', 'message' => trans('document/sighting.create.no-success')]);
+            }             
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('MasterRepository::storeSighting Exception: '. $e->getMessage());
+            return json_encode(['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/sighting.create.no-success')]);
+        }                
+        return json_encode(['status' => 'success', 'message' => trans('document/sighting.create.success')]);        
+    } // storeSighting Method
+    */
 
 } // class

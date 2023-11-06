@@ -140,6 +140,7 @@ class ControlRepository implements ControlRepositoryInterface
 
                 // Obtener datos del archivo soporte si existe
                 $support = $this->tool->getDocumentSettings('support_file', $document->settings);
+                //Log::debug(['DID' => $id, 'SUPPORT' => $support]);
                 if($support) {
                     if( is_array($support) ) {
                         $document->mime = ( key_exists('mime', $support) ) ? $this->tool->getFileMimeName($support['mime']) : 'other';                    

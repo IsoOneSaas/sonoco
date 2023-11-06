@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use App\Events\EmailSent;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ContentModel;
+use App\Models\Document\TagModel;
 use App\Models\Set\UserModel;
 use Illuminate\Support\Facades\DB;
 
@@ -311,6 +312,22 @@ class DashboardController extends Controller
 
             $user->assignRole($user->role);
         }
-    }    
+    }
+    
+    public function setCodeAsTag() //documentos/dashboard/migration/codes
+    {
+        $list = [2,3,4];
+
+        $documents = documentModel::findMany($list);
+        foreach( $documents as $document ) {
+            $oldCode = $document->code;
+            $newCode = str_replace('.', '-', $oldCode);
+            $tag = new TagModel;
+            $tag->document_id = $document->document_id;
+            $tag->class = 'Code';            
+            $tag->tag = $newCode;
+            $tag->save();
+        } // foreach
+    }
 
 } // Class
