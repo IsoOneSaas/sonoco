@@ -5,8 +5,9 @@ use App\Interfaces\Set\ProcessRepositoryInterface;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\JobModel;
 use App\Models\Set\ProcessModel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class ProcessRepository implements ProcessRepositoryInterface 
 {
@@ -112,6 +113,39 @@ class ProcessRepository implements ProcessRepositoryInterface
 
         return $jobs;
     } // jobs
+
+    /**
+     * Recupera el listado de cargos para autorización
+     * @param  collection/null $data colección de cargos relacionadas con el proceso
+     * @return collection    Datos de la consulta
+     */
+    public function auth()
+    {    
+        //Log::debug(['JOBS DATA' => $data]);
+        $admin = Auth::user();
+        $lids = $this->tool->getAdminAuthorizedLocations($admin);
+        Log::debug(['AUTH LIDS' => $lids]);
+
+        $jobs = JobModel::
+            join('set_department_job', function($join) {
+                $join->on('set_department_job.job_id', '=', 'set_jobs.job_id');  
+            })
+            ->join('set_departments', function($join) {
+                $join->on('set_department_job.department_id', '=', 'set_departments.department_id');
+            })
+            ->join('set_location_department', function($join) use($lids) {
+                $join->on('set_location_department.department_id', '=', 'set_departments.department_id');
+                $join->whereIn('set_location_department.location_id', $lids);
+            })            
+            ->get(['set_jobs.job_id', 'set_jobs.name']); 
+            
+        Log::debug(['AUTH JOBS' => $jobs->toArray()]);            
+
+        $jobs = JobModel::all();
+
+
+        return $jobs;
+    } // jobs    
 
     /**
      * Recupera el proceso específica

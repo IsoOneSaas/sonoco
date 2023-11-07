@@ -4,6 +4,7 @@ interface ProcessRepositoryInterface
 {
     public function select();
     public function departments($data);
+    public function auth();
     public function get($hash);
     public function store(array $data);
     public function update($id, array $data);

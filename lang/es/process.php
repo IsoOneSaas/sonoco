@@ -59,6 +59,12 @@ return [
                             'placeholder'   => 'Seleccione cargo del líder del proceso',
                             'tooltip'       => 'Requerido. Un cargo para seleccionar',
         ],
+        'auth'  =>  [
+                            'icon'          => 'lock',
+                            'title'         => 'Permisos',
+                            'placeholder'   => 'Seleccione cargo con autorización para este proceso',
+                            'tooltip'       => 'Requerido. Seleccione al menos un cargo',
+        ],        
         'target'  =>  [
                             'icon'          => 'target',
                             'title'         => 'Objetivo',
@@ -134,6 +140,11 @@ return [
                                     'required'      => 'Seleccione al menos un departamento para el proceso',
                                     'array'         => 'Seleccione al menos un departamento para el proceso',
                                     'min'           => 'Seleccione al menos un departamento para el proceso',
+                ],
+                'auth_id'  =>  [
+                                    'required'      => 'Seleccione al menos un cargo autorizado para el proceso',
+                                    'array'         => 'Seleccione al menos un cargo autorizado para el proceso',
+                                    'min'           => 'Seleccione al menos un cargo autorizado para el proceso',
                 ],
                 'job_id'  =>  [
                                     'required'      => 'Seleccione un cargo para el lider del proceso',

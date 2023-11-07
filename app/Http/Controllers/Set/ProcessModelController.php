@@ -54,8 +54,8 @@ class ProcessModelController extends Controller
     public function create() : View
     {
         $departments = $this->processRepo->departments(null);
-        //$jobs = $this->processRepo->jobs(null);
-        return view('settings.process.create', compact('departments'));
+        $auths = $this->processRepo->auth();
+        return view('settings.process.create', compact('departments','auths'));
     } // create Method
 
     /**

@@ -18,4 +18,6 @@ class ProcessModel extends Model
     {
         return $this->belongsToMany(DepartmentModel::class, 'set_department_process', 'process_id', 'department_id');
     }
+
+
 } // class

@@ -57,7 +57,17 @@
                                         <option value=''>{{ trans('process.form.job.placeholder') }}</option>
                                     </select>                                    
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div>                                                                                                                                                                                                   
+                                </div>
+                                <div class="input-group mt-3">
+                                    <div id="auth-id" class="input-group-text flex"><i data-lucide="{{ trans('process.form.auth.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.auth.title') }}</div>
+                                    <select multiple  id="auth-id" name="auth_id[]" class="form-control tom-select w-full">
+                                        <option value=''>{{ trans('process.form.auth.placeholder') }}</option>
+                                        @foreach($auths as $auth)   
+                                        <option value={{ $auth->job_id }} >{{ $auth->name }}</option>
+                                        @endforeach
+                                    </select>                                    
+                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.auth.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                </div>                                                                                                                                                                                                                                   
                             </form>
                         </div>
                     </div>

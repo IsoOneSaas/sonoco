@@ -27,6 +27,7 @@ class StoreProcessModelRequest extends FormRequest
             'target'        => 'required|min:8',
             'job_id'        => 'required',
             'department_id' => 'required|array|min:1',            
+            'auth_id'       => 'required|array|min:1', 
         ];
     }
 
@@ -58,9 +59,12 @@ class StoreProcessModelRequest extends FormRequest
             
             'department_id.required'   => trans('process.request.department_id.required'),
             'department_id.min'        => trans('process.request.department_id.min'),
-            'department_id.array'      => trans('process.request.department_id.array'),             
+            'department_id.array'      => trans('process.request.department_id.array'), 
+            
+            'auth_id.required'   => trans('process.request.auth_id.required'),
+            'auth_id.min'        => trans('process.request.auth_id.min'),
+            'auth_id.array'      => trans('process.request.auth_id.array'),             
     
-
          ];
      }    
 } // class
