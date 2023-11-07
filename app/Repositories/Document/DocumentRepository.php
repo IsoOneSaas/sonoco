@@ -10,6 +10,7 @@ use App\Models\Document\ContentModel;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\LinkModel;
+use App\Models\Document\StatusModel;
 use App\Models\Document\TagModel;
 use App\Models\Document\TypeModel;
 use App\Models\Set\DepartmentModel;
@@ -602,7 +603,12 @@ class DocumentRepository implements DocumentRepositoryInterface
         } else {
             $document->tags = '';
             $document->class = '';
-        } // if/else 
+        } // if/else
+        
+        // DETERMINAR ESTADO ACTUAL DE FLUJO (Si ya está en edición)
+        $createdStatus = StatusModel::where('document_id', $id)->where('action', config('settings.document_status.create'))->first(['return_by']);
+        $document->flow = ( $createdStatus && ($createdStatus->return_by == null) ) ? '0' : '1';
+
         //Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
     } // get Method

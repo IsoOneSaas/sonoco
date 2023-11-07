@@ -323,7 +323,10 @@ return [
                 'forget' => [
                             'title' => 'Abandonar configuración',
                             'text' => 'Está seguro de abandonar la configuración sin salvar primero? Puede perder información.',
-                ],                      
+                ],
+                'flow' => [
+                            'text' => 'El documento ya se encuentra en el proceso de gestión documental, cualquier cambio en su configuración puede afectar este proceso',
+                ],                   
     ],
 
     'grid'      => [

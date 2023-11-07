@@ -315,6 +315,8 @@
     var $selectize; 
     $(function () {
         var json = {!! $default !!};
+        var flow = "{{ $document->flow }}";
+
         //console.dir(json);
         if( json != 0 ) {
             $("input[name='name']").val(json.name);
@@ -364,6 +366,11 @@
 
        $selectize = $select[0].selectize;
 
+       // ALERTA DE ESTADO
+       //console.log('FLOW: '+flow);
+       if( flow == '1' ) {
+            swal("{{ trans('document/document.swal.flow.text') }}");
+       }
 
         // BTN SALIR
         $('#btn-exit').on("click", function() {
