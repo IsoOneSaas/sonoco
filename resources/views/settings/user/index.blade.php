@@ -21,7 +21,7 @@
                                 @csrf                                
                             </form>
                             @can('admin_master')
-                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-sheet"><i data-lucide="edit" class="w-5 h-5"></i></a>
+                            <!-- <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-sheet"><i data-lucide="user-check" class="w-5 h-5"></i></a> -->
                             @endcan
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">

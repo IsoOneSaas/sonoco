@@ -63,7 +63,7 @@ class ControlRepository implements ControlRepositoryInterface
     {
         $action = config('settings.document_status.'. $status);
         $dids = $this->tool->setDocumentByStatusForUser([$action]); // ['EDITING', 'CREATED']
-        Log::debug(['STATUS' => $status, 'SELECTED ACTION' => $action, 'SELECTED DIDS' => $dids]);
+        //Log::debug(['STATUS' => $status, 'SELECTED ACTION' => $action, 'SELECTED DIDS' => $dids]);
 
         $documents = DocumentModel::findMany(array_keys($dids));
         foreach($documents as $document) {
@@ -93,6 +93,7 @@ class ControlRepository implements ControlRepositoryInterface
     {
         $id = $this->tool->getIdHash($hash);
         $uid = auth()->user()->user_uid;
+        $dt0 = Carbon::today();
 
         //Log::debug(['SLUG' => $slug, 'HASH' => $hash, 'ID' => $id]);
 
@@ -108,7 +109,8 @@ class ControlRepository implements ControlRepositoryInterface
                 //$document->date = Carbon::createFromTimeStamp(strtotime($document->created_at))->format($this->set['date_format']);
 				// Obtener fecha de publicación // FIXME: validar si está bien
 				$status = StatusModel::where('document_id', $id)->where('action', $document->status)->orderBy('created_at', 'desc')->first();
-				$document->date = Carbon::createFromTimeStamp(strtotime($status->action_date))->format($this->set['date_format']);                
+				//$document->date = Carbon::createFromTimeStamp(strtotime($status->action_date))->format($this->set['date_format']);                
+                $document->date = $dt0->format($this->set['date_format']);  // cambiado 07.11.23
                 // Obtener el tipo de documento
                 $type = TypeModel::find($document->type_id);
                 $document->type = ($type) ? $type->name : '';

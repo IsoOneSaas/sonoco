@@ -40,11 +40,10 @@ class DocumentRepository implements DocumentRepositoryInterface
         $this->set = $this->tool->setSettings('document');
     }
 
-
     /**
-     * Obtiene los datos del gri
-     * @param  collection $data datos del formulario
-     * @return json    Resultado del método
+     * Renderiza la tabla de LISTADO DE DOCUMENTOS EN PROCESO (index.blade.php)
+     * @param  json $slug Parametros de filtración
+     * @return array   Arreglo de registros de la tabla
      */   
     public function render($slug)
     {
@@ -59,7 +58,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         if($params) {
 
             $documents = $this->tool->setDocumentsToControl($params['time'], $params['status']);  //
-            //Log::debug(['DOCS BEFORE' => $documents->count()]);
+            //Log::debug(['DOCS BEFORE' => $documents->toArray()]);
 
             foreach($documents as $document) {
                 $status = $document->status()->latest()->first();
@@ -138,6 +137,8 @@ class DocumentRepository implements DocumentRepositoryInterface
 
         } // if $params
 
+        //Log::debug(['# TO THE GRID' => count($data)]);
+
         $results = [
             "sEcho" => 1,
             "iTotalRecords" => count($data),
@@ -154,7 +155,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-       Log::debug(['STORE DOCUMENT DATA' => $data]);
+       //Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
 
@@ -245,7 +246,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                         $document->settings = $this->tool->updateSettings($document->settings, $params);                  
                     } // if
                     $document->flow = $this->set['control_flow'];
-                    Log::debug(['DOCUMENT TO SAVE' => $document->toArray()]);
+                    //Log::debug(['DOCUMENT TO SAVE' => $document->toArray()]);
                     $document->save();
                         
                     if( $idExisting) {

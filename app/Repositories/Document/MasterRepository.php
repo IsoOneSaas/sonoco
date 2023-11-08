@@ -45,56 +45,95 @@ class MasterRepository implements MasterRepositoryInterface
     }
 
     /**
-     * Recupera los documentos en estado actual de publicación de la base datos
-     * @return collection    Datos de la consulta
-     */     
-    public function select() 
+     * Renderiza la tabla de LISTADO MAESTRO DE DOCUMENTOS PUBLICADOS (master.blade.php)
+     * @param  json $slug Parametros de filtración 
+     * @return array   Arreglo de registros de la tabla
+     */ 
+    public function render($slug)
     {
-        $dids = $this->tool->setPublishedDocuments();
-        $action = config('settings.document_status.publish');
-        //Log::debug(['SELECTED DIDS' => count($dids)]);
+        $data = [];
+        $i = 0;
+        $target = config('settings.document_status.publish');
+        $light = false;
+        $params = json_decode($slug, true);
+        //Log::debug(['PARAMETERS' => $params]);
 
-        $documents = DocumentModel::orderBy('code', 'asc')->findMany(array_keys($dids));
-        foreach($documents as $document) {                       
-            $status = $document->status()->where('action', $action)->first(['return_date']);
-            $dt = Carbon::createFromTimeStamp(strtotime($status->return_date));
-            //Log::debug(['DID' => $document->document_id, 'PROCESS' => $status2->return_date]);            
-            $document->processName = ($document->process) ? $document->process->name : 'N/A';
-            $document->typeName = ($document->type) ? $document->type->name : 'N/A';
-            $document->date = $dt->diffForHumans();
-            $document->life = '';
-            $document->hash = $this->tool->setIdHash($document->document_id); // cambiar a ID para reducir tamaño de info
-            $document->systemName = ($document->system) ? $document->system->name : '';
-            $document->locationName = ($document->location) ? $document->location->name : '';
+        ini_set('max_execution_time', 3600);
+        set_time_limit(3600);
+
+
+        $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
+        foreach($documents as $document) {
+
+            //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
+            
+            if( $light ) {
+                $val = ['date' => '', 'status' => ''];
+                $date = '';
+            } else {
+                // Publicación
+                $status = $document->status()->where('action', $target)->first(['action_date']);
+                if($status) {
+                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
+                    $date = $dt->diffForHumans();
+                    // Validacion
+                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                     
+                } else {
+                    $val = ['date' => '', 'status' => ''];
+                    $date = false;
+                }                              
+            } // if
+            
+
+            if($date) {
+
+                // Keywords
+                $output = '';
+                $tags = $document->tags;
+                if($tags) {
+                    foreach($tags as $tag) {
+                        $output .= $tag->tag .' ';
+                    }
+                }
+                
+                $data[$i]['document_id'] = $document->document_id;
+
+                $data[$i]['DT_RowIndex'] = $i+1;
+                $data[$i]['code'] = $document->code;
+                $data[$i]['name'] = $document->name;
+                $data[$i]['version'] = $document->version;
+                $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
+                $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
+                $data[$i]['date']  = $date;
+                $data[$i]['life']  = $val['date'];
+
+                $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
+                $data[$i]['system_id']  = $document->system_id; 
+                $data[$i]['location_id']  = $document->location_id;
+                $data[$i]['alert']  = $val['status'];
+                $data[$i]['keys']  = $output;
+
+                $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
+
+                $i++;
+            } // if $date valid
+
         } // foreach
-        //Log::debug(['DOCUMENTS' => $documents->toArray()]);
-        return $documents;
-    } // select Method
+        
+       //Log::debug(['COUNT 3' => count($data)]);
 
-    public function get1()
-    {
-        $dids = $this->tool->setPublishedDocuments();
-        $action = config('settings.document_status.publish');
-        $documents = DocumentModel::whereIn('document_id', array_keys($dids))->orderBy('code', 'asc')->take(10)->get();
-        foreach($documents as $document) {                       
-            $status = $document->status()->where('action', $action)->first(['return_date']);
-            $dt = Carbon::createFromTimeStamp(strtotime($status->return_date));
-            //Log::debug(['DID' => $document->document_id, 'PROCESS' => $status2->return_date]);            
-            $document->processName = ($document->process) ? $document->process->name : 'N/A';
-            $document->typeName = ($document->type) ? $document->type->name : 'N/A';
-            $document->date = $dt->diffForHumans();
-            $document->life = '';
-            $document->hash = $this->tool->setIdHash($document->document_id); // cambiar a ID para reducir tamaño de info
-            $document->systemName = ($document->system) ? $document->system->name : '';
-            $document->locationName = ($document->location) ? $document->location->name : '';
-            //$document->hash = $document->document_id;
-        } // foreach        
-        return [
-            'total' => count($dids),
-            'grid'  => $documents,
+        $results = [
+            "sEcho" => 1,
+            "iTotalRecords" => count($data),
+            "iTotalDisplayRecords" => count($data),
+            "aaData" => $data
         ];
-    }
+        return json_encode($results);          
 
+    } // render    
+
+
+    // VALIDO ?
     public function get(array $data)
     {
         //Log::debug(['DATA' => $data]);
@@ -359,6 +398,7 @@ class MasterRepository implements MasterRepositoryInterface
         // VERSIONES PASADAS
         $versions = DocumentModel::where([['code', '=', $document->code ], ['document_id', '!=', $document->document_id]])->orderBy('created_at')->get(['document_id', 'version', 'status']);
         foreach($versions as $version) {
+            $version->text = config('settings.document_status_texts.'. $version->status .'.real');
             $version->hash = $this->tool->setIdHash($version->document_id);
         } // foreach
         $document->versions = $versions;
@@ -521,8 +561,6 @@ class MasterRepository implements MasterRepositoryInterface
         } 
         return json_encode(['success' => true]);
     } // closeDocument Method
-
-
 
     /**
      * Recupera listado de observaciones para el documento indicado
@@ -720,88 +758,6 @@ class MasterRepository implements MasterRepositoryInterface
     }
 
 
-    public function render($slug)
-    {
-        $data = [];
-        $i = 0;
-        $target = config('settings.document_status.publish');
-        $light = false;
-        $params = json_decode($slug, true);
-        Log::debug(['PARAMETERS' => $params]);
-
-        ini_set('max_execution_time', 3600);
-        set_time_limit(3600);
-
-
-        $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
-        foreach($documents as $document) {
-
-            //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
-            
-            if( $light ) {
-                $val = ['date' => '', 'status' => ''];
-                $date = '';
-            } else {
-                // Publicación
-                $status = $document->status()->where('action', $target)->first(['action_date']);
-                if($status) {
-                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
-                    $date = $dt->diffForHumans();
-                    // Validacion
-                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                     
-                } else {
-                    $val = ['date' => '', 'status' => ''];
-                    $date = false;
-                }                              
-            } // if
-            
-
-            if($date) {
-
-                // Keywords
-                $output = '';
-                $tags = $document->tags;
-                if($tags) {
-                    foreach($tags as $tag) {
-                        $output .= $tag->tag .' ';
-                    }
-                }
-                
-                $data[$i]['document_id'] = $document->document_id;
-
-                $data[$i]['DT_RowIndex'] = $i+1;
-                $data[$i]['code'] = $document->code;
-                $data[$i]['name'] = $document->name;
-                $data[$i]['version'] = $document->version;
-                $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
-                $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
-                $data[$i]['date']  = $date;
-                $data[$i]['life']  = $val['date'];
-
-                $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
-                $data[$i]['system_id']  = $document->system_id; 
-                $data[$i]['location_id']  = $document->location_id;
-                $data[$i]['alert']  = $val['status'];
-                $data[$i]['keys']  = $output;
-
-                $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
-
-                $i++;
-            } // if $date valid
-
-        } // foreach
-        
-        Log::debug(['COUNT 3' => count($data)]);
-
-        $results = [
-            "sEcho" => 1,
-            "iTotalRecords" => count($data),
-            "iTotalDisplayRecords" => count($data),
-            "aaData" => $data
-        ];
-        return json_encode($results);          
-
-    } // render
 
 
     public function getHistoryList($id)
@@ -846,6 +802,59 @@ class MasterRepository implements MasterRepositoryInterface
             return $dt->diffForHumans();
         }    
    } // seStatusDate
+
+   //=== ELIMINAR ?
+
+    /**
+     * Recupera los documentos en estado actual de publicación de la base datos
+     * @return collection    Datos de la consulta
+     */     
+    public function select() 
+    {
+        $dids = $this->tool->setPublishedDocuments();
+        $action = config('settings.document_status.publish');
+        //Log::debug(['SELECTED DIDS' => count($dids)]);
+
+        $documents = DocumentModel::orderBy('code', 'asc')->findMany(array_keys($dids));
+        foreach($documents as $document) {                       
+            $status = $document->status()->where('action', $action)->first(['return_date']);
+            $dt = Carbon::createFromTimeStamp(strtotime($status->return_date));
+            //Log::debug(['DID' => $document->document_id, 'PROCESS' => $status2->return_date]);            
+            $document->processName = ($document->process) ? $document->process->name : 'N/A';
+            $document->typeName = ($document->type) ? $document->type->name : 'N/A';
+            $document->date = $dt->diffForHumans();
+            $document->life = '';
+            $document->hash = $this->tool->setIdHash($document->document_id); // cambiar a ID para reducir tamaño de info
+            $document->systemName = ($document->system) ? $document->system->name : '';
+            $document->locationName = ($document->location) ? $document->location->name : '';
+        } // foreach
+        //Log::debug(['DOCUMENTS' => $documents->toArray()]);
+        return $documents;
+    } // select Method
+
+    public function get1()
+    {
+        $dids = $this->tool->setPublishedDocuments();
+        $action = config('settings.document_status.publish');
+        $documents = DocumentModel::whereIn('document_id', array_keys($dids))->orderBy('code', 'asc')->take(10)->get();
+        foreach($documents as $document) {                       
+            $status = $document->status()->where('action', $action)->first(['return_date']);
+            $dt = Carbon::createFromTimeStamp(strtotime($status->return_date));
+            //Log::debug(['DID' => $document->document_id, 'PROCESS' => $status2->return_date]);            
+            $document->processName = ($document->process) ? $document->process->name : 'N/A';
+            $document->typeName = ($document->type) ? $document->type->name : 'N/A';
+            $document->date = $dt->diffForHumans();
+            $document->life = '';
+            $document->hash = $this->tool->setIdHash($document->document_id); // cambiar a ID para reducir tamaño de info
+            $document->systemName = ($document->system) ? $document->system->name : '';
+            $document->locationName = ($document->location) ? $document->location->name : '';
+            //$document->hash = $document->document_id;
+        } // foreach        
+        return [
+            'total' => count($dids),
+            'grid'  => $documents,
+        ];
+    }   
 
      /*
     public function storeSighting(array $data)  // OBSOLETE : Se mueve a suggestionRepository

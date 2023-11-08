@@ -74,14 +74,13 @@ class DocumentModelController extends Controller
         return redirect()->route('documents.control.documento.index')->with($response['status'], $response['message']); 
     } // store Method
 
-
-    
-    
+    /**
+     * Display de Grid to Document Control (admins)
+     */    
     public function show($param)
     {
-        //Log::info('***NEW SHOW ');
         return $this->documentRepo->render($param);
-    }      
+    }  // show    
 
     /**
      * Show the form for editing the specified resource.

@@ -315,7 +315,7 @@
     var $selectize; 
     $(function () {
         var json = {!! $default !!};
-        var flow = "{{ $document->flow }}";
+        var flow = "{{ isset($document) ? $document->flow : 0; }}";
 
         //console.dir(json);
         if( json != 0 ) {

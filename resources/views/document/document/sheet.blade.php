@@ -68,7 +68,7 @@
                                                 @foreach($data->versions as $item)
                                                 <li>
                                                     <a href="{{ route('documents.master.datasheet', $item->hash ) }}" class="dropdown-item">
-                                                        <i data-lucide="box" class="w-4 h-4 mr-2"></i> {{ $item->status }} 
+                                                        <i data-lucide="box" class="w-4 h-4 mr-2"></i> {{ $item->text }} 
                                                         <div class="text-xs text-white px-1 rounded-full bg-success ml-auto">{{ $item->version }}</div>
                                                     </a>
                                                 </li>
@@ -122,7 +122,7 @@
                                     <h2 class="font-medium text-base mr-auto">
                                         Archivos adjuntos
                                     </h2>
-                                    <div class="dropdown ml-auto sm:hidden">
+<!--                                     <div class="dropdown ml-auto sm:hidden">
                                         <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown"> <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i> </a>
                                         <div class="dropdown-menu w-40">
                                             <ul class="dropdown-content">
@@ -130,7 +130,7 @@
                                             </ul>
                                         </div>
                                     </div>
-                                    <button class="btn btn-outline-secondary hidden sm:flex">All Files</button>
+                                    <button class="btn btn-outline-secondary hidden sm:flex">All Files</button> -->
                                 </div>
                                 <div class="p-5">
 
@@ -187,7 +187,7 @@
                                         <h2 class="font-medium text-base mr-auto">
                                             Flujo del documento
                                         </h2>
-                                        <div class="dropdown ml-auto sm:hidden">
+<!--                                         <div class="dropdown ml-auto sm:hidden">
                                             <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown"> <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i> </a>
                                             <div class="dropdown-menu w-40">
                                                 <ul class="dropdown-content">
@@ -197,7 +197,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-secondary hidden sm:flex"> <i data-lucide="file" class="w-4 h-4 mr-2"></i> Download Excel </button>
+                                        <button class="btn btn-outline-secondary hidden sm:flex"> <i data-lucide="file" class="w-4 h-4 mr-2"></i> Download Excel </button> -->
                                     </div>
                                     <div class="p-5">                                   
 

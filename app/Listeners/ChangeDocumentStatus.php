@@ -4,9 +4,6 @@ use App\Events\DocumentSent;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\StatusModel;
 use Carbon\Carbon;
-//use Illuminate\Contracts\Queue\ShouldQueue;
-//use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ChangeDocumentStatus
@@ -28,7 +25,7 @@ class ChangeDocumentStatus
         $ok = false;
         $array = config('settings.document_status');
         $date = null;
-        $limited = true;
+        $limited = false;
         $roled = false;
         $current = $event->document->status()->latest()->first();
         if ($current) {
@@ -86,6 +83,8 @@ class ChangeDocumentStatus
             // Cambiar estado en el registro del documento
             $event->document->status = $array[$key];
             $event->document->save();
+        } else {
+            Log::info('Estado '. $array[$key] .' no fue creado para id='. $event->document->document_id);
         }
 
     } // handle

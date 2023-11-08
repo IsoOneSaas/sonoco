@@ -127,7 +127,7 @@ return [
         'EDITING'       => ['title' => 'EDITANDO', 'actual' => 'EDICIÓN', 'verb' => 'REVISAR', 'status' => 'REVISIÓN', 'action' => 'REVISADO', 'real' => 'Edición', 'icon' => 'file-code'],
         'REVISING'      => ['title' => 'REVISANDO', 'actual' => 'REVISIÓN', 'verb' => 'APROBAR', 'status' => 'APROBACIÓN', 'action' => 'APROBADO', 'real' => 'Revisión', 'icon' => 'file-search'],
         'APPROVING'     => ['title' => 'APROBANDO', 'actual' => 'APROBACIÓN', 'verb' => 'PUBLICAR', 'status' => 'PUBLICACIÓN', 'action' => 'PUBLICADO', 'real' => 'Aprobación', 'icon' => 'file-check-2'],
-        'PUBLISHED'     => ['title' => 'A PUBLICAR', 'actual' => 'PUBLICACIÓN', 'verb' => '', 'status' => '', 'action' => '', 'real' => 'Publicado', 'icon' => 'file'], // Eliminar ?
+        'PUBLISHED'     => ['title' => 'A PUBLICAR', 'actual' => 'PUBLICACIÓN', 'verb' => '', 'status' => '', 'action' => '', 'real' => 'Publicado', 'icon' => 'file'],
         'OBSOLETED'     => ['real' => 'Obsoleto', 'icon' => 'file-x-2'],
     ],
  
