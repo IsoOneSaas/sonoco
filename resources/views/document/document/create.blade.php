@@ -19,7 +19,7 @@
                             <img id="loading-image" alt="Cargando..." class="h-12 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"> Configurar Documento
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            <button type="submit" form="document-form" class="btn btn-primary shadow-md mr-2" title="Salvar Formulario"> <i data-lucide="save" class="w-5 h-5"></i> </button>
+                            <button id="btn-submit" type="submit" form="document-form" class="btn btn-primary shadow-md mr-2" title="Salvar Formulario"> <i data-lucide="save" class="w-5 h-5"></i> </button>
                             <!-- <a class="btn btn-primary shadow-md mr-2" href="{ { route('documents.control.documento.index') } }" title="Regresar a la tabla"><i data-lucide="skip-back" class="w-5 h-5"></i></a> -->
                             <a class="btn btn-primary shadow-md mr-1" href="javascript:;" data-href="{{ route('documents.control.documento.index') }}" title="Regresar a la tabla" id="btn-exit"><i data-lucide="menu" class="w-5 h-5"></i></a>   
                         </div>
@@ -369,7 +369,9 @@
        // ALERTA DE ESTADO
        //console.log('FLOW: '+flow);
        if( flow == '1' ) {
+            $("#btn-submit").attr('disabled', true);
             swal("{{ trans('document/document.swal.flow.text') }}");
+            $isSaved = true;
        }
 
         // BTN SALIR
@@ -379,7 +381,7 @@
             //var exit = checkExit();
             //console.log(referrer);
 
-            if( !$isSaved ) {
+            if( !$isSaved && flow != '1' ) {
                 swal({ 
                     title: "{{ trans('document/document.swal.forget.title') }}",
                     text: "{{ trans('document/document.swal.forget.text') }}",

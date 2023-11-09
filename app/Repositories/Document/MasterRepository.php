@@ -757,12 +757,14 @@ class MasterRepository implements MasterRepositoryInterface
         return json_encode($results);      
     }
 
-
-
-
+    /**
+     * Recupera el listado del historial (cambios) para el documento
+     * @param  integer $id Identificador del documento
+     * @return collection    Collección de cambios del documento
+     */   
     public function getHistoryList($id)
     {
-        Log::debug(['HISTORY ID' => $id]);
+        //Log::debug(['HISTORY ID' => $id]);
         $changes = changeModel::where('document_id', $id)->orderBy('created_at', 'desc')->get();
         foreach($changes as $change) {
             $change->date = Carbon::createFromTimeStamp(strtotime($change->created_at))->format($this->set['date_format']);
