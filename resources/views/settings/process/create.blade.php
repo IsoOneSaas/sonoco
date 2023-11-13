@@ -49,16 +49,8 @@
                                         <option value={{ $department->department_id }} >{{ $department->name }}</option>
                                         @endforeach
                                     </select>                                    
-                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div>
-                                <div class="input-group mt-3">
-                                    <div id="job-id" class="input-group-text flex w-52"><i data-lucide="{{ trans('process.form.job.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.job.title') }}</div>
-                                    <select name="job_id" class="form-control w-full" required>
-                                        <option value=''>{{ trans('process.form.job.placeholder') }}</option>
-                                    </select>                                    
-                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div>
-                                <div class="input-group mt-3">
+                                    <div id="input-group-2" class="input-group-text  mr-2"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+
                                     <div id="auth-id" class="input-group-text flex"><i data-lucide="{{ trans('process.form.auth.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.auth.title') }}</div>
                                     <select multiple  id="auth-id" name="auth_id[]" class="form-control tom-select w-full">
                                         <option value=''>{{ trans('process.form.auth.placeholder') }}</option>
@@ -67,6 +59,16 @@
                                         @endforeach
                                     </select>                                    
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.auth.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                </div>
+                                <div class="input-group mt-3">
+                                    <div id="job-id" class="input-group-text flex w-52"><i data-lucide="{{ trans('process.form.job.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.job.title') }}</div>
+                                    <select name="job_id" class="form-control w-full" style="z-index:1" required>
+                                        <option value=''>{{ trans('process.form.job.placeholder') }}</option>
+                                    </select>                                    
+                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                </div>
+                                <div class="input-group mt-3">
+
                                 </div>                                                                                                                                                                                                                                   
                             </form>
                         </div>

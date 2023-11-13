@@ -19,5 +19,12 @@ class ProcessModel extends Model
         return $this->belongsToMany(DepartmentModel::class, 'set_department_process', 'process_id', 'department_id');
     }
 
+    /**
+    * Obtiene el registro de cargos autorizados con el proceso.
+    */
+    public function jobs(): BelongsToMany
+    {
+        return $this->belongsToMany(JobModel::class, 'set_job_process', 'process_id', 'job_id');
+    }    
 
 } // class

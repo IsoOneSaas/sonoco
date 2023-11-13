@@ -372,7 +372,7 @@ class ToolsClass
             //
         }
         return array_unique($processes); 
-    } // setJobsFilte
+    } // setProcessesFilter
 
     /**
      * Obtiene el listado de identificadores de requsitos con el criterio de permiso
@@ -399,7 +399,7 @@ class ToolsClass
             $systems = $plucked->all();            
         }
         return array_unique($systems); 
-    } // setJobsFilte
+    } // setSystemsFilte
 
     public function getPreviousDocumentAction($current)
     {

@@ -317,17 +317,22 @@ class DashboardController extends Controller
     public function setCodeAsTag() //documentos/dashboard/migration/codes
     {
         $list = [2,3,4];
+        $max = 5246;
 
-        $documents = documentModel::findMany($list);
-        foreach( $documents as $document ) {
-            $oldCode = $document->code;
-            $newCode = str_replace('.', '-', $oldCode);
-            $tag = new TagModel;
-            $tag->document_id = $document->document_id;
-            $tag->class = 'Code';            
-            $tag->tag = $newCode;
-            $tag->save();
-        } // foreach
+        //$documents = documentModel::findMany($list);
+        //foreach( $documents as $document ) {
+        for($i=1; $i <= $max; $i++) {
+            $document = documentModel::find($i);
+            if($document) {
+                $oldCode = $document->code;
+                $newCode = str_replace('.', '-', $oldCode);
+                $tag = new TagModel;
+                $tag->document_id = $document->document_id;
+                $tag->class = 'Ficha';            
+                $tag->tag = $newCode;
+                $tag->save();
+            }
+        } // for
     }
 
 } // Class

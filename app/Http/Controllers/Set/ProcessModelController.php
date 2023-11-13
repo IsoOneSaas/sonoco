@@ -7,7 +7,7 @@ use App\Http\Requests\StoreProcessModelRequest;
 use App\Interfaces\Set\ProcessRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 class ProcessModelController extends Controller
@@ -54,7 +54,7 @@ class ProcessModelController extends Controller
     public function create() : View
     {
         $departments = $this->processRepo->departments(null);
-        $auths = $this->processRepo->auth();
+        $auths = $this->processRepo->auth(null);
         return view('settings.process.create', compact('departments','auths'));
     } // create Method
 
@@ -73,9 +73,10 @@ class ProcessModelController extends Controller
     public function edit($hash) : View
     {
         $process = $this->processRepo->get($hash);
+        //Log::debug(['PROCESS' => $process->toArray()]);
         $departments = $this->processRepo->departments($process->departments);
-        //$jobs = $this->processRepo->jobs($process->job_id);
-        return view('settings.process.edit', compact('process','departments'));
+        $auths = $this->processRepo->auth($process->jobs()->where('set_job_process.auth', 1));
+        return view('settings.process.edit', compact('process','departments','auths'));
     } // edit Method
 
     /**

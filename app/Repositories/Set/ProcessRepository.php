@@ -4,7 +4,11 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Set\ProcessRepositoryInterface;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\JobModel;
+//use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
+
+use Exception;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -64,7 +68,6 @@ class ProcessRepository implements ProcessRepositoryInterface
         // Validar si departamentos no repite
         if( (count($exis_array) > 0) && (count($dids_array) > 0) ) {
             //Log::debug(['TOTAL DIDS' => $dids_array, 'EXISITING DIDS :' => $exis_array->all(), 'SELECTED DIDS' => $sele_array ]);
-            //for($i=0; $i<count($dids_array); $i++ ) {
             foreach($dids_array as $key => $value) {
                 if( in_array($value, $sele_array) ) {
                     $dids[] = $value;
@@ -119,30 +122,41 @@ class ProcessRepository implements ProcessRepositoryInterface
      * @param  collection/null $data colección de cargos relacionadas con el proceso
      * @return collection    Datos de la consulta
      */
-    public function auth()
+    public function auth($data)
     {    
         //Log::debug(['JOBS DATA' => $data]);
+        if( $data !== null) {
+            $plucked = $data->pluck('set_job_process.job_id');
+            $sele_array = $plucked->all();
+        } else {
+            $sele_array = [];
+        }
         $admin = Auth::user();
         $lids = $this->tool->getAdminAuthorizedLocations($admin);
-        Log::debug(['AUTH LIDS' => $lids]);
+        //Log::debug(['LIDS' => $lids]);
 
-        $jobs = JobModel::
-            join('set_department_job', function($join) {
-                $join->on('set_department_job.job_id', '=', 'set_jobs.job_id');  
-            })
-            ->join('set_departments', function($join) {
-                $join->on('set_department_job.department_id', '=', 'set_departments.department_id');
-            })
-            ->join('set_location_department', function($join) use($lids) {
-                $join->on('set_location_department.department_id', '=', 'set_departments.department_id');
-                $join->whereIn('set_location_department.location_id', $lids);
-            })            
-            ->get(['set_jobs.job_id', 'set_jobs.name']); 
-            
-        Log::debug(['AUTH JOBS' => $jobs->toArray()]);            
+        $plucked = DepartmentModel::join('set_location_department', function($join) use($lids) {
+            $join->on('set_location_department.department_id', '=', 'set_departments.department_id');
+            $join->whereIn('set_location_department.location_id', $lids);
+        })->pluck('set_location_department.department_id');
+        
+        $dids = array_unique($plucked->all());
 
-        $jobs = JobModel::all();
+        //Log::debug(['DIDS' => $dids]);
 
+        $plucked = JobModel::join('set_department_job', function($join) use($dids) {
+            $join->on('set_department_job.job_id', '=', 'set_jobs.job_id');
+            $join->whereIn('set_department_job.department_id', $dids);
+        })->pluck('set_department_job.job_id');
+
+        $jids = array_unique($plucked->all());               
+
+        //Log::debug(['JIDS' => $jids]);
+
+        $jobs = JobModel::whereIn('job_id', $jids)->orderBy('name')->get(['job_id', 'name']);      
+        if( $data !== null) {                                    
+            $jobs = $this->tool->setSelecctedCollection('job_id', $jobs, $sele_array);
+        } // if        
 
         return $jobs;
     } // jobs    
@@ -165,14 +179,20 @@ class ProcessRepository implements ProcessRepositoryInterface
      */    
     public function store(array $data) 
     {
-        Log::debug(['STORE PROCESS DATA' => $data]);
+        //Log::debug(['STORE PROCESS DATA' => $data]);
         try {
             // Transacción
             DB::beginTransaction();            
              $process = new ProcessModel($data);
              if ($process->save() ) {
-                // Tabla pivote
+                // Tabla pivote de departamementos
                 $process->departments()->attach($data['department_id']);
+                // Tabla pivote de procesos
+                $jobs_array = [];
+                for($i=0; $i<count($data['auth_id']); $i++) {
+                    $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
+                }
+                $process->jobs()->attach($jobs_array);
                 DB::commit();            
              } else {
                 DB::rollBack();
@@ -194,7 +214,7 @@ class ProcessRepository implements ProcessRepositoryInterface
      */    
     public function update($id, array $data) 
     {
-        Log::debug(['UPDATE PROCESS ID' => $id, 'DATA' => $data]);
+        //Log::debug(['UPDATE PROCESS ID' => $id, 'DATA' => $data]);
         try {
             // Transacción
             DB::beginTransaction();            
@@ -202,6 +222,12 @@ class ProcessRepository implements ProcessRepositoryInterface
              if ($process->update($data) ) {
                 // Tabla pivote
                 $process->departments()->sync($data['department_id']);
+                // Tabla pivote de procesos
+                $jobs_array = [];
+                for($i=0; $i<count($data['auth_id']); $i++) {
+                    $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
+                }
+                $process->jobs()->sync($jobs_array);                
                 DB::commit();            
              } else {
                 DB::rollBack();
