@@ -94,18 +94,21 @@ class MasterController extends Controller
     public function edit($hash) : View
     {  
         $data = $this->controlRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl); // Repository : ControlRepository::
-        $attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
-        $types = config('settings.document_sightings_option_default');
-        // Configuración de la hoja
-        $setup = $this->tool->getPaperSetup($data->settings);       
+        if($data) {
+            $attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
+            $types = config('settings.document_sightings_option_default');
+            // Configuración de la hoja
+            $setup = $this->tool->getPaperSetup($data->settings);       
 
-        return view('document.document.html', [
-            'size' => $setup['size'] .'-'. $setup['orientation'],
-            'document' => $data,
-            'attachment' => $attachment,
-            'types'     => $types,
-            'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
-        ]);         
+            return view('document.document.html', [
+                'size' => $setup['size'] .'-'. $setup['orientation'],
+                'document' => $data,
+                'attachment' => $attachment,
+                'types'     => $types,
+                'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
+            ]); 
+        }
+        return abort(404);      
     } // edit Method
 
       /**

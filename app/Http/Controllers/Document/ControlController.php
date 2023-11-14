@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-//use Barryvdh\DomPDF\PDF;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
+//use PDF;
 use Yajra\DataTables\DataTables;
 
 class ControlController extends Controller
@@ -84,25 +84,28 @@ class ControlController extends Controller
     public function edit($slug, $hash) : View
     {
         $document = $this->documentRepo->get($slug, $hash, $this->tenantUrl, $this->masterUrl);
-        $flow = $this->documentRepo->flow($document->document_id, $document->department_id);      
-        $blade = 'document.control.edit_'. strtolower($document->pattern);
-        $gridTemplatesLanguage =  json_encode(trans('document/document.datatable_templates'));
-        $gridReferencesLanguage =  json_encode(trans('document/document.datatable_references'));
-        $gridDisclaimersLanguage =  json_encode(trans('document/disclaimer.datatable'));
-        $path = $this->getSignature();
-
-        //Log::debug(['CONTENT:' => $document->content]);
-        
-        $set = [
-            'signUrl' => $path,
-            'disabled' => str_contains($path, 'blank'),
-            'templatesLang' => $gridTemplatesLanguage,
-            'referencesLang' => $gridReferencesLanguage,
-            'disclaimerLang'  => $gridDisclaimersLanguage,
-            'dateFormat'    => 'YYYY-MM-DD',    // FIXME: Debe ser generado a partir de la configuración general
-        ];
-        //Log::debug(['SET' => $set]);
-        return view($blade, compact('document', 'set', 'flow')); // ,'templates'
+        if($document) {
+            $flow = $this->documentRepo->flow($document->document_id, $document->department_id);      
+            $blade = 'document.control.edit_'. strtolower($document->pattern);
+            $gridTemplatesLanguage =  json_encode(trans('document/document.datatable_templates'));
+            $gridReferencesLanguage =  json_encode(trans('document/document.datatable_references'));
+            $gridDisclaimersLanguage =  json_encode(trans('document/disclaimer.datatable'));
+            $path = $this->getSignature();
+    
+            //Log::debug(['CONTENT:' => $document->content]);
+            
+            $set = [
+                'signUrl' => $path,
+                'disabled' => str_contains($path, 'blank'),
+                'templatesLang' => $gridTemplatesLanguage,
+                'referencesLang' => $gridReferencesLanguage,
+                'disclaimerLang'  => $gridDisclaimersLanguage,
+                'dateFormat'    => 'YYYY-MM-DD',    // FIXME: Debe ser generado a partir de la configuración general
+            ];
+            //Log::debug(['SET' => $set]);
+            return view($blade, compact('document', 'set', 'flow')); // ,'templates'            
+        }
+        return abort(404);
     } // edit Method
 
     /**
@@ -147,8 +150,9 @@ class ControlController extends Controller
         $setup = $this->tool->getPaperSetup($data->settings);       
 
         //Log::debug($html);
+        Log::info('To Print PDF...');
         // FIXME: Se está generando error al no encontrar la Facada
-        $pdf = PDF::loadHTML($html)->setPaper($setup['size'], $setup['orientation']);
+        $pdf = Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation']);
         if( $pdf ) {
             $fileName = Str::slug($data->name, '_');
             return $pdf->download($fileName .'.pdf');
@@ -244,8 +248,9 @@ class ControlController extends Controller
                 // Configuración de la hoja
                 $setup = $this->tool->getPaperSetup($settings);
 
-                // Salvar el archivo 
-                PDF::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->masterUrl . $fileName);
+                // Salvar el archivo
+                Log::info('To Save PDF...'); 
+                Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->masterUrl . $fileName);
 
                 // Verificar existencia de archivo
                 if( file_exists($this->masterUrl . $fileName) ) {
