@@ -117,7 +117,10 @@ class MasterController extends Controller
     public function sheet($hash) : View
     {  
         $data = $this->documentRepo->getDataSheet($hash, $this->tenantUrl, $this->contentUrl);
-        return view('document.document.sheet', compact('data'));         
+        if($data) {
+            return view('document.document.sheet', compact('data'));
+        }
+        return abort(404);        
     } // sheet Method    
 
 

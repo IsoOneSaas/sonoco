@@ -645,13 +645,18 @@
     var $target1 = "{{ config('settings.document_status.publish') }}";
     var $target2 = "{{ config('settings.document_status.obsolete') }}";
     var $status = "{{ $data->status }}";    
+    var $auth = "{{ $data->auth }}";
     $(function () {
 
         // BTN CREACION DE NUEVA VERSION
         $('#btn-copy, #btn-version').on("click", function(e)  {
             e.preventDefault();
             if( $status == $target1 ) {
-                $("#modal-versions-open")[0].click();
+                if( $auth == '1' ) {
+                    $("#modal-versions-open")[0].click();
+                } else {
+                    setSuccessNotification('error', 'Oops!', "{{ trans('document/document.publish.no-last', ['action'=>'generar versión']) }}");    
+                }
             } else {
                 setSuccessNotification('error', 'Oops!', "{{ trans('document/document.publish.no-publish') }}");
             }            
@@ -785,53 +790,60 @@
         // BTN CAMBIO A ESTADO OBSOLETE
         $('#btn-old').on("click", function(e)  {
             e.preventDefault();           
-            if( ($status == $target1) || ($status == $target2) ) {            
-                swal.fire({
-                    title: "{{ trans('document/document.obsolete.title') }}",
-                    icon: 'warning',
-                    input: 'textarea',
-                    inputPlaceholder: "{{ trans('document/document.obsolete.placeholder') }}",
-                    inputAttributes: {
-                        'aria-label': "{{ trans('document/document.obsolete.placeholder') }}"
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Si, cambiar!',
-                    cancelButtonText: 'No, cancelar!',                
-                    customClass: {
-                        title: 'iso-swal-title',
-                        confirmButton: 'btn btn-danger waves-effect waves-effect waves-light',
-                        cancelButton: 'btn btn-default ml-2 waves-effect'
-                    },
-                    buttonsStyling: false                                
-                })
-                .then( (result) => {
-                    //alert(result.value);
-                    if(result.value === '') {
-                        setSuccessNotification('error', 'Oops!', "{{ trans('document/document.obsolete.no-comment') }}");
-                        return false;                             
-                    } else if (result.value) {
-                        var route = "{{ route('documents.control.documento.obsolete') }}";
-                        var hash = "{{ $data->hash }}";
-                        $.ajax({
-                            url: route,
-                            data: {hash: hash, note: result.value },
-                            type: 'POST',
-                            dataType: 'json',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },                        
-                            success: function(json) {
-                                console.dir(json);
-                                if( json.status == 'success' ) {
-                                    setSuccessNotification('success', '', json.message);
-                                    location.reload(true);                               
-                                } else {
-                                    setSuccessNotification('error', 'Oops!', json.message);
-                                }
-                            } // success
-                        }); // ajax
-                    }
-                }); // then
+            if( ($status == $target1) || ($status == $target2) ) {
+                if( $auth == '1' ) {
+
+                    swal.fire({
+                        title: "{{ trans('document/document.obsolete.title') }}",
+                        icon: 'warning',
+                        input: 'textarea',
+                        inputPlaceholder: "{{ trans('document/document.obsolete.placeholder') }}",
+                        inputAttributes: {
+                            'aria-label': "{{ trans('document/document.obsolete.placeholder') }}"
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Si, cambiar!',
+                        cancelButtonText: 'No, cancelar!',                
+                        customClass: {
+                            title: 'iso-swal-title',
+                            confirmButton: 'btn btn-danger waves-effect waves-effect waves-light',
+                            cancelButton: 'btn btn-default ml-2 waves-effect'
+                        },
+                        buttonsStyling: false                                
+                    })
+                    .then( (result) => {
+                        //alert(result.value);
+                        if(result.value === '') {
+                            setSuccessNotification('error', 'Oops!', "{{ trans('document/document.obsolete.no-comment') }}");
+                            return false;                             
+                        } else if (result.value) {
+                            var route = "{{ route('documents.control.documento.obsolete') }}";
+                            var hash = "{{ $data->hash }}";
+                            $.ajax({
+                                url: route,
+                                data: {hash: hash, note: result.value },
+                                type: 'POST',
+                                dataType: 'json',
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },                        
+                                success: function(json) {
+                                    console.dir(json);
+                                    if( json.status == 'success' ) {
+                                        setSuccessNotification('success', '', json.message);
+                                        location.reload(true);                               
+                                    } else {
+                                        setSuccessNotification('error', 'Oops!', json.message);
+                                    }
+                                } // success
+                            }); // ajax
+                        }
+                    }); // then
+
+                } else {
+                    setSuccessNotification('error', 'Oops!', "{{ trans('document/document.publish.no-last', ['action'=>'pasar a obsoleto']) }}");    
+                }                
+                
             } else {
                 setSuccessNotification('error', 'Oops!', "{{ trans('document/document.publish.no-publish') }}");
             }           

@@ -258,6 +258,8 @@ class MasterRepository implements MasterRepositoryInterface
     public function getDataSheet($hash, $imageUrl, $fileUrl)
     {
         $id = $this->tool->getIdHash($hash);
+
+        if( $id == 'ERR' ) return false;
         
         $user = auth()->user();
         $document = DocumentModel::find($id);
@@ -395,6 +397,14 @@ class MasterRepository implements MasterRepositoryInterface
         } while ( $count != 0 );
         $document->newVersion = $newVersion;
 
+        // AUTORIZACION PARA CLONAR/OBSOLESCENCIA
+        // Validar si es documento actual es última versión para ser clonado (si no lo es toma el valor de 0)
+        if( $doc->version == $document->version ) {
+            $document->auth = 1;
+        } else {
+            $document->auth = 0;
+        }
+        
         // VERSIONES PASADAS
         $versions = DocumentModel::where([['code', '=', $document->code ], ['document_id', '!=', $document->document_id]])->orderBy('created_at')->get(['document_id', 'version', 'status']);
         foreach($versions as $version) {
@@ -406,7 +416,7 @@ class MasterRepository implements MasterRepositoryInterface
         //Log::debug(['**DOCUMENT' => $document->toArray()]);
 
         return $document;        
-    }
+    } // getDataSheet Method
 
     /**
      * Recupera el listado de sistemas de gestión de calidad (requisitos)
