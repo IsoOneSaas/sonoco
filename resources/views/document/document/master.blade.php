@@ -45,7 +45,8 @@
                         <div class="p-5" id="striped-rows-table">
                             <div class="preview">
 
-                                <div id="grid-table">                                                                    
+                                <div id="grid-table"> 
+                                    
                                     <div id="horizontal-form" class="pb-3">
                                         <div class="preview ml-auto w-full">
                                             <div class="form-inline">
