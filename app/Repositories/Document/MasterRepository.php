@@ -257,6 +257,8 @@ class MasterRepository implements MasterRepositoryInterface
      */       
     public function getDataSheet($hash, $imageUrl, $fileUrl)
     {
+        $except_array = [ config('settings.document_status.delete'), config('settings.document_status.deny'), config('settings.document_status.cancel') ];
+
         $id = $this->tool->getIdHash($hash);
 
         if( $id == 'ERR' ) return false;
@@ -399,14 +401,19 @@ class MasterRepository implements MasterRepositoryInterface
 
         // AUTORIZACION PARA CLONAR/OBSOLESCENCIA
         // Validar si es documento actual es última versión para ser clonado (si no lo es toma el valor de 0)
-        if( $doc->version == $document->version ) {
-            $document->auth = 1;
-        } else {
-            $document->auth = 0;
-        }
         
-        // VERSIONES PASADAS
-        $versions = DocumentModel::where([['code', '=', $document->code ], ['document_id', '!=', $document->document_id]])->orderBy('created_at')->get(['document_id', 'version', 'status']);
+        if( $doc->version == $document->version ) {
+            $document->auth = 1;    // Permite
+        } else {
+            if( in_array( $doc->status, $except_array) ) {
+                $document->auth = 1;    // Permite
+            } else {
+                $document->auth = 0;    
+            } // if
+        } // if
+        
+        // VERSIONES PASADAS    // 
+        $versions = DocumentModel::where([['code', '=', $document->code ], ['document_id', '!=', $document->document_id]])->whereNotIn('status', $except_array)->orderBy('created_at')->get(['document_id', 'version', 'status']);
         foreach($versions as $version) {
             $version->text = config('settings.document_status_texts.'. $version->status .'.real');
             $version->hash = $this->tool->setIdHash($version->document_id);
