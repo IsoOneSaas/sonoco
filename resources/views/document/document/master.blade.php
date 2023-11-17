@@ -58,7 +58,7 @@
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
                                                         <div class="form-inline">
-                                                            <input type="text" data-daterange="true" class="datepicker form-control w-56 block mx-auto">
+                                                            <input id="date-selected" type="text" class="form-control w-56 block mx-auto">
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
@@ -195,6 +195,7 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 @endpush
 
@@ -210,6 +211,8 @@
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
 <script src="{{ url('assets/js/dropzone-5.9.3/dropzone.min.js') }}"></script>
 <script src="{{ url('assets/js/dropzone-5.9.3/config_document_suggestion.js') }}"></script> 
+<script src="{{ url('assets/js/daterangepicker-master/moment.min.js') }}"></script>
+<script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 
 <script document="text/javascript">
@@ -222,6 +225,7 @@
         let lang = {!! $gridLanguage !!};
         let columns = {!! $gridColExp !!};        
         let route = "{{ route('documents.master.index.render', ':slug') }}";
+
         
         // ACONDICIONAMIENTO
         setFooter('documents-table', columnsDef);
@@ -241,7 +245,17 @@
         var sidArray = $("#system-selected").val();
         var pidsArray = $("#process-selected").val();
         var lidsArray = $("#location-selected").val();
-        param = {sid: sidArray, pids: pidsArray, lids: lidsArray};
+
+        $('#date-selected').daterangepicker({
+            locale: {
+                format: "YYYY/MM/DD",
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar"
+            }
+        });
+        param = {sid: sidArray, pids: pidsArray, lids: lidsArray};        
         console.dir(JSON.stringify(param)); 
 
         // DATATABLE
@@ -382,13 +396,15 @@
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
-            params = {sid: sidValue, pids: pidsArray, lids: lidsArray};
-            console.dir(JSON.stringify(params)); 
-            var url =  route.replace(':slug', JSON.stringify(params));
-            startTime = Date.now();
-            myTable.ajax.url(url).load();
-            myTable.state.clear();
-            myTable.search('').columns().search('').draw();          
+            var rangeStr = $("#date-selected").val();
+            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, range: rangeStr};
+            console.dir(JSON.stringify(params));
+
+            // var url =  route.replace(':slug', JSON.stringify(params));
+            // startTime = Date.now();
+            // myTable.ajax.url(url).load();
+            // myTable.state.clear();
+            // myTable.search('').columns().search('').draw();          
 
         }); // CHANGE selected
 
