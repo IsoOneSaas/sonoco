@@ -45,37 +45,53 @@
                         <div class="p-5" id="striped-rows-table">
                             <div class="preview">
 
-                                <div id="grid-table"> 
-                                    
-                                    <div id="horizontal-form" class="pb-3">
-                                        <div class="preview ml-auto w-full">
-                                            <div class="form-inline">
-                                                <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
-                                                <select id="system-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Requisito">
-                                                    <option value="">Todos</option>
-                                                    @foreach($systems as $system)   
-                                                    <option value={{ $system->system_id }} >{{ $system->name }}</option>
-                                                    @endforeach                                                                                                        
-                                                </select>
-                                                <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
-                                                <select multiple id="process-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Proceso">
-                                                    @foreach($processes as $process)
-                                                    <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
-                                                    @endforeach
-                                                    <option value="">Todos</option>
-                                                </select>                                                
-                                                <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localización:</label>
-                                                <select multiple id="location-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Localización">
-                                                    @foreach($locations as $location)
-                                                    <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
-                                                    @endforeach                                                    
-                                                    <option value="">Todos</option>
-                                                </select>
-                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
-                                            </div>                                           
+                                <div id="grid-table">
+
+
+                                    <div id="filter-accordion" class="accordion accordion-boxed">
+                                        <div class="accordion-item">
+                                            <div id="faq-accordion-content-5" class="accordion-header">
+                                                <button class="accordion-button" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-5" aria-expanded="true" aria-controls="faq-accordion-collapse-5"><i data-lucide="filter" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Filtro</span></button>
+                                            </div>
+                                            <div id="faq-accordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-5" data-tw-parent="#faq-accordion-2">
+
+                                                <div id="horizontal-form" class="pb-3">
+                                                    <div class="preview ml-auto w-full">
+                                                        <div class="form-inline">
+                                                            <input type="text" data-daterange="true" class="datepicker form-control w-56 block mx-auto">
+                                                        </div>
+                                                        <div class="form-inline">
+                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
+                                                            <select id="system-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Requisito">
+                                                                <option value="">Todos</option>
+                                                                @foreach($systems as $system)   
+                                                                <option value={{ $system->system_id }} >{{ $system->name }}</option>
+                                                                @endforeach                                                                                                        
+                                                            </select>
+                                                            <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
+                                                            <select multiple id="process-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Proceso">
+                                                                @foreach($processes as $process)
+                                                                <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
+                                                                @endforeach
+                                                                <option value="">Todos</option>
+                                                            </select>                                                
+                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localización:</label>
+                                                            <select multiple id="location-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Localización">
+                                                                @foreach($locations as $location)
+                                                                <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
+                                                                @endforeach                                                    
+                                                                <option value="">Todos</option>
+                                                            </select>
+                                                            <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
+                                                        </div>                                           
+                                                    </div>
+                                                </div>
+
+                                            </div>
                                         </div>
                                     </div>
 
+                                    
                                     <!-- BEGIN: DataTables -->
                                     <table id="documents-table" class="table table-bordered" style="width:100%">
                                         <thead>
