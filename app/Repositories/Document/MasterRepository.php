@@ -56,13 +56,16 @@ class MasterRepository implements MasterRepositoryInterface
         $target = config('settings.document_status.publish');
         $light = false;
         $params = json_decode($slug, true);
-        //Log::debug(['PARAMETERS' => $params]);
+        Log::debug(['PARAMETERS' => $params]);
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
 
 
         $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
+        $rangeIn = $params['din'] .' 00:00:00';
+        $rangeOut = $params['dout'] .' 23:59:59';
+        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
         foreach($documents as $document) {
 
             //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
@@ -72,7 +75,7 @@ class MasterRepository implements MasterRepositoryInterface
                 $date = '';
             } else {
                 // Publicación
-                $status = $document->status()->where('action', $target)->first(['action_date']);
+                $status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
                 if($status) {
                     $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
                     $date = $dt->diffForHumans();

@@ -841,7 +841,7 @@ class ToolsClass
         //$ids = DB::table('set_job_process')->where('job_id', $job->job_id)->where('auth', 1)->pluck('process_id');
     } // setProcessesFromJobs
 
-     /** Obtiene el listado de documentos publicados y autorizados para ser visualizados
+     /** Obtiene el listado de documentos publicados y autorizados para ser visualizados *** ACTUAL
      *  @param  string $role tipo de usuario  admin/user
      * @param  boolean $auth = true si se filtra los documentos que han sido o no autorizados
      * @param  integer $uid si es null -> el usuario activo, si e != null -> el usuario con el identificador dado
@@ -899,14 +899,10 @@ class ToolsClass
             $documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');            
         } // if/else params
         
-
         if( $uid === null ) {
             $user = Auth::user();
             $uid = $user->user_id;
         }
-
-
-
         Log::debug('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 
