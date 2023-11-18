@@ -229,7 +229,7 @@
         let route = "{{ route('documents.master.index.render', ':slug') }}";
         
         // ACONDICIONAMIENTO
-        moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
+        //moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
         setFooter('documents-table', columnsDef);
         var sCol = null;
         //var sCol = isoGetStorage('master_returnCol');
@@ -247,7 +247,7 @@
         var sidArray = $("#system-selected").val();
         var pidsArray = $("#process-selected").val();
         var lidsArray = $("#location-selected").val();
-        var dateInDefault = moment().subtract(7, 'days');
+        var dateInDefault = moment().subtract(6, 'days');
         var dateOutDefault = moment();        
 
         // DATERANGE
@@ -259,18 +259,27 @@
                 daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
                 monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 applyLabel: "Aplicar",
-                cancelLabel: "Cancelar"
+                cancelLabel: "Cancelar",
+                customRangeLabel: "Personalizado",
             },
             maxDate: moment(),
             startDate: dateInDefault,
             endDate: dateOutDefault,
+            ranges: {
+                'Hoy': [moment(), moment()],
+                'Última semana': [moment().subtract(6, 'days'), moment()],
+                'Último mes': [moment().subtract(29, 'days'), moment()],
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Último semestre': [moment().subtract(5, 'months'), moment()]
+            }            
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
             $("input[name='date_start']").val(picker.startDate.format());
-            console.log(picker.startDate.format());
+            console.log(picker.startDate.format('YYYY-MM-DD'));
             $("input[name='date_end']").val(picker.endDate.format());
-            console.log(picker.endDate.format());
+            console.log(picker.endDate.format('YYYY-MM-DD'));
         });        
 
         param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: dateInDefault, dout: dateOutDefault};        

@@ -56,6 +56,11 @@ class MasterRepository implements MasterRepositoryInterface
         $target = config('settings.document_status.publish');
         $light = false;
         $params = json_decode($slug, true);
+        $time = explode("T", $params['din']);
+        $rangeIn =  $time[0] .' 00:00:00';
+        $time = explode("T", $params['dout']);
+        $rangeOut = $time[0] .' 23:59:59';
+        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
         Log::debug(['PARAMETERS' => $params]);
 
         ini_set('max_execution_time', 3600);
@@ -63,9 +68,6 @@ class MasterRepository implements MasterRepositoryInterface
 
 
         $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
-        $rangeIn = $params['din'] .' 00:00:00';
-        $rangeOut = $params['dout'] .' 23:59:59';
-        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
         foreach($documents as $document) {
 
             //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
@@ -76,6 +78,7 @@ class MasterRepository implements MasterRepositoryInterface
             } else {
                 // Publicación
                 $status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
+                //$status = $document->status()->where('action', $target)->first(['action_date']);
                 if($status) {
                     $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
                     $date = $dt->diffForHumans();
@@ -123,7 +126,7 @@ class MasterRepository implements MasterRepositoryInterface
 
         } // foreach
         
-       //Log::debug(['COUNT 3' => count($data)]);
+       Log::debug('Número de documentos filtrados: '. count($data));
 
         $results = [
             "sEcho" => 1,
