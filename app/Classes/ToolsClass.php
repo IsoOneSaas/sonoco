@@ -897,6 +897,16 @@ class ToolsClass
 
             //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);            
             $documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');            
+            // $time = explode("T", $params['din']);
+            // $rangeIn =  $time[0] .' 00:00:00';
+            // $time = explode("T", $params['dout']);
+            // $rangeOut = $time[0] .' 23:59:59';            
+            // $documents =  DocumentModel::where('documents.status', $target)->whereIn('documents.system_id', $sids)->whereIn('documents.process_id', $pids)->whereIn('documents.location_id', $lids)
+            //     ->join('document_status', function($query) use($target, $rangeIn, $rangeOut) {
+            //         $query->on('document_status.document_id', '=', 'documents.document_id');
+            //         $query->where('document_status.action', '=', $target);    
+            //     })            
+            //     ->orderBy('documents.created_at', 'desc')->get()->unique('documents.code');
         } // if/else params
         
         if( $uid === null ) {

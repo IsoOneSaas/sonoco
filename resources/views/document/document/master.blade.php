@@ -198,6 +198,7 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 @endpush
 
@@ -215,6 +216,7 @@
 <script src="{{ url('assets/js/dropzone-5.9.3/config_document_suggestion.js') }}"></script> 
 <script src="{{ url('assets/js/daterangepicker-master/moment.min.js') }}"></script>
 <script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
+<script src="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.js') }}"></script>
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 
 <script document="text/javascript">
@@ -249,38 +251,7 @@
         var lidsArray = $("#location-selected").val();
         var dateInDefault = moment().subtract(6, 'days');
         var dateOutDefault = moment();        
-
-        // DATERANGE
-        $("input[name='date_start']").val(dateInDefault.format());
-        $("input[name='date_end']").val(dateOutDefault.format());
-        $('#date-selected').daterangepicker({
-            locale: {
-                format: "YYYY/MM/DD",
-                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
-                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
-                applyLabel: "Aplicar",
-                cancelLabel: "Cancelar",
-                customRangeLabel: "Personalizado",
-            },
-            maxDate: moment(),
-            startDate: dateInDefault,
-            endDate: dateOutDefault,
-            ranges: {
-                'Hoy': [moment(), moment()],
-                'Última semana': [moment().subtract(6, 'days'), moment()],
-                'Último mes': [moment().subtract(29, 'days'), moment()],
-                'Este mes': [moment().startOf('month'), moment().endOf('month')],
-                'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                'Último semestre': [moment().subtract(5, 'months'), moment()]
-            }            
-        });
-
-        $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
-            $("input[name='date_start']").val(picker.startDate.format());
-            console.log(picker.startDate.format('YYYY-MM-DD'));
-            $("input[name='date_end']").val(picker.endDate.format());
-            console.log(picker.endDate.format('YYYY-MM-DD'));
-        });        
+     
 
         param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: dateInDefault, dout: dateOutDefault};        
         console.dir(JSON.stringify(param)); 
@@ -361,6 +332,41 @@
             },
             language: lang
         }); // datatables
+
+        // DATERANGE
+        $("input[name='date_start']").val(dateInDefault.format());
+        $("input[name='date_end']").val(dateOutDefault.format());
+        $('#date-selected').daterangepicker({
+            locale: {
+                format: "YYYY/MM/DD",
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar",
+                customRangeLabel: "Personalizado",
+            },
+            maxDate: moment(),
+            startDate: dateInDefault,
+            endDate: dateOutDefault,
+            ranges: {
+                'Hoy': [moment(), moment()],
+                'Última semana': [moment().subtract(6, 'days'), moment()],
+                'Último mes': [moment().subtract(29, 'days'), moment()],
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Último semestre': [moment().subtract(5, 'months'), moment()]
+            }            
+        });
+
+        $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
+            $("input[name='date_start']").val(picker.startDate.format());
+            console.log(picker.startDate.format('YYYY-MM-DD'));
+            $("input[name='date_end']").val(picker.endDate.format());
+            console.log(picker.endDate.format('YYYY-MM-DD'));
+        }); 
+
+        // MULTIPLESELECT
+        $('#location-selected, #process-selected').multipleSelect();
 
 
         // BOTONES
