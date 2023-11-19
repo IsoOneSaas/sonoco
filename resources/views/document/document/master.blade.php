@@ -47,7 +47,6 @@
 
                                 <div id="grid-table">
 
-
                                     <div id="filter-accordion" class="accordion accordion-boxed">
                                         <div class="accordion-item">
                                             <div id="faq-accordion-content-5" class="accordion-header">
@@ -58,33 +57,33 @@
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
                                                         <div class="form-inline">
-                                                            <input id="date-selected" type="text" class="form-control block">
+                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
+                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
                                                             <input type="hidden" name="date_start">
                                                             <input type="hidden" name="date_end">
-                                                        </div>
-                                                        <div class="form-inline">
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
-                                                            <select id="system-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Requisito">
-                                                                <option value="">Todos</option>
+                                                            <select id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
+                                                                <option value="">Todos seleccionados</option>
                                                                 @foreach($systems as $system)   
                                                                 <option value={{ $system->system_id }} >{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
-                                                            </select>
+                                                            </select>                                                            
+                                                            <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
+                                                        </div>
+                                                        <div class="form-inline">
                                                             <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
-                                                            <select multiple id="process-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Proceso">
+                                                            <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
                                                                 @foreach($processes as $process)
                                                                 <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
                                                                 @endforeach
-                                                                <option value="">Todos</option>
                                                             </select>                                                
                                                             <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localización:</label>
-                                                            <select multiple id="location-selected" class="form-control form-multiselect mt-2 border-slate-500" size="2" aria-label="Localización">
+                                                            <select multiple id="location-selected" class="form-control mt-2 border-slate-500" aria-label="Localización">
                                                                 @foreach($locations as $location)
                                                                 <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
-                                                                @endforeach                                                    
-                                                                <option value="">Todos</option>
+                                                                @endforeach
                                                             </select>
-                                                            <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
+                                                            
                                                         </div>                                           
                                                     </div>
                                                 </div>
@@ -92,8 +91,7 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    
+                                    <br />
                                     <!-- BEGIN: DataTables -->
                                     <table id="documents-table" class="table table-bordered" style="width:100%">
                                         <thead>
@@ -117,7 +115,6 @@
                                         </thead>
                                     </table>                                    
                                     <!-- END: DataTables -->
-
 
                                 </div>
 
@@ -217,6 +214,7 @@
 <script src="{{ url('assets/js/daterangepicker-master/moment.min.js') }}"></script>
 <script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
 <script src="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.js') }}"></script>
+<script src="{{ url('assets/js/multiple-select-1.6.0/dist/locale/multiple-select-es-ES.min.js') }}"></script>
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 
 <script document="text/javascript">
@@ -345,6 +343,7 @@
                 cancelLabel: "Cancelar",
                 customRangeLabel: "Personalizado",
             },
+            showDropdowns: true,
             maxDate: moment(),
             startDate: dateInDefault,
             endDate: dateOutDefault,
@@ -366,7 +365,7 @@
         }); 
 
         // MULTIPLESELECT
-        $('#location-selected, #process-selected').multipleSelect();
+        $('#system-selected, #location-selected, #process-selected').multipleSelect();
 
 
         // BOTONES
