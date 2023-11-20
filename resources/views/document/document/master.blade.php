@@ -221,6 +221,8 @@
     let $storageData = [];
     let $systemColumn = 10;
     let $locationColumn = 11;
+    let $dateInDefault;
+    let $dateOutDefault;
     $(function () {
         let columnsDef = {!! $gridColDef !!};
         let col = {{ $gridColOrd }};
@@ -246,13 +248,13 @@
         // PARAMETROS
         // var sidArray = $("#system-selected").val();
         // var pidsArray = $("#process-selected").val();
-        var lidsArray = $("#location-selected").val();
-        var dateInDefault = moment().subtract(6, 'days');
-        var dateOutDefault = moment();
+        //var lidsArray = $("#location-selected").val();
+        // $dateInDefault = moment().subtract(6, 'days').valueOf();
+        // $dateOutDefault = moment().valueOf();
         
         // Sistema
         var sidStoraged = isoGetStorage('iso_masterSystem');
-        if( sidStoraged === null ) {
+        if( (sidStoraged === null) || (sidStoraged == '') ) {
             var sidArray = $("#system-selected").val();
         } else {
             var sidArray = sidStoraged;
@@ -265,12 +267,26 @@
         console.log('PIDS ARRAY: '); 
         console.dir(pidsArray);
         
-        
+        // Localizaciones
         var lidsStoraged = isoGetStorage('iso_masterLocations');
-        console.log('LIDS STORAGE: '+ lidsStoraged);     
+        var lidsArray = setStorageArray("location-selected", lidsStoraged);  
+        console.log('LIDS ARRAY: '); 
+        console.dir(lidsArray);
+        
+        // Rango In
+        var dateIn = isoGetStorage('iso_masterDatein');
+        $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days').valueOf() : dateIn;
+        // $("input[name='date_start']").val($dateInDefault.format()); 
+        console.log('DIN : '+ $dateInDefault);
+        
+        // Rango Out
+        var dateOut = isoGetStorage('iso_masterDateout');
+        $dateOutDefault = ( dateOut === null ) ? moment().valueOf() : dateOut;
+        // $("input[name='date_end']").val($dateOutDefault.format()); 
+        console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
-        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: dateInDefault, dout: dateOutDefault};        
+        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};        
         console.dir(JSON.stringify(param)); 
 
         // DATATABLE
@@ -351,8 +367,6 @@
         }); // datatables
 
         // DATERANGE
-        $("input[name='date_start']").val(dateInDefault.format());
-        $("input[name='date_end']").val(dateOutDefault.format());
         $('#date-selected').daterangepicker({
             locale: {
                 format: "YYYY/MM/DD",
@@ -364,8 +378,8 @@
             },
             showDropdowns: true,
             maxDate: moment(),
-            startDate: dateInDefault,
-            endDate: dateOutDefault,
+            startDate: $dateInDefault,
+            endDate: $dateOutDefault,
             ranges: {
                 'Hoy': [moment(), moment()],
                 'Última semana': [moment().subtract(6, 'days'), moment()],
@@ -377,10 +391,14 @@
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
-            $("input[name='date_start']").val(picker.startDate.format());
-            console.log(picker.startDate.format('YYYY-MM-DD'));
-            $("input[name='date_end']").val(picker.endDate.format());
-            console.log(picker.endDate.format('YYYY-MM-DD'));
+            //$("input[name='date_start']").val(picker.startDate.format());
+            $dateInDefault = picker.startDate.valueOf();
+            //console.log(picker.startDate.format('YYYY-MM-DD'));
+            console.log('DIN : '+$dateInDefault);
+            //$("input[name='date_end']").val(picker.endDate.format());
+            $dateOutDefault = picker.endDate.valueOf();
+            //console.log(picker.endDate.format('YYYY-MM-DD'));
+            console.log('DOUT : '+$dateOutDefault);
         }); 
 
         // MULTIPLESELECT
@@ -447,9 +465,9 @@
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
-            var dateInStr = $("input[name='date_start']").val();
-            var dateOutStr = $("input[name='date_end']").val();
-            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: dateInStr, dout: dateOutStr};
+            // var dateInStr = $("input[name='date_start']").val();
+            // var dateOutStr = $("input[name='date_end']").val();
+            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};
             console.dir(JSON.stringify(params));
             
             // Ajax
@@ -463,8 +481,8 @@
             isoSetStorage('iso_masterSystem', sidValue);
             isoSetStorage('iso_masterProcesses', pidsArray);
             isoSetStorage('iso_masterLocations', lidsArray);
-            isoSetStorage('iso_masterDatein', dateInStr);
-            isoSetStorage('iso_masterDateout', dateOutStr);
+            isoSetStorage('iso_masterDatein', $dateInDefault);
+            isoSetStorage('iso_masterDateout', $dateOutDefault);
 
         }); // CHANGE selected
 
@@ -579,12 +597,15 @@
         console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
         if( storaged === null ) {
             output = $("#"+tag).val();
-        } else {            
+        } else { 
+            $("#"+tag+" option").prop("selected", false);           
             if( storaged.indexOf(",") == -1 ) {
                 // valor único
                 output = [storaged];
+                console.log('val: '+ storaged);
+                $('#'+tag+' option[value='+storaged+']').prop('selected', 'selected');                
             } else {
-                // arreglo
+                // arreglo                
                 output = storaged.split(',');
                 $.each(output, function(i, val) {
                     console.log('val: '+ val);

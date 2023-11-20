@@ -56,12 +56,12 @@ class MasterRepository implements MasterRepositoryInterface
         $target = config('settings.document_status.publish');
         $light = false;
         $params = json_decode($slug, true);
-        $time = explode("T", $params['din']);
-        $rangeIn =  $time[0] .' 00:00:00';
-        $time = explode("T", $params['dout']);
-        $rangeOut = $time[0] .' 23:59:59';
-        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
+
+        $rangeIn = date('Y-m-d', (int)$params['din']/1000) .' 00:00:00'; 
+        $rangeOut = date('Y-m-d', (int)$params['dout']/1000) .' 23:59:59'; 
+        
         Log::debug(['PARAMETERS' => $params]);
+        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
