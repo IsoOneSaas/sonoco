@@ -244,13 +244,32 @@
         setTypes();
 
         // PARAMETROS
-        var sidArray = $("#system-selected").val();
-        var pidsArray = $("#process-selected").val();
+        // var sidArray = $("#system-selected").val();
+        // var pidsArray = $("#process-selected").val();
         var lidsArray = $("#location-selected").val();
         var dateInDefault = moment().subtract(6, 'days');
-        var dateOutDefault = moment();        
-     
+        var dateOutDefault = moment();
+        
+        // Sistema
+        var sidStoraged = isoGetStorage('iso_masterSystem');
+        if( sidStoraged === null ) {
+            var sidArray = $("#system-selected").val();
+        } else {
+            var sidArray = sidStoraged;
+            $('#system-selected option[value='+sidStoraged+']').prop('selected', 'selected');
+        }
 
+        // Procesos
+        var pidsStoraged = isoGetStorage('iso_masterProcesses');        
+        var pidsArray = setStorageArray("process-selected", pidsStoraged);        
+        console.log('PIDS ARRAY: '); 
+        console.dir(pidsArray);
+        
+        
+        var lidsStoraged = isoGetStorage('iso_masterLocations');
+        console.log('LIDS STORAGE: '+ lidsStoraged);     
+
+        // JSon
         param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: dateInDefault, dout: dateOutDefault};        
         console.dir(JSON.stringify(param)); 
 
@@ -432,12 +451,20 @@
             var dateOutStr = $("input[name='date_end']").val();
             params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: dateInStr, dout: dateOutStr};
             console.dir(JSON.stringify(params));
-
+            
+            // Ajax
             var url =  route.replace(':slug', JSON.stringify(params));
             startTime = Date.now();
             myTable.ajax.url(url).load();
             myTable.state.clear();
-            myTable.search('').columns().search('').draw();          
+            myTable.search('').columns().search('').draw(); 
+
+            // Store
+            isoSetStorage('iso_masterSystem', sidValue);
+            isoSetStorage('iso_masterProcesses', pidsArray);
+            isoSetStorage('iso_masterLocations', lidsArray);
+            isoSetStorage('iso_masterDatein', dateInStr);
+            isoSetStorage('iso_masterDateout', dateOutStr);
 
         }); // CHANGE selected
 
@@ -545,7 +572,28 @@
                 $("#filter-typeName").html(output);
             } // success
         });
-    } // setTypes Fx      
+    } // setTypes Fx
+    
+    function setStorageArray(tag, storaged) {
+        var output = [];
+        console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
+        if( storaged === null ) {
+            output = $("#"+tag).val();
+        } else {            
+            if( storaged.indexOf(",") == -1 ) {
+                // valor único
+                output = [storaged];
+            } else {
+                // arreglo
+                output = storaged.split(',');
+                $.each(output, function(i, val) {
+                    console.log('val: '+ val);
+                    $('#'+tag+' option[value='+val+']').prop('selected', 'selected');
+                });                 
+            }           
+        }
+        return output;
+    } // setStorage Fx
 
 </script>
 
