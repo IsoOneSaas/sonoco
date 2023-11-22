@@ -249,8 +249,8 @@
         // var sidArray = $("#system-selected").val();
         // var pidsArray = $("#process-selected").val();
         //var lidsArray = $("#location-selected").val();
-        // $dateInDefault = moment().subtract(6, 'days').valueOf();
-        // $dateOutDefault = moment().valueOf();
+        // $dateInDefault = moment().subtract(6, 'days');
+        // $dateOutDefault = moment();
         
         // Sistema
         var sidStoraged = isoGetStorage('iso_masterSystem');
@@ -275,14 +275,14 @@
         
         // Rango In
         var dateIn = isoGetStorage('iso_masterDatein');
-        $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days').valueOf() : dateIn;
-        // $("input[name='date_start']").val($dateInDefault.format()); 
+        $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
+        // $("input[name='date_start']").val($dateInDefault); 
         console.log('DIN : '+ $dateInDefault);
         
         // Rango Out
         var dateOut = isoGetStorage('iso_masterDateout');
-        $dateOutDefault = ( dateOut === null ) ? moment().valueOf() : dateOut;
-        // $("input[name='date_end']").val($dateOutDefault.format()); 
+        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
+        // $("input[name='date_end']").val($dateOutDefault); 
         console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
@@ -378,8 +378,10 @@
             },
             showDropdowns: true,
             maxDate: moment(),
+            //startDate: moment($dateInDefault, 'YYYY-MM-DDTHH:mm:ssZ').format(),
+            //endDate: moment($dateOutDefault, 'YYYY-MM-DDTHH:mm:ssZ').format(),
             startDate: $dateInDefault,
-            endDate: $dateOutDefault,
+            endDate: $dateOutDefault,            
             ranges: {
                 'Hoy': [moment(), moment()],
                 'Última semana': [moment().subtract(6, 'days'), moment()],
@@ -391,12 +393,12 @@
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
-            //$("input[name='date_start']").val(picker.startDate.format());
-            $dateInDefault = picker.startDate.valueOf();
+            $("input[name='date_start']").val(picker.startDate); // .format()
+            $dateInDefault = picker.startDate.format();
             //console.log(picker.startDate.format('YYYY-MM-DD'));
             console.log('DIN : '+$dateInDefault);
-            //$("input[name='date_end']").val(picker.endDate.format());
-            $dateOutDefault = picker.endDate.valueOf();
+            $("input[name='date_end']").val(picker.endDate);
+            $dateOutDefault = picker.endDate.format();
             //console.log(picker.endDate.format('YYYY-MM-DD'));
             console.log('DOUT : '+$dateOutDefault);
         }); 
