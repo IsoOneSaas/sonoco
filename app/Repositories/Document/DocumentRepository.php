@@ -22,6 +22,7 @@ use App\Models\Set\UserModel;
 //use App\Traits\Document\ControlDocumentsTrait;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
@@ -608,7 +609,11 @@ class DocumentRepository implements DocumentRepositoryInterface
         
         // DETERMINAR ESTADO ACTUAL DE FLUJO (Si ya está en edición)
         $createdStatus = StatusModel::where('document_id', $id)->where('action', config('settings.document_status.create'))->first(['return_by']);
-        $document->flow = ( $createdStatus && ($createdStatus->return_by == null) ) ? '0' : '1';
+		if( Auth::user()->hasAnyRole('MASTER','SUPER') ) {
+			$document->flow = '0';
+		} else {			
+			$document->flow = ( $createdStatus && ($createdStatus->return_by == null) ) ? '0' : '1';
+		}
 
         //Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;

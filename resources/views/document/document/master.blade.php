@@ -59,8 +59,6 @@
                                                         <div class="form-inline">
                                                             <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
                                                             <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
-                                                            <input type="hidden" name="date_start">
-                                                            <input type="hidden" name="date_end">
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
                                                             <select id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
                                                                 <option value="">Todos seleccionados</option>
@@ -234,21 +232,17 @@
         //moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
         setFooter('documents-table', columnsDef);
         var sCol = null;
-        //var sCol = isoGetStorage('master_returnCol');
-        //var sDir = isoGetStorage('master_returnDir');
-        var initPage = ( isoGetStorage('master_returnPage') === null ) ? 1 : isoGetStorage('master_returnPage'); 
+        var sCol = isoGetStorage('iso_masterReturnCol');
+        var sDir = isoGetStorage('iso_masterReturnDir');
+        var initPage = ( isoGetStorage('iso_masterReturnPage') === null ) ? 1 : isoGetStorage('iso_masterReturnPage'); 
         var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ 14, sDir]]; // sCol
+        var initRecords = ( isoGetStorage('iso_masterReturnRows') === null ) ? 10 : isoGetStorage('iso_masterReturnRows');
+        //var initFilter = ( isoGetStorage('iso_masterFilter') === null ) ? 'collapse' : isoGetStorage('iso_masterFilter');
 
         // FILTROS GENERALES
-        //setSystems();
-        //setLocations();
-        //setProcesses();
         setTypes();
 
         // PARAMETROS
-        // var sidArray = $("#system-selected").val();
-        // var pidsArray = $("#process-selected").val();
-        //var lidsArray = $("#location-selected").val();
         // $dateInDefault = moment().subtract(6, 'days');
         // $dateOutDefault = moment();
         
@@ -276,13 +270,11 @@
         // Rango In
         var dateIn = isoGetStorage('iso_masterDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
-        // $("input[name='date_start']").val($dateInDefault); 
         console.log('DIN : '+ $dateInDefault);
         
         // Rango Out
         var dateOut = isoGetStorage('iso_masterDateout');
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
-        // $("input[name='date_end']").val($dateOutDefault); 
         console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
@@ -301,12 +293,11 @@
         })
         .DataTable({
             bProcessing: true,
-            //sAjaxSource: "/documentos/master/test2",
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsDef,
             retrieve: true,
             //dom: 'Blfrtip',
-            pageLength: 10,
+            pageLength: initRecords,
             order: initOrder,
             orderClasses: false,
             responsive: true,
@@ -369,7 +360,7 @@
         // DATERANGE
         $('#date-selected').daterangepicker({
             locale: {
-                format: "YYYY/MM/DD",
+                format: "YYYY/MM/DD",   // FIXME:
                 daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
                 monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 applyLabel: "Aplicar",
@@ -378,8 +369,6 @@
             },
             showDropdowns: true,
             maxDate: moment(),
-            //startDate: moment($dateInDefault, 'YYYY-MM-DDTHH:mm:ssZ').format(),
-            //endDate: moment($dateOutDefault, 'YYYY-MM-DDTHH:mm:ssZ').format(),
             startDate: $dateInDefault,
             endDate: $dateOutDefault,            
             ranges: {
@@ -393,13 +382,9 @@
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
-            $("input[name='date_start']").val(picker.startDate); // .format()
             $dateInDefault = picker.startDate.format();
-            //console.log(picker.startDate.format('YYYY-MM-DD'));
             console.log('DIN : '+$dateInDefault);
-            $("input[name='date_end']").val(picker.endDate);
             $dateOutDefault = picker.endDate.format();
-            //console.log(picker.endDate.format('YYYY-MM-DD'));
             console.log('DOUT : '+$dateOutDefault);
         }); 
 
@@ -426,10 +411,11 @@
                 // Storage
                 var info = myTable.page.info();
                 var order = myTable.order();             
-                isoSetStorage('iso_returnUrl', isoGetCurrentURL());
-                isoSetStorage('iso_returnPage', info.page);
-                isoSetStorage('iso_returnCol', order[0][0]);
-                isoSetStorage('iso_returnDir', order[0][1]);
+                isoSetStorage('iso_masterReturnUrl', isoGetCurrentURL());
+                isoSetStorage('iso_masterReturnPage', info.page);
+                isoSetStorage('iso_masterReturnCol', order[0][0]);
+                isoSetStorage('iso_masterReturnDir', order[0][1]);
+                isoSetStorage('iso_masterReturnRows', info.length);
                 // Ref
                 uri = uri.replace(':hash', hash);
                 location.href = uri;                                 
@@ -467,8 +453,6 @@
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
-            // var dateInStr = $("input[name='date_start']").val();
-            // var dateOutStr = $("input[name='date_end']").val();
             params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};
             console.dir(JSON.stringify(params));
             
@@ -484,8 +468,8 @@
             isoSetStorage('iso_masterProcesses', pidsArray);
             isoSetStorage('iso_masterLocations', lidsArray);
             isoSetStorage('iso_masterDatein', $dateInDefault);
-            isoSetStorage('iso_masterDateout', $dateOutDefault);
-
+            isoSetStorage('iso_masterDateout', $dateOutDefault); //
+            //isoSetStorage('iso_masterFilter', $dateOutDefault);
         }); // CHANGE selected
 
         // Filtro de palabras clave

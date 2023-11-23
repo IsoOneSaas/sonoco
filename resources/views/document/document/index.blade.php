@@ -50,6 +50,31 @@
                             <div class="preview">
 
                                 <div id="grid-table">
+
+                                    <div id="filter-accordion" class="accordion accordion-boxed">
+                                        <div class="accordion-item">
+                                            <div id="faq-accordion-content-5" class="accordion-header">
+                                                <button class="accordion-button" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-5" aria-expanded="true" aria-controls="faq-accordion-collapse-5"><i data-lucide="filter" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Filtro</span></button>
+                                            </div>
+                                            <div id="faq-accordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-5" data-tw-parent="#faq-accordion-2">
+
+                                                <div id="horizontal-form" class="pb-3">
+                                                    <div class="preview ml-auto w-full">
+                                                        <div class="form-inline">
+                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
+                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
+
+
+                                                        </div>                                           
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <!-- BEGIN: DataTables -->
+
                                     
                                     <div id="horizontal-form" class="pb-3">
                                         <div class="preview ml-auto w-3/4">
@@ -161,6 +186,8 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />    
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 @endpush
 
@@ -174,6 +201,10 @@
 <script src="{{ url('assets/js/datatables/pdfmake-0.2.7/vfs_fonts.js') }}"></script>
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
+<script src="{{ url('assets/js/daterangepicker-master/moment.min.js') }}"></script>
+<script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
+<script src="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.js') }}"></script>
+<script src="{{ url('assets/js/multiple-select-1.6.0/dist/locale/multiple-select-es-ES.min.js') }}"></script>
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 
 <script document="text/javascript">
@@ -192,6 +223,8 @@
         let route = "{{ route('documents.control.documento.show', ':slug') }}";
         let param = [];
         let filterColumn = 13;
+        let $dateInDefault;
+        let $dateOutDefault;        
         //let initPage = 1;
         //let initOrder =  [[ col, 'desc']]; 
         console.dir(lang1);
@@ -204,6 +237,7 @@
         
         var timeSelected = isoGetStorage('iso_selectTime');
         var currentTimeSelected = ( timeSelected === null) ? $("#time-selected").val() : timeSelected;
+
         var statusSelected = isoGetStorage('iso_selectStatus');
         var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected; 
         var textSearch = isoGetStorage('iso_searchText');
@@ -214,8 +248,7 @@
         // PARAMETROS
         //console.log('timeSelected: '+timeSelected);        
         setFooter('documents-table', columnsConf);
-        param = {time: currentTimeSelected, status: currentStatusSelected};
-        //console.dir(JSON.stringify(param));   
+        
 
         // FILTROS GENERALES
         setProcesses();
@@ -226,6 +259,21 @@
         $('#status-selected option[value='+statusSelected+']').prop('selected', 'selected');
         $('#text-search').val(currentSearchText);
         $("input[name='radio-search']").filter("[value="+currentSearchRadio+"]").prop('checked', true);
+
+        // Rango In
+        var dateIn = isoGetStorage('iso_controlDatein');
+        $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
+        console.log('DIN : '+ $dateInDefault);
+        
+        // Rango Out
+        var dateOut = isoGetStorage('iso_controlDateout');
+        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
+        console.log('DOUT : '+ $dateOutDefault); 
+        
+        // JSon
+        
+        param = {time: currentTimeSelected, status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault};       
+        console.dir(JSON.stringify(param));         
                 
         // DATATABLE
         var startTime = Date.now();
@@ -313,6 +361,37 @@
             },                                    
             language: lang1               
         }); // datatables
+
+        // DATERANGE
+        $('#date-selected').daterangepicker({
+            locale: {
+                format: "YYYY/MM/DD",   // FIXME:
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar",
+                customRangeLabel: "Personalizado",
+            },
+            showDropdowns: true,
+            maxDate: moment(),
+            startDate: $dateInDefault,
+            endDate: $dateOutDefault,            
+            ranges: {
+                'Hoy': [moment(), moment()],
+                'Última semana': [moment().subtract(6, 'days'), moment()],
+                'Último mes': [moment().subtract(29, 'days'), moment()],
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Último semestre': [moment().subtract(5, 'months'), moment()]
+            }            
+        });
+
+        $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
+            $dateInDefault = picker.startDate.format();
+            console.log('DIN : '+$dateInDefault);
+            $dateOutDefault = picker.endDate.format();
+            console.log('DOUT : '+$dateOutDefault);
+        });        
         
         
         // BUTTONS       
