@@ -188,11 +188,11 @@ class ProcessRepository implements ProcessRepositoryInterface
                 // Tabla pivote de departamementos
                 $process->departments()->attach($data['department_id']);
                 // Tabla pivote de procesos
-                $jobs_array = [];
-                for($i=0; $i<count($data['auth_id']); $i++) {
-                    $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
-                }
-                $process->jobs()->attach($jobs_array);
+                // $jobs_array = [];
+                // for($i=0; $i<count($data['auth_id']); $i++) {
+                //     $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
+                // }
+                // $process->jobs()->attach($jobs_array);
                 DB::commit();            
              } else {
                 DB::rollBack();
@@ -223,11 +223,11 @@ class ProcessRepository implements ProcessRepositoryInterface
                 // Tabla pivote
                 $process->departments()->sync($data['department_id']);
                 // Tabla pivote de procesos
-                $jobs_array = [];
-                for($i=0; $i<count($data['auth_id']); $i++) {
-                    $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
-                }
-                $process->jobs()->sync($jobs_array);                
+                // $jobs_array = [];
+                // for($i=0; $i<count($data['auth_id']); $i++) {
+                //     $jobs_array[$data['auth_id'][$i]] = ['auth' => 1];
+                // }
+                // $process->jobs()->sync($jobs_array);                
                 DB::commit();            
              } else {
                 DB::rollBack();

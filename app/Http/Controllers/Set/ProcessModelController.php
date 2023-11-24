@@ -54,8 +54,8 @@ class ProcessModelController extends Controller
     public function create() : View
     {
         $departments = $this->processRepo->departments(null);
-        $auths = $this->processRepo->auth(null);
-        return view('settings.process.create', compact('departments','auths'));
+        //$auths = $this->processRepo->auth(null);
+        return view('settings.process.create', compact('departments')); // ,'auths'
     } // create Method
 
     /**
@@ -75,8 +75,8 @@ class ProcessModelController extends Controller
         $process = $this->processRepo->get($hash);
         //Log::debug(['PROCESS' => $process->toArray()]);
         $departments = $this->processRepo->departments($process->departments);
-        $auths = $this->processRepo->auth($process->jobs()->where('set_job_process.auth', 1));
-        return view('settings.process.edit', compact('process','departments','auths'));
+        //$auths = $this->processRepo->auth($process->jobs()->where('set_job_process.auth', 1));
+        return view('settings.process.edit', compact('process','departments')); // ,'auths'
     } // edit Method
 
     /**

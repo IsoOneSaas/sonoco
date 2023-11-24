@@ -52,6 +52,18 @@
                                         <option value={{ $department->department_id }} @if( $department->selected ) selected @endif >{{ $department->name }}</option>
                                         @endforeach
                                     </select>                                    
+                                    <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                </div> 
+
+
+                                    {{-- <div class="input-group mt-3">
+                                    <div id="department-id" class="input-group-text flex"><i data-lucide="{{ trans('process.form.department.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.department.title') }}</div>
+                                    <select id="select-department" name="department_id[]" class="form-control tom-select w-full" multiple required>
+                                        <option value=''>{{ trans('process.form.department.placeholder') }}</option>
+                                        @foreach($departments as $department)   
+                                        <option value={{ $department->department_id }} @if( $department->selected ) selected @endif >{{ $department->name }}</option>
+                                        @endforeach
+                                    </select>                                    
                                     <div id="input-group-2" class="input-group-text  mr-2"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
                                     <div id="auth-id" class="input-group-text flex"><i data-lucide="{{ trans('process.form.auth.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.auth.title') }}</div>
@@ -62,7 +74,7 @@
                                         @endforeach
                                     </select>                                    
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('process.form.auth.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                </div> 
+                                </div> --}} 
 
                                 <div class="input-group mt-3">
                                     <div id="job-id" class="input-group-text flex w-52"><i data-lucide="{{ trans('process.form.job.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('process.form.job.title') }}</div>
@@ -94,14 +106,14 @@
         var ids = $("#select-department").val();
         var txt = "{{ trans('process.form.job.placeholder') }}";
         var url = '/parametrizacion/procesos/cargoslider/'+pid+'/'+JSON.stringify(ids); 
-        console.dir(ids);
+        //console.dir(ids);
         setSelectGroup(url, "select[name=job_id]", txt);            
 
         $('body').on('change', '#select-department', function (e) {
             e.preventDefault();
             ids = $("#select-department").val();
             url = '/parametrizacion/procesos/cargoslider/'+pid+'/'+JSON.stringify(ids);            
-            console.dir(ids);
+            //console.dir(ids);
             setSelectGroup(url, "select[name=job_id]", txt);            
         }); // change
     }); // document

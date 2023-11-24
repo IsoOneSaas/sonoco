@@ -27,7 +27,7 @@ class StoreProcessModelRequest extends FormRequest
             'target'        => 'required|min:8',
             'job_id'        => 'required',
             'department_id' => 'required|array|min:1',            
-            'auth_id'       => 'required|array|min:1', 
+            //'auth_id'       => 'required|array|min:1', 
         ];
     }
 

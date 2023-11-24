@@ -66,7 +66,7 @@
                                                                 <option value={{ $system->system_id }} >{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
                                                             </select>                                                            
-                                                            <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>                                                                                     
+                                                            <button id="btn-filter" class="btn btn-primary shadow-md ml-3"><i data-lucide="filter" class="w-4 h-4"></i></button>                                                                                     
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
@@ -81,7 +81,7 @@
                                                                 <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
                                                                 @endforeach
                                                             </select>
-                                                            
+                                                            <img id="loading-image" alt="Cargando..." class="h-10 inline-flex ml-10" src="{{ url('/assets/images/loading_small.gif') }}">
                                                         </div>                                           
                                                     </div>
                                                 </div>
@@ -290,6 +290,7 @@
         })
         .on('xhr.dt', function () {
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
+            $("#loading-image").hide();
         })
         .DataTable({
             bProcessing: true,
@@ -352,7 +353,8 @@
                             column.search( this.value ).draw();
                         }
                     });   
-                });                
+                });
+                             
             },
             language: lang
         }); // datatables
@@ -449,12 +451,13 @@
 
         // FILTROS
         //$('#system-selected, #process-selected, #location-selected').on('change', function() {
-        $("#btn-search").on("click", function() {
+        $("#btn-filter").on("click", function() {
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
             params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};
             console.dir(JSON.stringify(params));
+            $("#loading-image").show();
             
             // Ajax
             var url =  route.replace(':slug', JSON.stringify(params));
