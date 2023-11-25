@@ -895,8 +895,18 @@ class ToolsClass
                 }
             }
 
-            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos]);            
-            $documents =  DocumentModel::where('status', $target)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->orderBy('created_at', 'desc')->get()->unique('code');            
+            $search = ( strlen($params['txt']) > 2 ) ? $params['txt'] : '';
+
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos, 'SEARCH' => $search]);            
+            $documents =  DocumentModel::where('status', $target)
+                ->whereIn('system_id', $sids)
+                ->whereIn('process_id', $pids)
+                ->whereIn('location_id', $lids)
+                ->where(function($query) use($search) {
+                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                })
+                ->orderBy('created_at', 'desc')
+                ->get()->unique('code');            
             // $time = explode("T", $params['din']);
             // $rangeIn =  $time[0] .' 00:00:00';
             // $time = explode("T", $params['dout']);

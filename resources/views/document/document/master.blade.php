@@ -47,15 +47,20 @@
 
                                 <div id="grid-table">
 
-                                    <div id="filter-accordion" class="accordion accordion-boxed">
+                                    <div id="faq-accordion-2" class="accordion accordion-boxed">
+
                                         <div class="accordion-item">
-                                            <div id="faq-accordion-content-5" class="accordion-header">
-                                                <button class="accordion-button" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-5" aria-expanded="true" aria-controls="faq-accordion-collapse-5"><i data-lucide="filter" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Filtro</span></button>
+                                            <div id="faq-accordion-content-6" class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
                                             </div>
-                                            <div id="faq-accordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-5" data-tw-parent="#faq-accordion-2">
+                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
+                                                        <div class="form-inline">
+                                                            <label for="text-input" class="form-label sm:w-20 text-right pt-3">Texto:</label>
+                                                            <input id="text-input" type="text" class="form-control mt-2 border-slate-500" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
+                                                        </div>
                                                         <div class="form-inline">
                                                             <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
                                                             <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
@@ -66,7 +71,7 @@
                                                                 <option value={{ $system->system_id }} >{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
                                                             </select>                                                            
-                                                            <button id="btn-filter" class="btn btn-primary shadow-md ml-3"><i data-lucide="filter" class="w-4 h-4"></i></button>                                                                                     
+                                                                                                                                                
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
@@ -81,14 +86,18 @@
                                                                 <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
                                                                 @endforeach
                                                             </select>
-                                                            <img id="loading-image" alt="Cargando..." class="h-10 inline-flex ml-10" src="{{ url('/assets/images/loading_small.gif') }}">
+                                                            
+                                                        </div>
+                                                        <div class="flex mt-3 justify-center">
+                                                            <button id="btn-filter" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
                                                         </div>                                           
                                                     </div>
-                                                </div>
+                                                </div>                                            
 
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>                                
+
                                     <br />
                                     <!-- BEGIN: DataTables -->
                                     <table id="documents-table" class="table table-bordered" style="width:100%">
@@ -278,7 +287,7 @@
         console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
-        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};        
+        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: ''};        
         console.dir(JSON.stringify(param)); 
 
         // DATATABLE
@@ -455,7 +464,8 @@
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
-            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault};
+            var text = $("#text-input").val();
+            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text};
             console.dir(JSON.stringify(params));
             $("#loading-image").show();
             
