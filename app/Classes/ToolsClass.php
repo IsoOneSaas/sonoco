@@ -18,6 +18,7 @@ use App\Models\Document\AuthorizationModel;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\StatusModel;
+use App\Models\Document\TypeModel;
 use App\Models\Document\ValidationDocModel;
 use App\Models\Document\ValidationTypeModel;
 
@@ -850,7 +851,7 @@ class ToolsClass
     public function setPublishedDocumentsCollection($role, $auth, $uid = null, $params = null)
     {
         $target = config('settings.document_status.publish');
-        //Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
+        Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
 
         if( $role == 'admin' ) {
             $dptos = $this->setDepartmentsFilter($uid);
@@ -868,12 +869,23 @@ class ToolsClass
             $arr = explode('T', $params['dout'] ); 
             $rangeOut = $arr[0] .' 23:59:59';  
 
+            // Tipos
+            if( key_exists('tids', $params) ) {
+                $tids =  $params['tids'];
+            } else {
+                $plucked = TypeModel::all()->pluck('type_id');
+                $tids =  $plucked->all();
+            }
+
+            // Requisitos
             if( $params['sid'] == '' ) {
                 $plucked = SystemModel::all()->pluck('system_id');
                 $sids = $plucked->all();
             } else {
                 $sids = [$params['sid']];
             }
+
+            // Procesos & Localizaciones
             $user = ($uid === null) ? Auth::user() : UserModel::find($uid);
             if( $user->hasAnyRole('MASTER','SUPER') ) {
                 $pids = ProcessModel::all()->pluck('process_id');
@@ -907,11 +919,12 @@ class ToolsClass
 
             $search = ( isset($params['txt']) && (strlen($params['txt']) > 2) ) ? $params['txt'] : '';
 
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos, 'SEARCH' => $search, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)
                 ->whereIn('location_id', $lids)
+                ->whereIn('type_id', $tids)
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })

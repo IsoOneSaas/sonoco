@@ -59,7 +59,7 @@
                                                     <div class="preview ml-auto w-full">
                                                         <div class="form-inline">
                                                             <label for="text-input" class="form-label sm:w-20 text-right pt-3">Texto:</label>
-                                                            <input id="text-input" type="text" class="form-control mt-2 border-slate-500" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
+                                                            <input id="text-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
@@ -212,6 +212,32 @@
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+    <style>
+            span.deleteicon {
+                position: relative;
+                display: inline-flex;
+                align-items: center;                
+            }
+            span.deleteicon span {
+                position: absolute;
+                display: block;
+                right: 3px;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                color: #fff;
+                background-color: #ccc;
+                font: 13px monospace;
+                text-align: center;
+                line-height: 1em;
+                cursor: pointer;
+                margin-top: 8px;
+            }
+            span.deleteicon input {
+                padding-right: 18px;
+                box-sizing: border-box;
+            }
+        </style>    
 @endpush
 
 @push('scripts-bottom')
@@ -293,10 +319,11 @@
             $("#type-selected").multipleSelect('checkAll');
             var tidsArray = $("#type-selected").val();
         } else {
-            var tidsArray = tidsStoraged;
-            $.each(tidsArray, function($i, tid) {
-                $('#type-selected option[value='+tid+']').prop('selected', 'selected');
-            });            
+            var tidsArray = setStorageArray("type-selected", tidsStoraged); 
+            // console.dir(tidsArray);
+            // for(var i in tidsArray) {
+            //     $('#type-selected option[value='+ tidsArray[i] +']').prop('selected', 'selected');
+            // } 
         }
         console.log('TIDS ARRAY: '); 
         console.dir(tidsArray);        
@@ -471,6 +498,10 @@
         $("#btn-colvis").on("click", function() {
             myTable.button('.buttons-colvis').trigger();
         });
+
+        $('input.deletable').wrap('<span class="deleteicon"></span>').after($('<span>x</span>').click(function() {
+            $(this).prev('input').val('').trigger('change').focus();
+        }));        
         
         // Seleccionar fila
         $('#documents-table').on('click', 'tr', function () {
@@ -492,6 +523,7 @@
             var tidsArray = $("#type-selected").val();
             var text = $("#text-input").val();
             params = {sid: sidValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text};
+            console.log('Searching...');
             console.dir(JSON.stringify(params));
             $("#loading-image").show();
             
