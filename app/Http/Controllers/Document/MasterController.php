@@ -45,6 +45,7 @@ class MasterController extends Controller
         $systems = $this->documentRepo->systems();
         $processes = $this->documentRepo->processes();
         $locations = $this->documentRepo->locations();
+        $types = $this->documentRepo->types();
 
         //Log::debug(['PROCESSES ARRAY' => $processes->toArray()]);
         
@@ -54,6 +55,7 @@ class MasterController extends Controller
             'systems'       => $systems,
             'processes'     => $processes,
             'locations'     => $locations,
+            'types'         => $types,
             'gridColOrd'    => $columnDefinition['column_order'],
             'gridColDef'    => $columnDefinition['column_json'], 
             'gridColExp'    => $columnDefinition['column_export'],

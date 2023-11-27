@@ -11,6 +11,8 @@ interface MasterRepositoryInterface
 
     public function locations();
 
+    public function types();
+
     public function openDocument($id);
 
     public function closeDocument($id, $session);

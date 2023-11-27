@@ -861,6 +861,13 @@ class ToolsClass
         if( $params === null ) {
             $documents =  DocumentModel::where('status', $target)->orderBy('created_at', 'desc')->get()->unique('code');
         } else {
+
+            // Range Date // TODO: si no existe 
+            $arr = explode('T', $params['din'] );
+            $rangeIn = $arr[0] .' 00:00:00';
+            $arr = explode('T', $params['dout'] ); 
+            $rangeOut = $arr[0] .' 23:59:59';  
+
             if( $params['sid'] == '' ) {
                 $plucked = SystemModel::all()->pluck('system_id');
                 $sids = $plucked->all();
@@ -893,11 +900,14 @@ class ToolsClass
                 } else {
                     $lids = $params['lids'];
                 }
+
+                 
+
             }
 
-            $search = ( strlen($params['txt']) > 2 ) ? $params['txt'] : '';
+            $search = ( isset($params['txt']) && (strlen($params['txt']) > 2) ) ? $params['txt'] : '';
 
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos, 'SEARCH' => $search]);            
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'DIDS' => $dptos, 'SEARCH' => $search, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)
@@ -905,6 +915,7 @@ class ToolsClass
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
                 ->orderBy('created_at', 'desc')
                 ->get()->unique('code');            
             // $time = explode("T", $params['din']);

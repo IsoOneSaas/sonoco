@@ -60,13 +60,13 @@ class MasterRepository implements MasterRepositoryInterface
         // $rangeIn = date('Y-m-d', (int)$params['din']/1000) .' 00:00:00'; 
         // $rangeOut = date('Y-m-d', (int)$params['dout']/1000) .' 23:59:59'; 
 
-        $arr = explode('T', $params['din'] );
-        $rangeIn = $arr[0] .' 00:00:00';
-        $arr = explode('T', $params['dout'] ); 
-        $rangeOut = $arr[0] .' 23:59:59';         
+        // $arr = explode('T', $params['din'] );
+        // $rangeIn = $arr[0] .' 00:00:00';
+        // $arr = explode('T', $params['dout'] ); 
+        // $rangeOut = $arr[0] .' 23:59:59';         
         
-        Log::debug(['PARAMETERS' => $params]);
-        Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
+        // Log::debug(['PARAMETERS' => $params]);
+        // Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
@@ -82,8 +82,8 @@ class MasterRepository implements MasterRepositoryInterface
                 $date = '';
             } else {
                 // Publicación
-                $status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
-                //$status = $document->status()->where('action', $target)->first(['action_date']);
+                //$status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
+                $status = $document->status()->where('action', $target)->first(['action_date']);
                 if($status) {
                     $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
                     $date = $dt->diffForHumans();
@@ -499,7 +499,16 @@ class MasterRepository implements MasterRepositoryInterface
 
 
         return $locations;
-    } // locations    
+    } // locations 
+    
+    /**
+     * Recupera el listado de tipos de documento
+     * @return collection    Lista con id y nombre
+     */  
+    public function types()
+    {
+        return TypeModel::get(['type_id', 'name']);
+    } // types Method    
 
     /**
      * Recupera el listado de requisitos (sistemas de gestión)

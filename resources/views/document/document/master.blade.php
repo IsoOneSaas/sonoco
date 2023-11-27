@@ -80,13 +80,21 @@
                                                                 <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
                                                                 @endforeach
                                                             </select>                                                
-                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localización:</label>
+                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localizaciones:</label>
                                                             <select multiple id="location-selected" class="form-control mt-2 border-slate-500" aria-label="Localización">
                                                                 @foreach($locations as $location)
                                                                 <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
                                                                 @endforeach
                                                             </select>
                                                             
+                                                        </div>
+                                                        <div class="form-inline">
+                                                            <label for="type-selected" class="form-label sm:w-20 text-right pt-3">Tipos:</label>
+                                                            <select multiple id="type-selected" class="form-control mt-2 border-slate-500" aria-label="Tipo">
+                                                                @foreach($types as $type)
+                                                                <option value={{ $type->type_id }} >{{ $type->name }}</option>
+                                                                @endforeach
+                                                            </select>                                                             
                                                         </div>
                                                         <div class="flex mt-3 justify-center">
                                                             <button id="btn-filter" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
@@ -254,6 +262,9 @@
         // PARAMETROS
         // $dateInDefault = moment().subtract(6, 'days');
         // $dateOutDefault = moment();
+
+        // MULTIPLESELECT
+        $('#system-selected, #location-selected, #process-selected, #type-selected').multipleSelect();        
         
         // Sistema
         var sidStoraged = isoGetStorage('iso_masterSystem');
@@ -275,6 +286,20 @@
         var lidsArray = setStorageArray("location-selected", lidsStoraged);  
         console.log('LIDS ARRAY: '); 
         console.dir(lidsArray);
+
+        // Tipos
+        var tidsStoraged = isoGetStorage('iso_masterTypes');
+        if( (tidsStoraged === null) || (tidsStoraged == '') ) {
+            $("#type-selected").multipleSelect('checkAll');
+            var tidsArray = $("#type-selected").val();
+        } else {
+            var tidsArray = tidsStoraged;
+            $.each(tidsArray, function($i, tid) {
+                $('#type-selected option[value='+tid+']').prop('selected', 'selected');
+            });            
+        }
+        console.log('TIDS ARRAY: '); 
+        console.dir(tidsArray);        
         
         // Rango In
         var dateIn = isoGetStorage('iso_masterDatein');
@@ -287,7 +312,7 @@
         console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
-        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: ''};        
+        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: ''};        
         console.dir(JSON.stringify(param)); 
 
         // DATATABLE
@@ -376,20 +401,21 @@
                 monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 applyLabel: "Aplicar",
                 cancelLabel: "Cancelar",
-                customRangeLabel: "Personalizado",
+                customRangeLabel: "Personalizado"
             },
             showDropdowns: true,
             maxDate: moment(),
             startDate: $dateInDefault,
-            endDate: $dateOutDefault,            
+            endDate: $dateOutDefault,         
             ranges: {
                 'Hoy': [moment(), moment()],
                 'Última semana': [moment().subtract(6, 'days'), moment()],
                 'Último mes': [moment().subtract(29, 'days'), moment()],
                 'Este mes': [moment().startOf('month'), moment().endOf('month')],
                 'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                'Último semestre': [moment().subtract(5, 'months'), moment()]
-            }            
+                'Último semestre': [moment().subtract(5, 'months'), moment()],
+                'Todos': [moment("1970-01-01"), moment()]
+            }                     
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
@@ -399,8 +425,7 @@
             console.log('DOUT : '+$dateOutDefault);
         }); 
 
-        // MULTIPLESELECT
-        $('#system-selected, #location-selected, #process-selected').multipleSelect();
+
 
 
         // BOTONES
@@ -464,8 +489,9 @@
             var sidValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
+            var tidsArray = $("#type-selected").val();
             var text = $("#text-input").val();
-            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text};
+            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text};
             console.dir(JSON.stringify(params));
             $("#loading-image").show();
             
@@ -480,6 +506,7 @@
             isoSetStorage('iso_masterSystem', sidValue);
             isoSetStorage('iso_masterProcesses', pidsArray);
             isoSetStorage('iso_masterLocations', lidsArray);
+            isoSetStorage('iso_masterTypes', tidsArray);
             isoSetStorage('iso_masterDatein', $dateInDefault);
             isoSetStorage('iso_masterDateout', $dateOutDefault); //
             //isoSetStorage('iso_masterFilter', $dateOutDefault);
