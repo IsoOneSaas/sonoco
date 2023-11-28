@@ -236,8 +236,8 @@ class MasterController extends Controller
     private function dataTableDefinition()
     {
         // **** AGREGAR COLUMNA AFECTA INDICE DE LAS COLUMNAS QUE SON UTILIZADAS PARA BUSQUEDA GLOBAL
-        $columnOrder = 14;   // published timestamp
-        $columnExport = [2,3,4,5,6,7,8];
+        $columnOrder = 10;   // published timestamp
+        $columnExport = [2,3,4,5,6,7];
         $columns_basic = [
             ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"],                      
             ["data" => "document_id", "title" => "ID", "visible" => false, "orderable" => false],            
@@ -247,19 +247,19 @@ class MasterController extends Controller
             ["data" => "code", "title" => "Código", "searchable" => true, "className" => "dt-nowrap"], // 2
             ["data" => "name", "title" => "Nombre", "searchable" => true], // 3
             ["data" => "version", "title" => "Versión", "searchable" => true, "className" => "dt-center"],
-            ["data" => "processName", "title" => "Proceso", "searchable" => true, 'filterable' => true, 'visible' => false],
+            //["data" => "processName", "title" => "Proceso", "searchable" => true, 'filterable' => true, 'visible' => false],
             ["data" => "typeName", "title" => "Tipo Documento", "searchable" => true, 'filterable' => true],
-            ["data" => "date", "title" => "Publicado", "searchable" => true], //7
-            ["data" => "life", "title" => "Vigencia", "searchable" => true], //8
+            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => true], //6
+            ["data" => "life", "title" => "Vigencia", "searchable" => true], //7
         ];
 
         $columns_extra = [
-            ["data" => "hash", "title" => "hash", "visible" => false,  "orderable" => false], // 9
-            ["data" => "system_id", "title" => "S", "visible" => false,  "orderable" => false],    // 10
-            ["data" => "location_id", "title" => "L", "visible" => false,  "orderable" => false],  // 11
-            ["data" => "alert", "title" => "A", "visible" => false,  "orderable" => false],  // 12
-            ["data" => "keys", "title" => "K", "visible" => true,  "orderable" => false],  // 13
-            ["data" => "time", "title" => "Vida", "visible" => false,  "orderable" => true], // 14
+            ["data" => "hash", "title" => "hash", "visible" => false,  "orderable" => false], // 8
+            //["data" => "system_id", "title" => "S", "visible" => false,  "orderable" => false],    // 10
+            //["data" => "location_id", "title" => "L", "visible" => false,  "orderable" => false],  // 11
+            ["data" => "alert", "title" => "A", "visible" => false,  "orderable" => false],  // 9
+            //["data" => "keys", "title" => "K", "visible" => false,  "orderable" => false],  // 13
+            ["data" => "time", "title" => "Vida", "visible" => false,  "orderable" => true], // 10
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

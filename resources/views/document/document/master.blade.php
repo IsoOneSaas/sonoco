@@ -51,7 +51,7 @@
 
                                         <div class="accordion-item">
                                             <div id="faq-accordion-content-6" class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
                                             </div>
                                             <div id="faq-accordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
@@ -118,18 +118,42 @@
                                                 <th>Código</th>
                                                 <th>Nombre</th>
                                                 <th>Versión</th>
-                                                <th>Proceso</th>
                                                 <th>Tipo Documento</th>
                                                 <th>Publicado</th>
                                                 <th>Vigencia</th>
                                                 <th>H</th>
-                                                <th>S</th>
-                                                <th>L</th>
                                                 <th>A</th>
-                                                <th>K</th>
                                                 <th>T</th>
                                             </tr>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Id</th>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Versión</th>
+                                                <th>Tipo Documento</th>
+                                                <th>Publicado</th>
+                                                <th>Vigencia</th>
+                                                <th>H</th>
+                                                <th>A</th>
+                                                <th>T</th>
+                                            </tr>                                            
                                         </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Id</th>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Versión</th>
+                                                <th>Tipo Documento</th>
+                                                <th>Publicado</th>
+                                                <th>Vigencia</th>
+                                                <th>H</th>
+                                                <th>A</th>
+                                                <th>T</th>
+                                            </tr>                                            
+                                        </tfoot>
                                     </table>                                    
                                     <!-- END: DataTables -->
 
@@ -199,7 +223,6 @@
                     </div>
                     <!-- END: Modal Suggestion -->
 
-
                 </div>
                 <!-- END: Content -->
 @push('meta')                
@@ -262,8 +285,8 @@
 
 <script document="text/javascript">
     let $storageData = [];
-    let $systemColumn = 10;
-    let $locationColumn = 11;
+    //let $systemColumn = 10;
+    //let $locationColumn = 11;
     let $dateInDefault;
     let $dateOutDefault;
     $(function () {
@@ -275,17 +298,22 @@
         
         // ACONDICIONAMIENTO
         //moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
-        setFooter('documents-table', columnsDef);
+        //setFooter('documents-table', columnsDef);
+        var columnType = 5;
+        var columnPublished = 6;
+        var columnAlert = 9;
+        var columnSort = 10;        
         var sCol = null;
         var sCol = isoGetStorage('iso_masterReturnCol');
         var sDir = isoGetStorage('iso_masterReturnDir');
         var initPage = ( isoGetStorage('iso_masterReturnPage') === null ) ? 1 : isoGetStorage('iso_masterReturnPage'); 
-        var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ 14, sDir]]; // sCol
+        var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ columnSort, sDir]]; // sCol
         var initRecords = ( isoGetStorage('iso_masterReturnRows') === null ) ? 10 : isoGetStorage('iso_masterReturnRows');
+
         //var initFilter = ( isoGetStorage('iso_masterFilter') === null ) ? 'collapse' : isoGetStorage('iso_masterFilter');
 
         // FILTROS GENERALES
-        setTypes();
+        //setTypes();
 
         // PARAMETROS
         // $dateInDefault = moment().subtract(6, 'days');
@@ -358,17 +386,21 @@
         .on('xhr.dt', function () {
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
             $("#loading-image").hide();
+            $("#btn-filter").removeClass('btn-primary').addClass('btn-success');
         })
         .DataTable({
+            dom: 'lrtip', // 'Blfrtip'
             bProcessing: true,
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsDef,
             retrieve: true,
-            //dom: 'Blfrtip',
             pageLength: initRecords,
             order: initOrder,
             orderClasses: false,
             responsive: true,
+
+            orderCellsTop: true,
+            fixedHeader: true,            
             buttons: [
                 {
                     extend: 'excelHtml5',
@@ -391,10 +423,10 @@
             columnDefs: [{
                 targets: 8,
                 createdCell: function(td, cellData, rowData, row, col) {
-                    if( rowData[12] == 2 ) {
+                    if( rowData[columnAlert] == 2 ) {
                         $(td).css('background-color', 'red');
                         console.log('row 2: '+ rowData[1]);
-                    } else if( rowData[12] == 1 ) {
+                    } else if( rowData[columnAlert] == 1 ) {
                         $(td).css('background-color', 'yellow');
                         console.log('row 1: '+ rowData[1]);
                     }
@@ -413,19 +445,25 @@
             initComplete: function() {
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
-                this.api().columns().every( function (i) {
-                    var column = this;
-                    $( 'input', this.footer() ).on( 'keyup change clear', function () {
-                        if ( column.search() !== this.value ) {
-                            column.search( this.value ).draw();
-                        }
-                    });   
+                
+                this.api().column(columnType).data().unique().sort().each( function ( d, j ) {
+                    if( d !== null ) {
+                        console.log('<option value="' + d + '">' + d + '</option>');
+                        $("#filter-typeName").append( '<option value="' + d + '">' + d + '</option>' );
+                    }                                
                 });
-                             
+
+                this.api().column(columnPublished).data().unique().sort().each( function ( d, j ) {
+                    if( d !== null ) {
+                        $("#filter-date").append( '<option value="' + d + '">' + d + '</option>' );
+                    }                                
+                });                
+
             },
             language: lang
         }); // datatables
 
+     
         // DATERANGE
         $('#date-selected').daterangepicker({
             locale: {
@@ -457,8 +495,6 @@
             $dateOutDefault = picker.endDate.format();
             console.log('DOUT : '+$dateOutDefault);
         }); 
-
-
 
 
         // BOTONES
@@ -521,7 +557,6 @@
 
 
         // FILTROS
-        //$('#system-selected, #process-selected, #location-selected').on('change', function() {
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
@@ -532,14 +567,18 @@
             params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
             console.log('Searching...');
             console.dir(JSON.stringify(params));
-            $("#loading-image").show();
+            
             
             // Ajax
             var url =  route.replace(':slug', JSON.stringify(params));
             startTime = Date.now();
             myTable.ajax.url(url).load();
             myTable.state.clear();
-            myTable.search('').columns().search('').draw(); 
+            myTable.search('').columns().search('').draw();
+            
+            // Confirmación de carga
+            $("#loading-image").show();
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
 
             // Store
             isoSetStorage('iso_masterSystems', sidsValue);
@@ -549,17 +588,77 @@
             isoSetStorage('iso_masterDatein', $dateInDefault);
             isoSetStorage('iso_masterDateout', $dateOutDefault); //
             //isoSetStorage('iso_masterFilter', $dateOutDefault);
+
+            // Restaurar Filtros de columnas
+            $("#filter-typeName").html('<option value="">Seleccione Tipo Documento</option>');
+            myTable.column(columnType).data().unique().sort().each( function ( d, j ) {
+                if( d !== null ) {
+                    console.log('<option value="' + d + '">' + d + '</option>');
+                    $("#filter-typeName").append( '<option value="' + d + '">' + d + '</option>' );
+                }                                
+            });
+
+            $("#filter-date").html('<option value="">Seleccione Publicado</option>');
+            myTable.column(columnPublished).data().unique().sort().each( function ( d, j ) {
+                if( d !== null ) {
+                    $("#filter-date").append( '<option value="' + d + '">' + d + '</option>' );
+                }                                
+            });            
+
         }); // CHANGE selected
 
         // Filtro de palabras clave
         $('input[type="search"]').on( 'keyup click', function () {
             myTable.search('');     
             myTable.column(13).search(this.value).draw();
-        });         
+        });
+        
+        // Filtros : generación
+        $('#documents-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsDef[i+1];
+            //console.dir(item);
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"><option value="">Seleccione '+item.title+'</option></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });
+        
+        // Filtros : search - text
+        $('#documents-table thead' ).on( 'keyup', ".input-filter", function () {
+            myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
+        });
+        
+        // Filtros : search - select 
+        $('#filter-typeName').on( 'change', function () {
+            var val = $(this).val();
+            myTable.column(columnType).search( val ? '^' + val + '$' : '', true, false).draw();
+        });
 
-        $('#filter-typeName').on('change', function(){
-            myTable.column(6).search(this.value).draw();   
-        }); // filter-typeName        
+        $('#filter-date').on( 'change', function () {
+            var val = $(this).val();
+            //alert(val);
+            myTable.column(columnPublished).search( val ? '^' + val + '$' : '', true, false).draw();
+        });         
+        
+        // Efectos Botón
+        $('#date-selected, #text-input, #tag-input').on('blur', function() {
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+        });
+
+        $('#system-selected, #process-selected, #location-selected, #type-selected').on('change', function() {
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+        });
         
 
         // GEMERA EL MODAL PARA OBSERVACIONES

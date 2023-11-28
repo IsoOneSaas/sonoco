@@ -87,13 +87,13 @@ class MasterRepository implements MasterRepositoryInterface
             if($date) {
                 
                 // Keywords
-                $output = '';
-                $tags = $document->tags;
-                if($tags) {
-                    foreach($tags as $tag) {
-                        $output .= $tag->tag .' ';
-                    }
-                }
+                // $output = '';
+                // $tags = $document->tags;
+                // if($tags) {
+                //     foreach($tags as $tag) {
+                //         $output .= $tag->tag .' ';
+                //     }
+                // }
                 
                 $data[$i]['document_id'] = $document->document_id;
 
@@ -107,10 +107,10 @@ class MasterRepository implements MasterRepositoryInterface
                 $data[$i]['life']  = $val['date'];
 
                 $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
-                $data[$i]['system_id']  = $document->system_id; 
-                $data[$i]['location_id']  = $document->location_id;
+                //$data[$i]['system_id']  = $document->system_id; 
+                //$data[$i]['location_id']  = $document->location_id;
                 $data[$i]['alert']  = $val['status'];
-                $data[$i]['keys']  = $output;
+                //$data[$i]['keys']  = $output;
 
                 $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
 
