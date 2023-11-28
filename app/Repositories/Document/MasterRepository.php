@@ -57,20 +57,8 @@ class MasterRepository implements MasterRepositoryInterface
         $light = false;
         $params = json_decode($slug, true);
 
-        // $rangeIn = date('Y-m-d', (int)$params['din']/1000) .' 00:00:00'; 
-        // $rangeOut = date('Y-m-d', (int)$params['dout']/1000) .' 23:59:59'; 
-
-        // $arr = explode('T', $params['din'] );
-        // $rangeIn = $arr[0] .' 00:00:00';
-        // $arr = explode('T', $params['dout'] ); 
-        // $rangeOut = $arr[0] .' 23:59:59';         
-        
-        // Log::debug(['PARAMETERS' => $params]);
-        // Log::debug('RANGE : '. $rangeIn .' => '. $rangeOut);
-
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
-
 
         $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
         foreach($documents as $document) {
@@ -97,7 +85,7 @@ class MasterRepository implements MasterRepositoryInterface
             
 
             if($date) {
-
+                
                 // Keywords
                 $output = '';
                 $tags = $document->tags;

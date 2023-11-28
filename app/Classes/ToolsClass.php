@@ -18,6 +18,7 @@ use App\Models\Document\AuthorizationModel;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\StatusModel;
+use App\Models\Document\TagModel;
 use App\Models\Document\TypeModel;
 use App\Models\Document\ValidationDocModel;
 use App\Models\Document\ValidationTypeModel;
@@ -878,11 +879,11 @@ class ToolsClass
             }
 
             // Requisitos
-            if( $params['sid'] == '' ) {
+            if( is_array($params['sids'])  ) {
+                $sids = $params['sids'];
+            } else {                
                 $plucked = SystemModel::all()->pluck('system_id');
-                $sids = $plucked->all();
-            } else {
-                $sids = [$params['sid']];
+                $sids = $plucked->all();                
             }
 
             // Procesos & Localizaciones
@@ -911,15 +912,21 @@ class ToolsClass
                     $lids = $this->getOwnLocationsByUser($user);
                 } else {
                     $lids = $params['lids'];
-                }
+                }                 
+            } // IF
 
-                 
-
-            }
-
+            // Texto de código o nombre
             $search = ( isset($params['txt']) && (strlen($params['txt']) > 2) ) ? $params['txt'] : '';
 
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
+            // Etiquetas
+            $dids = false;
+            if( !empty($params['tag']) ) {
+                $plucked = TagModel::where('tag', 'LIKE', "%". $params['tag'] ."%")->pluck('document_id');
+                $dids = $plucked->all();
+                if( count($dids) == 0 ) $dids = false;               
+            }
+
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)
@@ -929,18 +936,11 @@ class ToolsClass
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })
                 ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                ->when($dids, function($query) use($dids) {
+                    $query->whereIn('document_id', $dids);
+                })
                 ->orderBy('created_at', 'desc')
                 ->get()->unique('code');            
-            // $time = explode("T", $params['din']);
-            // $rangeIn =  $time[0] .' 00:00:00';
-            // $time = explode("T", $params['dout']);
-            // $rangeOut = $time[0] .' 23:59:59';            
-            // $documents =  DocumentModel::where('documents.status', $target)->whereIn('documents.system_id', $sids)->whereIn('documents.process_id', $pids)->whereIn('documents.location_id', $lids)
-            //     ->join('document_status', function($query) use($target, $rangeIn, $rangeOut) {
-            //         $query->on('document_status.document_id', '=', 'documents.document_id');
-            //         $query->where('document_status.action', '=', $target);    
-            //     })            
-            //     ->orderBy('documents.created_at', 'desc')->get()->unique('documents.code');
         } // if/else params
         
         if( $uid === null ) {
@@ -950,6 +950,7 @@ class ToolsClass
         Log::debug('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 
+        // FIXME: Validar si están en la fecha y son de tipo
         if($auth) {
 
             // Documentos para Agregar

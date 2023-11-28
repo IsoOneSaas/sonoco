@@ -58,19 +58,28 @@
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
                                                         <div class="form-inline">
+                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
+                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
                                                             <label for="text-input" class="form-label sm:w-20 text-right pt-3">Texto:</label>
                                                             <input id="text-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
+                                                            <label for="tag-input" class="form-label sm:w-20 text-right pt-3">Etiqueta:</label>
+                                                            <input id="tag-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Etiqueta" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
                                                         </div>
                                                         <div class="form-inline">
-                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
-                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
+
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
-                                                            <select id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
-                                                                <option value="">Todos seleccionados</option>
+                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
                                                                 @foreach($systems as $system)   
-                                                                <option value={{ $system->system_id }} >{{ $system->name }}</option>
+                                                                <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
-                                                            </select>                                                            
+                                                            </select>
+                                                            
+                                                            <label for="type-selected" class="form-label sm:w-20 text-right pt-3">Tipos:</label>
+                                                            <select multiple id="type-selected" class="form-control mt-2 border-slate-500" aria-label="Tipo">
+                                                                @foreach($types as $type)
+                                                                <option value={{ $type->type_id }} selected >{{ $type->name }}</option>
+                                                                @endforeach
+                                                            </select>                                                             
                                                                                                                                                 
                                                         </div>
                                                         <div class="form-inline">
@@ -88,14 +97,7 @@
                                                             </select>
                                                             
                                                         </div>
-                                                        <div class="form-inline">
-                                                            <label for="type-selected" class="form-label sm:w-20 text-right pt-3">Tipos:</label>
-                                                            <select multiple id="type-selected" class="form-control mt-2 border-slate-500" aria-label="Tipo">
-                                                                @foreach($types as $type)
-                                                                <option value={{ $type->type_id }} >{{ $type->name }}</option>
-                                                                @endforeach
-                                                            </select>                                                             
-                                                        </div>
+
                                                         <div class="flex mt-3 justify-center">
                                                             <button id="btn-filter" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
                                                         </div>                                           
@@ -290,42 +292,46 @@
         // $dateOutDefault = moment();
 
         // MULTIPLESELECT
-        $('#system-selected, #location-selected, #process-selected, #type-selected').multipleSelect();        
+        //$('#system-selected, #location-selected, #process-selected, #type-selected').multipleSelect();        
         
         // Sistema
-        var sidStoraged = isoGetStorage('iso_masterSystem');
-        if( (sidStoraged === null) || (sidStoraged == '') ) {
-            var sidArray = $("#system-selected").val();
-        } else {
-            var sidArray = sidStoraged;
-            $('#system-selected option[value='+sidStoraged+']').prop('selected', 'selected');
-        }
+        console.log('SID ARRAY: '); 
+        var sidsStoraged = isoGetStorage('iso_masterSystems');
+        console.dir(sidsStoraged);
+        // if( (sidStoraged === null) || (sidStoraged == '') ) {
+        //     var sidArray = $("#system-selected").val();
+        // } else {
+        //     var sidArray = sidStoraged;
+        //     $('#system-selected option[value='+sidStoraged+']').prop('selected', 'selected');
+        // }
+        var sidsArray = setStorageArray("system-selected", sidsStoraged);   
+
+        console.dir(sidsArray);
 
         // Procesos
+        console.log('PIDS ARRAY: ');        
         var pidsStoraged = isoGetStorage('iso_masterProcesses');        
-        var pidsArray = setStorageArray("process-selected", pidsStoraged);        
-        console.log('PIDS ARRAY: '); 
+        console.dir(pidsStoraged);
+        var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
         console.dir(pidsArray);
         
         // Localizaciones
+        console.log('LIDS ARRAY: ');                 
         var lidsStoraged = isoGetStorage('iso_masterLocations');
+        console.dir(lidsStoraged);
         var lidsArray = setStorageArray("location-selected", lidsStoraged);  
-        console.log('LIDS ARRAY: '); 
         console.dir(lidsArray);
 
         // Tipos
+        console.log('TIDS ARRAY: ');
         var tidsStoraged = isoGetStorage('iso_masterTypes');
+        console.dir(tidsStoraged);
         if( (tidsStoraged === null) || (tidsStoraged == '') ) {
             $("#type-selected").multipleSelect('checkAll');
             var tidsArray = $("#type-selected").val();
         } else {
             var tidsArray = setStorageArray("type-selected", tidsStoraged); 
-            // console.dir(tidsArray);
-            // for(var i in tidsArray) {
-            //     $('#type-selected option[value='+ tidsArray[i] +']').prop('selected', 'selected');
-            // } 
-        }
-        console.log('TIDS ARRAY: '); 
+        }            
         console.dir(tidsArray);        
         
         // Rango In
@@ -339,7 +345,7 @@
         console.log('DOUT : '+ $dateOutDefault);        
 
         // JSon
-        param = {sid: sidArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: ''};        
+        param = {sids: sidsArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};        
         console.dir(JSON.stringify(param)); 
 
         // DATATABLE
@@ -517,12 +523,13 @@
         // FILTROS
         //$('#system-selected, #process-selected, #location-selected').on('change', function() {
         $("#btn-filter").on("click", function() {
-            var sidValue = $("#system-selected").val();
+            var sidsValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
             var lidsArray = $("#location-selected").val();
             var tidsArray = $("#type-selected").val();
             var text = $("#text-input").val();
-            params = {sid: sidValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text};
+            var tag = $("#tag-input").val();
+            params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             $("#loading-image").show();
@@ -535,7 +542,7 @@
             myTable.search('').columns().search('').draw(); 
 
             // Store
-            isoSetStorage('iso_masterSystem', sidValue);
+            isoSetStorage('iso_masterSystems', sidsValue);
             isoSetStorage('iso_masterProcesses', pidsArray);
             isoSetStorage('iso_masterLocations', lidsArray);
             isoSetStorage('iso_masterTypes', tidsArray);
@@ -649,30 +656,33 @@
             } // success
         });
     } // setTypes Fx
-    
+
     function setStorageArray(tag, storaged) {
-        var output = [];
+        var output = '';
         console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
-        if( storaged === null ) {
-            output = $("#"+tag).val();
-        } else { 
-            $("#"+tag+" option").prop("selected", false);           
-            if( storaged.indexOf(",") == -1 ) {
-                // valor único
-                output = [storaged];
-                console.log('val: '+ storaged);
-                $('#'+tag+' option[value='+storaged+']').prop('selected', 'selected');                
-            } else {
-                // arreglo                
-                output = storaged.split(',');
-                $.each(output, function(i, val) {
-                    console.log('val: '+ val);
-                    $('#'+tag+' option[value='+val+']').prop('selected', 'selected');
-                });                 
-            }           
+
+        if( (storaged === null) || (storaged == '') ) {
+            var array = $("#"+tag).val();
+        } else {
+            var array = ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
         }
-        return output;
-    } // setStorage Fx
+
+        console.dir(array);
+        $('#'+tag+' option').each(function(i) {
+            
+            if( $.inArray( this.value , array ) !== -1 ) {
+                output += '<option value='+ parseInt(this.value) +' selected>'+ this.text +'</option>';
+                console.log(i, this.value , this.text, 'Selected');
+            } else {
+                output += '<option value='+ parseInt(this.value) +'>'+ this.text +'</option>';
+                console.log(i, this.value , this.text, '');
+            }
+        });        
+
+        $("#"+tag).html(output);
+        $("#"+tag).multipleSelect(); 
+        return array;
+    }
 
 </script>
 

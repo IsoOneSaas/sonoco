@@ -258,7 +258,7 @@ class MasterController extends Controller
             ["data" => "system_id", "title" => "S", "visible" => false,  "orderable" => false],    // 10
             ["data" => "location_id", "title" => "L", "visible" => false,  "orderable" => false],  // 11
             ["data" => "alert", "title" => "A", "visible" => false,  "orderable" => false],  // 12
-            ["data" => "keys", "title" => "K", "visible" => false,  "orderable" => false],  // 13
+            ["data" => "keys", "title" => "K", "visible" => true,  "orderable" => false],  // 13
             ["data" => "time", "title" => "Vida", "visible" => false,  "orderable" => true], // 14
         ];
         
