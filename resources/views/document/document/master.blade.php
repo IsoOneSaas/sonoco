@@ -59,7 +59,7 @@
                                                     <div class="preview ml-auto w-full">
                                                         <div class="form-inline">
                                                             <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
-                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
+                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500 w-16" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
                                                             <label for="text-input" class="form-label sm:w-20 text-right pt-3">Texto:</label>
                                                             <input id="text-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
                                                             <label for="tag-input" class="form-label sm:w-20 text-right pt-3">Etiqueta:</label>
@@ -289,31 +289,36 @@
     //let $locationColumn = 11;
     let $dateInDefault;
     let $dateOutDefault;
+    let $myTable;
+    var $columnType = 5;
+    var $columnPublished = 6;
+    var $columnAlert = 9;
+    var $columnSort = 10;
+    var $lang = {!! $gridLanguage !!};
+    var $route = "{{ route('documents.master.index.render', ':slug') }}";
+
     $(function () {
         let columnsDef = {!! $gridColDef !!};
-        let col = {{ $gridColOrd }};
-        let lang = {!! $gridLanguage !!};
+        let col = {{ $gridColOrd }};        
         let columns = {!! $gridColExp !!};        
-        let route = "{{ route('documents.master.index.render', ':slug') }}";
+        var startTime = Date.now();
         
         // ACONDICIONAMIENTO
         //moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
         //setFooter('documents-table', columnsDef);
-        var columnType = 5;
-        var columnPublished = 6;
-        var columnAlert = 9;
-        var columnSort = 10;        
+
+               
         var sCol = null;
         var sCol = isoGetStorage('iso_masterReturnCol');
         var sDir = isoGetStorage('iso_masterReturnDir');
         var initPage = ( isoGetStorage('iso_masterReturnPage') === null ) ? 1 : isoGetStorage('iso_masterReturnPage'); 
-        var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ columnSort, sDir]]; // sCol
+        var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ $columnSort, sDir]]; // sCol
         var initRecords = ( isoGetStorage('iso_masterReturnRows') === null ) ? 10 : isoGetStorage('iso_masterReturnRows');
 
         //var initFilter = ( isoGetStorage('iso_masterFilter') === null ) ? 'collapse' : isoGetStorage('iso_masterFilter');
 
         // FILTROS GENERALES
-        //setTypes();
+        
 
         // PARAMETROS
         // $dateInDefault = moment().subtract(6, 'days');
@@ -341,26 +346,26 @@
         var pidsStoraged = isoGetStorage('iso_masterProcesses');        
         console.dir(pidsStoraged);
         var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
-        console.dir(pidsArray);
+        // console.dir(pidsArray);
         
         // Localizaciones
         console.log('LIDS ARRAY: ');                 
         var lidsStoraged = isoGetStorage('iso_masterLocations');
         console.dir(lidsStoraged);
         var lidsArray = setStorageArray("location-selected", lidsStoraged);  
-        console.dir(lidsArray);
+        // console.dir(lidsArray);
 
         // Tipos
         console.log('TIDS ARRAY: ');
         var tidsStoraged = isoGetStorage('iso_masterTypes');
-        console.dir(tidsStoraged);
+        //console.dir(tidsStoraged);
         if( (tidsStoraged === null) || (tidsStoraged == '') ) {
             $("#type-selected").multipleSelect('checkAll');
             var tidsArray = $("#type-selected").val();
         } else {
             var tidsArray = setStorageArray("type-selected", tidsStoraged); 
         }            
-        console.dir(tidsArray);        
+        //console.dir(tidsArray);        
         
         // Rango In
         var dateIn = isoGetStorage('iso_masterDatein');
@@ -372,33 +377,32 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
         console.log('DOUT : '+ $dateOutDefault);        
 
-        // JSon
-        param = {sids: sidsArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};        
+        // DATATABLES
+        //param = {sids: sidsArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};
+        param = {sids: [], pids: [], lids: [], tids: [], din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};
         console.dir(JSON.stringify(param)); 
-
-        // DATATABLE
-        var startTime = Date.now();
         console.log('Datatables init starts now: ', Date.now() - startTime);
-        let myTable = $('#documents-table')
+
+        $myTable = $('#documents-table')
         .on('preXhr.dt', function () {
             console.log('Send ajax request ', Date.now() - startTime + ' milliseconds.');
         })
         .on('xhr.dt', function () {
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
             $("#loading-image").hide();
-            $("#btn-filter").removeClass('btn-primary').addClass('btn-success');
+            $("#btn-filter").removeClass('btn-primary').addClass('btn-success'); 
+            setFilters();
         })
         .DataTable({
             dom: 'lrtip', // 'Blfrtip'
             bProcessing: true,
-            sAjaxSource: route.replace(':slug', JSON.stringify(param)),
+            sAjaxSource: $route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsDef,
             retrieve: true,
             pageLength: initRecords,
             order: initOrder,
             orderClasses: false,
             responsive: true,
-
             orderCellsTop: true,
             fixedHeader: true,            
             buttons: [
@@ -423,10 +427,10 @@
             columnDefs: [{
                 targets: 8,
                 createdCell: function(td, cellData, rowData, row, col) {
-                    if( rowData[columnAlert] == 2 ) {
+                    if( rowData[$columnAlert] == 2 ) {
                         $(td).css('background-color', 'red');
                         console.log('row 2: '+ rowData[1]);
-                    } else if( rowData[columnAlert] == 1 ) {
+                    } else if( rowData[$columnAlert] == 1 ) {
                         $(td).css('background-color', 'yellow');
                         console.log('row 1: '+ rowData[1]);
                     }
@@ -445,24 +449,10 @@
             initComplete: function() {
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
-                
-                this.api().column(columnType).data().unique().sort().each( function ( d, j ) {
-                    if( d !== null ) {
-                        console.log('<option value="' + d + '">' + d + '</option>');
-                        $("#filter-typeName").append( '<option value="' + d + '">' + d + '</option>' );
-                    }                                
-                });
-
-                this.api().column(columnPublished).data().unique().sort().each( function ( d, j ) {
-                    if( d !== null ) {
-                        $("#filter-date").append( '<option value="' + d + '">' + d + '</option>' );
-                    }                                
-                });                
-
+                $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
             },
-            language: lang
-        }); // datatables
-
+            language: $lang
+        }); // datatables        
      
         // DATERANGE
         $('#date-selected').daterangepicker({
@@ -500,13 +490,13 @@
         // BOTONES
         // Refrescar el listado
         $('#btn-refresh').on("click", function() {
-            myTable.search('').columns().search('').draw();
+            $myTable.search('').columns().search('').draw();
             $(".col-filter").val('');
         }); // btn-refresh
 
         // Mostrar el documento en html
         $('#btn-view').on("click", function() {
-            var rowdata = myTable.rows('.selected').data()[0];
+            var rowdata = $myTable.rows('.selected').data()[0];
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/document.grid.row_show') }}");
             } else {
@@ -514,8 +504,8 @@
                 var uri = "{{ route('documents.master.render', ':hash') }}"; 
                 
                 // Storage
-                var info = myTable.page.info();
-                var order = myTable.order();             
+                var info = $myTable.page.info();
+                var order = $myTable.order();             
                 isoSetStorage('iso_masterReturnUrl', isoGetCurrentURL());
                 isoSetStorage('iso_masterReturnPage', info.page);
                 isoSetStorage('iso_masterReturnCol', order[0][0]);
@@ -530,15 +520,15 @@
         // UTILIDADES
         
         $("#btn-download").on("click", function() {
-            myTable.button('.buttons-excel').trigger();
+            $myTable.button('.buttons-excel').trigger();
         });
         
         $("#btn-print").on("click", function() {
-            myTable.button('.buttons-pdf').trigger();
+            $myTable.button('.buttons-pdf').trigger();
         });
 
         $("#btn-colvis").on("click", function() {
-            myTable.button('.buttons-colvis').trigger();
+            $myTable.button('.buttons-colvis').trigger();
         });
 
         $('input.deletable').wrap('<span class="deleteicon"></span>').after($('<span>x</span>').click(function() {
@@ -550,7 +540,7 @@
             if ( $(this).hasClass('selected') ) {
                 $(this).removeClass('selected');
             } else {
-                myTable.$('tr.selected').removeClass('selected');
+                $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');                
             } // if selected
         }); // row selects
@@ -564,55 +554,38 @@
             var tidsArray = $("#type-selected").val();
             var text = $("#text-input").val();
             var tag = $("#tag-input").val();
-            params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
+            var info = $myTable.page.info();            
+            var params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
+            var url =  $route.replace(':slug', JSON.stringify(params));
+            
+            // Ajustes a cambio
+            $("#filter-typeName").html('');
+            $("#filter-date").html('');
+            $("#loading-image").show();
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');           
+            
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            
-            // Ajax
-            var url =  route.replace(':slug', JSON.stringify(params));
+            // Ajax            
             startTime = Date.now();
-            myTable.ajax.url(url).load();
-            myTable.state.clear();
-            myTable.search('').columns().search('').draw();
-            
-            // Confirmación de carga
-            $("#loading-image").show();
-            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+            $myTable.ajax.url(url).load();
+            $myTable.state.clear();
+            //$myTable.search('').columns().search('').draw();
 
-            // Store
+            // Store            
             isoSetStorage('iso_masterSystems', sidsValue);
             isoSetStorage('iso_masterProcesses', pidsArray);
             isoSetStorage('iso_masterLocations', lidsArray);
             isoSetStorage('iso_masterTypes', tidsArray);
             isoSetStorage('iso_masterDatein', $dateInDefault);
             isoSetStorage('iso_masterDateout', $dateOutDefault); //
+            isoSetStorage('iso_masterReturnRows', info.length);
             //isoSetStorage('iso_masterFilter', $dateOutDefault);
-
-            // Restaurar Filtros de columnas
-            $("#filter-typeName").html('<option value="">Seleccione Tipo Documento</option>');
-            myTable.column(columnType).data().unique().sort().each( function ( d, j ) {
-                if( d !== null ) {
-                    console.log('<option value="' + d + '">' + d + '</option>');
-                    $("#filter-typeName").append( '<option value="' + d + '">' + d + '</option>' );
-                }                                
-            });
-
-            $("#filter-date").html('<option value="">Seleccione Publicado</option>');
-            myTable.column(columnPublished).data().unique().sort().each( function ( d, j ) {
-                if( d !== null ) {
-                    $("#filter-date").append( '<option value="' + d + '">' + d + '</option>' );
-                }                                
-            });            
 
         }); // CHANGE selected
 
-        // Filtro de palabras clave
-        $('input[type="search"]').on( 'keyup click', function () {
-            myTable.search('');     
-            myTable.column(13).search(this.value).draw();
-        });
-        
+       
         // Filtros : generación
         $('#documents-table thead tr:eq(1) th').each( function (i) {
             var tag;
@@ -622,7 +595,7 @@
                 $(this).html('');
             } else {
                 if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
-                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"><option value="">Seleccione '+item.title+'</option></select>';
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
                     $(this).html(tag);
                 } else {
                     if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
@@ -636,19 +609,19 @@
         
         // Filtros : search - text
         $('#documents-table thead' ).on( 'keyup', ".input-filter", function () {
-            myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
+            $myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
         });
         
         // Filtros : search - select 
         $('#filter-typeName').on( 'change', function () {
             var val = $(this).val();
-            myTable.column(columnType).search( val ? '^' + val + '$' : '', true, false).draw();
+            $myTable.column($columnType).search( val ? '^' + val + '$' : '', true, false).draw();
         });
 
         $('#filter-date').on( 'change', function () {
             var val = $(this).val();
             //alert(val);
-            myTable.column(columnPublished).search( val ? '^' + val + '$' : '', true, false).draw();
+            $myTable.column($columnPublished).search( val ? '^' + val + '$' : '', true, false).draw();
         });         
         
         // Efectos Botón
@@ -667,98 +640,22 @@
             $('#uploadForm')[0].reset();
             $("#modal-suggestions-open")[0].click();
         });
-                
+                        
     }); // document
 
-    function setSystems() {
-        var current = $("#system-selected").val();
-        $.ajax({
-            type: 'POST',
-            data: {'sid':current},
-            dataType: 'json',
-            url: '/documentos/master/listado/sistemas',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(data) {
-                //console.dir(data);
-                var output = '<option value="">Todos</option>';
-                $.each(data, function(i, value) {
-                    output += '<option value='+value.system_id;
-                    output += (value.selected) ? ' selected' : '';
-                    output += '>'+value.name+'</option>';
-                });
-                $("#system-selected").html(output);
-            } // success
-        });
-    } // setSystems Fx
 
-    function setLocations() {
-        var current = $("#location-selected").val();
-        $.ajax({
-            type: 'POST',
-            data: {'lid':current},
-            dataType: 'json',
-            url: '/documentos/master/listado/localizaciones',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(data) {
-                //console.dir(data);
-                var output = '<option value="">Todos</option>';
-                $.each(data, function(i, value) {
-                    output += '<option value='+value.location_id;
-                    output += (value.selected) ? ' selected' : '';
-                    output += '>'+value.name+'</option>';
-                });
-                $("#location-selected").html(output);
-            } // success
+    function setFilters() {
+        // Tipo de documento
+        var output = '<option value="">Seleccione Tipo Documento</option>';
+        $("#type-selected > option:selected").each( function() {
+            output += '<option value="' + $(this).text() + '">' + $(this).text() + '</option>';
         });
-    } // setLocations Fx 
-    
-    function setProcesses() {
-        var current = $("#filter-processName").val();
-        $.ajax({
-            type: 'POST',
-            data: {'name':current},
-            dataType: 'json',
-            url: '/documentos/master/listado/procesos',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(data) {
-                //console.dir(data);
-                var output = '<option value="">Todos</option>';
-                $.each(data, function(i, value) {
-                    output += '<option value="'+value.name+'"';
-                    output += (value.selected) ? ' selected' : '';
-                    output += '>'+value.name+'</option>';
-                });
-                $("#filter-processName").html(output);
-              
-
-            } // success
-        });
-    } // setProcesses Fx
-    
-    function setTypes() {
-        var current = $("#filter-typeName").val();
-        $.ajax({
-            type: 'POST',
-            data: {'name':current}, //   FIXME: corregir
-            dataType: 'json',
-            url: '/documentos/master/listado/tipos',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(data) {
-                //console.dir(data);
-                var output = '<option value="">Todos</option>';
-                $.each(data, function(i, value) {
-                    output += '<option value="'+value.name+'"';
-                    output += (value.selected) ? ' selected' : '';
-                    output += '>'+value.name+'</option>';
-                });
-                $("#filter-typeName").html(output);
-            } // success
-        });
-    } // setTypes Fx
+        $("#filter-typeName").html(output);
+    }
 
     function setStorageArray(tag, storaged) {
         var output = '';
-        console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
+        //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
 
         if( (storaged === null) || (storaged == '') ) {
             var array = $("#"+tag).val();
@@ -766,15 +663,15 @@
             var array = ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
         }
 
-        console.dir(array);
+        //console.dir(array);
         $('#'+tag+' option').each(function(i) {
             
             if( $.inArray( this.value , array ) !== -1 ) {
                 output += '<option value='+ parseInt(this.value) +' selected>'+ this.text +'</option>';
-                console.log(i, this.value , this.text, 'Selected');
+                //console.log(i, this.value , this.text, 'Selected');
             } else {
                 output += '<option value='+ parseInt(this.value) +'>'+ this.text +'</option>';
-                console.log(i, this.value , this.text, '');
+                //console.log(i, this.value , this.text, '');
             }
         });        
 

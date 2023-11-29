@@ -249,7 +249,7 @@ class MasterController extends Controller
             ["data" => "version", "title" => "Versión", "searchable" => true, "className" => "dt-center"],
             //["data" => "processName", "title" => "Proceso", "searchable" => true, 'filterable' => true, 'visible' => false],
             ["data" => "typeName", "title" => "Tipo Documento", "searchable" => true, 'filterable' => true],
-            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => true], //6
+            ["data" => "date", "title" => "Publicado", "searchable" => true], //6
             ["data" => "life", "title" => "Vigencia", "searchable" => true], //7
         ];
 

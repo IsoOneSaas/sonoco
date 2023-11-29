@@ -964,17 +964,34 @@ class ToolsClass
                             $new = DocumentModel::find($did);
                         } else {                             
                             //$new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
-                            if( in_array('', $params['lids']) && in_array('', $params['pids']) ) {
-                                $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->first();
-                            }
-                            elseif( in_array('', $params['lids']) ) {
-                                $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->first();
-                            }
-                            elseif( in_array('', $params['pids']) ) {
-                                $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('location_id', $lids)->first();
-                            } else {
-                                $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
-                            }                            
+                            // if( in_array('', $params['lids']) && in_array('', $params['pids']) ) {
+                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->first();
+                            // }
+                            // elseif( in_array('', $params['lids']) ) {
+                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->first();
+                            // }
+                            // elseif( in_array('', $params['pids']) ) {
+                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('location_id', $lids)->first();
+                            // } else {
+                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
+                            // }
+                            // $doc =  DocumentModel::find($did);
+                            // Log::debug(['DOC' => $doc->document_id]);
+                            
+                            $new =  DocumentModel::where('document_id', $did)
+                                ->whereIn('system_id', $sids)
+                                ->whereIn('process_id', $pids)
+                                ->whereIn('location_id', $lids)
+                                ->whereIn('type_id', $tids)
+                                ->where(function($query) use($search) {
+                                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                                })
+                                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                                ->when($dids, function($query) use($dids) {
+                                    $query->whereIn('document_id', $dids);
+                                })
+                                ->first();                              
+
                         }
                         if( $new ) { 
                             // Validar si código no está ya contenido en en la collección (se deja la versión de la collección)                           
