@@ -21,6 +21,7 @@ class MasterController extends Controller
     protected $documentRepo;
     protected $sightRepo;
     private $tool;
+    //private $set;
     protected $contentUrl;    
     protected $tenantUrl;
     protected $masterUrl;  
@@ -31,6 +32,7 @@ class MasterController extends Controller
         $this->documentRepo = $documentRepository;
         $this->sightRepo = $sightRepository;        
         $this->tool = $Tools;
+        //$this->set = $this->tool->setSettings('document');
         $this->contentUrl = public_path() .'/tenants/sonoco/'.  config('settings.PATH_DOC_CONTENT');
         $this->tenantUrl = 'tenants/sonoco/images';
         $this->masterUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_MASTER');
@@ -47,15 +49,12 @@ class MasterController extends Controller
         $locations = $this->documentRepo->locations();
         $types = $this->documentRepo->types();
 
-        //Log::debug(['PROCESSES ARRAY' => $processes->toArray()]);
-        
-        //$docs = $this->documentRepo->get();
         return view('document.document.master', [
-            //'docs'          => $docs,
             'systems'       => $systems,
             'processes'     => $processes,
             'locations'     => $locations,
             'types'         => $types,
+            //'formatDate'    => $this->tool->setFormat($this->set['date_format']),
             'gridColOrd'    => $columnDefinition['column_order'],
             'gridColDef'    => $columnDefinition['column_json'], 
             'gridColExp'    => $columnDefinition['column_export'],

@@ -57,13 +57,19 @@
 
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
-                                                        <div class="form-inline">
-                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
-                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500 w-16" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
-                                                            <label for="text-input" class="form-label sm:w-20 text-right pt-3">Texto:</label>
-                                                            <input id="text-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Texto" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
-                                                            <label for="tag-input" class="form-label sm:w-20 text-right pt-3">Etiqueta:</label>
-                                                            <input id="tag-input" type="text" class="form-control mt-2 border-slate-500 deletable" aria-label="Etiqueta" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">                                                            
+                                                        <div class="grid grid-cols-3 gap-2">
+                                                            <div class="form-inline">
+                                                                <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
+                                                                <input id="date-selected" type="text" class="form-control w-32 border-slate-500 iso-input" aria-label="Rango">
+                                                            </div>
+                                                            <div class="form-inline">
+                                                                <label for="text-input" class="form-label sm:w-20 text-right">Texto:</label>
+                                                                <input id="text-input" type="text" class="form-control w-52 border-slate-500 iso-input deletable" aria-label="Texto">
+                                                            </div>
+                                                            <div class="form-inline">
+                                                                <label for="tag-input" class="form-label sm:w-20 text-right">Etiqueta:</label>
+                                                                <input id="tag-input" type="text" class="form-control w-52 border-slate-500 iso-input deletable" aria-label="Etiqueta">
+                                                            </div>
                                                         </div>
                                                         <div class="form-inline">
 
@@ -256,11 +262,16 @@
                 text-align: center;
                 line-height: 1em;
                 cursor: pointer;
-                margin-top: 8px;
+                
             }
             span.deleteicon input {
                 padding-right: 18px;
                 box-sizing: border-box;
+            }
+            .iso-input {
+                padding: 0.15em 0.6em; 
+                font-size: 0.95em; 
+                border-radius: 5px;                
             }
         </style>    
 @endpush
@@ -285,8 +296,6 @@
 
 <script document="text/javascript">
     let $storageData = [];
-    //let $systemColumn = 10;
-    //let $locationColumn = 11;
     let $dateInDefault;
     let $dateOutDefault;
     let $myTable;
@@ -300,14 +309,9 @@
     $(function () {
         let columnsDef = {!! $gridColDef !!};
         let col = {{ $gridColOrd }};        
-        let columns = {!! $gridColExp !!};        
+        let columns = {!! $gridColExp !!};       
         var startTime = Date.now();
-        
-        // ACONDICIONAMIENTO
-        //moment.defaultFormat = "YYYY-MM-DD"; // Solo interno
-        //setFooter('documents-table', columnsDef);
-
-               
+                       
         var sCol = null;
         var sCol = isoGetStorage('iso_masterReturnCol');
         var sDir = isoGetStorage('iso_masterReturnDir');
@@ -315,72 +319,33 @@
         var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ $columnSort, sDir]]; // sCol
         var initRecords = ( isoGetStorage('iso_masterReturnRows') === null ) ? 10 : isoGetStorage('iso_masterReturnRows');
 
-        //var initFilter = ( isoGetStorage('iso_masterFilter') === null ) ? 'collapse' : isoGetStorage('iso_masterFilter');
-
-        // FILTROS GENERALES
-        
-
-        // PARAMETROS
-        // $dateInDefault = moment().subtract(6, 'days');
-        // $dateOutDefault = moment();
-
-        // MULTIPLESELECT
-        //$('#system-selected, #location-selected, #process-selected, #type-selected').multipleSelect();        
-        
         // Sistema
-        console.log('SID ARRAY: '); 
         var sidsStoraged = isoGetStorage('iso_masterSystems');
-        console.dir(sidsStoraged);
-        // if( (sidStoraged === null) || (sidStoraged == '') ) {
-        //     var sidArray = $("#system-selected").val();
-        // } else {
-        //     var sidArray = sidStoraged;
-        //     $('#system-selected option[value='+sidStoraged+']').prop('selected', 'selected');
-        // }
         var sidsArray = setStorageArray("system-selected", sidsStoraged);   
 
-        console.dir(sidsArray);
-
-        // Procesos
-        console.log('PIDS ARRAY: ');        
+        // Procesos       
         var pidsStoraged = isoGetStorage('iso_masterProcesses');        
-        console.dir(pidsStoraged);
         var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
-        // console.dir(pidsArray);
         
-        // Localizaciones
-        console.log('LIDS ARRAY: ');                 
+        // Localizaciones               
         var lidsStoraged = isoGetStorage('iso_masterLocations');
-        console.dir(lidsStoraged);
         var lidsArray = setStorageArray("location-selected", lidsStoraged);  
-        // console.dir(lidsArray);
 
         // Tipos
-        console.log('TIDS ARRAY: ');
         var tidsStoraged = isoGetStorage('iso_masterTypes');
-        //console.dir(tidsStoraged);
-        if( (tidsStoraged === null) || (tidsStoraged == '') ) {
-            $("#type-selected").multipleSelect('checkAll');
-            var tidsArray = $("#type-selected").val();
-        } else {
-            var tidsArray = setStorageArray("type-selected", tidsStoraged); 
-        }            
-        //console.dir(tidsArray);        
+        var tidsArray = setStorageArray("type-selected", tidsStoraged);                  
         
         // Rango In
         var dateIn = isoGetStorage('iso_masterDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
-        console.log('DIN : '+ $dateInDefault);
         
         // Rango Out
         var dateOut = isoGetStorage('iso_masterDateout');
-        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
-        console.log('DOUT : '+ $dateOutDefault);        
+        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;       
 
         // DATATABLES
-        //param = {sids: sidsArray, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};
         param = {sids: [], pids: [], lids: [], tids: [], din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};
-        console.dir(JSON.stringify(param)); 
+
         console.log('Datatables init starts now: ', Date.now() - startTime);
 
         $myTable = $('#documents-table')
@@ -455,14 +420,15 @@
         }); // datatables        
      
         // DATERANGE
+        //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
         $('#date-selected').daterangepicker({
             locale: {
-                format: "YYYY/MM/DD",   // FIXME:
+                format: 'YYYY/MM/DD',
                 daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
                 monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 applyLabel: "Aplicar",
                 cancelLabel: "Cancelar",
-                customRangeLabel: "Personalizado"
+                customRangeLabel: "-"
             },
             showDropdowns: true,
             maxDate: moment(),
@@ -517,8 +483,7 @@
             }
         }); // btn-view
 
-        // UTILIDADES
-        
+        // UTILIDADES        
         $("#btn-download").on("click", function() {
             $myTable.button('.buttons-excel').trigger();
         });
@@ -545,8 +510,7 @@
             } // if selected
         }); // row selects
 
-
-        // FILTROS
+        // FILTROS ***
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
@@ -581,7 +545,6 @@
             isoSetStorage('iso_masterDatein', $dateInDefault);
             isoSetStorage('iso_masterDateout', $dateOutDefault); //
             isoSetStorage('iso_masterReturnRows', info.length);
-            //isoSetStorage('iso_masterFilter', $dateOutDefault);
 
         }); // CHANGE selected
 
@@ -599,7 +562,7 @@
                     $(this).html(tag);
                 } else {
                     if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
-                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter" placeholder="Buscar ' + item.title + '" />');
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
                     } else {
                         $(this).html('');
                     }

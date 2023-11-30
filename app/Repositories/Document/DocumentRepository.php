@@ -58,7 +58,8 @@ class DocumentRepository implements DocumentRepositoryInterface
 
         if($params) {
 
-            $documents = $this->tool->setDocumentsToControl($params['time'], $params['status']);  //
+            //$documents = $this->tool->setDocumentsToControl($params['time'], $params['status']);  //
+            $documents = $this->tool->setDocumentsToControl($params);
             //Log::debug(['DOCS BEFORE' => $documents->toArray()]);
 
             foreach($documents as $document) {

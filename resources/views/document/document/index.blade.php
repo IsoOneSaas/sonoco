@@ -51,60 +51,49 @@
 
                                 <div id="grid-table">
 
-                                    <div id="filter-accordion" class="accordion accordion-boxed">
+
+                                    <div id="faq-accordion-2" class="accordion accordion-boxed">
+
                                         <div class="accordion-item">
-                                            <div id="faq-accordion-content-5" class="accordion-header">
-                                                <button class="accordion-button" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-5" aria-expanded="true" aria-controls="faq-accordion-collapse-5"><i data-lucide="filter" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Filtro</span></button>
+                                            <div id="faq-accordion-content-6" class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
                                             </div>
-                                            <div id="faq-accordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-5" data-tw-parent="#faq-accordion-2">
+                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
-                                                        <div class="form-inline">
-                                                            <label for="date-selected" class="form-label sm:w-20 text-right pt-3">Rango:</label>
-                                                            <input id="date-selected" type="text" class="form-control mt-2 border-slate-500" aria-label="Rango" style="padding: 0.15em 0.6em; font-size: 0.95em; border-radius: 5px">
-
-
-                                                        </div>                                           
+                                                        <div class="grid grid-cols-3 gap-2">
+                                                            <div class="form-inline">
+                                                                <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
+                                                                <input id="date-selected" type="text" class="form-control w-32 border-slate-500 iso-input" aria-label="Rango">
+                                                            </div>
+                                                            <div class="form-inline">
+                                                                <label for="text-input" class="form-label sm:w-20 text-right">Texto:</label>
+                                                                <input id="text-input" type="text" class="form-control w-52 border-slate-500 iso-input deletable" aria-label="Texto">
+                                                            </div>
+                                                            <div class="form-inline">
+                                                                <label for="status-selected" class="form-label sm:w-20 text-right pt-3">Estado:</label>
+                                                                <select id="status-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Estado">
+                                                                    <option value=0>En proceso</option>
+                                                                    <option value=1>Publicados</option>
+                                                                    <option value=9>Obsoletos</option>
+                                                                    <option value=2>Cancelados</option>
+                                                                    <option value=3>Eliminados</option>
+                                                                    <option value=4>Desestimado</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex mt-3 justify-center">
+                                                            <button id="btn-search" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
+                                                        </div>                                                         
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>                                        
                                     <br />
-                                    <!-- BEGIN: DataTables -->
 
-                                    
-                                    <div id="horizontal-form" class="pb-3">
-                                        <div class="preview ml-auto w-3/4">
-                                            <div class="form-inline">
-                                                <label for="text-search" class="form-label sm:w-20 text-right">
-                                                    <input type="radio" name="radio-search" value=2> Código&nbsp;&nbsp;
-                                                    <input type="radio" name="radio-search" value=3 checked> Nombre
-                                                </label>
-                                                <input id="text-search" type="text" class="form-control pt-0 pb-0 mt-2 border-slate-500" aria-label="Texto" />
-                                                <label for="time-selected" class="form-label sm:w-20 text-right pt-3">Periodo:</label>
-                                                <select id="time-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Periodo">
-                                                    <option value='week'>Última semana</option>
-                                                    <option value='month'>Último mes</option>
-                                                    <option value='semester'>Último semestre</option>
-                                                    <option value="">Todos</option>
-                                                </select>
-                                                <label for="status-selected" class="form-label sm:w-20 text-right pt-3">Estado:</label>
-                                                <select id="status-selected" class="form-control form-select-sm mt-2 border-slate-500" aria-label="Estado">
-                                                    <option value=0>En proceso</option>
-                                                    <option value=1>Publicados</option>
-                                                    <option value=9>Obsoletos</option>
-                                                    <option value=2>Cancelados</option>
-                                                    <option value=3>Eliminados</option>
-                                                    <option value=4>Desestimado</option>
-                                                </select>
-                                                <button id="btn-search" class="btn btn-primary shadow-md ml-3"><i data-lucide="search" class="w-4 h-4"></i></button>
-                                            </div>                                                                                                                                     
-                                        </div>
-                                    </div>                                                           
-                                 
+                                    <!-- BEGIN: DataTables -->                                                                                                                           
                                     <table id="documents-table" class="table table-bordered" style="width:100%">
                                         <thead>
                                             <tr>
@@ -124,7 +113,41 @@
                                                 <th>F</th>
                                                 <th>L</th>
                                             </tr>
-                                        </thead>                                     
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Id</th>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Versión</th>
+                                                <th>Proceso</th>
+                                                <th>Tipo Documento</th>
+                                                <th>Responsable</th>
+                                                <th>Viene de</th>
+                                                <th>Estado</th>
+                                                <th>H</th>
+                                                <th>C</th>
+                                                <th>X</th>
+                                                <th>F</th>
+                                                <th>L</th>
+                                            </tr>                                            
+                                        </thead>
+                                        <tfood>
+                                        <th>#</th>
+                                                <th>Id</th>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Versión</th>
+                                                <th>Proceso</th>
+                                                <th>Tipo Documento</th>
+                                                <th>Responsable</th>
+                                                <th>Viene de</th>
+                                                <th>Estado</th>
+                                                <th>H</th>
+                                                <th>C</th>
+                                                <th>X</th>
+                                                <th>F</th>
+                                                <th>L</th>                                            
+                                        </tfood>                                     
                                     </table>
 
                                 </div>
@@ -189,6 +212,37 @@
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />    
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+    <style>
+            span.deleteicon {
+                position: relative;
+                display: inline-flex;
+                align-items: center;                
+            }
+            span.deleteicon span {
+                position: absolute;
+                display: block;
+                right: 3px;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                color: #fff;
+                background-color: #ccc;
+                font: 13px monospace;
+                text-align: center;
+                line-height: 1em;
+                cursor: pointer;
+                
+            }
+            span.deleteicon input {
+                padding-right: 18px;
+                box-sizing: border-box;
+            }
+            .iso-input {
+                padding: 0.15em 0.6em; 
+                font-size: 0.95em; 
+                border-radius: 5px;                
+            }
+        </style>    
 @endpush
 
 @push('scripts-bottom')
@@ -238,8 +292,7 @@
         var timeSelected = isoGetStorage('iso_selectTime');
         var currentTimeSelected = ( timeSelected === null) ? $("#time-selected").val() : timeSelected;
 
-        var statusSelected = isoGetStorage('iso_selectStatus');
-        var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected; 
+ 
         var textSearch = isoGetStorage('iso_searchText');
         var currentSearchText = ( textSearch === null) ? $("#text-search").val() : textSearch;
         var radioSearch = isoGetStorage('iso_searchRadio');
@@ -260,19 +313,24 @@
         $('#text-search').val(currentSearchText);
         $("input[name='radio-search']").filter("[value="+currentSearchRadio+"]").prop('checked', true);
 
+        //*** VALIDADO */
+
+        // Estado
+        var statusSelected = isoGetStorage('iso_controlStatus');
+        var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected;        
+
         // Rango In
         var dateIn = isoGetStorage('iso_controlDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
-        console.log('DIN : '+ $dateInDefault);
         
         // Rango Out
         var dateOut = isoGetStorage('iso_controlDateout');
-        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;
-        console.log('DOUT : '+ $dateOutDefault); 
+        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;  
         
         // JSon
         
-        param = {time: currentTimeSelected, status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault};       
+        //param = {time: currentTimeSelected, status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault};       
+        param = {status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault, txt: ''};
         console.dir(JSON.stringify(param));         
                 
         // DATATABLE
@@ -285,6 +343,8 @@
         })
         .on('xhr.dt', function () {
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
+            $("#loading-image").hide();
+            $("#btn-search").removeClass('btn-primary').addClass('btn-success');             
         })
         .DataTable({
             dom: 'lrtip',
@@ -354,7 +414,8 @@
                 });
 
                 // Filtro de estado
-                setStatus();                
+                setStatus();
+                $("#btn-search").removeClass('btn-success').addClass('btn-primary');                
 
                 // Filtro inicial
                 //this.api().column(filterColumn).search(0).draw(); // hacia filtrado inicial
@@ -362,28 +423,52 @@
             language: lang1               
         }); // datatables
 
+        // Filtros : generación
+        $('#documents-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsConf[i+1];
+            //console.dir(item);
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });        
+
+        
         // DATERANGE
+        console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
         $('#date-selected').daterangepicker({
             locale: {
-                format: "YYYY/MM/DD",   // FIXME:
+                format: 'YYYY/MM/DD',
                 daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
                 monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 applyLabel: "Aplicar",
                 cancelLabel: "Cancelar",
-                customRangeLabel: "Personalizado",
+                customRangeLabel: "-"
             },
             showDropdowns: true,
             maxDate: moment(),
             startDate: $dateInDefault,
-            endDate: $dateOutDefault,            
+            endDate: $dateOutDefault,         
             ranges: {
                 'Hoy': [moment(), moment()],
                 'Última semana': [moment().subtract(6, 'days'), moment()],
                 'Último mes': [moment().subtract(29, 'days'), moment()],
                 'Este mes': [moment().startOf('month'), moment().endOf('month')],
                 'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                'Último semestre': [moment().subtract(5, 'months'), moment()]
-            }            
+                'Último semestre': [moment().subtract(5, 'months'), moment()],
+                'Todos': [moment("1970-01-01"), moment()]
+            }                     
         });
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
@@ -392,7 +477,6 @@
             $dateOutDefault = picker.endDate.format();
             console.log('DOUT : '+$dateOutDefault);
         });        
-        
         
         // BUTTONS       
         $('#btn-edit').on("click", function()  {
@@ -449,7 +533,11 @@
                 uri = uri.replace(':hash', rowdata.hash);
                 location.href = uri;                                 
             }
-        }); // btn-view        
+        }); // btn-view 
+        
+        $('input.deletable').wrap('<span class="deleteicon"></span>').after($('<span>x</span>').click(function() {
+            $(this).prev('input').val('').trigger('change').focus();
+        }));          
 
         // SUBMENU        
         $("#btn-download").on("click", function() {
@@ -504,32 +592,36 @@
 
         // FILTROS
         $("#btn-search").on("click", function() {
-            var ts =  $("#time-selected").val();
+            //var ts =  $("#time-selected").val();
             var ss =  $("#status-selected").val();
-            var tx =  $('#text-search').val();
-            var rs = $("input[name='radio-search']:checked").val();
+            //var tx =  $('#text-search').val();
+            var tx = $("#text-input").val();            
+            //var rs = $("input[name='radio-search']:checked").val();
             //console.log('>', ts, ss, tx, rs);
-            param = {time: ts, status: ss};
+            //param = {time: ts, status: ss};
+            param = {status: ss, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
             var url =  route.replace(':slug', JSON.stringify(param))
             startTime = Date.now();
-            //console.dir(JSON.stringify(param)); 
+            console.dir(JSON.stringify(param)); 
 
             $myTable.ajax.url(url).load();
             $myTable.state.clear();
-            if( rs == 2 ) {
-                $myTable.column(2).search(tx);
-                $myTable.column(3).search('').draw();
-            } else {
-                $myTable.column(3).search(tx);
-                $myTable.column(2).search('').draw();
-            }
+            // if( rs == 2 ) {
+            //     $myTable.column(2).search(tx);
+            //     $myTable.column(3).search('').draw();
+            // } else {
+            //     $myTable.column(3).search(tx);
+            //     $myTable.column(2).search('').draw();
+            // }
             
 
             setStatus();
-            isoSetStorage('iso_selectTime', ts);
-            isoSetStorage('iso_selectStatus', ss); 
-            isoSetStorage('iso_searchText', tx);
-            isoSetStorage('iso_searchRadio', rs);
+            //isoSetStorage('iso_selectTime', ts);
+            isoSetStorage('iso_controlStatus', ss); 
+            //isoSetStorage('iso_searchText', tx);
+            isoSetStorage('iso_controlDatein', $dateInDefault);
+            isoSetStorage('iso_controlDateout', $dateOutDefault); //            
+            //isoSetStorage('iso_searchRadio', rs);
         });
 
 
@@ -549,6 +641,15 @@
         $('#filter-status').on('change', function(){
             $myTable.column(9).search(this.value).draw();   
         }); // filter-status          
+
+        // Efectos Botón
+        $('#date-selected, #text-input').on('blur', function() {
+            $("#btn-search").removeClass('btn-success').addClass('btn-primary');
+        });
+
+        $('#status-selected').on('change', function() {
+            $("#btn-search").removeClass('btn-success').addClass('btn-primary');
+        });        
         
         // TOOLS
         $('#documents-table').on('click', 'tr', function () {

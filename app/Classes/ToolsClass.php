@@ -598,7 +598,8 @@ class ToolsClass
      * @param  integer $group estado del documento
      * @return array    Arreglo multidimiensional con key: id de documento y valores del status : acción y fecha de la acción
      */     
-    public function setDocumentsToControl($frequency, $group)
+    //public function setDocumentsToControl($frequency, $group)
+    public function setDocumentsToControl($params)
     {
         $groups = [
             0   => config('settings.document_status_inprocess'),
@@ -610,32 +611,59 @@ class ToolsClass
             ''  => [],
         ];
         $admin = Auth::user();
-        $groupArray = $groups[$group];
+        //$groupArray = $groups[$group];
+        $groupArray = $groups[$params['status']];
         $dt = Carbon::today();
         $newFrequency = '';
 
-        switch($frequency) {
-            case 'week':
-                $date = $dt->subWeek();
-                break;
-            case 'month':
-                $date = $dt->subMonth();
-                break;
-            case 'semester':
-                $date = $dt->subMonths(6);
-                break;
-            default:
-                $date = $dt->subYears(20);
-        }
+        // switch($frequency) {
+        //     case 'week':
+        //         $date = $dt->subWeek();
+        //         break;
+        //     case 'month':
+        //         $date = $dt->subMonth();
+        //         break;
+        //     case 'semester':
+        //         $date = $dt->subMonths(6);
+        //         break;
+        //     default:
+        //         $date = $dt->subYears(20);
+        // }
 
-        //Log::debug(['FREQU' => $frequency, 'GROUP' => $group, 'DATE' => $date, 'ARRAY' => $groupArray]);
+        // Range Date
+        $arr = explode('T', $params['din'] );
+        $rangeIn = $arr[0] .' 00:00:00';
+        $arr = explode('T', $params['dout'] ); 
+        $rangeOut = $arr[0] .' 23:59:59';
+        // Texto de código o nombre
+        $search = ( isset($params['txt']) && (strlen($params['txt']) > 2) ) ? $params['txt'] : '';                      
+
+        Log::debug(['PARAMETERS' => $params, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
         if( $admin->hasRole('ADMIN') ) {
+            // Si es Administrador            
             $lids = $this->getAdminAuthorizedLocations($admin);
-            $sids = $this->getAdminAuthorizedSystems($admin);
-            $documents =  DocumentModel::whereIn('status', $groupArray)->whereIn('location_id', $lids)->whereIn('system_id', $sids)->whereDate('updated_at', '>=', $date)->orderBy('created_at', 'desc')->get()->unique('code');
+            $sids = $this->getAdminAuthorizedSystems($admin);       
+
+            $documents =  DocumentModel::whereIn('status', $groupArray)
+                ->whereIn('location_id', $lids)
+                ->whereIn('system_id', $sids)
+                //->whereDate('updated_at', '>=', $date)
+                ->where(function($query) use($search) {
+                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                })                
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                ->orderBy('created_at', 'desc')
+                ->get()->unique('code');
+
+
+            // FIXME: Quitar esto???
             if( $documents->count() == 0 ) {
             //if( $admin ) {
-                $documents =  DocumentModel::whereIn('status', $groupArray)->whereIn('location_id', $lids)->whereIn('system_id', $sids)->orderBy('created_at', 'desc')->take(10)->get()->unique('code');
+                $documents =  DocumentModel::whereIn('status', $groupArray)
+                    ->whereIn('location_id', $lids)
+                    ->whereIn('system_id', $sids)
+                    ->orderBy('created_at', 'desc')
+                    ->take(10)->get()->unique('code');
                 $doc = $documents->last();
                 if($doc) {
                     $date = Carbon::createFromTimeStamp(strtotime($doc->updated_at));
@@ -650,9 +678,20 @@ class ToolsClass
                 } else {
                     $newFrequency = '';
                 }
-            } // if           
+            } // if  
+            
+            
         } else {
-            $documents =  DocumentModel::whereIn('status', $groupArray)->whereDate('updated_at', '>=', $date)->orderBy('created_at', 'desc')->get()->unique('code');
+            // No administrador
+            //$documents =  DocumentModel::whereIn('status', $groupArray)->whereDate('updated_at', '>=', $date)->orderBy('created_at', 'desc')->get()->unique('code');
+            $documents =  DocumentModel::whereIn('status', $groupArray)
+                ->where(function($query) use($search) {
+                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                })             
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                ->orderBy('created_at', 'desc')
+                ->get()->unique('code');
+
             if( $documents->count() == 0 ) {
                 $documents =  DocumentModel::whereIn('status', $groupArray)->orderBy('created_at', 'desc')->take(10)->get()->unique('code');
             } // if
@@ -1354,5 +1393,36 @@ class ToolsClass
         }
         return config('settings.'. $module .'_settings_default');
     } // setSettings
+
+
+    /**
+     * Cambia formato de fecha de PHP a Moment
+     * @param  string $format Formato a transformar
+     * @return string    formato transformado
+     */      
+    public function setFormat($format)
+    {
+        $output = '';
+        $table = [
+            'd'     => 'DD',
+            'D'     => 'DD',
+            'j'     => 'D',
+            'm'     => 'MM',
+            'M'     => 'MMM',
+            'n'     => 'M',
+            'Y'     => 'YYYY',
+            'y'     => 'YY',
+        ];
+
+        for($i=0; $i<strlen($format); $i++) {
+            $key = $format[$i];
+            if( key_exists($key, $table) ) {
+                $output .= $table[$key];
+            } else {
+                $output .= $key;
+            }
+        } // for
+        return $output;
+    } // setSettings    
 
 } // class
