@@ -132,7 +132,7 @@
                                             </tr>                                            
                                         </thead>
                                         <tfood>
-                                        <th>#</th>
+                                                <th>#</th>
                                                 <th>Id</th>
                                                 <th>Código</th>
                                                 <th>Nombre</th>
@@ -266,10 +266,11 @@
     let $myTable;
     let $beforeRow = 0;
     let $selectedRow = false;
+    let $columnsConf = {!! $gridColDef !!};
 
     $(function () {
     
-        let columnsConf = {!! $gridColDef !!};
+        
         let col = {{ $gridColOrd }};
         let lang1 = {!! $gridLanguage !!};
         let lang2 = {!! $modalLanguage !!};
@@ -281,7 +282,7 @@
         let $dateOutDefault;        
         //let initPage = 1;
         //let initOrder =  [[ col, 'desc']]; 
-        console.dir(lang1);
+        //console.dir(lang1);
         
         // ACONDICIONAMIENTO        
         var sCol = isoGetStorage('control_returnCol');
@@ -300,13 +301,13 @@
         
         // PARAMETROS
         //console.log('timeSelected: '+timeSelected);        
-        setFooter('documents-table', columnsConf);
+        //setFooter('documents-table', $columnsConf);
         
 
         // FILTROS GENERALES
-        setProcesses();
-        setTypes();        
-        setUsers();
+        //setProcesses();
+        //setTypes();        
+        //setUsers();
         
         $('#time-selected option[value="'+timeSelected+'"]').prop('selected', 'selected');
         $('#status-selected option[value='+statusSelected+']').prop('selected', 'selected');
@@ -336,6 +337,7 @@
         // DATATABLE
         var startTime = Date.now();
         console.log('Datatables init starts now: ', Date.now() - startTime);
+
         $myTable = $('#documents-table')
         .on('preXhr.dt', function () {
 
@@ -344,13 +346,14 @@
         .on('xhr.dt', function () {
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
             $("#loading-image").hide();
-            $("#btn-search").removeClass('btn-primary').addClass('btn-success');             
+            $("#btn-search").removeClass('btn-primary').addClass('btn-success'); 
+                        
         })
         .DataTable({
             dom: 'lrtip',
             bProcessing: true,
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
-            aoColumns: columnsConf,
+            aoColumns: $columnsConf,
             retrieve: true,
             pageLength: 10,
             order: initOrder,
@@ -358,7 +361,9 @@
             //filter: false,
             orderClasses: false,
             responsive: true,
-            stateSave: true,
+            //stateSave: true,
+            orderCellsTop: true,
+            fixedHeader: true,              
             buttons: [
                 {
                     extend: 'excelHtml5',
@@ -404,17 +409,18 @@
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
                 // Filtros de input en eel footer
-                this.api().columns().every( function (i) {
-                    var column = this;
-                    $( 'input', this.footer() ).on( 'keyup change clear', function () {
-                        if ( column.search() !== this.value ) {
-                            column.search( this.value ).draw();
-                        }
-                    });   
-                });
+                // this.api().columns().every( function (i) {
+                //     var column = this;
+                //     $( 'input', this.footer() ).on( 'keyup change clear', function () {
+                //         if ( column.search() !== this.value ) {
+                //             column.search( this.value ).draw();
+                //         }
+                //     });   
+                // });
 
                 // Filtro de estado
                 setStatus();
+                setProcessesList();
                 $("#btn-search").removeClass('btn-success').addClass('btn-primary');                
 
                 // Filtro inicial
@@ -426,7 +432,7 @@
         // Filtros : generación
         $('#documents-table thead tr:eq(1) th').each( function (i) {
             var tag;
-            var item = columnsConf[i+1];
+            var item = $columnsConf[i+1];
             //console.dir(item);
             if( typeof item.visible !== 'undefined' && item.visible === false ) {
                 $(this).html('');
@@ -442,6 +448,13 @@
                     }
                 }
             }          
+        });
+        
+        // Filtros : search - text
+        $('#documents-table thead' ).on( 'keyup', ".input-filter", function () {
+            console.log('INDEX: '+$(this).parent().index() );
+            console.log('VALUE: '+this.value);
+            $myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
         });        
 
         
@@ -627,7 +640,8 @@
 
 
         $('#filter-process').on('change', function(){
-            $myTable.column(5).search(this.value).draw();   
+            var val = $(this).val();
+            $myTable.column(5).search( val ? '^' + val + '$' : '', true, false).draw();   
         }); // filter-process
 
         $('#filter-type').on('change', function(){
@@ -775,6 +789,50 @@
         return d.content;
     }
 
+    function setStatus() {
+        var statusVal = $("#status-selected").val();
+        var output = '<option value="">Todos</option>';
+        if(statusVal == 0) {
+            var statusFilter = isoGetStorage('iso_statusFilter');
+            var statusArray = ['Nuevo','En edición','En revisión','En aprobación','En Publicación'];
+            $.each(statusArray, function(i, key) {
+                output += '<option value="'+key+'"';
+                output += ( statusFilter == key ) ? ' selected' : '';
+                output += '>'+key+'</option>';
+            }); 
+        }
+        $("#filter-status").html(output);
+    } // statusFilter Fx  
+    
+    function setProcessesList() {
+        //var data = $myTable.column(5).data().eq(0).sort().unique().join('<br>');
+        // console.log('*** PROCESSES:');
+        // console.log(data);
+
+        $myTable.columns().every( function (i) { 
+            var column = this;
+            //console.dir($columnsConf[i]);
+            if( $columnsConf[i].filterable == true ) {
+                var id =  $columnsConf[i].data;
+                console.log('ID: '+ id);
+                var select = $('<select id="filter-' + id + '" class="col-filter"><option value="">Todo</option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                        column.search( val ? '^' + val + '$' : '', true, false).draw();
+                    });
+                column.data().unique().sort().each( function ( d, j ) {
+                    if( d !== null ) {
+                        select.append( '<option value="' + d + '">' + d + '</option>' );
+                    }                                
+                });                
+            }
+        });
+
+    }
+
+    // Revisando
+
     function setProcesses() {
         var current = $("#filter-process").val();
         $.ajax({
@@ -838,20 +896,7 @@
         });
     } // setTypes Fx     
     
-    function setStatus() {
-        var statusVal = $("#status-selected").val();
-        var output = '<option value="">Todos</option>';
-        if(statusVal == 0) {
-            var statusFilter = isoGetStorage('iso_statusFilter');
-            var statusArray = ['Nuevo','En edición','En revisión','En aprobación','En Publicación'];
-            $.each(statusArray, function(i, key) {
-                output += '<option value="'+key+'"';
-                output += ( statusFilter == key ) ? ' selected' : '';
-                output += '>'+key+'</option>';
-            }); 
-        }
-        $("#filter-status").html(output);
-    } // statusFilter Fx
+
 
 
 </script>
