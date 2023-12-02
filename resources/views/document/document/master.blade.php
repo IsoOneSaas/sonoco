@@ -133,16 +133,16 @@
                                             </tr>
                                             <tr>
                                                 <th>#</th>
-                                                <th>Id</th>
-                                                <th>Código</th>
-                                                <th>Nombre</th>
-                                                <th>Versión</th>
-                                                <th>Tipo Documento</th>
-                                                <th>Publicado</th>
-                                                <th>Vigencia</th>
-                                                <th>H</th>
-                                                <th>A</th>
-                                                <th>T</th>
+                                                <th class="th-filter">Id</th>
+                                                <th class="th-filter">Código</th>
+                                                <th class="th-filter">Nombre</th>
+                                                <th class="th-filter">Versión</th>
+                                                <th class="th-filter">Tipo Documento</th>
+                                                <th class="th-filter">Publicado</th>
+                                                <th class="th-filter">Vigencia</th>
+                                                <th class="th-filter">H</th>
+                                                <th class="th-filter">A</th>
+                                                <th class="th-filter">T</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -532,7 +532,7 @@
             console.dir(JSON.stringify(params));
             
             // Ajax            
-            startTime = Date.now();
+            //startTime = Date.now();
             $myTable.ajax.url(url).load();
             $myTable.state.clear();
             //$myTable.search('').columns().search('').draw();

@@ -289,16 +289,8 @@
         var sDir = isoGetStorage('control_returnDir');        
         var initPage = ( isoGetStorage('control_returnPage') === null ) ? 1 : isoGetStorage('control_returnPage'); 
         var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ sCol, sDir]];
-        
-        var timeSelected = isoGetStorage('iso_selectTime');
-        var currentTimeSelected = ( timeSelected === null) ? $("#time-selected").val() : timeSelected;
-
- 
-        var textSearch = isoGetStorage('iso_searchText');
-        var currentSearchText = ( textSearch === null) ? $("#text-search").val() : textSearch;
-        var radioSearch = isoGetStorage('iso_searchRadio');
-        var currentSearchRadio = ( radioSearch === null) ? $("input[name='radio-search']:checked").val() : radioSearch;
-        
+        var initRecords = ( isoGetStorage('iso_controlReturnRows') === null ) ? 10 : isoGetStorage('iso_controlReturnRows');
+         
         // PARAMETROS
         //console.log('timeSelected: '+timeSelected);        
         //setFooter('documents-table', $columnsConf);
@@ -308,17 +300,19 @@
         //setProcesses();
         //setTypes();        
         //setUsers();
-        
-        $('#time-selected option[value="'+timeSelected+'"]').prop('selected', 'selected');
-        $('#status-selected option[value='+statusSelected+']').prop('selected', 'selected');
-        $('#text-search').val(currentSearchText);
-        $("input[name='radio-search']").filter("[value="+currentSearchRadio+"]").prop('checked', true);
+    
 
         //*** VALIDADO */
 
         // Estado
         var statusSelected = isoGetStorage('iso_controlStatus');
-        var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected;        
+        var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected;
+        if( (statusSelected === null) || (statusSelected === '')  ) {
+            var currentStatusSelected = $("#status-selected").val();
+        } else {
+            var currentStatusSelected = statusSelected;
+            $("#status-selected").val(currentStatusSelected);
+        }
 
         // Rango In
         var dateIn = isoGetStorage('iso_controlDatein');
@@ -347,7 +341,6 @@
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
             $("#loading-image").hide();
             $("#btn-search").removeClass('btn-primary').addClass('btn-success'); 
-                        
         })
         .DataTable({
             dom: 'lrtip',
@@ -355,13 +348,11 @@
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
             aoColumns: $columnsConf,
             retrieve: true,
-            pageLength: 10,
+            pageLength: initRecords,
             order: initOrder,
             page: initPage,
-            //filter: false,
             orderClasses: false,
             responsive: true,
-            //stateSave: true,
             orderCellsTop: true,
             fixedHeader: true,              
             buttons: [
@@ -405,26 +396,47 @@
                 }
                 return nRow;                
             },
+            drawCallback: function(settings) {
+                var api = this.api();
+                api.columns().every( function (i) {
+                    var column = this;
+                    if( $columnsConf[i].filterable == true ) {                     
+                        //console.log('column: '+i);
+                        var id =  $columnsConf[i].data;
+                        var output = '<option value="">Todos</option>';
+                        var val = $("#filter-"+id).val();
+                        column.data().unique().sort().each( function ( d, j ) { 
+                            if( (d !== null) && (d != '') ) {
+                                output +=  '<option value="' + d + '">' + d + '</option>';
+                            }
+                        });
+                        $("#filter-"+id).html(output).val(val);                                             
+                    }
+                });
+            },
             initComplete: function() {
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
-                // Filtros de input en eel footer
-                // this.api().columns().every( function (i) {
-                //     var column = this;
-                //     $( 'input', this.footer() ).on( 'keyup change clear', function () {
-                //         if ( column.search() !== this.value ) {
-                //             column.search( this.value ).draw();
-                //         }
-                //     });   
-                // });
-
-                // Filtro de estado
-                setStatus();
-                setProcessesList();
-                $("#btn-search").removeClass('btn-success').addClass('btn-primary');                
-
-                // Filtro inicial
-                //this.api().column(filterColumn).search(0).draw(); // hacia filtrado inicial
+                
+                this.api().columns().every( function (i) {
+                    var column = this;
+                    var id =  $columnsConf[i].data;
+                    
+                    if( $columnsConf[i].filterable == true ) {
+                        //console.log('column: '+id);
+                        $("#filter-"+id).on( 'change', function () {
+                            //console.log($(this).val());
+                            var val = $(this).val();
+                            column.search( val ? '^' + val + '$' : '', true, false).draw();
+                        });                                                
+                    } else if( $columnsConf[i].searchable == true ) {                                                
+                        $("#filter-"+id).on( 'keyup change clear', function() {
+                            if ( column.search() !== this.value ) {
+                                column.search( this.value ).draw();
+                            }
+                        });
+                    }                        
+                });
             },                                    
             language: lang1               
         }); // datatables
@@ -438,7 +450,7 @@
                 $(this).html('');
             } else {
                 if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
-                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"><option value="">Todos</option></select>';
                     $(this).html(tag);
                 } else {
                     if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
@@ -450,12 +462,7 @@
             }          
         });
         
-        // Filtros : search - text
-        $('#documents-table thead' ).on( 'keyup', ".input-filter", function () {
-            console.log('INDEX: '+$(this).parent().index() );
-            console.log('VALUE: '+this.value);
-            $myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
-        });        
+   
 
         
         // DATERANGE
@@ -603,58 +610,32 @@
             } // if/else
         });        
 
-        // FILTROS
+        // FILTROS ******
         $("#btn-search").on("click", function() {
-            //var ts =  $("#time-selected").val();
+
             var ss =  $("#status-selected").val();
-            //var tx =  $('#text-search').val();
             var tx = $("#text-input").val();            
-            //var rs = $("input[name='radio-search']:checked").val();
-            //console.log('>', ts, ss, tx, rs);
-            //param = {time: ts, status: ss};
-            param = {status: ss, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
+            var param = {status: ss, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
+            var info = $myTable.page.info(); 
             var url =  route.replace(':slug', JSON.stringify(param))
-            startTime = Date.now();
+
+            // Ajustes a cambio
+            $(".select-filter").html('');
+            $(".input-filter").val('');
+            $("#loading-image").show();
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');              
+
+            console.log('Searching...');
             console.dir(JSON.stringify(param)); 
 
             $myTable.ajax.url(url).load();
             $myTable.state.clear();
-            // if( rs == 2 ) {
-            //     $myTable.column(2).search(tx);
-            //     $myTable.column(3).search('').draw();
-            // } else {
-            //     $myTable.column(3).search(tx);
-            //     $myTable.column(2).search('').draw();
-            // }
-            
-
-            setStatus();
-            //isoSetStorage('iso_selectTime', ts);
+        
             isoSetStorage('iso_controlStatus', ss); 
-            //isoSetStorage('iso_searchText', tx);
             isoSetStorage('iso_controlDatein', $dateInDefault);
             isoSetStorage('iso_controlDateout', $dateOutDefault); //            
-            //isoSetStorage('iso_searchRadio', rs);
-        });
-
-
-
-        $('#filter-process').on('change', function(){
-            var val = $(this).val();
-            $myTable.column(5).search( val ? '^' + val + '$' : '', true, false).draw();   
-        }); // filter-process
-
-        $('#filter-type').on('change', function(){
-            $myTable.column(6).search(this.value).draw();   
-        }); // filter-type
-        
-        $('#filter-user').on('change', function(){
-            $myTable.column(7).search(this.value).draw();   
-        }); // filter-user
-        
-        $('#filter-status').on('change', function(){
-            $myTable.column(9).search(this.value).draw();   
-        }); // filter-status          
+            isoSetStorage('iso_controlReturnRows', info.length);
+        });     
 
         // Efectos Botón
         $('#date-selected, #text-input').on('blur', function() {
@@ -789,49 +770,8 @@
         return d.content;
     }
 
-    function setStatus() {
-        var statusVal = $("#status-selected").val();
-        var output = '<option value="">Todos</option>';
-        if(statusVal == 0) {
-            var statusFilter = isoGetStorage('iso_statusFilter');
-            var statusArray = ['Nuevo','En edición','En revisión','En aprobación','En Publicación'];
-            $.each(statusArray, function(i, key) {
-                output += '<option value="'+key+'"';
-                output += ( statusFilter == key ) ? ' selected' : '';
-                output += '>'+key+'</option>';
-            }); 
-        }
-        $("#filter-status").html(output);
-    } // statusFilter Fx  
-    
-    function setProcessesList() {
-        //var data = $myTable.column(5).data().eq(0).sort().unique().join('<br>');
-        // console.log('*** PROCESSES:');
-        // console.log(data);
 
-        $myTable.columns().every( function (i) { 
-            var column = this;
-            //console.dir($columnsConf[i]);
-            if( $columnsConf[i].filterable == true ) {
-                var id =  $columnsConf[i].data;
-                console.log('ID: '+ id);
-                var select = $('<select id="filter-' + id + '" class="col-filter"><option value="">Todo</option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                        column.search( val ? '^' + val + '$' : '', true, false).draw();
-                    });
-                column.data().unique().sort().each( function ( d, j ) {
-                    if( d !== null ) {
-                        select.append( '<option value="' + d + '">' + d + '</option>' );
-                    }                                
-                });                
-            }
-        });
-
-    }
-
-    // Revisando
+    //*** */ Revisando
 
     function setProcesses() {
         var current = $("#filter-process").val();
@@ -896,7 +836,20 @@
         });
     } // setTypes Fx     
     
-
+    function setStatus() {
+        var statusVal = $("#status-selected").val();
+        var output = '<option value="">Todos</option>';
+        if(statusVal == 0) {
+            var statusFilter = isoGetStorage('iso_controlStatus');
+            var statusArray = ['Nuevo','En edición','En revisión','En aprobación','En Publicación'];
+            $.each(statusArray, function(i, key) {
+                output += '<option value="'+key+'"';
+                output += ( statusFilter == key ) ? ' selected' : '';
+                output += '>'+key+'</option>';
+            }); 
+        }
+        $("#filter-status").html(output);
+    } // statusFilter Fx  
 
 
 </script>
