@@ -32,8 +32,12 @@ class DocumentModelController extends Controller
      */
     public function index() : View
     {
+        
         $columnDefinition = $this->dataTableDefinition();
         //Log::debug('URL'. $this->contentUrl);
+        $systems = $this->documentRepo->getSystemsList();
+        $locations = $this->documentRepo->getLocationsList();
+        $types = $this->documentRepo->getTypesList();
         return view('document.document.index', [
             'urlContent'  => $this->contentUrl,
             'gridColOrd'  => $columnDefinition['column_order'],
@@ -41,6 +45,9 @@ class DocumentModelController extends Controller
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/document.datatable_grid')),
             'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
+            'systems'       => $systems,
+            'locations'     => $locations,
+            'types'         => $types,
         ]);    
     } // index Method
 

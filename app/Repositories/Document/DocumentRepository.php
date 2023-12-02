@@ -993,6 +993,37 @@ class DocumentRepository implements DocumentRepositoryInterface
         return json_encode(array('success' => false, 'message' => ''));
     } // tags Method
 
+    /**
+     * Listado de requisitos para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
+     * @return collection    Listado
+     */
+    public function getSystemsList()
+    {
+        $admin = Auth::user();
+        $sids = $this->tool->getAdminAuthorizedSystems($admin);
+        return SystemModel::whereIn('system_id', $sids)->get(['system_id', 'name']);
+    } // etSystemsList Method
+
+    /**
+     * Listado de localizaciones para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
+     * @return collection    Listado
+     */
+    public function getLocationsList()
+    {
+        $admin = Auth::user();
+        $sids = $this->tool->getAdminAuthorizedLocations($admin);
+        return LocationModel::whereIn('location_id', $sids)->get(['location_id', 'name']);
+    } // setLocationsList Method
+    
+    /**
+     * Listado de tipos de documentos para el select del filtro en Listado de Documentos de proceso
+     * @return collection    Listado
+     */
+    public function getTypesList()
+    {
+        return TypeModel::orderBy('name')->get(['type_id', 'name']);
+    } // setTypesList Method     
+
 
     private function saveForwarding($action, $deadline, $links)
     {

@@ -24,4 +24,7 @@ interface DocumentRepositoryInterface
     public function version($url, array $data);
 
     public function render($slug);   // New render grid
+    public function getSystemsList();
+    public function getLocationsList();
+    public function getTypesList();
 }

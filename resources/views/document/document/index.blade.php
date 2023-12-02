@@ -83,6 +83,30 @@
                                                                 </select>
                                                             </div>
                                                         </div>
+
+                                                        <div class="form-inline">
+
+                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
+                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
+                                                                @foreach($systems as $system)   
+                                                                <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
+                                                                @endforeach                                                                                                        
+                                                            </select>
+                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-5">Localización:</label>
+                                                            <select multiple id="location-selected" class="form-control mt-2 border-slate-500" aria-label="Localización">
+                                                                @foreach($locations as $location)   
+                                                                <option value={{ $location->location_id }} selected>{{ $location->name }}</option>
+                                                                @endforeach                                                                                                        
+                                                            </select>
+                                                            <label for="type-selected" class="form-label sm:w-20 text-right pt-3">Tipos:</label>
+                                                            <select multiple id="type-selected" class="form-control mt-2 border-slate-500" aria-label="Tipo">
+                                                                @foreach($types as $type)
+                                                                <option value={{ $type->type_id }} selected >{{ $type->name }}</option>
+                                                                @endforeach
+                                                            </select>                                                                                                                         
+
+                                                        </div>
+
                                                         <div class="flex mt-3 justify-center">
                                                             <button id="btn-search" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
                                                         </div>                                                         
@@ -242,6 +266,9 @@
                 font-size: 0.95em; 
                 border-radius: 5px;                
             }
+            .input-filter {
+                width: 100%
+            }
         </style>    
 @endpush
 
@@ -314,6 +341,24 @@
             $("#status-selected").val(currentStatusSelected);
         }
 
+        // Sistema
+        var sidsStoraged = isoGetStorage('iso_controlSystems');
+        console.log('SIDSTRORAGE: ');
+        console.dir(sidsStoraged);
+        var sidsArray = setStorageArray("system-selected", sidsStoraged);
+        
+        // Localizaciones
+        var lidsStoraged = isoGetStorage('iso_controlLocations');
+        console.log('LIDSTRORAGE: ');
+        console.dir(lidsStoraged);
+        var lidsArray = setStorageArray("location-selected", lidsStoraged);    
+        
+        // Tipos
+        var tidsStoraged = isoGetStorage('iso_controlTypes');
+        console.log('TIDSTRORAGE: ');
+        console.dir(tidsStoraged);
+        var tidsArray = setStorageArray("type-selected", tidsStoraged);          
+
         // Rango In
         var dateIn = isoGetStorage('iso_controlDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
@@ -325,7 +370,7 @@
         // JSon
         
         //param = {time: currentTimeSelected, status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault};       
-        param = {status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault, txt: ''};
+        param = {status: currentStatusSelected, sids: sidsArray, lids: lidsArray, tids: tidsArray,  din: $dateInDefault, dout: $dateOutDefault, txt: ''};
         console.dir(JSON.stringify(param));         
                 
         // DATATABLE
@@ -462,9 +507,7 @@
             }          
         });
         
-   
-
-        
+           
         // DATERANGE
         console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
         $('#date-selected').daterangepicker({
@@ -614,27 +657,41 @@
         $("#btn-search").on("click", function() {
 
             var ss =  $("#status-selected").val();
+            var rs =  $("#system-selected").val();
+            var ls =  $("#location-selected").val();
+            var ts =  $("#type-selected").val();
             var tx = $("#text-input").val();            
-            var param = {status: ss, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
+            var param = {status: ss, sids: rs, lids: ls, tids: ts, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
             var info = $myTable.page.info(); 
             var url =  route.replace(':slug', JSON.stringify(param))
 
-            // Ajustes a cambio
-            $(".select-filter").html('');
-            $(".input-filter").val('');
-            $("#loading-image").show();
-            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');              
-
             console.log('Searching...');
             console.dir(JSON.stringify(param)); 
-
-            $myTable.ajax.url(url).load();
-            $myTable.state.clear();
-        
-            isoSetStorage('iso_controlStatus', ss); 
-            isoSetStorage('iso_controlDatein', $dateInDefault);
-            isoSetStorage('iso_controlDateout', $dateOutDefault); //            
-            isoSetStorage('iso_controlReturnRows', info.length);
+            
+            if( (rs.length > 0) && (ls.length > 0) ) {
+                // Ajustes a cambio
+                $(".select-filter").html('');
+                $(".input-filter").val('');
+                $("#loading-image").show();
+                $("#btn-filter").removeClass('btn-success').addClass('btn-primary');              
+                // Ajax
+                $myTable.ajax.url(url).load();
+                $myTable.state.clear();
+                // Storage
+                isoSetStorage('iso_controlStatus', ss); 
+                isoSetStorage('iso_controlSystems', rs);
+                isoSetStorage('iso_controlLocations', ls);
+                isoSetStorage('iso_controlTypes', ts);
+                isoSetStorage('iso_controlDatein', $dateInDefault);
+                isoSetStorage('iso_controlDateout', $dateOutDefault); //            
+                isoSetStorage('iso_controlReturnRows', info.length);
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Debe seleccionar al menos una opción de todos los selectores"
+                });
+            }
         });     
 
         // Efectos Botón
@@ -642,7 +699,7 @@
             $("#btn-search").removeClass('btn-success').addClass('btn-primary');
         });
 
-        $('#status-selected').on('change', function() {
+        $('#status-selected, #system-selected', '#location-selected', '#type-selected').on('change', function() {
             $("#btn-search").removeClass('btn-success').addClass('btn-primary');
         });        
         
@@ -752,6 +809,33 @@
         }); // #btn-sheet        
 
     }); // document
+
+    function setStorageArray(tag, storaged) {
+        var output = '';
+        //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
+
+        if( (storaged === null) || (storaged == '') ) {
+            var array = $("#"+tag).val();
+        } else {
+            var array = ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        }
+
+        //console.dir(array);
+        $('#'+tag+' option').each(function(i) {
+            
+            if( $.inArray( this.value , array ) !== -1 ) {
+                output += '<option value='+ parseInt(this.value) +' selected>'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, 'Selected');
+            } else {
+                output += '<option value='+ parseInt(this.value) +'>'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, '');
+            }
+        });        
+
+        $("#"+tag).html(output);
+        $("#"+tag).multipleSelect(); 
+        return array;
+    } // setStorageArray Fx     
 
     function checkSight(id) {
         var route = "{{ route('documents.master.check', ':id') }}";

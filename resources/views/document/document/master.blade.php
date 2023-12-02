@@ -641,7 +641,7 @@
         $("#"+tag).html(output);
         $("#"+tag).multipleSelect(); 
         return array;
-    }
+    } // setStorageArray Fx 
 
 </script>
 

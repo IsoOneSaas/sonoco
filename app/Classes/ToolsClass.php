@@ -593,7 +593,7 @@ class ToolsClass
 
 
     /**
-     * ACTUAL DE CONTROL DE DOCUMENTOS
+     * ACTUAL DE CONTROL DE DOCUMENTOS *****
      * @param  string $frequency rango de tiempo 
      * @param  integer $group estado del documento
      * @return array    Arreglo multidimiensional con key: id de documento y valores del status : acción y fecha de la acción
@@ -611,24 +611,7 @@ class ToolsClass
             ''  => [],
         ];
         $admin = Auth::user();
-        //$groupArray = $groups[$group];
         $groupArray = $groups[$params['status']];
-        $dt = Carbon::today();
-        $newFrequency = '';
-
-        // switch($frequency) {
-        //     case 'week':
-        //         $date = $dt->subWeek();
-        //         break;
-        //     case 'month':
-        //         $date = $dt->subMonth();
-        //         break;
-        //     case 'semester':
-        //         $date = $dt->subMonths(6);
-        //         break;
-        //     default:
-        //         $date = $dt->subYears(20);
-        // }
 
         // Range Date
         $arr = explode('T', $params['din'] );
@@ -637,68 +620,71 @@ class ToolsClass
         $rangeOut = $arr[0] .' 23:59:59';
         // Texto de código o nombre
         $search = ( isset($params['txt']) && (strlen($params['txt']) > 2) ) ? $params['txt'] : '';                      
+        // Requisitos
+        if( is_array($params['sids'])  ) {
+            $sids = $params['sids'];
+        } else {                
+            $sids = [];                
+        } 
+        // Localizaciones
+        if( is_array($params['lids'])  ) {
+            $lids = $params['lids'];
+        } else {                
+            $lids = [];                
+        }  
+        // Typos de documentos
+        if( is_array($params['tids'])  ) {
+            $tids = $params['tids'];
+        } else {                
+            $tids = [];                
+        }
+        
+        $dids = false;
+        // Responsables
+        // $params['uids'] = ['AF25092C-6B53-B99F-D38C-BADBAA7223F2'];
+        // 
+        // if( key_exists('uids', $params) && (count($params['uids']) > 0) ) {
+        //     $plucked = ForwardModel::whereIn('user_uid', $params['uids'])->pluck('document_id');
+        //     $dids = $plucked->all();
+        //     if( count($dids) == 0 ) $dids = false;               
+        // }        
 
-        Log::debug(['PARAMETERS' => $params, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
+        Log::debug(['PARAMETERS' => $params, 'DIDS' => $dids, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
         if( $admin->hasRole('ADMIN') ) {
             // Si es Administrador            
-            $lids = $this->getAdminAuthorizedLocations($admin);
-            $sids = $this->getAdminAuthorizedSystems($admin);       
-
             $documents =  DocumentModel::whereIn('status', $groupArray)
                 ->whereIn('location_id', $lids)
                 ->whereIn('system_id', $sids)
-                //->whereDate('updated_at', '>=', $date)
+                ->whereIn('type_id', $tids)
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })                
                 ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                // ->when($dids, function($query) use($dids) {
+                //     $query->whereIn('document_id', array_unique($dids));
+                //     // deben tener el mismo estado <documents -> forwards
+                // })                 
                 ->orderBy('created_at', 'desc')
-                ->get()->unique('code');
-
-
-            // FIXME: Quitar esto???
-            if( $documents->count() == 0 ) {
-            //if( $admin ) {
-                $documents =  DocumentModel::whereIn('status', $groupArray)
-                    ->whereIn('location_id', $lids)
-                    ->whereIn('system_id', $sids)
-                    ->orderBy('created_at', 'desc')
-                    ->take(10)->get()->unique('code');
-                $doc = $documents->last();
-                if($doc) {
-                    $date = Carbon::createFromTimeStamp(strtotime($doc->updated_at));
-                    if(  $date > $dt->subMonth() ) {
-                        $newFrequency = 'month';
-                    } elseif( $date > $dt->subMonths(6) ) {
-                        $newFrequency = 'semester';
-                    } else {
-                        $newFrequency = '';
-                    }
-                    //Log::debug(['LAST' => $doc->toArray(), 'DATE' => $date, 'REF' => $dt->subMonth(), 'FREQ' => $newFrequency]);
-                } else {
-                    $newFrequency = '';
-                }
-            } // if  
-            
+                ->get()->unique('code');            
             
         } else {
             // No administrador
-            //$documents =  DocumentModel::whereIn('status', $groupArray)->whereDate('updated_at', '>=', $date)->orderBy('created_at', 'desc')->get()->unique('code');
             $documents =  DocumentModel::whereIn('status', $groupArray)
+                ->whereIn('location_id', $lids)
+                ->whereIn('system_id', $sids)
+                ->whereIn('type_id', $tids)            
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })             
                 ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                // ->when($dids, function($query) use($dids) {
+                //     $query->whereIn('document_id', array_unique($dids));
+                // })                
                 ->orderBy('created_at', 'desc')
                 ->get()->unique('code');
 
-            if( $documents->count() == 0 ) {
-                $documents =  DocumentModel::whereIn('status', $groupArray)->orderBy('created_at', 'desc')->take(10)->get()->unique('code');
-            } // if
         }        
         Log::debug('== Número de documentos final: '. $documents->count());
-
-        // si no encuentra datos, toma los últimos diez y cambia los parámetros
 
         return $documents; 
 
