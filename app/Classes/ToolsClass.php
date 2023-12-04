@@ -946,11 +946,12 @@ class ToolsClass
             // Etiquetas
             $dids = false;
             if( !empty($params['tag']) ) {
-                $plucked = TagModel::where('tag', 'LIKE', "%". $params['tag'] ."%")->pluck('document_id');
+                //$plucked = TagModel::where('tag', 'LIKE', "%". $params['tag'] ."%")->pluck('document_id');
+                $plucked = TagModel::where('tag', '=', $params['tag'])->pluck('document_id');
                 $dids = $plucked->all();
-                if( count($dids) == 0 ) $dids = false;               
+                if( count($dids) == 0 ) $dids = [0];               
             }
-
+            
             Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
@@ -1004,6 +1005,7 @@ class ToolsClass
                             // Log::debug(['DOC' => $doc->document_id]);
                             
                             $new =  DocumentModel::where('document_id', $did)
+                                ->where('status', $target)
                                 ->whereIn('system_id', $sids)
                                 ->whereIn('process_id', $pids)
                                 ->whereIn('location_id', $lids)

@@ -1000,8 +1000,13 @@ class DocumentRepository implements DocumentRepositoryInterface
     public function getSystemsList()
     {
         $admin = Auth::user();
-        $sids = $this->tool->getAdminAuthorizedSystems($admin);
-        return SystemModel::whereIn('system_id', $sids)->get(['system_id', 'name']);
+        if( $admin->hasRole('ADMIN') ) {
+            $sids = $this->tool->getAdminAuthorizedSystems($admin);
+            return SystemModel::whereIn('system_id', $sids)->orderBy('name')->get(['system_id', 'name']);
+        } else {
+            return SystemModel::orderBy('name')->get(['system_id', 'name']);
+        }
+
     } // etSystemsList Method
 
     /**
@@ -1011,8 +1016,12 @@ class DocumentRepository implements DocumentRepositoryInterface
     public function getLocationsList()
     {
         $admin = Auth::user();
-        $sids = $this->tool->getAdminAuthorizedLocations($admin);
-        return LocationModel::whereIn('location_id', $sids)->get(['location_id', 'name']);
+        if( $admin->hasRole('ADMIN') ) {
+            $sids = $this->tool->getAdminAuthorizedLocations($admin);
+            return LocationModel::whereIn('location_id', $sids)->orderBy('name')->get(['location_id', 'name']);
+        } else {
+            return LocationModel::orderBy('name')->get(['location_id', 'name']);
+        }            
     } // setLocationsList Method
     
     /**

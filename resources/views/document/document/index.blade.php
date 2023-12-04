@@ -58,7 +58,7 @@
                                             <div id="faq-accordion-content-6" class="accordion-header">
                                                 <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
                                             </div>
-                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
+                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
@@ -156,6 +156,7 @@
                                             </tr>                                            
                                         </thead>
                                         <tfood>
+                                            <tr>
                                                 <th>#</th>
                                                 <th>Id</th>
                                                 <th>Código</th>
@@ -170,10 +171,11 @@
                                                 <th>C</th>
                                                 <th>X</th>
                                                 <th>F</th>
-                                                <th>L</th>                                            
+                                                <th>L</th>
+                                            </tr>                                            
                                         </tfood>                                     
                                     </table>
-
+                                    <!-- END: DataTables -->
                                 </div>
 
                             </div>
@@ -318,19 +320,6 @@
         var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ sCol, sDir]];
         var initRecords = ( isoGetStorage('iso_controlReturnRows') === null ) ? 10 : isoGetStorage('iso_controlReturnRows');
          
-        // PARAMETROS
-        //console.log('timeSelected: '+timeSelected);        
-        //setFooter('documents-table', $columnsConf);
-        
-
-        // FILTROS GENERALES
-        //setProcesses();
-        //setTypes();        
-        //setUsers();
-    
-
-        //*** VALIDADO */
-
         // Estado
         var statusSelected = isoGetStorage('iso_controlStatus');
         var currentStatusSelected = ( (statusSelected === null) || (statusSelected === '')  ) ? $("#status-selected").val() : statusSelected;
@@ -361,14 +350,15 @@
 
         // Rango In
         var dateIn = isoGetStorage('iso_controlDatein');
+        console.log('dateIn: '+dateIn)
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
         
         // Rango Out
         var dateOut = isoGetStorage('iso_controlDateout');
+        console.log('dateOut: '+dateOut);
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;  
         
-        // JSon
-        
+        // JSon        
         //param = {time: currentTimeSelected, status: currentStatusSelected, din: $dateInDefault, dout: $dateOutDefault};       
         param = {status: currentStatusSelected, sids: sidsArray, lids: lidsArray, tids: tidsArray,  din: $dateInDefault, dout: $dateOutDefault, txt: ''};
         console.dir(JSON.stringify(param));         
@@ -509,7 +499,7 @@
         
            
         // DATERANGE
-        console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
+        //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
         $('#date-selected').daterangepicker({
             locale: {
                 format: 'YYYY/MM/DD',
@@ -699,7 +689,7 @@
             $("#btn-search").removeClass('btn-success').addClass('btn-primary');
         });
 
-        $('#status-selected, #system-selected', '#location-selected', '#type-selected').on('change', function() {
+        $('#status-selected, #system-selected, #location-selected, #type-selected').on('change', function() {
             $("#btn-search").removeClass('btn-success').addClass('btn-primary');
         });        
         

@@ -255,7 +255,7 @@ class DocumentModelController extends Controller
             ["data" => "process", "title" => "Proceso", "searchable" => true, 'filterable' => true],        // 5
             ["data" => "type", "title" => "Tipo Documento", "searchable" => true, 'filterable' => true],    // 6
             ["data" => "user", "title" => "Responsable", "searchable" => true, 'filterable' => true],
-            ["data" => "date", "title" => "Viene de...", "searchable" => true],
+            ["data" => "date", "title" => "Viene de...", "searchable" => true, 'filterable' => true],
             ["data" => "status", "title" => "Estado", "searchable" => true, 'filterable' => true], //9
         ];
 

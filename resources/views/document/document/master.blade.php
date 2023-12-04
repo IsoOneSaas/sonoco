@@ -53,7 +53,7 @@
                                             <div id="faq-accordion-content-6" class="accordion-header">
                                                 <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar</span></button>
                                             </div>
-                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
+                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
@@ -64,11 +64,11 @@
                                                             </div>
                                                             <div class="form-inline">
                                                                 <label for="text-input" class="form-label sm:w-20 text-right">Texto:</label>
-                                                                <input id="text-input" type="text" class="form-control w-52 border-slate-500 iso-input deletable" aria-label="Texto">
+                                                                <input id="text-input" type="text" class="form-control w-full border-slate-500 iso-input deletable" aria-label="Texto">
                                                             </div>
                                                             <div class="form-inline">
                                                                 <label for="tag-input" class="form-label sm:w-20 text-right">Etiqueta:</label>
-                                                                <input id="tag-input" type="text" class="form-control w-52 border-slate-500 iso-input deletable" aria-label="Etiqueta">
+                                                                <input id="tag-input" type="text" class="form-control w-full border-slate-500 iso-input deletable" aria-label="Etiqueta">
                                                             </div>
                                                         </div>
                                                         <div class="form-inline">
@@ -273,6 +273,9 @@
                 font-size: 0.95em; 
                 border-radius: 5px;                
             }
+            .input-filter {
+                width: 100%
+            }            
         </style>    
 @endpush
 
@@ -356,7 +359,6 @@
             console.log('Received ajax response ', Date.now() - startTime + ' milliseconds.');
             $("#loading-image").hide();
             $("#btn-filter").removeClass('btn-primary').addClass('btn-success'); 
-            setFilters();
         })
         .DataTable({
             dom: 'lrtip', // 'Blfrtip'
@@ -410,14 +412,74 @@
                     $('td:eq(0)', nRow).html(ordinal);
                 }
                 return nRow;                
-            },                
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                api.columns().every( function (i) {
+                    var column = this;
+                    if( columnsDef[i].filterable == true ) {                     
+                        //console.log('column: '+i);
+                        var id =  columnsDef[i].data;
+                        var output = '<option value="">Todos</option>';
+                        var val = $("#filter-"+id).val();
+                        column.data().unique().sort().each( function ( d, j ) { 
+                            if( (d !== null) && (d != '') ) {
+                                output +=  '<option value="' + d + '">' + d + '</option>';
+                            }
+                        });
+                        $("#filter-"+id).html(output).val(val);                                             
+                    }
+                });
+            },
             initComplete: function() {
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
                 $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+
+                this.api().columns().every( function (i) {
+                    var column = this;
+                    var id =  columnsDef[i].data;
+                    
+                    if( columnsDef[i].filterable == true ) {
+                        //console.log('column: '+id);
+                        $("#filter-"+id).on( 'change', function () {
+                            //console.log($(this).val());
+                            var val = $(this).val();
+                            column.search( val ? '^' + val + '$' : '', true, false).draw();
+                        });                                                
+                    } else if( columnsDef[i].searchable == true ) {                                                
+                        $("#filter-"+id).on( 'keyup change clear', function() {
+                            if ( column.search() !== this.value ) {
+                                column.search( this.value ).draw();
+                            }
+                        });
+                    }                        
+                });
+
             },
             language: $lang
-        }); // datatables        
+        }); // datatables
+        
+        // Filtros : generación
+        $('#documents-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsDef[i+1];
+            //console.dir(item);
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });        
      
         // DATERANGE
         //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
@@ -521,72 +583,40 @@
             var info = $myTable.page.info();            
             var params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
             var url =  $route.replace(':slug', JSON.stringify(params));
-            
-            // Ajustes a cambio
-            $("#filter-typeName").html('');
-            $("#filter-date").html('');
-            $("#loading-image").show();
-            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');           
-            
+
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            // Ajax            
-            //startTime = Date.now();
-            $myTable.ajax.url(url).load();
-            $myTable.state.clear();
-            //$myTable.search('').columns().search('').draw();
+            if( (sidsValue.length > 0) && (pidsArray.length > 0) && (lidsArray.length > 0) && (tidsArray.length > 0) ) {
+                // Ajustes a cambio
+                $("#filter-typeName").html('');
+                $("#filter-date").html('');
+                $("#loading-image").show();
+                $("#btn-filter").removeClass('btn-success').addClass('btn-primary');           
+                                
+                // Ajax            
+                $myTable.ajax.url(url).load();
+                $myTable.state.clear();
 
-            // Store            
-            isoSetStorage('iso_masterSystems', sidsValue);
-            isoSetStorage('iso_masterProcesses', pidsArray);
-            isoSetStorage('iso_masterLocations', lidsArray);
-            isoSetStorage('iso_masterTypes', tidsArray);
-            isoSetStorage('iso_masterDatein', $dateInDefault);
-            isoSetStorage('iso_masterDateout', $dateOutDefault); //
-            isoSetStorage('iso_masterReturnRows', info.length);
+                // Store            
+                isoSetStorage('iso_masterSystems', sidsValue);
+                isoSetStorage('iso_masterProcesses', pidsArray);
+                isoSetStorage('iso_masterLocations', lidsArray);
+                isoSetStorage('iso_masterTypes', tidsArray);
+                isoSetStorage('iso_masterDatein', $dateInDefault);
+                isoSetStorage('iso_masterDateout', $dateOutDefault); //
+                isoSetStorage('iso_masterReturnRows', info.length);
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Debe seleccionar al menos una opción de todos los selectores"
+                });
+            }                
 
         }); // CHANGE selected
 
-       
-        // Filtros : generación
-        $('#documents-table thead tr:eq(1) th').each( function (i) {
-            var tag;
-            var item = columnsDef[i+1];
-            //console.dir(item);
-            if( typeof item.visible !== 'undefined' && item.visible === false ) {
-                $(this).html('');
-            } else {
-                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
-                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
-                    $(this).html(tag);
-                } else {
-                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
-                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
-                    } else {
-                        $(this).html('');
-                    }
-                }
-            }          
-        });
-        
-        // Filtros : search - text
-        $('#documents-table thead' ).on( 'keyup', ".input-filter", function () {
-            $myTable.column( $(this).parent().index() + 1 ).search( this.value ).draw();
-        });
-        
-        // Filtros : search - select 
-        $('#filter-typeName').on( 'change', function () {
-            var val = $(this).val();
-            $myTable.column($columnType).search( val ? '^' + val + '$' : '', true, false).draw();
-        });
-
-        $('#filter-date').on( 'change', function () {
-            var val = $(this).val();
-            //alert(val);
-            $myTable.column($columnPublished).search( val ? '^' + val + '$' : '', true, false).draw();
-        });         
-        
+               
         // Efectos Botón
         $('#date-selected, #text-input, #tag-input').on('blur', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
