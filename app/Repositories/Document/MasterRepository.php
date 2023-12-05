@@ -443,15 +443,18 @@ class MasterRepository implements MasterRepositoryInterface
             $process_array = $plucked->all();
         } else {        
             // Obtener procesos pertenecientes
-            $process_array = $this->tool->getOwnProcessesByJob($user);
+            $pids1 = $this->tool->getOwnProcessesByJob($user); 
+            // Procesos de la tabla de relaciones con cargos                  
+            $pids2 = $this->tool->setProcessesFromJobs($user);
+            // Concatenar
+            $process_array = array_unique(array_merge($pids1, $pids2));            
         }
 
         // Obtener el listado para el filtro
-        $processes = ProcessModel::orderBy('name')->get(['process_id', 'name']);
+        $processes = ProcessModel::whereIn('process_id', $process_array)->orderBy('name')->get(['process_id', 'name']);
         foreach($processes as $process) {
             $process->selected = ( in_array($process->process_id, $process_array) ) ? true : false;
         } // foreach
-
 
         return $processes;
     } // processes

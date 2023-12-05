@@ -46,6 +46,7 @@ class MasterController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->documentRepo->systems();
         $processes = $this->documentRepo->processes();
+        Log::debug(['PROCESSES TO GRID' => $processes->count()]);
         $locations = $this->documentRepo->locations();
         $types = $this->documentRepo->types();
 

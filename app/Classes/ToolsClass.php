@@ -849,7 +849,7 @@ class ToolsClass
         return array_unique($dptos); 
     } // setDepartmentsToMaster  
     
-    private function setProcessesFromJobs($user)
+    public function setProcessesFromJobs($user)
     {
         $ids_array = [];
         $plucked = $user->jobs->pluck('job_id');
@@ -904,7 +904,7 @@ class ToolsClass
             }
 
             // Requisitos
-            if( is_array($params['sids'])  ) {
+            if( key_exists('sids', $params) ) {
                 $sids = $params['sids'];
             } else {                
                 $plucked = SystemModel::all()->pluck('system_id');
@@ -1191,11 +1191,12 @@ class ToolsClass
 
     public function getBadgeMasterCount()
     {
-        //$ids = $this->setPublishedDocuments();
-        //$docs = $this->setPublishedDocumentsCollection(true);
+		$dt0 =  Carbon::today()->toDateString();
         $user = Auth::user();
         $uid = $user->user_id;
-        $params = ['sid' => '', 'pids' => [''], 'lids' => ['']];
+		$din = '1970-01-01T_';
+		$dout = $dt0 .'T_';
+        $params = ['pids' => [''], 'lids' => [''], 'din' => $din, 'dout' => $dout, 'tag' => ''];
         $docs = $this->setPublishedDocumentsCollection('user', true, $uid, $params);
         return $docs->count();
     } // getBadgeMasterCount
