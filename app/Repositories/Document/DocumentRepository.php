@@ -1017,8 +1017,8 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
         $admin = Auth::user();
         if( $admin->hasRole('ADMIN') ) {
-            $sids = $this->tool->getAdminAuthorizedLocations($admin);
-            return LocationModel::whereIn('location_id', $sids)->orderBy('name')->get(['location_id', 'name']);
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            return LocationModel::whereIn('location_id', $lids)->orderBy('name')->get(['location_id', 'name']);
         } else {
             return LocationModel::orderBy('name')->get(['location_id', 'name']);
         }            

@@ -4,12 +4,11 @@ use App\Classes\ToolsClass;
 use App\Events\EmailDocumentEvent;
 use App\Interfaces\Document\SightingRepositoryInterface;
 use App\Models\Document\DocumentModel;
+use App\Models\Document\SettingModel;
 use App\Models\Document\SightingModel;
-
+use App\Models\Document\TypeModel;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\LocationModel;
-use App\Models\Document\SettingModel;
-use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
 
 use Carbon\Carbon;
@@ -48,7 +47,16 @@ class SightingRepository implements SightingRepositoryInterface
             $plucked = DocumentModel::all()->pluck('document_id');
             $adminDocs = $plucked->all();
         } else {
-            $documents = $this->tool->setDocumentsToControl('', 1);
+            $dt0 =  Carbon::today()->toDateString();
+            $din = '1970-01-01T_';
+            $dout = $dt0 .'T_';
+            $sids = $this->tool->getAdminAuthorizedSystems($admin);
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            $plucked = TypeModel::all()->pluck('type_id');
+            $tids = $plucked->all();
+            $params = ['status' => 1, 'sids' => $sids, 'lids' => $lids, 'tids' => $tids, 'din' => $din, 'dout' => $dout];            
+            //$documents = $this->tool->setDocumentsToControl('', 1);
+            $documents = $this->tool->setDocumentsToControl($params);
             $plucked = $documents->pluck('document_id');
             $adminDocs = $plucked->all();
         }
