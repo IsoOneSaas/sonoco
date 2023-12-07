@@ -390,13 +390,14 @@ class ControlRepository implements ControlRepositoryInterface
                     $document->date = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline)->format($this->set['date_format']);
                     $user = UserModel::where('user_uid', $forward->user_uid)->first();
                     //Log::debug(['USER' => $user->toArray(), 'DEADLINE' => $forward->deadline, 'FORMAT' => $this->set['date_format'], 'DATE' => $document->date ]);
-                    Event::dispatch(new EmailSent($document, $user));
-
-                    //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                    if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
-                        break;
-                    }
-                    $n++;
+                    if($user) {
+                        Event::dispatch(new EmailSent($document, $user));
+                        //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
+                        if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
+                            break;
+                        }
+                        $n++;                        
+                    } // if                    
                 } // foreach                
 
             } else {
