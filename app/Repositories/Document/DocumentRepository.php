@@ -159,6 +159,7 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
        //Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
+       $auth = true;    // Autorización para reemplazar responsables
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
 
        $existsDocument = $this->validateExistingCode($idExisting, $data['code'], $data['version']);
@@ -205,12 +206,48 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $edit_array = $this->saveForwarding(config('settings.document_status.edit'), $data['deadline_edit'], $data['link_edit']);
                     if( $edit_array ) {
                         //Log::debug(['EDIT ARRAY' => $edit_array]);
+
+                        // Nuevo algoritmo 9.12.2023
                         if( $idExisting) {
-                            ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.edit'))->delete();
-                        }                    
-                        $document->forwards()->createMany($edit_array);
+                            // Documento existente
+                            $forwards = ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.edit'))->get();
+                            $keys = [];
+                            foreach($forwards as $forward) {
+                                $found = false;
+                                foreach( $edit_array as $key => $responsive ) {
+                                    if( ($forward->name == $responsive['name']) && ($forward->job == $responsive['job']) ) {
+                                        // Registro existente que no cambia -> no hace nada
+                                        $found = true;
+                                        $keys[] = $key;
+                                    } // if
+                                } // foreach
+
+                                if(!$found && $auth) {
+                                    // Registro existente que no es actualizado -> eliminar
+                                    ForwardModel::find($forward->forward_id)->delete();                                
+                                } //if
+                                
+                            } // foreach
+
+                            // Agregar actualizados (si tiene autorización)
+                            if( $auth ) {
+                                foreach($edit_array as $key => $responsive) {
+                                    if( !in_array($key, $keys) ) {
+                                        // Registro nuevo que no se encontró existente -> agregar                                       
+                                        $document->forwards()->create($responsive);
+                                    } // if
+                                } // foreach
+                            } // if                            
+                            
+                        } else {
+                            // Nuevo Documento -> crea responsables 
+                            $document->forwards()->createMany($edit_array);
+                        }
+                        
                         $document->job_edit_id = $data['link_edit'];
-                        $params['auto_forward']['edit'] = $data['deadline_edit'];                        
+                        $params['auto_forward']['edit'] = $data['deadline_edit'];   
+                        
+                        
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'editar'])];
                     }
@@ -1033,7 +1070,13 @@ class DocumentRepository implements DocumentRepositoryInterface
         return TypeModel::orderBy('name')->get(['type_id', 'name']);
     } // setTypesList Method     
 
-
+    /**
+     * Contruye el array del responsable para ser almacenado en la tabla de Forwards
+     * @param  string $action Estado actual del flujo del documento
+     * @param  integer/string $deadline Número de dias de plazo para gestionar el documento
+     * @param  json $links Relaciones cargo -> usuario responsable para gestionar el documento
+     * @return array/boolean    arreglo de usuarios responsables / false si hay un error
+     */
     private function saveForwarding($action, $deadline, $links)
     {
         $forward = [];
