@@ -205,35 +205,19 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $data['link_edit'] = $this->normalizeLinks($data['link_edit']);
                     $edit_array = $this->saveForwarding(config('settings.document_status.edit'), $data['deadline_edit'], $data['link_edit']);
                     if( $edit_array ) {
-                        //Log::debug(['EDIT ARRAY' => $edit_array]);
+                        Log::debug(['EDIT ARRAY' => $edit_array]);
 
                         // Nuevo algoritmo 9.12.2023
                         if( $idExisting) {
                             // Documento existente
-                            $forwards = ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.edit'))->get();
-                            $keys = [];
-                            foreach($forwards as $forward) {
-                                $found = false;
-                                foreach( $edit_array as $key => $responsive ) {
-                                    if( ($forward->name == $responsive['name']) && ($forward->job == $responsive['job']) ) {
-                                        // Registro existente que no cambia -> no hace nada
-                                        $found = true;
-                                        $keys[] = $key;
-                                    } // if
-                                } // foreach
-
-                                if(!$found && $auth) {
-                                    // Registro existente que no es actualizado -> eliminar
-                                    ForwardModel::find($forward->forward_id)->delete();                                
-                                } //if
-                                
-                            } // foreach
-
+                            $keys = $this->updateForward($document->document_id, config('settings.document_status.edit'), $edit_array, $auth);
+                            Log::debug(['EDIT KEYS' => $keys]);
                             // Agregar actualizados (si tiene autorización)
                             if( $auth ) {
-                                foreach($edit_array as $key => $responsive) {
-                                    if( !in_array($key, $keys) ) {
-                                        // Registro nuevo que no se encontró existente -> agregar                                       
+                                foreach($edit_array as $responsive) {
+                                    if( !in_array($responsive['user_uid'], $keys) ) {
+                                        // Registro nuevo que no se encontró existente -> agregar 
+                                        Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
                                         $document->forwards()->create($responsive);
                                     } // if
                                 } // foreach
@@ -255,11 +239,29 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $data['link_review'] = $this->normalizeLinks($data['link_review']);
                     $review_array = $this->saveForwarding(config('settings.document_status.review'), $data['deadline_review'], $data['link_review']);
                     if( $review_array ) {
-                        //Log::debug(['REVIEW ARRAY' => $review_array]);
+                        Log::debug(['REVIEW ARRAY' => $review_array]);
+
+                        // Nuevo algoritmo 9.12.2023
                         if( $idExisting) {
-                            ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.review'))->delete();
-                        }                       
-                        $document->forwards()->createMany($review_array);
+                            // Documento existente
+                            $keys = $this->updateForward($document->document_id, config('settings.document_status.review'), $review_array, $auth);
+                            Log::debug(['REVIEW KEYS' => $keys]);
+                            // Agregar actualizados (si tiene autorización)
+                            if( $auth ) {
+                                foreach($review_array as $responsive) {
+                                    if( !in_array($responsive['user_uid'], $keys) ) {
+                                        // Registro nuevo que no se encontró existente -> agregar 
+                                        Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
+                                        $document->forwards()->create($responsive);
+                                    } // if
+                                } // foreach
+                            } // if                            
+                            
+                        } else {
+                            // Nuevo Documento -> crea responsables 
+                            $document->forwards()->createMany($review_array);
+                        }
+
                         $document->job_review_id = $data['link_review'];
                         $params['auto_forward']['review'] = $data['deadline_review'];                    
                     } else {
@@ -269,11 +271,29 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $data['link_approve'] = $this->normalizeLinks($data['link_approve']);
                     $approve_array = $this->saveForwarding(config('settings.document_status.approve'), $data['deadline_approve'], $data['link_approve']);
                     if( $approve_array ) {
-                        //Log::debug(['APPROVE ARRAY' => $approve_array]);
+                        Log::debug(['APPROVE ARRAY' => $approve_array]);
+
+                        // Nuevo algoritmo 9.12.2023
                         if( $idExisting) {
-                            ForwardModel::where('document_id', $document->document_id)->where('action', config('settings.document_status.approve'))->delete();
-                        }                       
-                        $document->forwards()->createMany($approve_array);
+                            // Documento existente
+                            $keys = $this->updateForward($document->document_id, config('settings.document_status.approve'), $approve_array, $auth);
+                            Log::debug(['APPROVE KEYS' => $keys]);
+                            // Agregar actualizados (si tiene autorización)
+                            if( $auth ) {
+                                foreach($approve_array as $responsive) {
+                                    if( !in_array($responsive['user_uid'], $keys) ) {
+                                        // Registro nuevo que no se encontró existente -> agregar 
+                                        Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
+                                        $document->forwards()->create($responsive);
+                                    } // if
+                                } // foreach
+                            } // if                            
+                            
+                        } else {
+                            // Nuevo Documento -> crea responsables 
+                            $document->forwards()->createMany($approve_array);
+                        }
+                        // FIXME:  Sólo cambia esta inforamción si logra salvar (con auth)
                         $document->job_approve_id = $data['link_approve'];
                         $params['auto_forward']['approve'] = $data['deadline_approve'];                       
                     } else {
@@ -316,6 +336,31 @@ class DocumentRepository implements DocumentRepositoryInterface
             return ['status' => 'error', 'message' => trans('document/document.create.exists')];
        }
     } // store Method
+
+    private function updateForward($did, $action, $array, $auth)
+    {
+        $forwards = ForwardModel::where('document_id', $did)->where('action', $action)->get();
+        $keys = [];
+        foreach($forwards as $forward) {
+            $found = false;
+            foreach( $array as $responsive ) {
+                if( ($forward->name == $responsive['name']) && ($forward->job == $responsive['job']) ) {
+                    // Registro existente que no cambia -> no hace nada
+                    Log::debug('Mantiene reponsable '.  $forward->name ); 
+                    $found = true;
+                    $keys[] = $forward->user_uid;
+                } // if
+            } // foreach
+
+            if(!$found && $auth) {
+                // Registro existente que no es actualizado -> eliminar
+                Log::debug('Elimina reponsable '.  $forward->name );
+                ForwardModel::find($forward->forward_id)->delete();                                
+            } //if
+            
+        } // foreach
+        return $keys;
+    } // updateForward
 
     /**
      * Guarda los datos del formulario en la base de datos del registro editado

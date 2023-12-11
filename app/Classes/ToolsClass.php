@@ -649,7 +649,7 @@ class ToolsClass
         //     if( count($dids) == 0 ) $dids = false;               
         // }        
 
-        Log::debug(['PARAMETERS' => $params, 'DIDS' => $dids, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
+        //Log::debug(['PARAMETERS' => $params, 'DIDS' => $dids, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
         if( $admin->hasRole('ADMIN') ) {
             // Si es Administrador            
             $documents =  DocumentModel::whereIn('status', $groupArray)
