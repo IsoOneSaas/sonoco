@@ -213,25 +213,38 @@ class DocumentRepository implements DocumentRepositoryInterface
                             $keys = $this->updateForward($document->document_id, config('settings.document_status.edit'), $edit_array, $auth);
                             Log::debug(['EDIT KEYS' => $keys]);
                             // Agregar actualizados (si tiene autorización)
+                            $newKeys = $keys;
                             if( $auth ) {
                                 foreach($edit_array as $responsive) {
                                     if( !in_array($responsive['user_uid'], $keys) ) {
                                         // Registro nuevo que no se encontró existente -> agregar 
                                         Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
                                         $document->forwards()->create($responsive);
+                                        $newKeys[] = $responsive['user_uid'];
                                     } // if
                                 } // foreach
-                            } // if                            
+                            } // if
                             
+                            $array = json_decode($data['link_edit'], true);
+                            $json = [];
+                            foreach($array[0] as $uid => $jid ) {
+                                $user = UserModel::find($uid);
+                                if( in_array($user->user_uid, $newKeys) ) {
+                                    $json[$uid] = $jid;
+                                }
+                            } // foreach
+
+                            if( count($json) == 0 ) return ['status' => 'error', 'message' => 'No es posible actualizar los responsables de edición sin autorización'];
+                            $document->job_edit_id = json_encode([$json]);                             
+                                                        
                         } else {
                             // Nuevo Documento -> crea responsables 
                             $document->forwards()->createMany($edit_array);
+                            $document->job_edit_id = $data['link_edit'];                                                         
                         }
-                        
-                        $document->job_edit_id = $data['link_edit'];
-                        $params['auto_forward']['edit'] = $data['deadline_edit'];   
-                        
-                        
+
+                        $params['auto_forward']['edit'] = $data['deadline_edit']; 
+                                                                        
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'editar'])];
                     }
@@ -247,22 +260,36 @@ class DocumentRepository implements DocumentRepositoryInterface
                             $keys = $this->updateForward($document->document_id, config('settings.document_status.review'), $review_array, $auth);
                             Log::debug(['REVIEW KEYS' => $keys]);
                             // Agregar actualizados (si tiene autorización)
+                            $newKeys = $keys;
                             if( $auth ) {
                                 foreach($review_array as $responsive) {
                                     if( !in_array($responsive['user_uid'], $keys) ) {
                                         // Registro nuevo que no se encontró existente -> agregar 
                                         Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
                                         $document->forwards()->create($responsive);
+                                        $newKeys[] = $responsive['user_uid'];
                                     } // if
                                 } // foreach
-                            } // if                            
+                            } // if
+                            
+                            $array = json_decode($data['link_review'], true);
+                            $json = [];
+                            foreach($array[0] as $uid => $jid ) {
+                                $user = UserModel::find($uid);
+                                if( in_array($user->user_uid, $newKeys) ) {
+                                    $json[$uid] = $jid;
+                                }
+                            } // foreach
+
+                            if( count($json) == 0 ) return ['status' => 'error', 'message' => 'No es posible actualizar los responsables de revisión sin autorización'];
+                            $document->job_review_id = json_encode([$json]);                             
                             
                         } else {
                             // Nuevo Documento -> crea responsables 
                             $document->forwards()->createMany($review_array);
+                            $document->job_review_id = $data['link_review'];
                         }
 
-                        $document->job_review_id = $data['link_review'];
                         $params['auto_forward']['review'] = $data['deadline_review'];                    
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'revisar'])];
@@ -271,6 +298,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $data['link_approve'] = $this->normalizeLinks($data['link_approve']);
                     $approve_array = $this->saveForwarding(config('settings.document_status.approve'), $data['deadline_approve'], $data['link_approve']);
                     if( $approve_array ) {
+                        $json = [];
                         Log::debug(['APPROVE ARRAY' => $approve_array]);
 
                         // Nuevo algoritmo 9.12.2023
@@ -279,22 +307,37 @@ class DocumentRepository implements DocumentRepositoryInterface
                             $keys = $this->updateForward($document->document_id, config('settings.document_status.approve'), $approve_array, $auth);
                             Log::debug(['APPROVE KEYS' => $keys]);
                             // Agregar actualizados (si tiene autorización)
+                            $newKeys = $keys;
                             if( $auth ) {
                                 foreach($approve_array as $responsive) {
                                     if( !in_array($responsive['user_uid'], $keys) ) {
                                         // Registro nuevo que no se encontró existente -> agregar 
                                         Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
                                         $document->forwards()->create($responsive);
+                                        $newKeys[] = $responsive['user_uid'];
                                     } // if
                                 } // foreach
-                            } // if                            
+                            } // if
+                            
+                            $array = json_decode($data['link_approve'], true);
+                            $json = [];
+                            foreach($array[0] as $uid => $jid ) {
+                                $user = UserModel::find($uid);
+                                if( in_array($user->user_uid, $newKeys) ) {
+                                    $json[$uid] = $jid;
+                                }
+                            } // foreach
+
+                            if( count($json) == 0 ) return ['status' => 'error', 'message' => 'No es posible actualizar los responsables de aprobar sin autorización'];
+                            $document->job_approve_id = json_encode([$json]);                             
                             
                         } else {
                             // Nuevo Documento -> crea responsables 
                             $document->forwards()->createMany($approve_array);
+                            $document->job_approve_id = $data['link_approve'];
                         }
                         // FIXME:  Sólo cambia esta inforamción si logra salvar (con auth)
-                        $document->job_approve_id = $data['link_approve'];
+                        
                         $params['auto_forward']['approve'] = $data['deadline_approve'];                       
                     } else {
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'aprobar'])];

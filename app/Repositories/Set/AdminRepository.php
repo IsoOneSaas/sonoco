@@ -5,8 +5,9 @@ use App\Interfaces\Set\AdminRepositoryInterface;
 use App\Models\Set\UserModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\SystemModel;
+use Exception;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class AdminRepository implements AdminRepositoryInterface 
 {
@@ -81,6 +82,7 @@ class AdminRepository implements AdminRepositoryInterface
         $admin->department_auth = ( $admin->hasDirectPermission('setup_edit_department') ) ? true : false;
         $admin->job_auth = ( $admin->hasDirectPermission('setup_edit_job') ) ? true : false;
         $admin->process_auth = ( $admin->hasDirectPermission('setup_edit_process') ) ? true : false;
+        $admin->responsible_auth = ( $admin->hasDirectPermission('setup_edit_responsible') ) ? true : false;
         return $admin;
     }
     
@@ -115,7 +117,12 @@ class AdminRepository implements AdminRepositoryInterface
                 $user->givePermissionTo('setup_edit_process');
             } else {
                 $user->revokePermissionTo('setup_edit_process');
-            }                        
+            }
+            if( isset($data['responsible_auth']) ) {
+                $user->givePermissionTo('setup_edit_responsible');
+            } else {
+                $user->revokePermissionTo('setup_edit_responsible');
+            }                                     
 
             DB::commit();
         } catch (Exception $e) {

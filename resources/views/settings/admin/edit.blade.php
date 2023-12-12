@@ -64,7 +64,13 @@
                                     <div class="form-switch mt-2 ml-4  w-full">
                                         <input type="checkbox" class="form-check-input" id="process-auth" name="process_auth" @if( $admin->process_auth ) checked @endif>
                                     </div>                                    
-                                </div>                                                                                                                                                                                                
+                                </div>
+                                <div class="input-group mt-3">
+                                    <div id="responsible-auth" class="input-group-text flex w-56"><i data-lucide="{{ trans('admin.form.pauth.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('admin.form.rauth.title') }}</div>
+                                    <div class="form-switch mt-2 ml-4  w-full">
+                                        <input type="checkbox" class="form-check-input" id="responsible-auth" name="responsible_auth" @if( $admin->responsible_auth ) checked @endif>
+                                    </div>                                    
+                                </div>                                                                                                                                                                                                                                
                             </form>                                
                         </div>
                     </div>
