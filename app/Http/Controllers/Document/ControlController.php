@@ -117,6 +117,14 @@ class ControlController extends Controller
         return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);        
     } // store Method
 
+    /**
+     * Store a comment
+     */    
+    public function comment(Request $request, $id) : RedirectResponse
+    {
+        $response = $this->documentRepo->setComment($id, $request->all());
+        return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+    } // comment Method
 
       /**
      * show preview of the document in HTML format

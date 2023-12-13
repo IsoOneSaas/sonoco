@@ -28,4 +28,6 @@ interface ControlRepositoryInterface
     public function deleteChange($hash);
 
     public function getApprovingStatus($hash);
+
+    public function setComment($id, array $data);
 } // Interface

@@ -99,9 +99,12 @@
                         </div>
                         @endif
 
-                        <form>
+                        <form id="document-form" action="{{ route('documents.control.manage.comment', $document->document_id) }}" method="POST">
+                            @csrf
                             <input type="hidden" id="hash" name="hash" value="{{ old('hash', $document->hash) }}">
                             <input type="hidden" name="version" value={{ old('version', $document->version) }} >
+                            <input type="hidden" name="action" value="{{ old('action', $document->action) }}" >
+                            <input type="hidden" name="comment" value="{{ old('comment', $document->comment) }}" >
                         </form>                        
 
                     </div>
@@ -384,7 +387,8 @@
                 } else {
                     setTimeout(goLocation, 10, url);   
                 }                             
-            }); // btn-exit             
+            }); // btn-exit
+                   
 
             // MOSTRAR ARCHIVO SOPORTE
             $('body').on('click', '#btn-support-show', function (e) {
@@ -522,6 +526,7 @@
             $('body').on('click', '#btn-back-ok', function (e) {
                 e.preventDefault();  
                 $("input[name='comment']").val($("#comment").val());
+                $("#document-form").submit(); 
                 $("#btn-back-ko").click();
             });
             
@@ -639,6 +644,35 @@
             //history.back();
         }   // change Document        
 
+        function checkExit(txt) {
+            var role = "{{ $document->status }}";
+            var file = "{{ $document->support['file'] ?? '' }}";
+            var goal = "{{ config('settings.document_status.create') }}";
+
+            if( role == goal ) {
+                return true;
+            } else {
+                if( file == "" ) {
+                    swal("{{ trans('document/document.swal.file.text') }}"+txt, {
+                        button: "{{ trans('document/document.swal.file.button') }}",
+                    });
+                    return false;                        
+                }
+            }
+
+            return true;
+        } // checkExit
+
+        function checkComment() {
+            if( $("input[name='comment']").val().length < 10 ) {
+                swal("{{ trans('document/document.swal.commented.text') }}", {
+                    button: "{{ trans('document/document.swal.commented.button') }}",
+                });                
+                return false;
+            }
+            return true;
+        } // checkComment        
+
         function setSupportData() {
             var id = $("input[name='did']").val();
             //alert('Hello World: '+ id);
@@ -656,32 +690,7 @@
                     $("#support-table-body").html(output);
                 } // success
             }); // ajax
-        } // setSupportData
-
-        function checkExit(txt) {
-            var role = "{{ $document->status }}";
-            var file = "{{ $document->support['file'] ?? '' }}";
-            var goal = "{{ config('settings.document_status.create') }}";
-
-            if( !$isSaved ) {
-                swal("{{ trans('document/document.swal.saved.text') }}"+txt, {
-                    button: "{{ trans('document/document.swal.saved.button') }}",
-                });
-                return false;
-            } else {
-                if( role == goal ) {
-                    return true;
-                } else {
-                    if( file == "" ) {
-                        swal("{{ trans('document/document.swal.file.text') }}"+txt, {
-                            button: "{{ trans('document/document.swal.file.button') }}",
-                        });
-                        return false;                        
-                    }
-                }
-            }
-            return true;
-        } // checkExit
+        } // setSupportData        
 
         function format(d) {
             return d.text;

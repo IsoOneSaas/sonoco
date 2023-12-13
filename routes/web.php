@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('gestion/actualizar/{id}', [\App\Http\Controllers\Document\ControlController::class, 'store'])->name('manage.update'); // Update de edición
             Route::get('gestion/enviar/{slug}/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'send'])->name('manage.send'); // Cambio de estado hacia adelante
             Route::get('gestion/retroceder/{slug}', [\App\Http\Controllers\Document\ControlController::class, 'back'])->name('manage.back'); // Cambio de estado hacia atrás
+            Route::post('gestion/comentar/{id}', [\App\Http\Controllers\Document\ControlController::class, 'comment'])->name('manage.comment'); // Enviar comentario
 
 
 

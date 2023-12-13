@@ -348,6 +348,32 @@ class ControlRepository implements ControlRepositoryInterface
         }                
         return ['status' => 'success', 'action' => $data['action'], 'message' => trans('document/document.update.success')];
     } // store Method
+
+    /**
+     * Guarda el comentario para el documento en proceso
+     * @param  integer $id Identificador del documento editado
+     * @param  array $data datos del formulario
+     * @return json    Resultado del método
+     */  
+    public function setComment($id, array $data)
+    {
+        //Log::debug(['SET COMMENT ID' => $id, 'DATA'=> $data]);
+        try {
+            $document = DocumentModel::find($id);
+            // Salvar Comentario si hay
+            if( !empty($data['comment']) ) {
+                $comment = DisclaimerModel::firstOrNew(
+                    ['document_id' => $id, 'user_id' => Auth::user()->user_id, 'action' => $document->status ]
+                );    
+                $comment->comment = $data['comment'];
+                $comment->save();
+            }  // if 
+        } catch (Exception $e) {
+            Log::error('ControlRepository::setComment Exception: '. $e->getMessage());
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/document.update.no-success')];
+        }                
+        return ['status' => 'success', 'action' => $data['action'], 'message' => trans('document/document.update.success')];                 
+    } // SetComment Method
     
     /**
      * Cambia el estado del documento hacia adelante
