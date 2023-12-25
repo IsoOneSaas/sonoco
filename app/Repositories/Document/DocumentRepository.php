@@ -673,7 +673,7 @@ class DocumentRepository implements DocumentRepositoryInterface
     } // version
     
     /**
-     * Recupera el documento específico
+     * Recupera el documento específico para actualizar configuración
      * @param  string $hash Hash del identificador del documento
      * @return collection    Datos de la consulta
      */     
@@ -699,6 +699,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $result = $this->foundResponsibles($id, $document->job_edit_id, $action);
         $document->job_edit_id = $result['jobs'];
         $document->user_edit_id = $result['users'];
+        $document->check_edit_id = $result['check'];
         $document->link_edit = json_encode($result['link']);
 
         // Revision
@@ -745,20 +746,36 @@ class DocumentRepository implements DocumentRepositoryInterface
         return $document;
     } // get Method
 
+    /**
+     * Encuentra los reponsanbles para el estado dado
+     * @param  integer $did Identificador del documento
+     * @param  json $data Relación usuario:cargo
+     * @param  string $action Estado del flujo
+     * @return array    Arreglo de responsables
+     */       
     private function foundResponsibles($did, $data, $action)   // document->document_id, $document->job_xxx_id, config('settings.document_status.xxx')
     {   
         $array_result = [
             'users' => [],
             'jobs'  => [],
             'link'  => [],
+            'check'  => [],
         ];
         $jArray = json_decode($data, true);
         if( is_array($jArray)  ) {
             // Formato nuevo con la información en un json 
             //Log::debug('Formato nuevo');           
-            foreach( $jArray[0] as $user => $job ) {
-                $array_result['users'][] = strval($user);
-                $array_result['jobs'][] = strval($job);
+            foreach( $jArray[0] as $uid => $jid ) {
+                $array_result['users'][] = strval($uid);
+                $array_result['jobs'][] = strval($jid);
+                // nuevo
+                $user = UserModel::find($uid);
+                if($user) {
+                    $fwd = ForwardModel::where('user_uid', $user->user_uid)->where('document_id', $did)->where('action', $action)->first();
+                    if( $fwd ) {
+                        $array_result['check'][$uid] = ($fwd->checked == 1) ? 'SI' : 'NO';
+                    }
+                }
             }
             $array_result['link'] = json_encode($jArray);            
         } elseif( is_integer($data) ) {
@@ -766,7 +783,7 @@ class DocumentRepository implements DocumentRepositoryInterface
             //Log::debug('Formato antiguo');
             $array_result['jobs'][] = strval($data);
             // Encontrar los usuarios en la tabla <document_forwards>
-            $fwds = ForwardModel::where('document_id', $did)->where('action', $action)->get(['user_uid']);
+            $fwds = ForwardModel::where('document_id', $did)->where('action', $action)->get(['user_uid','checked']);
             if( $fwds ) {
                 $array = [];
                 foreach($fwds as $fwd) {
@@ -774,6 +791,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     if($user) {
                         $array_result['users'][] = $user->user_id;
                         $array[$user->user_id] = strval($data);
+                        $array_result['check'][] = ($fwd->checked == 1) ? 'SI' : 'NO';
                     } else {
                         // Buscar el nombre del usuario si está en la columna {name}
 
@@ -784,6 +802,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         } else {
             Log::info('No se encuentra dato');
         }
+        Log::debug(['RESPONSIBLES FOUND TO '. $action. ' : ' => $array_result]);
         return $array_result;
     } // foundResponsibles
     

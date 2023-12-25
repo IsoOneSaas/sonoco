@@ -55,11 +55,19 @@ class SuggestionRepository implements SuggestionRepositoryInterface
             // Obtiene las localizaciones del administrador
             $lids = $this->tool->getAdminAuthorizedLocations($admin);
             // Obteine el usuarios que pertenecen a las localizaciones
-            $plucked = UserModel::join('set_admin_location', function($query) use($lids) {
-                    $query->on('set_admin_location.user_id', '=', 'set_users.user_id');
-                    $query->whereIn('set_admin_location.location_id', $lids);
-                })
-                ->pluck('set_users.user_uid');  
+            // $plucked = UserModel::leftjoin('set_admin_location', function($query) use($lids) {
+            //         $query->on('set_admin_location.user_id', '=', 'set_users.user_id');
+            //         $query->whereIn('set_admin_location.location_id', $lids);
+            //     })
+            //     ->pluck('set_users.user_uid');
+			$plucked = UserModel::join('set_location_user', function($query) use($lids) {
+				$query->on('set_location_user.user_id', '=', 'set_users.user_id');
+				$query->whereIn('set_location_user.location_id', $lids);
+			})
+			->pluck('set_users.user_uid');
+            
+            
+
         }
 
         $uids = array_unique($plucked->all());

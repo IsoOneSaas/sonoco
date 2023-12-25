@@ -417,6 +417,7 @@ class ControlRepository implements ControlRepositoryInterface
                     $user = UserModel::where('user_uid', $forward->user_uid)->first();
                     //Log::debug(['USER' => $user->toArray(), 'DEADLINE' => $forward->deadline, 'FORMAT' => $this->set['date_format'], 'DATE' => $document->date ]);
                     if($user) {
+                        Log::debug(['NOTICE NEW STATUS TO USER' => $user->email]);
                         Event::dispatch(new EmailSent($document, $user));
                         //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
                         if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
@@ -538,9 +539,14 @@ class ControlRepository implements ControlRepositoryInterface
             $current = $document->status()->latest()->first();
             DB::beginTransaction();
             $forward = ForwardModel::where('document_id', $id)->where('user_uid', $uid)->where('action', $current->action)->first();
-            $forward->checked = 1;
-            $forward->save();
-            DB::commit();
+			if($forward) {				
+				$forward->checked = 1;
+				$forward->save();
+				DB::commit();
+			} else {
+				DB::rollBack();
+				Log::error('ControlRepository::check Error: Responsable '. $uid .' no encontrado para el documento '. $id .' en el estado de '. $current->action);
+			}
 
         } catch (Exception $e) {
             DB::rollBack();

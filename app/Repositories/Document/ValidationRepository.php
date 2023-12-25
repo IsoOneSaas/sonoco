@@ -155,17 +155,19 @@ class ValidationRepository implements ValidationRepositoryInterface
                 }
                 //$dt = Carbon::createFromFormat('Y-m-d H:i:s', $dids[$document->document_id]['date']);
                 $status = StatusModel::where(['document_id' => $document->document_id, 'action' => $target])->first(['return_date']);
-                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $status->return_date);
-                $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
-                $validity = $val['text'];
-                $status = $this->status_text[(int)$val['status']];
-                //Log::debug(['ID' => $document->document_id, 'DATE' => $dids[$document->document_id]['date'] ]);
-                $process = ( $document->process) ? $document->process->name : '';
-                $type = ( $document->type) ? $document->type->name : '';
-                //$location = ( $document->location) ? $document->location->name : '';
-                $selected = ( key_exists('dids', $data) && in_array($document->document_id, $data['dids']) ) ? 1 : 0;
-                //$grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
-                $grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
+                if($status) {
+                    $dt = Carbon::createFromFormat('Y-m-d H:i:s', $status->return_date);
+                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
+                    $validity = $val['text'];
+                    $status = $this->status_text[(int)$val['status']];
+                    //Log::debug(['ID' => $document->document_id, 'DATE' => $dids[$document->document_id]['date'] ]);
+                    $process = ( $document->process) ? $document->process->name : '';
+                    $type = ( $document->type) ? $document->type->name : '';
+                    //$location = ( $document->location) ? $document->location->name : '';
+                    $selected = ( key_exists('dids', $data) && in_array($document->document_id, $data['dids']) ) ? 1 : 0;
+                    //$grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
+                    $grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
+                } // if
             } // foreach            
          } // if
 

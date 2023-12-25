@@ -685,7 +685,7 @@
                 if(json.success) {
                     //console.log('=== AJAX TAGS');
                     //$("input[name='tags']").val(json.tags);
-                    console.dir(json.tags);
+                    //console.dir(json.tags);
                     $selectize.clearOptions();
                     $selectize.addOption(json.tags);
 
@@ -896,7 +896,7 @@
                     var approveOutput = '';
                     var n;
                     // console.log('=== ARRAY JOBS ===');
-                    // console.dir(editJobs);
+                    //console.dir(editJobs);
                     $.each(data, function(i, job) {
                         n = job.job_id.toString();
                         //console.log('check: '+ job.job_id);
@@ -933,15 +933,20 @@
                     var editOutput = '';
                     var reviewOutput = '';
                     var approveOutput = '';
+                    var editChecks =  {!! json_encode(isset($document) ? $document->check_edit_id : []) !!};
                     var n;
-                    // console.log('=== ARRAY USERS ===');
-                    // console.dir(editUsers);
+                    var checked;
+                    var j = 0;
+                    console.log('=== ARRAY USERS ===');
+                    console.dir(editChecks);
                     $.each(data, function(i, user) {
                         n = user.user_id.toString();
                         //console.log('check: '+ user.user_id);
                         // Edit
                         if( $.inArray( n, editUsers) != -1 ) {
-                            editOutput += '<option value='+user.user_id+' selected >'+user.name+'</option>';
+                            checked = (editChecks[n] == 'SI') ? ' class="text-red-500"' : '';
+                            console.log(n,editChecks[n]);
+                            editOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Review
                         if( $.inArray( n, reviewUsers) != -1 ) {
@@ -950,7 +955,8 @@
                         // Approve
                         if( $.inArray( n, approveUsers) != -1 ) {
                             approveOutput += '<option value='+user.user_id+' selected >'+user.name+'</option>';
-                        }                                                      
+                        }
+                        j = j + 1;                                                      
                     });
                     $("#select-user-edit").html(editOutput);
                     $("#select-user-review").html(reviewOutput);
