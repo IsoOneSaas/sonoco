@@ -27,6 +27,11 @@
                     <!-- BEGIN: Form -->
                     <div class="intro-y box p-5 mt-5">
                         <div>
+
+                            <div id="flow-alert" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                 {{ trans('document/document.swal.flow.text') }} 
+                                <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                            </div>                        
                             
                             <form id="document-form" action="{{ route('documents.control.documento.store') }}" method="POST">
                                 @csrf
@@ -109,6 +114,10 @@
 
 
                                 <!-- Edit select -->
+                                <div id="flow-edit" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha editado el documento. 
+                                    <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                                </div>                                
                                 <div class="input-group mt-3">
                                     <div id="job-edit" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_edit.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_edit.title') }}</div>
                                     <select multiple id="select-job-edit" name="job_edit_id[]" class="form-control w-full" required>
@@ -121,8 +130,12 @@
                                     <button id="btn-modal-user" data-id="edit" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="users" class="w-4 h-4"></i></button>
 
                                     <div id="input-group-2" class="input-group-text"><br><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.job_edit.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>
-                                </div>
+                                </div>                                  
                                 <!-- Review select -->
+                                <div id="flow-review" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha revisado el documento. 
+                                    <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                                </div>                                  
                                 <div class="input-group mt-3">
                                     <div id="job-review" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_review.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_review.title') }}</div>
                                     <select multiple id="select-job-review" name="job_review_id[]" class="form-control w-full" required>
@@ -137,6 +150,10 @@
                                     <div id="input-group-2" class="input-group-text"><br><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.job_review.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>
                                 </div>                                
                                 <!-- Approve select -->
+                                <div id="flow-approve" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha aprobado el documento. 
+                                    <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                                </div>                                 
                                 <div class="input-group mt-3">
                                     <div id="job-approve" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_approve.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_approve.title') }}</div>
                                     <select multiple id="select-job-approve" name="job_approve_id[]" class="form-control w-full" required>
@@ -369,8 +386,9 @@
        // ALERTA DE ESTADO
        //console.log('FLOW: '+flow);
        if( flow == '1' ) {
-            $("#btn-submit").attr('disabled', true);
-            swal("{{ trans('document/document.swal.flow.text') }}");
+            //$("#btn-submit").attr('disabled', true);
+            //swal("{{ trans('document/document.swal.flow.text') }}");
+            $("#flow-alert").css('display', 'block');
             $isSaved = true;
        }
 
@@ -934,6 +952,8 @@
                     var reviewOutput = '';
                     var approveOutput = '';
                     var editChecks =  {!! json_encode(isset($document) ? $document->check_edit_id : []) !!};
+                    var reviewChecks =  {!! json_encode(isset($document) ? $document->check_review_id : []) !!};
+                    var approveChecks =  {!! json_encode(isset($document) ? $document->check_approve_id : []) !!};
                     var n;
                     var checked;
                     var j = 0;
@@ -944,17 +964,35 @@
                         //console.log('check: '+ user.user_id);
                         // Edit
                         if( $.inArray( n, editUsers) != -1 ) {
-                            checked = (editChecks[n] == 'SI') ? ' class="text-red-500"' : '';
-                            console.log(n,editChecks[n]);
+                            //checked = (editChecks[n] == 'SI') ? ' class="text-red-500"' : '';
+                            if( editChecks[n] == 'SI' ) {
+                                checked = ' class="text-red-500"';
+                                $("#flow-edit").css('display', 'block');
+                            } else {
+                                checked = '';
+                            }
+                            //console.log(n,editChecks[n]);
                             editOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Review
                         if( $.inArray( n, reviewUsers) != -1 ) {
-                            reviewOutput += '<option value='+user.user_id+' selected >'+user.name+'</option>';
+                            if( reviewChecks[n] == 'SI' ) {
+                                checked = ' class="text-red-500"';
+                                $("#flow-review").css('display', 'block');
+                            } else {
+                                checked = '';
+                            }                            
+                            reviewOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Approve
                         if( $.inArray( n, approveUsers) != -1 ) {
-                            approveOutput += '<option value='+user.user_id+' selected >'+user.name+'</option>';
+                            if( approveChecks[n] == 'SI' ) {
+                                checked = ' class="text-red-500"';
+                                $("#flow-approve").css('display', 'block');
+                            } else {
+                                checked = '';
+                            }                             
+                            approveOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         j = j + 1;                                                      
                     });

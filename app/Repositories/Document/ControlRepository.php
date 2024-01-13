@@ -907,7 +907,7 @@ class ControlRepository implements ControlRepositoryInterface
                 $array_output[] = [
                     "DT_RowId" => "row_". $comment->disclaimer_id,
                     'date' => Carbon::createFromTimeStamp(strtotime($comment->created_at))->format($this->set['date_format']),
-                    'user' => $user->name,
+                    'user' => ($user) ? $user->name : '',
                     'status' => $sts['actual'],
                     'text' => $comment->comment,
                 ];

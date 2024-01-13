@@ -707,6 +707,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $result = $this->foundResponsibles($id, $document->job_review_id, $action);
         $document->job_review_id = $result['jobs'];
         $document->user_review_id = $result['users'];
+        $document->check_review_id = $result['check'];
         $document->link_review = json_encode($result['link']);
 
         // Aprobación
@@ -714,6 +715,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $result = $this->foundResponsibles($id, $document->job_approve_id, $action);
         $document->job_approve_id = $result['jobs'];
         $document->user_approve_id = $result['users'];
+        $document->check_approve_id = $result['check'];
         $document->link_approve = json_encode($result['link']);                 
 
         // OBTENER ETIQUETAS     
