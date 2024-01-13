@@ -716,7 +716,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $document->job_approve_id = $result['jobs'];
         $document->user_approve_id = $result['users'];
         $document->check_approve_id = $result['check'];
-        $document->link_approve = json_encode($result['link']);                 
+        $document->link_approve = json_encode($result['link']);               
 
         // OBTENER ETIQUETAS     
         $plucked = $document->tags()->pluck('tag');
@@ -793,7 +793,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                     if($user) {
                         $array_result['users'][] = $user->user_id;
                         $array[$user->user_id] = strval($data);
-                        $array_result['check'][] = ($fwd->checked == 1) ? 'SI' : 'NO';
+                        $array_result['check'][$user->user_id] = ($fwd->checked == 1) ? 'SI' : 'NO';
                     } else {
                         // Buscar el nombre del usuario si está en la columna {name}
 

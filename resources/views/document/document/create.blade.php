@@ -113,11 +113,7 @@
                                 </div>
 
 
-                                <!-- Edit select -->
-                                <div id="flow-edit" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
-                                    Ya el responsable ha editado el documento. 
-                                    <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
-                                </div>                                
+                                <!-- Edit select -->                              
                                 <div class="input-group mt-3">
                                     <div id="job-edit" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_edit.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_edit.title') }}</div>
                                     <select multiple id="select-job-edit" name="job_edit_id[]" class="form-control w-full" required>
@@ -130,12 +126,12 @@
                                     <button id="btn-modal-user" data-id="edit" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="users" class="w-4 h-4"></i></button>
 
                                     <div id="input-group-2" class="input-group-text"><br><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.job_edit.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>
-                                </div>                                  
-                                <!-- Review select -->
-                                <div id="flow-review" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
-                                    Ya el responsable ha revisado el documento. 
+                                </div>
+                                <div id="flow-edit" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha editado el documento. 
                                     <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
-                                </div>                                  
+                                </div>                                                                    
+                                <!-- Review select -->                                  
                                 <div class="input-group mt-3">
                                     <div id="job-review" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_review.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_review.title') }}</div>
                                     <select multiple id="select-job-review" name="job_review_id[]" class="form-control w-full" required>
@@ -148,12 +144,12 @@
                                     <button id="btn-modal-user" data-id="review" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="users" class="w-4 h-4"></i></button>
 
                                     <div id="input-group-2" class="input-group-text"><br><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.job_review.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>
-                                </div>                                
-                                <!-- Approve select -->
-                                <div id="flow-approve" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
-                                    Ya el responsable ha aprobado el documento. 
+                                </div>
+                                <div id="flow-review" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha revisado el documento. 
                                     <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
-                                </div>                                 
+                                </div>                                                                
+                                <!-- Approve select -->                                
                                 <div class="input-group mt-3">
                                     <div id="job-approve" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_approve.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_approve.title') }}</div>
                                     <select multiple id="select-job-approve" name="job_approve_id[]" class="form-control w-full" required>
@@ -167,6 +163,10 @@
 
                                     <div id="input-group-2" class="input-group-text"><br><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.job_approve.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>
                                 </div>
+                                <div id="flow-approve" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
+                                    Ya el responsable ha aprobado el documento. 
+                                    <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                                </div>                                 
                                                                                         
                                 <div class="input-group mt-3">
                                     <div id="class" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.class.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.class.title') }}</div>
@@ -957,17 +957,19 @@
                     var n;
                     var checked;
                     var j = 0;
-                    console.log('=== ARRAY USERS ===');
-                    console.dir(editChecks);
+                    //console.log('=== ARRAY USERS ===');
+                    //console.dir(editChecks);
                     $.each(data, function(i, user) {
                         n = user.user_id.toString();
-                        //console.log('check: '+ user.user_id);
+                        //console.log('check: '+n+' in ');
+                        //console.dir(editUsers);
                         // Edit
-                        if( $.inArray( n, editUsers) != -1 ) {
+                        if( ($.inArray( user.user_id, editUsers) != -1) || ($.inArray( n, editUsers) != -1) ) {
                             //checked = (editChecks[n] == 'SI') ? ' class="text-red-500"' : '';
+                            //console.log('match : '+ n + ' Check '+ editChecks[n]);
                             if( editChecks[n] == 'SI' ) {
                                 checked = ' class="text-red-500"';
-                                $("#flow-edit").css('display', 'block');
+                                $("#flow-edit").css('display', 'block');                               
                             } else {
                                 checked = '';
                             }
@@ -975,7 +977,7 @@
                             editOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Review
-                        if( $.inArray( n, reviewUsers) != -1 ) {
+                        if( ($.inArray( user.user_id, reviewUsers) != -1) || ($.inArray( n, reviewUsers) != -1) ) {
                             if( reviewChecks[n] == 'SI' ) {
                                 checked = ' class="text-red-500"';
                                 $("#flow-review").css('display', 'block');
@@ -985,7 +987,7 @@
                             reviewOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Approve
-                        if( $.inArray( n, approveUsers) != -1 ) {
+                        if( ($.inArray( user.user_id, approveUsers) != -1) || ($.inArray( n, approveUsers) != -1) ) {
                             if( approveChecks[n] == 'SI' ) {
                                 checked = ' class="text-red-500"';
                                 $("#flow-approve").css('display', 'block');
