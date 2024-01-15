@@ -157,7 +157,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-       //Log::debug(['STORE DOCUMENT DATA' => $data]);
+       Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $auth = true;    // Autorización para reemplazar responsables
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
@@ -171,12 +171,12 @@ class DocumentRepository implements DocumentRepositoryInterface
 
                 if( $idExisting) {
                     // update
-                    //Log::debug('Updateing...');
+                    Log::debug('Updating...');
                     $document = DocumentModel::find($data['document_id']);                    
                     $result = $document->update($data);
                 } else {
                     // insert
-                    //Log::debug('Inserting...');
+                    Log::debug('Inserting...');
                     $document = new DocumentModel($data);
                     $result = $document->save();                
                 }
@@ -200,11 +200,16 @@ class DocumentRepository implements DocumentRepositoryInterface
                             $document->tags()->createMany($tags);                        
                         } // if
                     } // if
-
+                    Log::debug('AQUI VOY 0...');
                     // SAVE FORWARDING
                     $data['link_edit'] = $this->normalizeLinks($data['link_edit']);
+                    Log::debug('AQUI VOY 1...');
+                    Log::debug(['ACTION' => $data['link_edit']]);
+                    Log::debug('AQUI VOY 1.5 ..');
                     $edit_array = $this->saveForwarding(config('settings.document_status.edit'), $data['deadline_edit'], $data['link_edit']);
+                    Log::debug('AQUI VOY 2...');
                     if( $edit_array ) {
+                        Log::debug('AQUI VOY 3...');
                         Log::debug(['EDIT ARRAY' => $edit_array]);
 
                         // Nuevo algoritmo 9.12.2023
@@ -239,6 +244,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                                                         
                         } else {
                             // Nuevo Documento -> crea responsables 
+                            Log::debug('Nuevo Documento -> crea responsables ');
                             $document->forwards()->createMany($edit_array);
                             $document->job_edit_id = $data['link_edit'];                                                         
                         }
@@ -246,9 +252,11 @@ class DocumentRepository implements DocumentRepositoryInterface
                         $params['auto_forward']['edit'] = $data['deadline_edit']; 
                                                                         
                     } else {
+                        Log::debug('AQUI VOY 4...');
+                        Log::error('ERROR: '. trans('document/document.create.no-users', ['txt' => 'editar']));
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'editar'])];
                     }
-                        
+                    Log::debug('AQUI VOY 5...');
                     $data['link_review'] = $this->normalizeLinks($data['link_review']);
                     $review_array = $this->saveForwarding(config('settings.document_status.review'), $data['deadline_review'], $data['link_review']);
                     if( $review_array ) {
@@ -292,6 +300,7 @@ class DocumentRepository implements DocumentRepositoryInterface
 
                         $params['auto_forward']['review'] = $data['deadline_review'];                    
                     } else {
+                        Log::error('ERROR: '. trans('document/document.create.no-users', ['txt' => 'revisar']));
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'revisar'])];
                     }                
                            
@@ -340,6 +349,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                         
                         $params['auto_forward']['approve'] = $data['deadline_approve'];                       
                     } else {
+                        Log::error('ERROR: '. trans('document/document.create.no-users', ['txt' => 'aprobar']));
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'aprobar'])];
                     }
 
@@ -366,6 +376,7 @@ class DocumentRepository implements DocumentRepositoryInterface
 
                 } else {
                     DB::rollBack();
+                    Log::error('ERROR: '. trans('document/document.create.no-success'));
                     return ['status' => 'error', 'message' => trans('document/document.create.no-success')];
                 }
 
@@ -376,6 +387,7 @@ class DocumentRepository implements DocumentRepositoryInterface
             }                
             return ['status' => 'success', 'message' => trans('document/document.create.success')];
        } else {
+            Log::error('ERROR: '. trans('document/document.create.exists'));
             return ['status' => 'error', 'message' => trans('document/document.create.exists')];
        }
     } // store Method
@@ -804,7 +816,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         } else {
             Log::info('No se encuentra dato');
         }
-        Log::debug(['RESPONSIBLES FOUND TO '. $action. ' : ' => $array_result]);
+        //Log::debug(['RESPONSIBLES FOUND TO '. $action. ' : ' => $array_result]);
         return $array_result;
     } // foundResponsibles
     
@@ -1190,7 +1202,7 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
         $forward = [];
         $array = json_decode($links, true);
-        //Log::debug(['LINKS' => $links, 'FIXED' => $normalizedLink,'ARRAY' => $array[0]]);
+        //Log::debug(['ACTION' => $action, 'DEADLINE' => $deadline, 'LINKS' => $links, 'ARRAY' => $array[0]]);
         if( $array[0] && is_array($array[0]) ) {
             foreach($array[0] as $uid => $jid ) {
                 $dt0 = Carbon::today();
@@ -1201,9 +1213,9 @@ class DocumentRepository implements DocumentRepositoryInterface
                     $job = JobModel::find($jid);
                     
                     if( $job ) {
-                       //Log::debug(['NAME' => $job->name]);
+                        //Log::debug(['NAME' => $job->name]);
                         if( is_numeric($deadline) ) {
-                           //Log::debug(['DL' => $deadline]);
+                            //Log::debug(['DL' => $deadline]);
                             if( $deadline == 0 ) {
                                 $dl = $dt0->format('Y-m-d');
                             } else {
@@ -1237,8 +1249,22 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
         $normalized_targets = array('\\','"[', ']"');
         $normalized_correct = array('','[', ']'); 
-        return str_replace($normalized_targets, $normalized_correct, $str);
-    }
+        $newStr = str_replace($normalized_targets, $normalized_correct, $str);
+
+        // Validar si tiene corchete de inicio
+        $pos = strpos($newStr, '[');
+        if($pos === false) {
+            $newStr = substr_replace($newStr, '[', 0, 0);
+        }
+
+        // Validar si tiene corchete de cierre
+        $pos = strpos($newStr, ']');
+        if($pos === false) {
+            $newStr = substr_replace($newStr, ']', strlen($newStr), 0);
+        }        
+
+        return $newStr;
+    } // normalizeLinks
 
     /**
      * Determina si se está repitiendo la creación de un documento

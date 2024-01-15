@@ -965,16 +965,13 @@
                         //console.dir(editUsers);
                         // Edit
                         if( ($.inArray( user.user_id, editUsers) != -1) || ($.inArray( n, editUsers) != -1) ) {
-                            //checked = (editChecks[n] == 'SI') ? ' class="text-red-500"' : '';
-                            //console.log('match : '+ n + ' Check '+ editChecks[n]);
                             if( editChecks[n] == 'SI' ) {
                                 checked = ' class="text-red-500"';
-                                $("#flow-edit").css('display', 'block');                               
+                                $("#flow-edit").css('display', 'block'); 
                             } else {
-                                checked = '';
-                            }
-                            //console.log(n,editChecks[n]);
-                            editOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
+                                checked = '';    
+                            }                            
+                            editOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Review
                         if( ($.inArray( user.user_id, reviewUsers) != -1) || ($.inArray( n, reviewUsers) != -1) ) {
@@ -983,8 +980,8 @@
                                 $("#flow-review").css('display', 'block');
                             } else {
                                 checked = '';
-                            }                            
-                            reviewOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
+                            }                    
+                            reviewOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         // Approve
                         if( ($.inArray( user.user_id, approveUsers) != -1) || ($.inArray( n, approveUsers) != -1) ) {
@@ -993,8 +990,8 @@
                                 $("#flow-approve").css('display', 'block');
                             } else {
                                 checked = '';
-                            }                             
-                            approveOutput += '<option '+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
+                            }                          
+                            approveOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
                         }
                         j = j + 1;                                                      
                     });
