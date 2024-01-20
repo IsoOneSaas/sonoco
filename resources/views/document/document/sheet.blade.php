@@ -289,7 +289,10 @@
                                         @endforeach
                                     </div>
                                 </div>
-                                <!-- END: History -->                                
+                                <!-- END: History --> 
+                                
+                                     
+
 
                                 <!-- BEGIN: Top Products - ->
                                 <div class="intro-y box col-span-12 2xl:col-span-6">
@@ -575,6 +578,37 @@
 
                             </div>
                         </div>
+
+
+                        <!-- BEGIN: Users -->
+                        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+                            <div class="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
+                                <h2 class="font-medium text-base mr-auto">
+                                    Usuarios del documento
+                                </h2>
+                            </div>
+                            <div class="tiny-slider py-5" id="users">
+                                <table id="users-table" class="display" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Rol</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($data->users as $user)
+                                        <tr>
+                                            @foreach($user as $item)
+                                            <td>{!! $item !!}</td>
+                                            @endforeach
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- END: Users -->
+
                         
                     </div>
                     <!-- BEGIN: Modal Version -->
@@ -620,6 +654,7 @@
 @endpush
                 
 @push('styles')
+<link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
 <link rel="stylesheet" href="{{ url('assets/js/sweetalert/11.7.12/minimal.min.css') }}" />
 <style>
     
@@ -633,10 +668,19 @@
     .iso-swal-title {
         line-height: 100%;
     }
+
+    table#users-table td {
+        font-size: 0.8em;
+    }
+
+    table#users-table th {
+        font-size: 0.9em;
+    }     
 </style>
 @endpush
 
 @push('scripts-bottom')
+<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/11.7.12/sweetalert2.min.js') }}"></script>
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 
@@ -647,6 +691,23 @@
     var $status = "{{ $data->status }}";    
     var $auth = "{{ $data->auth }}";
     $(function () {
+
+        new DataTable("#users-table", {
+            order: [[0, 'asc']],
+            language: {
+                lengthMenu: 'Mostrar _MENU_ usuarios por página',
+                zeroRecords: '<h4>No hay usuarios encontrados</h4>',
+                info: 'Mostrando página _PAGE_ de _PAGES_',
+                infoEmpty: '*',
+                infoFiltered: '(_TOTAL_ filtrados de _MAX_ usuarios totales)',
+                loadingRecords: 'Cargando...',
+                search: 'Buscar: ',
+                paginate: {
+                    next: '>>',
+                    previous: '<<'
+                }
+            }
+        });        
 
         // BTN CREACION DE NUEVA VERSION
         $('#btn-copy, #btn-version').on("click", function(e)  {

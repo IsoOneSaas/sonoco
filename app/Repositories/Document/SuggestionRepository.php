@@ -36,7 +36,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
      * Recupera listado de sugerencias
      * @param  string $scope Identificador de la sugerencia
      * @return json   Json para generar el grid
-     */       
+     */    
     public function getSuggestions($scope)
     {
         $array_output = [];
@@ -64,9 +64,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
 				$query->on('set_location_user.user_id', '=', 'set_users.user_id');
 				$query->whereIn('set_location_user.location_id', $lids);
 			})
-			->pluck('set_users.user_uid');
-            
-            
+			->pluck('set_users.user_uid');        
 
         }
 

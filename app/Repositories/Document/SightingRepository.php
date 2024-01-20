@@ -34,8 +34,22 @@ class SightingRepository implements SightingRepositoryInterface
     /**
      * Recupera listado de observaciones
      * @return json   Json para generar el grid
-     */       
+     */
     public function getSightings($scope)
+    {
+       $array_output = [];
+       $n = 0;
+       $admin = Auth::user();
+
+        //withTrashed()
+        return 'Hello world';
+
+    } // getSightings
+
+   /**
+    * OBSOLETE
+    */          
+    public function getSightingsOld($scope)
     {
         $array_output = [];
         $n = 0;

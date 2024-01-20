@@ -114,8 +114,7 @@
             $myTable.clear().destroy();
             setTable();
         });
-        
-        
+                
         $("#btn-download").on("click", function() {
             $myTable.button('.buttons-excel').trigger();
         });
@@ -132,9 +131,6 @@
         var route = "{{ route('documents.control.observacion.show', ':slug') }}";
 
         $myTable = $('#sightings-table').DataTable({
-            //processing: true,
-            //serverSide: true,
-            //retrieve: true,
             ajax: route.replace(':slug', scope),
             columns: [
                 {
@@ -152,11 +148,6 @@
                 //{ data: null, class: 'dt-center', orderable: false, defaultContent: '<button><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>' },
             ],           
             order: [[5, 'desc']],
-            //paging: false,  // FIXME: No está funcionando
-            //info: false,    // FIXME: No está funcionando
-            //filter: false,  // FIXME: No está funcionando
-            //scrollY: '400px',
-            //scrollCollapse: true,
             language: $lang,
             buttons: [
                 {
@@ -177,7 +168,7 @@
         // Array to track the ids of the details displayed rows
         const detailRows = [];
         
-        $myTable.on('click', 'tbody td.dt-control', function () {
+/*         $myTable.on('click', 'tbody td.dt-control', function () {
             let tr = event.target.closest('tr');
             let row = $myTable.row(tr);
             let idx = detailRows.indexOf(tr.id);
@@ -198,10 +189,10 @@
                     detailRows.push(tr.id);
                 }
             }
-        });
+        }); */
         
         // On each draw, loop over the `detailRows` array and show any child rows
-        $myTable.on('draw', () => {
+/*         $myTable.on('draw', () => {
             detailRows.forEach((id, i) => {
                 let el = document.querySelector('#' + id + ' td.dt-control');
         
@@ -209,9 +200,9 @@
                     el.dispatchEvent(new Event('click', { bubbles: true }));
                 }
             });
-        });
+        }); */
         
-        $('body').on('click', '.btn-sheet', function (e) {
+/*         $('body').on('click', '.btn-sheet', function (e) {
             e.preventDefault();
             var hash = $(this).data('hash');
             var route = "{{ route('documents.master.datasheet', ':hash') }}";
@@ -222,7 +213,7 @@
                 route = route.replace(':hash', hash);
                 location.href = route;
             }            
-        }); // #btn-sheet           
+        }); // #btn-sheet   */         
 
     } // setTable
 

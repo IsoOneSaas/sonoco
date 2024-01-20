@@ -1065,6 +1065,9 @@ class ToolsClass
 
     /**
      * Obtiene el listado de indicadores de usuarios que tienen privilegio de ver el documento dado
+     * Utilizado en:
+     *                  - controlRepository@flow
+     *                  - controlRepository@post
      * @param  integer $xid identificador del departametno al cual pertenece el documento
      * @param  integer $did identificador del documento para determinar los permisos especiales (if null : no determina)
      * @return array    Arreglo multidimiensional con key: id de documento y valores del status : acción y fecha de la acción

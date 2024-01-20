@@ -76,7 +76,8 @@ class DocumentModelController extends Controller
         $response = $this->documentRepo->store($request->all());
         //$response = ['status' => 'error', 'message' => 'Testing...'];
         if( $response['status'] == 'error' ) {
-            return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']); 
+            //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']); // producía error 2024.01.15
+            return redirect()->back()->with($response['status'], $response['message']); 
         }
         return redirect()->route('documents.control.documento.index')->with($response['status'], $response['message']); 
     } // store Method
