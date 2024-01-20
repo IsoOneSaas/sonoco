@@ -422,11 +422,10 @@ class MasterRepository implements MasterRepositoryInterface
         //Log::debug(['**DOCUMENT' => $document->toArray()]);
 
         // USUARIOS DEL DOCUMENTO
-        $uids = $this->tool->setPublishedUsers($document->department_id, $id);
-        $total = count($uids);
+        $uids = $this->tool->setPublishedUsers($document->department_id, $document->process_id, $id);
         $users_array = [];
-        for($i=0; $i<$total; $i++) {                
-            $user = UserModel::find($uids[$i]);
+        foreach($uids as $i => $uid) {              
+            $user = UserModel::find($uid);
             $users_array[] = ['name' => $user->name, 'role' => config('settings.roles.'.$user->role)];
         } // foreach
         $document->users =  $users_array;

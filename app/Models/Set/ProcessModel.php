@@ -20,11 +20,19 @@ class ProcessModel extends Model
     }
 
     /**
-    * Obtiene el registro de cargos autorizados con el proceso.
+    * Obtiene el registro de cargos relacionados con el proceso.
     */
     public function jobs(): BelongsToMany
     {
         return $this->belongsToMany(JobModel::class, 'set_job_process', 'process_id', 'job_id');
-    }    
+    }  
+    
+    /**
+    * Obtiene el registro de cargos autorizados con el proceso.
+    */
+    public function jobsAuthorized(): BelongsToMany
+    {
+        return $this->belongsToMany(JobModel::class, 'set_job_process', 'process_id', 'job_id')->where('set_job_process.auth', '=', 1);
+    }     
 
 } // class

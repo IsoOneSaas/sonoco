@@ -577,40 +577,41 @@
 
 
                             </div>
-                        </div>
-
-
-                        <!-- BEGIN: Users -->
-                        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-                            <div class="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                                <h2 class="font-medium text-base mr-auto">
-                                    Usuarios del documento
-                                </h2>
-                            </div>
-                            <div class="tiny-slider py-5" id="users">
-                                <table id="users-table" class="display" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Rol</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($data->users as $user)
-                                        <tr>
-                                            @foreach($user as $item)
-                                            <td>{!! $item !!}</td>
-                                            @endforeach
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <!-- END: Users -->
-
-                        
+                        </div>                        
                     </div>
+
+                    <div class="col-span-12 w-full mt-5">
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- BEGIN: Daily Sales -->
+                            <div class="intro-y box col-span-12">
+                                <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
+                                    <h2 class="font-medium text-base mr-auto">
+                                        Usuarios del documento
+                                    </h2>
+                                </div>
+                                <div class="p-5"> 
+                                    <table id="users-table" class="display" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Rol</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($data->users as $user)
+                                            <tr>
+                                                @foreach($user as $item)
+                                                <td>{!! $item !!}</td>
+                                                @endforeach
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- BEGIN: Modal Version -->
                     <div id="modal-versions" class="modal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
@@ -692,7 +693,11 @@
     var $auth = "{{ $data->auth }}";
     $(function () {
 
+        // Datatables
         new DataTable("#users-table", {
+            columnDefs: [
+                { targets: [0], className: 'dt-nowrap' },
+            ],
             order: [[0, 'asc']],
             language: {
                 lengthMenu: 'Mostrar _MENU_ usuarios por página',
@@ -707,7 +712,7 @@
                     previous: '<<'
                 }
             }
-        });        
+        });
 
         // BTN CREACION DE NUEVA VERSION
         $('#btn-copy, #btn-version').on("click", function(e)  {

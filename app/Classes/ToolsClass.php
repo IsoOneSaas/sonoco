@@ -1068,17 +1068,20 @@ class ToolsClass
      * Utilizado en:
      *                  - controlRepository@flow
      *                  - controlRepository@post
-     * @param  integer $xid identificador del departametno al cual pertenece el documento
+     * @param  integer $xid identificador del departamento al cual pertenece el documento
+     * @param  integer $pid identificador del proceso al cual pertenece el documento
      * @param  integer $did identificador del documento para determinar los permisos especiales (if null : no determina)
      * @return array    Arreglo multidimiensional con key: id de documento y valores del status : acción y fecha de la acción
      */    
-    public function setPublishedUsers($xid, $did = null)
+    public function setPublishedUsers($xid, $pid = null, $did = null)
     {  
         $users_array = [];
+
+        //Log::debug(['ID' => $did, 'DID' => $xid, 'PID' => $pid]);
         
         $dpto = DepartmentModel::find($xid);
         if ($dpto) {
-            // cargos del departamento
+            // cargos del departamento asignado
             $jobs = $dpto->jobs;
 
             foreach($jobs as $job) {
@@ -1090,7 +1093,29 @@ class ToolsClass
                 } // foreach
             } // foreach
 
-            Log::debug('== Número de usuarios iniciales: '. count($users_array));
+            Log::debug('== Número de usuarios iniciales sólo por departamento: '. count($users_array));
+
+            // cargos por procesos adicionales asignados
+            if($pid !== null) {
+                $process = ProcessModel::find($pid);
+                if($process) {
+                    $jobs = $process->jobsAuthorized;
+                    if($jobs) {
+                        foreach($jobs as $job) {
+                            $users = $job->users;
+                            if($users) {
+                                foreach($users as $user) {
+                                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) ) {
+                                        $users_array[] = $user->user_id;
+                                    }  // if              
+                                } // foreach
+                            } // if
+                        } // foreach
+                    } // if                    
+                } // if
+            } // if
+            $users_array = array_unique($users_array);
+            Log::debug('== Número de usuarios después de agregar por procesos añadidos: '. count($users_array));
             //Log::debug(['USERS 0 ' => $users_array]);
 
             if( $did !== null ) {
@@ -1102,7 +1127,7 @@ class ToolsClass
                     } // foreach
                 } // if
                 $users_array = array_unique($users_array);
-                Log::debug('== Número de usuarios después de agregar: '. count($users_array));
+                Log::debug('== Número de usuarios después de agregar por authorizaciones: '. count($users_array));
                 // Usuarios que NO tienen permiso para el documento
                 $plucked = AuthorizationModel::where('document_id', $did)->where('permissions', 'LIKE', '%"view":0%')->pluck('user_id');
                 if($plucked && ( count($plucked->all()) > 0 ) ) {
@@ -1115,7 +1140,7 @@ class ToolsClass
             } // if $did
         } // if $dpto
         $users_array = array_unique($users_array);
-        Log::debug('== Número de usuarios después de eliminar: '. count($users_array));
+        Log::debug('== Número de usuarios después de eliminar por authorizaciones: '. count($users_array));
         //Log::debug(['USERS 2 ' => $users_array]);
 
         return $users_array;

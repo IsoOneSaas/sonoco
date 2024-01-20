@@ -85,7 +85,7 @@ class ControlController extends Controller
     {
         $document = $this->documentRepo->get($slug, $hash, $this->tenantUrl, $this->masterUrl);
         if($document) {
-            $flow = $this->documentRepo->flow($document->document_id, $document->department_id);      
+            $flow = $this->documentRepo->flow($document->document_id, $document->department_id, $document->process_id);      
             $blade = 'document.control.edit_'. strtolower($document->pattern);
             $gridTemplatesLanguage =  json_encode(trans('document/document.datatable_templates'));
             $gridReferencesLanguage =  json_encode(trans('document/document.datatable_references'));

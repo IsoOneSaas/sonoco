@@ -7,7 +7,7 @@ interface ControlRepositoryInterface
     public function store($id, array $data);
 
     public function status($hash);
-    public function flow($did, $xid);
+    public function flow($did, $xid, $pid);
     //public function confirm($hash);
     public function check($hash);
     public function back($hash);
