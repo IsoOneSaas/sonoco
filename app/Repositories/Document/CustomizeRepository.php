@@ -55,6 +55,9 @@ class CustomizeRepository implements CustomizeRepositoryInterface
             $new['notice_new_suggestion'] = (  key_exists('notice_new_suggestion', $data) ) ? true : false;
             $new['notice_new_sighting'] = (  key_exists('notice_new_sighting', $data) ) ? true : false;
             $new['notice_new_document'] = (  key_exists('notice_new_document', $data) ) ? true : false;
+            $new['notice_master']['text'] = $data['master_text'];
+            $new['notice_master']['alert'] = $data['master_text'];
+            unset($new['master_text'], $new['master_alert']);
             Log::debug(['TO SAVE' => $new]);
 
             DB::beginTransaction();

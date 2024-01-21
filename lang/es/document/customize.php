@@ -90,7 +90,12 @@ return [
                             'placeholder'   => 'Seleccione',
                             'tooltip'       => 'Permita o no que se envíe una notificación vía email cuando se publique un documento',
             ],
-
+            'notice_master_document'         =>  [
+                            'icon'          => 'alert',
+                            'title'         => 'Notificación Documento Visto',
+                            'placeholder'   => 'Texto de la notificación',
+                            'tooltip'       => 'Escriba un texto que aparecerá al visualizar el documento publicado para todos los usuarios. Seleccione el tipo de mensaje a mostrar.  Deje el texto vacío si no quiere mostrar algún mensaje.',
+            ],
                                                             
     ],    
 

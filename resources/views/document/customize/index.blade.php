@@ -153,7 +153,18 @@
                                                 <input type="checkbox" class="form-check-input" id="notice-new-document" name="notice_new_document" @if( old('notice_new_document', $data['notice_new_document']) ) checked @endif>
                                             </div>                                             
                                             <div id="input-group-35" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.notice_new_document.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>                                                                                                                        
+                                        </div>
+                                        <div class="input-group mt-3">
+                                            <div id="notice-master-document" class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/customize.form.notice_master_document.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/customize.form.notice_master_document.title') }}</div>
+                                            <textarea  name="master_text" class="form-control  w-full" aria-describedby="master_text" placeholder="{{ trans('document/customize.form.notice_master_document.placeholder') }}">{{ old('master_text') }}</textarea>
+                                            <select  name="master_alert" class="form-control w-48" required>
+                                                <option value='danger'>Peligro</option>
+                                                <option value='alert'>Alarma</option>
+                                                <option value='info'>Información</option>
+                                                <option value='dark'>Neutro</option>
+                                            </select>                                             
+                                            <div id="input-group-35" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.notice_master_document.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                        </div>                                                                                                                                                                                                   
                                     </div>
                                 </div>
                                 </form>
