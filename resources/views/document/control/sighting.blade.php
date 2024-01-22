@@ -54,11 +54,14 @@
                             <thead>
                                 <tr>
                                     <th class="dt-control sorting_disabled" rowspan="1" colspan="1" style="width: 22.9688px;"></th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Código</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Nombre</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Versión</th>                                              
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Fecha</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Observaciones</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Código</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Tipo</th>                                              
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Nombre</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Usuario</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Página</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Sección</th>
+                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Observación</th>
                                     <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"></th>
                                 </tr>
                             </thead>
@@ -139,15 +142,18 @@
                     data: null,
                     defaultContent: '',
                 },
+                { data: 'date', class: 'no-wrap' },
                 { data: 'code', class: 'no-wrap' },
+                { data: 'type' },
                 { data: 'name' },
-                { data: 'version', class: 'dt-center', width: '30px' },
-                { data: 'date', class: 'dt-center'},
-                { data: 'total', class: 'dt-center'  },
+                { data: 'user' },
+                { data: 'page', class: 'dt-center', width: '30px' },
+                { data: 'section' },
+                { data: 'sighting' },
                 { data: 'control', class: 'dt-center', orderable: false },
                 //{ data: null, class: 'dt-center', orderable: false, defaultContent: '<button><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>' },
             ],           
-            order: [[5, 'desc']],
+            order: [[1, 'desc']],
             language: $lang,
             buttons: [
                 {
@@ -159,7 +165,7 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: [1,2,3,4]
+                        columns: [1,2,3,4,5,6,7,8]
                     }
                 }
             ]

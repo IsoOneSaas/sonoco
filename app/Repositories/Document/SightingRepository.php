@@ -41,8 +41,72 @@ class SightingRepository implements SightingRepositoryInterface
        $n = 0;
        $admin = Auth::user();
 
-        //withTrashed()
-        return 'Hello world';
+        // Documentos permitidos para el administrador
+        if( $admin->can('setup_admins') ) {
+            $plucked = DocumentModel::all()->pluck('document_id');
+            $adminDocs = $plucked->all();
+        } else {
+            $dt0 =  Carbon::today()->toDateString();
+            $din = '1970-01-01T_';
+            $dout = $dt0 .'T_';
+            $sids = $this->tool->getAdminAuthorizedSystems($admin);
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            $plucked = TypeModel::all()->pluck('type_id');
+            $tids = $plucked->all();
+            $params = ['status' => 1, 'sids' => $sids, 'lids' => $lids, 'tids' => $tids, 'din' => $din, 'dout' => $dout];            
+            //$documents = $this->tool->setDocumentsToControl('', 1);
+            $documents = $this->tool->setDocumentsToControl($params);
+            $plucked = $documents->pluck('document_id');
+            $adminDocs = $plucked->all();
+        } // if
+
+        if($scope == 'all') {
+            $items = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
+                ->join('documents', function($query) {
+                    $query->on('documents.document_id', '=', 'document_sightings.document_id');
+                })
+                ->orderBy('document_sightings.date', 'desc')
+                ->get();
+        } else {
+            $items = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
+                ->join('documents', function($query) {
+                    $query->on('documents.document_id', '=', 'document_sightings.document_id');
+                })
+                ->where('document_sightings.status', $scope)
+                ->orderBy('document_sightings.date', 'desc')
+                ->get();
+        }
+
+
+
+        
+        //Log::debug(['ITEMS' => $items->toArray()]);
+
+        foreach($items as $item) {
+            $user = UserModel::where('user_uid', $item->user_uid)->withTrashed()->first();
+            $dateString = Carbon::createFromTimeStamp(strtotime($item->date))->format($this->set['date_format']);
+            $array_output[] = [
+                "DT_RowId" => "row_". $item->sighting_id,
+                'date' => $dateString,
+                'code' => $item->code,
+                'type' => $item->type,
+                'name' => $item->name,
+                'user' => ($user) ? $user->name : '',
+                'page' => $item->page,
+                'section' => $item->section,
+                'sighting' => '',
+                'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>',
+            ];
+            $n++;            
+
+        }
+
+        return json_encode([
+            "draw" => 1,
+            "recordsTotal" => $n,
+            "recordsFiltered"=> $n,
+            "data"=> $array_output,           
+        ]);
 
     } // getSightings
 
@@ -128,8 +192,8 @@ class SightingRepository implements SightingRepositoryInterface
     } // getSighting Method     
 
     /**
-     * Actualiza el valor de status para la sugerencia indicada
-     * @param  integer $id Identificador de la sugerencia
+     * Actualiza el valor de status para la observacion indicada
+     * @param  integer $id Identificador de la observacion
      * @return json   Resultado de la actualización
      */      
     public function checkSighting($id)
@@ -147,7 +211,7 @@ class SightingRepository implements SightingRepositoryInterface
 
 
     /**
-     * Insertar una nueva sugerencia
+     * Insertar una nueva observacion
      * @param  array $data Datos del formulario
      * @return json   Resultado de la consuta
      */     
