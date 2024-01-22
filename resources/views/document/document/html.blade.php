@@ -41,7 +41,7 @@
                     </div>
                     <!-- BEGIN: Editor -->
                     <div class="intro-y box p-5 mt-5 bg-slate-200 flex justify-center">
-
+                   
                         @if($document->pdf)
                             <div class="justify-center">
                                 <embed id="pdf-render" type="application/pdf" src="{{ url($document->pdf) }}" width="640" height="1020" />
@@ -49,9 +49,37 @@
                         @else
                             @if($document->pattern == 'HTML')
                             <div class="iso-body iso-{{ $size ?? 'emtpy' }}">
+                                @if( is_array($notice) && ($notice['text'] != '') )
+                                <div class="intro-y col-span-11 alert alert-{{ $notice['alert'] }} show flex items-center" role="alert">
+                                    <span><i data-lucide="info" class="w-6 h-6 mr-2"></i></span>
+                                    <span>{{ $notice['text'] }}</span>
+                                    <a href="javascript:;" class="close ml-4" style="margin:0 auto" data-dismiss="alert" aria-label="close"><i data-lucide="x-circle" class="w-6 h-6"></i></a>
+                                </div>
+                                @endif
+                                @if( $expiration && ($expiration['message'] != '') )
+                                <div class="intro-y col-span-11 alert alert-{{ $expiration['alert'] }} show flex items-center" role="alert">                                    
+                                    <span><i data-lucide="info" class="w-6 h-6 mr-2"></i></span>
+                                    <span>{{ $expiration['message'] }}</span>
+                                    <a href="javascript:;" class="close ml-4" style="margin:0 auto" data-dismiss="alert" aria-label="close"><i data-lucide="x-circle" class="w-6 h-6"></i></a>
+                                </div>
+                                @endif                                                                
                                 <div class="iso-page iso-{{ $size ?? 'emtpy' }}">
                             @else
                             <div class="iso-body">
+                                @if( is_array($notice) && ($notice['text'] != '') )
+                                <div class="intro-y col-span-11 alert alert-{{ $notice['alert'] }} show flex items-center" role="alert">
+                                    <span><i data-lucide="info" class="w-6 h-6 mr-2"></i></span>
+                                    <span>{{ $notice['text'] }}</span>
+                                    <a href="javascript:;" class="close ml-4" style="margin:0 auto" data-dismiss="alert" aria-label="close"><i data-lucide="x-circle" class="w-6 h-6"></i></a>
+                                </div>
+                                @endif
+                                @if( $expiration && ($expiration['message'] != '') )
+                                <div class="intro-y col-span-11 alert alert-{{ $expiration['alert'] }} alert-dismissable show flex items-center" role="alert">                                    
+                                    <span><i data-lucide="info" class=" w-6 h-6 mr-2"></i></span>
+                                    <span>{{ $expiration['message'] }}</span>
+                                    <a href="javascript:;" class="close ml-4" style="margin:0 auto" data-dismiss="alert" aria-label="close"><i data-lucide="x-circle" class="w-6 h-6"></i></a>
+                                </div>
+                                @endif                                                                    
                                 <div class="iso-page">                      
                             @endif
                                     <div class="w-full p-2">
@@ -407,7 +435,11 @@
                     }
                 });
                 
-            });   // #btn-modal-history 
+            });   // #btn-modal-history
+            
+            $('div.alert .close').on('click', function() {
+                $(this).parent().remove(); 
+            });            
             
         }); // document
 

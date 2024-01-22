@@ -212,7 +212,13 @@ class ControlRepository implements ControlRepositoryInterface
                         $document->color = 'bg-success';
                     } else {
                         $document->color = 'bg-danger';
-                    }            
+                    }
+
+                    // Caducidad
+                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date));
+                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
+                    $document->expiration = $val['status'];
+                    //Log::debug(['EXPIRATION' => $val]);
 
                     // Estado del control
                     $statusTexts = config('settings.document_status_texts.'. $document->status);

@@ -159,7 +159,7 @@
                                             <textarea  name="master_text" class="form-control  w-full" aria-describedby="master_text" placeholder="{{ trans('document/customize.form.notice_master_document.placeholder') }}">{{ old('master_text') }}</textarea>
                                             <select  name="master_alert" class="form-control w-48" required>
                                                 <option value='danger'>Peligro</option>
-                                                <option value='alert'>Alarma</option>
+                                                <option value='warning'>Alarma</option>
                                                 <option value='info'>Información</option>
                                                 <option value='dark'>Neutro</option>
                                             </select>                                             

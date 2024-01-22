@@ -21,7 +21,7 @@ class MasterController extends Controller
     protected $documentRepo;
     protected $sightRepo;
     private $tool;
-    //private $set;
+    protected $set;
     protected $contentUrl;    
     protected $tenantUrl;
     protected $masterUrl;  
@@ -32,7 +32,7 @@ class MasterController extends Controller
         $this->documentRepo = $documentRepository;
         $this->sightRepo = $sightRepository;        
         $this->tool = $Tools;
-        //$this->set = $this->tool->setSettings('document');
+        $this->set = $this->tool->setSettings('document');
         $this->contentUrl = public_path() .'/tenants/sonoco/'.  config('settings.PATH_DOC_CONTENT');
         $this->tenantUrl = 'tenants/sonoco/images';
         $this->masterUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_MASTER');
@@ -46,7 +46,7 @@ class MasterController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->documentRepo->systems();
         $processes = $this->documentRepo->processes();
-        Log::debug(['PROCESSES TO GRID' => $processes->count()]);
+        //Log::debug(['PROCESSES TO GRID' => $processes->count()]);
         $locations = $this->documentRepo->locations();
         $types = $this->documentRepo->types();
 
@@ -100,13 +100,15 @@ class MasterController extends Controller
             $attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
             $types = config('settings.document_sightings_option_default');
             // Configuración de la hoja
-            $setup = $this->tool->getPaperSetup($data->settings);       
+            $setup = $this->tool->getPaperSetup($data->settings);     
 
             return view('document.document.html', [
                 'size' => $setup['size'] .'-'. $setup['orientation'],
                 'document' => $data,
                 'attachment' => $attachment,
                 'types'     => $types,
+                'notice'    => ( key_exists('notice_master', $this->set) ) ? $this->set['notice_master'] : '',  // Mensaje de notificación
+                'expiration' => ( $data->expiration == 2 ) ? $this->set['validation'] : false,               // Mensaje de expiración
                 'modalLanguage'  => json_encode(trans('document/document.datatable_modal')),
             ]); 
         }
