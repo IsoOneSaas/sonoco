@@ -86,7 +86,8 @@ class SightingRepository implements SightingRepositoryInterface
             $user = UserModel::where('user_uid', $item->user_uid)->withTrashed()->first();
             $dateString = Carbon::createFromTimeStamp(strtotime($item->date))->format($this->set['date_format']);
             $array_output[] = [
-                "DT_RowId" => "row_". $item->sighting_id,
+                //"DT_RowId" => "row_". $item->sighting_id,
+                'empty' => '',
                 'date' => $dateString,
                 'code' => $item->code,
                 'type' => $item->type,
@@ -94,8 +95,10 @@ class SightingRepository implements SightingRepositoryInterface
                 'user' => ($user) ? $user->name : '',
                 'page' => $item->page,
                 'section' => $item->section,
-                'sighting' => '',
-                'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>',
+                //'control' => '<a href="javascript:;" class="tooltip inline" title="'. $item->content .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></a><button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
+                //'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
+                'content' => $item->content .'. <button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
+                //'file' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
             ];
             $n++;            
 

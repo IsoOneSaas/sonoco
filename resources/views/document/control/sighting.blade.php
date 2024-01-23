@@ -50,19 +50,18 @@
                             </div>
                         </div>                        
 
-                        <table id="sightings-table" class="display dataTable" style="width:100%" aria-describedby="example_info">
+                        <table id="sightings-table" class="display responsive" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th class="dt-control sorting_disabled" rowspan="1" colspan="1" style="width: 22.9688px;"></th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Fecha</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Código</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Tipo</th>                                              
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Nombre</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Usuario</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Página</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Sección</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Observación</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"></th>
+                                    <th class="all"></th>
+                                    <th class="all">Fecha</th>
+                                    <th class="all">Código</th>
+                                    <th class="all">Tipo</th>                                              
+                                    <th class="all">Nombre</th>
+                                    <th class="all">Usuario</th>
+                                    <th class="all">Página</th>
+                                    <th class="all">Sección</th>
+                                    <th class="none">Comentario: </th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -77,11 +76,14 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/responsive.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+
 @endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/buttons.html5.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/JSZip-2.5.0/jszip.min.js') }}"></script>
@@ -133,15 +135,15 @@
         var scope = $("#scope-selected").val();
         var route = "{{ route('documents.control.observacion.show', ':slug') }}";
 
+        $('#sightings-table thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#sightings-table thead');        
+
         $myTable = $('#sightings-table').DataTable({
             ajax: route.replace(':slug', scope),
             columns: [
-                {
-                    class: 'dt-control',
-                    orderable: false,
-                    data: null,
-                    defaultContent: '',
-                },
+                { data: 'empty', orderable: false },
                 { data: 'date', class: 'no-wrap' },
                 { data: 'code', class: 'no-wrap' },
                 { data: 'type' },
@@ -149,11 +151,15 @@
                 { data: 'user' },
                 { data: 'page', class: 'dt-center', width: '30px' },
                 { data: 'section' },
-                { data: 'sighting' },
-                { data: 'control', class: 'dt-center', orderable: false },
+                //{ data: 'control', class: 'dt-center', width: '50px', orderable: false },
+                { data: 'content', orderable: false },
                 //{ data: null, class: 'dt-center', orderable: false, defaultContent: '<button><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>' },
             ],           
             order: [[1, 'desc']],
+            columDefs: [{targets: 0, className: 'text-nowrap'}],
+            responsive: true,
+            orderCellsTop: true,
+            fixedHeader: true,            
             language: $lang,
             buttons: [
                 {
@@ -168,7 +174,58 @@
                         columns: [1,2,3,4,5,6,7,8]
                     }
                 }
-            ]
+            ],
+            initComplete: function () {
+            var api = this.api();
+ 
+            // For each column
+            api
+                .columns()
+                .eq(0)
+                .each(function (colIdx) {
+
+                    
+                    // Set the header cell to contain the input element
+                    var cell = $('.filters th').eq(
+                        $(api.column(colIdx).header()).index()
+                    );
+                    var title = $(cell).text();
+                    $(cell).html('<input type="text" style="padding:0; padding-left:1em;width:auto" placeholder="' + title + '" />');
+ 
+                    // On every keypress in this input
+                    $(
+                        'input',
+                        $('.filters th').eq($(api.column(colIdx).header()).index())
+                    )
+                        .off('keyup change')
+                        .on('change', function (e) {
+                            // Get the search value
+                            $(this).attr('title', $(this).val());
+                            var regexr = '({search})'; 
+ 
+                            var cursorPosition = this.selectionStart;
+                            // Search the column for that value
+                            api
+                                .column(colIdx)
+                                .search(
+                                    this.value != ''
+                                        ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                        : '',
+                                    this.value != '',
+                                    this.value == ''
+                                )
+                                .draw();
+                        })
+                        .on('keyup', function (e) {
+                            e.stopPropagation();
+ 
+                            $(this).trigger('change');
+                            $(this)
+                                .focus()[0]
+                                .setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                });
+        },            
         }); // datatable
 
         // Array to track the ids of the details displayed rows
@@ -208,7 +265,7 @@
             });
         }); */
         
-/*         $('body').on('click', '.btn-sheet', function (e) {
+        $('body').on('click', '.btn-sheet', function (e) {
             e.preventDefault();
             var hash = $(this).data('hash');
             var route = "{{ route('documents.master.datasheet', ':hash') }}";
@@ -219,7 +276,7 @@
                 route = route.replace(':hash', hash);
                 location.href = route;
             }            
-        }); // #btn-sheet   */         
+        }); // #btn-sheet       
 
     } // setTable
 
