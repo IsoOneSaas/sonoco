@@ -96,18 +96,20 @@ class SuggestionRepository implements SuggestionRepositoryInterface
                         $type = ($hint->mimetype !== null) ? $hint->mimetype : '';                        
                         $mime = $this->tool->getFileMimeName($type);
                         $image = 'assets/images/mimes/'. $mime .'.png';
-                        $link = '<a class="btn-file-show" data-file="'. $hint->filename .'" href="javascript:;" title="abrir el archivo anexo"><span class="text-base font-medium underline text-blue-600"><img src="'. url($image) .'" alt="Mime" style="width:1em"  class="inline-block" /> '. $hint->name . $size .'</span></a>';
+                        $link = '<a class="btn-file-show" data-file="'. $hint->filename .'" href="javascript:;" title="abrir el archivo anexo '. $hint->name . $size .'"><span class="text-base font-medium underline text-blue-600"><img src="'. url($image) .'" alt="Mime" style="width:1.2em"  class="inline-block" /></span></a>';
                     }
                     $array_output[] = [
-                        "DT_RowId" => "row_". $hint->hinting_id,
+                        'empty' => '',
+                        "DT_RowIndex" => $n,
                         'date' => Carbon::createFromTimeStamp(strtotime($hint->created_at))->format($this->set['date_format']),
                         'user' =>  $user->name,
                         'system' =>  $system->name,
                         'document' =>  $hint->document,
-                        'justification' =>  $hint->justification,   // 
-                        'id' => $hint->suggestion_id,
-                        'checked' => '<input type="checkbox" onClick="checkSuggestion('. $hint->suggestion_id .')"'. $checked .' />',
-                        'link' => $link,
+                        'content' =>  $hint->justification,   // 
+                        //'id' => $hint->suggestion_id,
+                        'checked' => '<input type="checkbox" title="Cambiar de estado" onClick="checkSuggestion('. $hint->suggestion_id .')"'. $checked .' />&nbsp;&nbsp;'. $link,
+                        //'link' => $link,
+                        'order' => $hint->created_at,
                     ];
                     $n++;
                //} // if

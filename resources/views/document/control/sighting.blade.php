@@ -54,6 +54,7 @@
                             <thead>
                                 <tr>
                                     <th class="all"></th>
+                                    <th class="all">No</th>
                                     <th class="all">Fecha</th>
                                     <th class="all">Código</th>
                                     <th class="all">Tipo</th>                                              
@@ -61,8 +62,24 @@
                                     <th class="all">Usuario</th>
                                     <th class="all">Página</th>
                                     <th class="all">Sección</th>
-                                    <th class="none">Comentario: </th>
+                                    <th class="all"></th>
+                                    <th class="none"></th>
+                                    <th class="none"></th>
                                 </tr>
+                                <tr>
+                                    <th class="th-filter"></th>
+                                    <th class="th-filter">No</th>
+                                    <th class="th-filter">Fecha</th>
+                                    <th class="th-filter">Código</th>
+                                    <th class="th-filter">Tipo</th>                                              
+                                    <th class="th-filter">Nombre</th>
+                                    <th class="th-filter">Usuario</th>
+                                    <th class="th-filter">Página</th>
+                                    <th class="th-filter">Sección</th>
+                                    <th class="th-filter"></th>
+                                    <th class="none" style="width:0"></th>
+                                    <th class="none" style="width:0"></th>
+                                </tr>                                
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -132,31 +149,18 @@
     }); // document
 
     function setTable() {
+        var columnsDef = {!! $gridColDef !!};
+        var col = {{ $gridColOrd }};        
+        var columnsExp = {!! $gridColExp !!};          
         var scope = $("#scope-selected").val();
         var route = "{{ route('documents.control.observacion.show', ':slug') }}";
 
-        $('#sightings-table thead tr')
-            .clone(true)
-            .addClass('filters')
-            .appendTo('#sightings-table thead');        
+ 
 
         $myTable = $('#sightings-table').DataTable({
             ajax: route.replace(':slug', scope),
-            columns: [
-                { data: 'empty', orderable: false },
-                { data: 'date', class: 'no-wrap' },
-                { data: 'code', class: 'no-wrap' },
-                { data: 'type' },
-                { data: 'name' },
-                { data: 'user' },
-                { data: 'page', class: 'dt-center', width: '30px' },
-                { data: 'section' },
-                //{ data: 'control', class: 'dt-center', width: '50px', orderable: false },
-                { data: 'content', orderable: false },
-                //{ data: null, class: 'dt-center', orderable: false, defaultContent: '<button><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></button>' },
-            ],           
-            order: [[1, 'desc']],
-            columDefs: [{targets: 0, className: 'text-nowrap'}],
+            columns: columnsDef,
+            order: [[col, 'desc']],
             responsive: true,
             orderCellsTop: true,
             fixedHeader: true,            
@@ -171,62 +175,81 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: [1,2,3,4,5,6,7,8]
+                        columns: columnsExp 
                     }
                 }
-            ],
-            initComplete: function () {
-            var api = this.api();
- 
-            // For each column
-            api
-                .columns()
-                .eq(0)
-                .each(function (colIdx) {
-
-                    
-                    // Set the header cell to contain the input element
-                    var cell = $('.filters th').eq(
-                        $(api.column(colIdx).header()).index()
-                    );
-                    var title = $(cell).text();
-                    $(cell).html('<input type="text" style="padding:0; padding-left:1em;width:auto" placeholder="' + title + '" />');
- 
-                    // On every keypress in this input
-                    $(
-                        'input',
-                        $('.filters th').eq($(api.column(colIdx).header()).index())
-                    )
-                        .off('keyup change')
-                        .on('change', function (e) {
-                            // Get the search value
-                            $(this).attr('title', $(this).val());
-                            var regexr = '({search})'; 
- 
-                            var cursorPosition = this.selectionStart;
-                            // Search the column for that value
-                            api
-                                .column(colIdx)
-                                .search(
-                                    this.value != ''
-                                        ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                        : '',
-                                    this.value != '',
-                                    this.value == ''
-                                )
-                                .draw();
-                        })
-                        .on('keyup', function (e) {
-                            e.stopPropagation();
- 
-                            $(this).trigger('change');
-                            $(this)
-                                .focus()[0]
-                                .setSelectionRange(cursorPosition, cursorPosition);
+            ],            
+            rowCallback: function( nRow, data, index, displayIndex ) {
+                // Generar columna índice
+                if(nRow){
+                    var ordinal = displayIndex + 1;
+                    $('td:eq(1)', nRow).html(ordinal);
+                }
+                return nRow;                
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                api.columns().every( function (i) {
+                    var column = this;
+                    if( columnsDef[i].filterable == true ) {                     
+                        //console.log('column: '+i);
+                        var id =  columnsDef[i].data;
+                        var output = '<option value="">Todos</option>';
+                        var val = $("#filter-"+id).val();
+                        column.data().unique().sort().each( function ( d, j ) { 
+                            if( (d !== null) && (d != '') ) {
+                                output +=  '<option value="' + d + '">' + d + '</option>';
+                            }
                         });
+                        $("#filter-"+id).html(output).val(val);                                             
+                    }
                 });
-        },            
+            },
+            initComplete: function() {
+
+                this.api().columns().every( function (i) {
+                    var column = this;
+                    var id =  columnsDef[i].data;
+                    
+                    if( columnsDef[i].filterable == true ) {
+                        //console.log('column: '+id);
+                        $("#filter-"+id).on( 'change', function () {
+                            //console.log($(this).val());
+                            var val = $(this).val();
+                            column.search( val ? '^' + val + '$' : '', true, false).draw();
+                        });                                                
+                    } else if( columnsDef[i].searchable == true ) {                                                
+                        $("#filter-"+id).on( 'keyup change clear', function() {
+                            if ( column.search() !== this.value ) {
+                                column.search( this.value ).draw();
+                            }
+                        });
+                    }                        
+                });
+
+            }            
         }); // datatable
+
+        // Filtros : generación
+        $('#sightings-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsDef[i];
+            //console.dir(item);
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });          
 
         // Array to track the ids of the details displayed rows
         const detailRows = [];

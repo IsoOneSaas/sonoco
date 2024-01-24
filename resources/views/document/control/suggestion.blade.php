@@ -50,16 +50,30 @@
                             </div>
                         </div>                        
 
-                        <table id="suggestions-table" class="display dataTable" style="width:100%" aria-describedby="example_info">
+                        <table id="suggestions-table" class="display responsive" style="width:100%" aria-describedby="example_info">
                             <thead>
                                 <tr>
-                                    <th class="dt-control sorting_disabled" rowspan="1" colspan="1" style="width: 22.9688px;"></th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Fecha</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Sistema</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Usuario</th>
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">Documento</th>                                                
-                                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"></th>
+                                    <th class="all"></th>
+                                    <th class="all">No</th>
+                                    <th class="all">Fecha</th>
+                                    <th class="all">Sistema</th>
+                                    <th class="all">Usuario</th>
+                                    <th class="all">Documento</th>
+                                    <th class="all"></th>                                                
+                                    <th class="none"></th>
+                                    <th class="none"></th>
                                 </tr>
+                                <tr>
+                                    <th class="th-filter"></th>
+                                    <th class="th-filter">No</th>
+                                    <th class="th-filter">Fecha</th>
+                                    <th class="th-filter">Sistema</th>
+                                    <th class="th-filter">Usuario</th>
+                                    <th class="th-filter">Documento</th>
+                                    <th class="th-filter"></th>                                                
+                                    <th class="none" style="width:0"></th>
+                                    <th class="none" style="width:0"></th>
+                                </tr>                                
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -73,11 +87,13 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/responsive.dataTables.min.css') }}" />    
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 @endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/buttons.html5.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/JSZip-2.5.0/jszip.min.js') }}"></script>
@@ -154,33 +170,20 @@
     }); // document
 
     function setTable() {
+        var columnsDef = {!! $gridColDef !!};
+        var col = {{ $gridColOrd }};        
+        var columnsExp = {!! $gridColExp !!};          
         var scope = $("#scope-selected").val();
         var route = "{{ route('documents.control.solicitud.show', ':slug') }}";
 
         $myTable = $('#suggestions-table').DataTable({
-            //processing: true,
-            //serverSide: true,
-            //retrieve: true,
             ajax: route.replace(':slug', scope),
-            columns: [
-                {
-                    class: 'dt-control',
-                    orderable: false,
-                    data: null,
-                    defaultContent: '',
-                },
-                { data: 'date' },
-                { data: 'system' },
-                { data: 'user' },
-                { data: 'document', orderable: false },
-                { data: 'checked', orderable: false, searchable: false },
-            ],
-            order: [[1, 'desc']],
-            //paging: false,  // FIXME: No está funcionando
-            //info: false,    // FIXME: No está funcionando
-            //filter: false,  // FIXME: No está funcionando
-            //scrollY: '400px',
-            //scrollCollapse: true,
+            columns: columnsDef,
+            order: [[col, 'desc']],
+            language: $lang,
+            responsive: true,
+            orderCellsTop: true,
+            fixedHeader: true,            
             language: $lang,
             buttons: [
                 {
@@ -192,14 +195,84 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: [1,2,3,4,5]
+                        columns: columnsExp 
                     }
                 }
-            ]
+            ],            
+            rowCallback: function( nRow, data, index, displayIndex ) {
+                // Generar columna índice
+                if(nRow){
+                    var ordinal = displayIndex + 1;
+                    $('td:eq(1)', nRow).html(ordinal);
+                }
+                return nRow;                
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                api.columns().every( function (i) {
+                    var column = this;
+                    if( columnsDef[i].filterable == true ) {                     
+                        //console.log('column: '+i);
+                        var id =  columnsDef[i].data;
+                        var output = '<option value="">Todos</option>';
+                        var val = $("#filter-"+id).val();
+                        column.data().unique().sort().each( function ( d, j ) { 
+                            if( (d !== null) && (d != '') ) {
+                                output +=  '<option value="' + d + '">' + d + '</option>';
+                            }
+                        });
+                        $("#filter-"+id).html(output).val(val);                                             
+                    }
+                });
+            },
+            initComplete: function() {
+
+                this.api().columns().every( function (i) {
+                    var column = this;
+                    var id =  columnsDef[i].data;
+                    
+                    if( columnsDef[i].filterable == true ) {
+                        //console.log('column: '+id);
+                        $("#filter-"+id).on( 'change', function () {
+                            //console.log($(this).val());
+                            var val = $(this).val();
+                            column.search( val ? '^' + val + '$' : '', true, false).draw();
+                        });                                                
+                    } else if( columnsDef[i].searchable == true ) {                                                
+                        $("#filter-"+id).on( 'keyup change clear', function() {
+                            if ( column.search() !== this.value ) {
+                                column.search( this.value ).draw();
+                            }
+                        });
+                    }                        
+                });
+
+            }  
         }); // datatable
 
+        // Filtros : generación
+        $('#suggestions-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsDef[i];
+            //console.dir(item);
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });           
+
         // Array to track the ids of the details displayed rows
-        const detailRows = [];
+/*         const detailRows = [];
         
         $myTable.on('click', 'tbody td.dt-control', function () {
             let tr = event.target.closest('tr');
@@ -233,7 +306,7 @@
                     el.dispatchEvent(new Event('click', { bubbles: true }));
                 }
             });
-        });
+        }); */
 
     } // setTable
 

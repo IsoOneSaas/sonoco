@@ -26,8 +26,12 @@ class SuggestionModelController extends Controller
      * Display a listing of the resource.
      */
     public function index() : View
-    {        
+    { 
+        $columnDefinition = $this->dataTableDefinition();        
         return view('document.control.suggestion', [
+            'gridColOrd'    => $columnDefinition['column_order'],
+            'gridColDef'    => $columnDefinition['column_json'], 
+            'gridColExp'    => $columnDefinition['column_export'],              
             'gridLanguage'  => json_encode(trans('document/suggestion.datatable')),
         ]);    
     } // index Method
@@ -125,6 +129,37 @@ class SuggestionModelController extends Controller
         //return urlencode($json);
         return json_encode(['code' => urlencode($json)]);
 
-    } // check Method    
+    } // check Method 
+    
+    /**
+     * Se definite la estructura de la tabla a generar con DataTables
+     * @return Array    Definición de la tabla
+     */    
+    private function dataTableDefinition()
+    {
+        // **** AGREGAR COLUMNA AFECTA INDICE DE LAS COLUMNAS QUE SON UTILIZADAS PARA BUSQUEDA GLOBAL
+        $columnOrder = 8;
+        $columnExport = [2,3,4,5,7];
+        $columns_basic = [
+            ["data" => "empty", "title" => "", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "10px"], 
+            ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"], 
+        ];
+
+        $columns_array = [
+            ["data" => "date", "title" => "Fecha", "searchable" => true, "className" => "dt-nowrap"], // 2
+            ["data" => "system", "title" => "Sistema", "searchable" => true, 'filterable' => true], // 3
+            ["data" => "user", "title" => "Usuario", "searchable" => true, 'filterable' => true], //4
+            ["data" => "document", "title" => "Documento", "orderable" => false, "searchable" => true], // 5
+            ["data" => "checked", "title" => "", "orderable" => false, "searchable" => false, 'filterable' => false, "className" => "dt-nowrap" ],
+            ["data" => "content", "title" => "Contenido", "searchable" => false, "width" => "5px" ], // 7
+        ];
+
+        $columns_extra = [
+            ["data" => "order", "title" => "", "visible" => false,  "orderable" => false], // 8
+        ];
+        
+        return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);
+
+    } // dataTableDefinition      
 
 } // class
