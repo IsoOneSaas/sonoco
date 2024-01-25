@@ -136,7 +136,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('gestion/retroceder/{slug}', [\App\Http\Controllers\Document\ControlController::class, 'back'])->name('manage.back'); // Cambio de estado hacia atrás
             Route::post('gestion/comentar/{id}', [\App\Http\Controllers\Document\ControlController::class, 'comment'])->name('manage.comment'); // Enviar comentario
 
-
+            // Gestión Documental
+            Route::resource('seguimiento', \App\Http\Controllers\Document\FollowupController::class);
 
             // Anexos (links)
             Route::resource('anexos', \App\Http\Controllers\Document\LinkModelController::class);
