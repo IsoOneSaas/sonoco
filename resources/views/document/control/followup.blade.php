@@ -18,6 +18,7 @@
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <div class="dropdown ml-auto sm:ml-0">
+                                <button id="btn-send"  class="btn btn-primary shadow-md mr-2" title="Enviar Mensaje"> <i data-lucide="send" class="w-5 h-5"></i> </button>
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
                                 </button>
@@ -28,7 +29,7 @@
                                         </li>
                                         <li>
                                             <a id="btn-download" href="javascript:;" class="dropdown-item"> <i data-lucide="download" class="w-4 h-4 mr-2"></i> Exportar tabla </a>
-                                        </li>                                       
+                                        </li>                                                                            
                                     </ul>
                                 </div>
                             </div>
@@ -100,21 +101,40 @@
         
         setTable();
 
-        $('body').on('click', '.btn-file-show', function (e) {
+        $('#btn-send').on("click", function(e) {
             e.preventDefault();
-            var win;
-            var file = $(this).data('file');                 
-            var uri = "{{ route('documents.control.observacion.open', ':name') }}"; 
+            //alert('Sending...');
+            let array = []; 
+            $("input:checkbox[name=mail]:checked").each(function() { 
+                array.push($(this).val()); 
+            });
+            
+            if(array.length) {
+                console.dir(array);
+                var arrStr = encodeURIComponent(JSON.stringify(array));
+                swal({
+                    title: "{{ trans('document/followup.send.title') }}",
+                    text: "{{ trans('document/followup.send.text') }}",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        var route = "{{ route('documents.control.follow.send', ':slug') }}";
+                        console.log('Enviando con '+ route.replace(':slug', arrStr));
+                    } // if
+                }); 
 
-            if( file != '' ) {
-                uri = uri.replace(':name', file);
-                //alert(uri);
-                win = window.open(uri, '_blank');
-                win.focus();
             } else {
-                setSuccessNotification('error', 'Oops!', "{{ trans('document/followup.open.no-found') }}");
+                swal({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "{{ trans('document/followup.send.empty') }}"
+                });                
             }
-        });
+
+        }); // #btn-send         
 
         $('body').on('change', '#scope-selected', function (e) {
             $myTable.clear().destroy();
@@ -232,24 +252,7 @@
                     }
                 }
             }          
-        });          
-
-        // Array to track the ids of the details displayed rows
-        const detailRows = [];
-        
-        
-        $('body').on('click', '.btn-sheet', function (e) {
-            e.preventDefault();
-            var hash = $(this).data('hash');
-            var route = "{{ route('documents.master.datasheet', ':hash') }}";
-
-            if (hash === undefined || hash === null) {
-                setSimpleNotification("{{ trans('document/document.grid.row_sheet') }}");
-            } else { 
-                route = route.replace(':hash', hash);
-                location.href = route;
-            }            
-        }); // #btn-sheet       
+        });              
 
     } // setTable
 

@@ -14,6 +14,9 @@ return [
     'send' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'success'       => 'Mensajes enviados correctamente',
+                'empty'         => 'No ha seleccionado ningún responsable',
+                'title'         => 'Envío de notificación para gestión documental',
+                'text'          => 'Está seguro de enviar la notificación a los usuarios responsables seleccionados?'
     ],
 
     'form' => [

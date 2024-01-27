@@ -36,6 +36,17 @@ class FollowupController extends Controller
         ]);    
     } // index Method
 
+
+    /**
+     * Send Email Notification to users
+     */    
+    public function send($slug)
+    {
+        //return $this->followupRepo->getFollowup($slug);
+        return json_encode(['success' => true]); 
+    } // show Method
+
+
     /**
      * Get list of followups to the document
      */    
@@ -126,9 +137,9 @@ class FollowupController extends Controller
         ];
 
         $columns_array = [
-            ["data" => "user", "title" => "Nombre Usuario", "searchable" => true, 'filterable' => true, "className" => "dt-nowrap"], // 1
+            ["data" => "user", "title" => "Nombre Usuario", "searchable" => true, "className" => "dt-nowrap"], // 1
             ["data" => "number", "title" => "# Documentos Vencidos", "searchable" => true, 'filterable' => true, "className" => "dt-center"], // 2
-            ["data" => "days", "title" => "# Días Vencido (máximo)", "searchable" => true, 'filterable' => true, "className" => "dt-center"],
+            ["data" => "days", "title" => "# Días Vencido (máximo)", "searchable" => true, "className" => "dt-center"],
             ["data" => "checked", "title" => "", "orderable" => false, "searchable" => false, "className" => "dt-nowrap" ],
         ];
 

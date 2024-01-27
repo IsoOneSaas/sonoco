@@ -138,6 +138,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Gestión Documental
             Route::resource('seguimiento', \App\Http\Controllers\Document\FollowupController::class);
+            Route::get('seguimiento/enviar/{slug}', [\App\Http\Controllers\Document\FollowupController::class, 'send'])->name('follow.send');
 
             // Anexos (links)
             Route::resource('anexos', \App\Http\Controllers\Document\LinkModelController::class);

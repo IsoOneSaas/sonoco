@@ -40,11 +40,30 @@ class FollowupRepository implements FollowupRepositoryInterface
     {
        $array_output = [];
        $n = 0;
+       $admin = Auth::user();
 
-       //FIXME: Filtrar los usuarios para lo que son responsable el administrador
+       $array_scope = [
+            1 => ''
+       ];
 
-        //$hints = DB::table('document_forwards')->select('user_uid', DB::raw('count(*) as total'))->where('checked', 0)->where('deadline', '<', date('Y-m-d H:i:s'))->groupBy('user_uid')->orderBy('total','desc')->get();
-        $hints = DB::table('document_forwards')->where('checked', 0)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->orderBy('user_uid','asc')->orderBy('document_id','asc')->get(['user_uid', 'forward_id', 'document_id']);
+
+       // Filtrar los usuarios para lo que son responsable el administrador
+       if( $admin->can('setup_admins') ) {
+            // Webmaster
+            $plucked = UserModel::where('is_active', 1)->pluck('user_uid'); 
+        } else {   
+            // Admin     
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+			$plucked = UserModel::where('set_users.is_active', 1)
+                ->join('set_location_user', function($query) use($lids) {
+                    $query->on('set_location_user.user_id', '=', 'set_users.user_id');
+                    $query->whereIn('set_location_user.location_id', $lids);
+                })
+                ->pluck('set_users.user_uid');        
+        }
+        $uids = array_unique($plucked->all());
+
+        $hints = DB::table('document_forwards')->where('checked', 0)->whereIn('user_uid', $uids)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->orderBy('user_uid','asc')->orderBy('document_id','asc')->get(['user_uid', 'forward_id', 'document_id']);
         //Log::debug(['HINTS' => $hints->toArray()]);
         $array_users = [];
         $current = '';
@@ -88,7 +107,7 @@ class FollowupRepository implements FollowupRepositoryInterface
                 'user' => $user['name'],
                 'number' => $user['count'],
                 'days' => $user['max'],
-                'checked' => '<input type="checkbox" value='. $user['uid'] .' title="Seleccionar responsable" style="margin-top:-10px" />',
+                'checked' => '<input type="checkbox" name="mail" value='. $user['uid'] .' title="Seleccionar responsable" style="margin-top:-10px" />',
             ];
             $n++;            
         }        
