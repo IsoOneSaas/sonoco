@@ -53,32 +53,18 @@
                         <table id="followup-table" class="display responsive" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th class="all"></th>
-                                    <th class="all">No</th>
-                                    <th class="all">Fecha</th>
-                                    <th class="all">Código</th>
-                                    <th class="all">Tipo</th>                                              
-                                    <th class="all">Nombre</th>
-                                    <th class="all">Usuario</th>
-                                    <th class="all">Página</th>
-                                    <th class="all">Sección</th>
-                                    <th class="all"></th>
-                                    <th class="none"></th>
-                                    <th class="none"></th>
+                                    <th>No</th>
+                                    <th>Usuario Responsable</th>
+                                    <th># Documentos Vencidos</th>
+                                    <th># Días Vencido (máximo)</th>                                              
+                                    <th></th>
                                 </tr>
                                 <tr>
-                                    <th class="th-filter"></th>
                                     <th class="th-filter">No</th>
-                                    <th class="th-filter">Fecha</th>
-                                    <th class="th-filter">Código</th>
-                                    <th class="th-filter">Tipo</th>                                              
-                                    <th class="th-filter">Nombre</th>
-                                    <th class="th-filter">Usuario</th>
-                                    <th class="th-filter">Página</th>
-                                    <th class="th-filter">Sección</th>
+                                    <th class="th-filter">Usuario Responsable</th>
+                                    <th class="th-filter"># Documentos Vencidos</th>
+                                    <th class="th-filter"># Días Vencido (máximo)</th>                                              
                                     <th class="th-filter"></th>
-                                    <th class="none" style="width:0"></th>
-                                    <th class="none" style="width:0"></th>
                                 </tr>                                
                             </thead>
                             <tbody></tbody>
@@ -93,14 +79,12 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
-    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/responsive.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 
 @endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/buttons.html5.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/JSZip-2.5.0/jszip.min.js') }}"></script>
@@ -160,8 +144,7 @@
         $myTable = $('#followup-table').DataTable({
             ajax: route.replace(':slug', scope),
             columns: columnsDef,
-            order: [[col, 'desc']],
-            responsive: true,
+            order: [[col, 'asc']],
             orderCellsTop: true,
             fixedHeader: true,            
             language: $lang,
@@ -183,7 +166,7 @@
                 // Generar columna índice
                 if(nRow){
                     var ordinal = displayIndex + 1;
-                    $('td:eq(1)', nRow).html(ordinal);
+                    $('td:eq(0)', nRow).html(ordinal);
                 }
                 return nRow;                
             },
@@ -254,39 +237,6 @@
         // Array to track the ids of the details displayed rows
         const detailRows = [];
         
-/*         $myTable.on('click', 'tbody td.dt-control', function () {
-            let tr = event.target.closest('tr');
-            let row = $myTable.row(tr);
-            let idx = detailRows.indexOf(tr.id);
-        
-            if (row.child.isShown()) {
-                tr.classList.remove('details');
-                row.child.hide();
-        
-                // Remove from the 'open' array
-                detailRows.splice(idx, 1);
-            }
-            else {
-                tr.classList.add('details');
-                row.child(gridFormatFollowup(row.data())).show();
-        
-                // Add to the 'open' array
-                if (idx === -1) {
-                    detailRows.push(tr.id);
-                }
-            }
-        }); */
-        
-        // On each draw, loop over the `detailRows` array and show any child rows
-/*         $myTable.on('draw', () => {
-            detailRows.forEach((id, i) => {
-                let el = document.querySelector('#' + id + ' td.dt-control');
-        
-                if (el) {
-                    el.dispatchEvent(new Event('click', { bubbles: true }));
-                }
-            });
-        }); */
         
         $('body').on('click', '.btn-sheet', function (e) {
             e.preventDefault();

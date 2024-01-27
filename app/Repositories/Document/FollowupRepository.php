@@ -40,76 +40,8 @@ class FollowupRepository implements FollowupRepositoryInterface
     {
        $array_output = [];
        $n = 0;
-       $admin = Auth::user();
 
-        // Documentos permitidos para el administrador
-        if( $admin->can('setup_admins') ) {
-            $plucked = DocumentModel::all()->pluck('document_id');
-            $adminDocs = $plucked->all();
-        } else {
-            $dt0 =  Carbon::today()->toDateString();
-            $din = '1970-01-01T_';
-            $dout = $dt0 .'T_';
-            $sids = $this->tool->getAdminAuthorizedSystems($admin);
-            $lids = $this->tool->getAdminAuthorizedLocations($admin);
-            $plucked = TypeModel::all()->pluck('type_id');
-            $tids = $plucked->all();
-            $params = ['status' => 1, 'sids' => $sids, 'lids' => $lids, 'tids' => $tids, 'din' => $din, 'dout' => $dout];            
-            //$documents = $this->tool->setDocumentsToControl('', 1);
-            $documents = $this->tool->setDocumentsToControl($params);
-            $plucked = $documents->pluck('document_id');
-            $adminDocs = $plucked->all();
-        } // if
-
-        if($scope == 'all') {
-            $items = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
-                ->join('documents', function($query) {
-                    $query->on('documents.document_id', '=', 'document_sightings.document_id');
-                })
-                ->orderBy('document_sightings.date', 'desc')
-                ->get();
-        } else {
-            $items = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
-                ->join('documents', function($query) {
-                    $query->on('documents.document_id', '=', 'document_sightings.document_id');
-                })
-                ->where('document_sightings.status', $scope)
-                ->orderBy('document_sightings.date', 'desc')
-                ->get(['documents.document_id', 'documents.name', 'documents.code', 'document_sightings.sighting_id', 'document_sightings.user_uid', 'document_sightings.type', 'document_sightings.date', 'document_sightings.page', 'document_sightings.section', 'document_sightings.content', 'document_sightings.status']);
-        }
-
-
-
-        
-        //Log::debug(['ITEMS' => $items->toArray()]);
-
-        foreach($items as $item) {
-            $user = UserModel::where('user_uid', $item->user_uid)->withTrashed()->first();
-            $dateString = Carbon::createFromTimeStamp(strtotime($item->date))->format($this->set['date_format']);
-            $checked = ($item->status == 1 ) ? ' checked' : '';
-            $array_output[] = [
-                
-                //"followup_id" => $item->followup_id,
-                'empty' => '',
-                "DT_RowIndex" => $n,
-                'date' => $dateString,
-                'code' => $item->code,
-                'type' => $item->type,
-                'name' => $item->name,
-                'user' => ($user) ? $user->name : '',
-                'page' => $item->page,
-                'section' => $item->section,
-                'checked' => '<input type="checkbox" title="Cambiar de estado" style="margin-top:-10px" onClick="checkFollowup('. $item->followup_id .')"'. $checked .' />&nbsp;&nbsp;<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'" title="ver documento '. $item->name .'"><img alt="file" style="width:1.2em" src="/assets/images/fileopen.png"></button>',
-                //'control' => '<a href="javascript:;" class="tooltip inline" title="'. $item->content .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></a><button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
-                //'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
-                'content' => $item->content .'. ',
-                'order' => $item->date,
-                //'file' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
-            ];
-            $n++;            
-
-        }
-
+       //FIXME: Filtrar los usuarios para lo que son responsable el administrador
 
         //$hints = DB::table('document_forwards')->select('user_uid', DB::raw('count(*) as total'))->where('checked', 0)->where('deadline', '<', date('Y-m-d H:i:s'))->groupBy('user_uid')->orderBy('total','desc')->get();
         $hints = DB::table('document_forwards')->where('checked', 0)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->orderBy('user_uid','asc')->orderBy('document_id','asc')->get(['user_uid', 'forward_id', 'document_id']);
@@ -148,7 +80,18 @@ class FollowupRepository implements FollowupRepositoryInterface
             } // if           
         } // foreach
         
-        Log::debug(['ARRAY' => $array_users]);
+        //Log::debug(['ARRAY' => $array_users]);
+
+        foreach($array_users as $key => $user) {
+            $array_output[] = [   
+                "DT_RowIndex" => $n,             
+                'user' => $user['name'],
+                'number' => $user['count'],
+                'days' => $user['max'],
+                'checked' => '<input type="checkbox" value='. $user['uid'] .' title="Seleccionar responsable" style="margin-top:-10px" />',
+            ];
+            $n++;            
+        }        
 
 
         return json_encode([
