@@ -123,6 +123,15 @@
                     if (willDelete) {
                         var route = "{{ route('documents.control.follow.send', ':slug') }}";
                         console.log('Enviando con '+ route.replace(':slug', arrStr));
+                        $.ajax({
+                            url: route.replace(':slug', arrStr),
+                            type: 'GET',
+                            dataType: 'json',                
+                            success: function(json) {
+                                console.dir(json);
+
+                            } // success
+                        }); // ajax   
                     } // if
                 }); 
 

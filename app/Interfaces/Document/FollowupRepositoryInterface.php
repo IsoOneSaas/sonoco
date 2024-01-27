@@ -2,7 +2,8 @@
 
 interface FollowupRepositoryInterface 
 {
+
+    public function sendNotification(array $data);
     public function getFollowup($scope);
-    public function checkFollowup($id);
-    public function storeFollowup(array $data, $path = null, $name = null);
+
 }

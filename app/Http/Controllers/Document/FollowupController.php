@@ -42,9 +42,9 @@ class FollowupController extends Controller
      */    
     public function send($slug)
     {
-        //return $this->followupRepo->getFollowup($slug);
-        return json_encode(['success' => true]); 
-    } // show Method
+        $data = json_decode(urldecode($slug));
+        return $this->followupRepo->sendNotification($data);
+    } // send Method
 
 
     /**
@@ -56,71 +56,6 @@ class FollowupController extends Controller
         return $this->followupRepo->getFollowup($slug);
     } // show Method
     
-    /**
-     * Check/unCheck column status to the Followup
-     */    
-    //public function checkFollowup($id)
-    public function edit($id)
-    {
-        return $this->followupRepo->checkFollowup($id);
-    } // check Method
-    
-    /**
-     * Show attachment file
-     */
-    public function open($filename)
-    {
-        return response()->file($this->contentUrl . $filename);       
-    } // open Method
-    
-    /**
-     * Check/unCheck column status to the followup
-     */    
-    public function store(Request $request)
-    {
-        //Log::debug(['SET SIGHTING REQUEST: ' => $request->all()]);
-        $response = ['status' => 'error', 'message' => 'Testing...'];
-        $msgs = '';
-
-        $validator = Validator::make($request->all(), [
-            'system_id'     => 'required',
-            'document'      => 'required|min:2|max:255',
-            'justification' => 'required|min:8',
-        ], [
-            'document.required'         => trans('document/followup.request.document.required'),
-            'document.min'              => trans('document/followup.request.document.valid'),
-            'document.max'              => trans('document/followup.request.document.valid'),
-            'system_id.required'        => trans('document/followup.request.system.required'),           
-            'justification.required'  => trans('document/followup.request.justification.required'),
-            'justification.min'       => trans('document/followup.request.justification.valid'),
-        ]);
-
-        if ($validator->fails()) {
-            $messages = json_decode($validator->messages(), true);
-            foreach($messages as $message) {
-                $msgs .= $message[0] .'<br>'; 
-            }
-            $response =  ['status' => 'alert', 'message' => $msgs];
-            return redirect()->back()->withInput()->with($response['status'], $response['message']); 
-        } else {
-            if( $file = $request->file('file') ) {
-                $fileInfo = $file->getClientOriginalName();        
-                $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);      
-                $file_name = uniqid('ADS') .'.'. $extension;            
-                if( $file->move($this->contentUrl, $file_name) ) {                  
-                    $response = $this->followupRepo->storeFollowup($request->except(['file']), $this->contentUrl, $file_name);                
-                } else {
-                    $response = ['status'=> 'error', 'message' => trans('document/link.upload.no-move') ];
-                }
-            } else {
-                $response = $this->followupRepo->storeFollowup($request->all());
-                return redirect()->back()->with($response['status'], $response['message']); 
-            }
-        }       
-
-        return response()->json($response);
-
-    } //  store Method  
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables
