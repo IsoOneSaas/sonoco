@@ -1,19 +1,13 @@
 <?php   namespace App\Repositories\Document;
 
 use App\Classes\ToolsClass;
-use App\Events\EmailDocumentEvent;
+use App\Events\EmailDueEvent;
 use App\Interfaces\Document\FollowupRepositoryInterface;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
-use App\Models\Document\SettingModel;
-use App\Models\Document\SightingModel;
-use App\Models\Document\TypeModel;
-use App\Models\Set\DepartmentModel;
-use App\Models\Set\LocationModel;
 use App\Models\Set\UserModel;
 
 use Carbon\Carbon;
-//use ErrorException;
 use Exception;
 
 use Illuminate\Support\Facades\Auth;
@@ -85,15 +79,17 @@ class FollowupRepository implements FollowupRepositoryInterface
                 if($user) {
                     // VAlidar que el documento no está publicado
                     if( $hint->document_id != $did ) {
-
                         $forward = ForwardModel::find($hint->forward_id);
-                        $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
-                        $dif = $d0->diffInDays($d1);
-                        $high = ( $dif > $high ) ? $dif : $high;
-                        $n++;
-                        $array_users[$current] = ['count' => $n, 'max' => $high, 'name' => $user->name, 'uid' => $user->user_id];
-
-                        $did = $hint->document_id;
+                        // Validar que sea el usuario actual : documents.status = forwards.action
+                        if( $forward->action == $document->status ) {
+                            $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
+                            $dif = $d0->diffInDays($d1);
+                            $high = ( $dif > $high ) ? $dif : $high;
+                            $n++;
+                            $array_users[$current] = ['count' => $n, 'max' => $high, 'name' => $user->name, 'uid' => $user->user_id];
+    
+                            $did = $hint->document_id;
+                        } // if
                     } // if
                 } // if 
             } // if           
@@ -127,31 +123,38 @@ class FollowupRepository implements FollowupRepositoryInterface
     {
         Log::debug(['SEND NOTIFICATION - DATA' => $data]);
         $d0 = Carbon::now();
+        $n = 0;
 
-        foreach($data as $key => $uid) {                
-            $user = UserModel::find($uid);
-            if($user) {
-                $forwards = DB::table('document_forwards')->where('checked', 0)->where('user_uid', $user->user_uid)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->get(['forward_id', 'document_id', 'deadline']);
-                $documents_array = [];
-                foreach( $forwards as $forward) {
-                    $document = DocumentModel::find($forward->document_id);
-                    if( in_array($document->status, config('settings.document_status_users') ) ) {
-                        $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
-                        $days = $d0->diffInDays($d1);
-                        $documents_array[] = ['name' => $document->name, 'code' => $document->code, 'due' => $days];
-                        //Log::debug(['NOTICE MANAGEMENT TO USER' => $user->email, 'DOCUMENT' => $document->name, 'DUE' => $document->due, 'UID' => $user->user_uid, 'DID' => $document->document_id, 'FID' => $forward->forward_id]);
-                        //Log::debug(['NOTICE MANAGEMENT TO USER' => $user->email, 'DOCUMENT' => $document->name, 'DUE' => $days]);
-                    } // if                                        
-                } // foreach
-                $user->documents = $documents_array;
-                Log::debug(['NOTICE MANAGEMENT TO USER' => $user->email, 'DOCUMENTS' => $user->documents]);
-                
-                //Event::dispatch(new EmailSent($document, $user));
-            } // if
-        } // foreach 
+        try{
+            foreach($data as $key => $uid) {                
+                $user = UserModel::find($uid);
+                if($user) {
+                    $forwards = DB::table('document_forwards')->where('checked', 0)->where('user_uid', $user->user_uid)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->get(['forward_id', 'document_id', 'deadline', 'action']);
+                    $documents_array = [];
+                    foreach( $forwards as $forward) {
+                        $document = DocumentModel::find($forward->document_id);
+                        if( in_array($document->status, config('settings.document_status_users') ) && ($forward->action == $document->status) ) {
+                            $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
+                            $days = $d0->diffInDays($d1);
+                            $hash = $this->tool->setIdHash($document->document_id);
+                            $status = config('settings.document_status_texts.'. $document->status .'.actual');
+                            $documents_array[] = ['name' => $document->name, 'code' => $document->code, 'due' => $days, 'status' => ucfirst(mb_strtolower($status)), 'hash' => $hash];
+                        } // if                                        
+                    } // foreach
+                    $user->documents = $documents_array;
+                    Log::debug(['NOTICE MANAGEMENT TO USER' => $user->email, 'DOCUMENTS' => $user->documents]);
+                    // Enviar Email
+                    Event::dispatch(new EmailDueEvent($user));
+                    $n++;
+                } // if
+            } // foreach 
 
+        } catch (Exception $e) {
+            Log::error('FoolowupRepository::sendNotification Exception: '. $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/followup.send.no-success')];
+        } 
 
-        return json_encode(['success' => true]);  
+        return json_encode(['success' => true, 'message' => trans('document/followup.send.success', ['no' => $n])]);  
     } // sendNotification
 
 

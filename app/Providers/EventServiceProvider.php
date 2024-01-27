@@ -8,6 +8,7 @@ use App\Events\DocumentSwitch;
 use App\Events\DocumentTracing;
 use App\Events\EmailSent;
 use App\Events\EmailDocumentEvent;
+use App\Events\EmailDueEvent;
 
 use App\Listeners\BackDocumentStatus;
 use App\Listeners\DeletedDocumentStatus;
@@ -17,6 +18,7 @@ use App\Listeners\SwitchDocumentStatus;
 use App\Listeners\SetDocumentTrace;
 use App\Listeners\SendNotification;
 use App\Listeners\DocumentNotification;
+use App\Listeners\DueNotification;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -57,7 +59,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         EmailDocumentEvent::class => [
             DocumentNotification::class,
-        ],                     
+        ],
+        EmailDueEvent::class => [
+            DueNotification::class,
+        ],                             
     ];
 
     /**

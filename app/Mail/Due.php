@@ -13,13 +13,11 @@ class Due extends Mailable
     use Queueable, SerializesModels;
 
     public $name;
-    public $document;
-    public $action;
-    public $date;
-    public $link;
+    public $documents;
     public $set;
     public $sign;
-    public $blade;
+    public $message;
+    //public $path;
 
     /**
      * Create a new message instance.
@@ -28,7 +26,10 @@ class Due extends Mailable
     {
         $this->set = SettingModel::find(1)->settings;
         $this->name = $name;
+        $this->documents = $documents;
         $this->sign = $this->set['signature_edit'];
+        $this->message = 'Los siguientes documentos en proceso requieren de su pronta gestión:';
+        //$this->path = route('documents.control.manage.edit') .'/user';
 
 
         // Verificar si agrega copia oculta
@@ -82,9 +83,8 @@ class Due extends Mailable
     }
 
     public function build()
-    {
-        $blade = strtolower(str_replace('-', '_', $this->blade));
-        return $this->markdown('emails.'.$blade)
+    {        
+        return $this->markdown('emails.alert_due')
             ->from( $this->set['from_email_edit'], $this->set['from_name_edit'])
             ->subject($this->set['subject_edit']);
     }

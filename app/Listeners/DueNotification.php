@@ -1,11 +1,11 @@
 <?php namespace App\Listeners;
 
 use App\Events\EmailDueEvent;
-use App\Mail\Responsible;
+use App\Mail\Due;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendNotification
+class DueNotification
 {
     /**
      * Create the event listener.

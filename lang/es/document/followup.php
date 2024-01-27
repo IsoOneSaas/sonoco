@@ -13,22 +13,13 @@ return [
 
     'send' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'success'       => 'Mensajes enviados correctamente',
+                'success'       => 'Mensajes enviados correctamente [:no mensajes]',
                 'empty'         => 'No ha seleccionado ningún responsable',
                 'title'         => 'Envío de notificación para gestión documental',
                 'text'          => 'Está seguro de enviar la notificación a los usuarios responsables seleccionados?'
     ],
 
-    'form' => [
-                'type'  =>  [
-                            'icon'          => 'type',
-                            'title'         => 'Tipo',
-                            'placeholder'   => 'Tipo de observación',
-                            'tooltip'       => 'Requerido. Seleccione una de las opciones dadas',
-                ],                                                  
-    ],    
-
-   
+  
     'datatable' => [
         'lengthMenu' => 'Mostrar _MENU_ responsables por página',
         'zeroRecords' => '<h4>No hay responsables encontrados para la selección actual</h4>',

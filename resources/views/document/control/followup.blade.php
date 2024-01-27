@@ -129,6 +129,11 @@
                             dataType: 'json',                
                             success: function(json) {
                                 console.dir(json);
+                                if( json.success) {
+                                    setSuccessNotification('success', '', json.message);
+                                } else {
+                                    setSuccessNotification('error', 'Oops!', json.message+' [error: '+json.error+']');
+                                }
 
                             } // success
                         }); // ajax   
