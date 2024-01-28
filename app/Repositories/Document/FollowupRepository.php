@@ -103,7 +103,6 @@ class FollowupRepository implements FollowupRepositoryInterface
                 'user' => $user['name'],
                 'number' => $user['count'],
                 'days' => $user['max'],
-                'checked' => '<input type="checkbox" name="mail" value='. $user['uid'] .' title="Seleccionar responsable" style="margin-top:-10px" />',
                 'uid'   => $user['uid'],
             ];
             $n++;            
@@ -118,6 +117,44 @@ class FollowupRepository implements FollowupRepositoryInterface
         ]);
 
     } // getFollowups
+
+    public function getDocumentsList(array $data)
+    {
+        Log::debug(['GET DOCUMENT LIST - DATA' => $data]);
+        $documents = [];
+        $text = '';
+        $d0 = Carbon::now();
+
+        try{
+            // Contenido del texto
+            $text = ( key_exists('due_email', $this->set) ) ? $this->set['due_email']['text'] : config('settings.document_due_email.text');
+
+            // Listado de documentos
+            foreach($data as $key => $uid) {                
+                $user = UserModel::find($uid);
+                if($user) {
+                    $forwards = DB::table('document_forwards')->where('checked', 0)->where('user_uid', $user->user_uid)->where('deadline', '<>', '1970-01-01 00:00:00')->where('deadline', '<', date('Y-m-d H:i:s'))->get(['forward_id', 'document_id', 'deadline', 'action']);
+                    $documents_array = [];
+                    foreach( $forwards as $forward) {
+                        $document = DocumentModel::find($forward->document_id);
+                        if( in_array($document->status, config('settings.document_status_users') ) && ($forward->action == $document->status) ) {
+                            $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
+                            $days = $d0->diffInDays($d1);
+                            $status = config('settings.document_status_texts.'. $document->status .'.actual');
+                            $documents[$uid][] = ['name' => $document->name, 'code' => $document->code, 'due' => $days, 'status' => ucfirst(mb_strtolower($status))];
+                        } // if                                        
+                    } // foreach
+                } // if
+            } // foreach            
+
+        } catch (Exception $e) {
+            Log::error('FoolowupRepository::getDocumentsList Exception: '. $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/followup.get.no-success')];
+        } 
+
+        return json_encode(['success' => true, 'message' => $text, 'list' => $documents ]);              
+
+    } // getDocumentsList
 
 
     public function sendNotification(array $data)

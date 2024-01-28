@@ -19,6 +19,20 @@ return [
                 'text'          => 'Está seguro de enviar la notificación a los usuarios responsables seleccionados?'
     ],
 
+    'get' => [
+                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+    ],    
+
+
+    'form' => [
+                'comment'  =>  [
+                            'icon'          => 'message-square',
+                            'title'         => 'Texto del mensaje',
+                            'placeholder'   => 'Texto del mensaje',
+                            'tooltip'       => 'Requerido. Edite el texto que aparecerá en el cuerpo del mensaje enviado junto a la relación de documentos por gestión',
+                ],
+    ],    
+
   
     'datatable' => [
         'lengthMenu' => 'Mostrar _MENU_ responsables por página',

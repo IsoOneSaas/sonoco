@@ -72,7 +72,11 @@ return [
     ],
     'document_expire_alarm' => 30,  // days
     'document_validity_lapse_val' => 1,
-    'document_validity_lapse_txt' => 'year',      
+    'document_validity_lapse_txt' => 'year', 
+    'document_due_email' => [
+        'subject' => 'Solicitud de gestión documental',
+        'text' => 'Los siguientes documentos en proceso requieren de su pronta gestión:',
+    ],     
 
     // 'letter', 'landscape'
     // 'legal', 'portrait'

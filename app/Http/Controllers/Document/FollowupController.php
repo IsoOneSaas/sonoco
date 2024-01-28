@@ -40,7 +40,7 @@ class FollowupController extends Controller
     /**
      * Send Email Notification to users
      */    
-    public function send($slug)
+    public function send($slug) // ELIMINAR?
     {
         $data = json_decode(urldecode($slug));
         return $this->followupRepo->sendNotification($data);
@@ -55,6 +55,16 @@ class FollowupController extends Controller
     {
         return $this->followupRepo->getFollowup($slug);
     } // show Method
+
+    /**
+     * Get list of document to the users given
+     */    
+    //public function getFollowups()
+    public function get($slug)
+    {
+        $data = json_decode(urldecode($slug));
+        return $this->followupRepo->getDocumentsList($data);
+    } // get Method    
     
     
     /**
@@ -75,7 +85,6 @@ class FollowupController extends Controller
             ["data" => "user", "title" => "Nombre Usuario", "searchable" => true, "className" => "dt-nowrap"], // 1
             ["data" => "number", "title" => "# Documentos Vencidos", "searchable" => true, 'filterable' => true, "className" => "dt-center"], // 2
             ["data" => "days", "title" => "# Días Vencido (máximo)", "searchable" => true, "className" => "dt-center"],
-            ["data" => "checked", "title" => "", "orderable" => false, "searchable" => false, "className" => "dt-nowrap" ],
         ];
 
         $columns_extra = [
