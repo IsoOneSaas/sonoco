@@ -104,6 +104,7 @@ class FollowupRepository implements FollowupRepositoryInterface
                 'number' => $user['count'],
                 'days' => $user['max'],
                 'checked' => '<input type="checkbox" name="mail" value='. $user['uid'] .' title="Seleccionar responsable" style="margin-top:-10px" />',
+                'uid'   => $user['uid'],
             ];
             $n++;            
         }        

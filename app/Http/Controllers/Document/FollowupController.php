@@ -79,7 +79,7 @@ class FollowupController extends Controller
         ];
 
         $columns_extra = [
-            //["data" => "order", "title" => "", "visible" => false,  "orderable" => false], // 11
+            ["data" => "uid", "title" => "", "visible" => false,  "orderable" => false], // 5
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

@@ -59,6 +59,7 @@
                                     <th># Documentos Vencidos</th>
                                     <th># Días Vencido (máximo)</th>                                              
                                     <th></th>
+                                    <th></th>
                                 </tr>
                                 <tr>
                                     <th class="th-filter">No</th>
@@ -66,6 +67,7 @@
                                     <th class="th-filter"># Documentos Vencidos</th>
                                     <th class="th-filter"># Días Vencido (máximo)</th>                                              
                                     <th class="th-filter"></th>
+                                    <th></th>
                                 </tr>                                
                             </thead>
                             <tbody></tbody>
@@ -80,12 +82,14 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/Select-1.6.2/css/select.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 
 @endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('assets/js/datatables/Select-1.6.2/js/dataTables.select.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/Buttons-2.3.6/js/buttons.html5.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/JSZip-2.5.0/jszip.min.js') }}"></script>
@@ -104,6 +108,27 @@
         $('#btn-send').on("click", function(e) {
             e.preventDefault();
             //alert('Sending...');
+            var jsonObj = [];
+            var count = $myTable.rows( { selected: true } ).count();
+            if( count > 0 ) {
+                var selected = $myTable.rows( { selected: true } ).data();
+                $.each(selected, function(i, value) {    
+                    console.dir(value);                
+                    jsonObj.push(value.uid);                                
+                });
+                console.log('JSON:');
+                console.dir(jsonObj);
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "{{ trans('document/followup.send.empty') }}"
+                });                 
+            }
+
+
+
+
             let array = []; 
             $("input:checkbox[name=mail]:checked").each(function() { 
                 array.push($(this).val()); 
@@ -195,7 +220,11 @@
                         columns: columnsExp 
                     }
                 }
-            ],            
+            ],
+            select: {
+                blurable: true,
+                style: 'multi'
+            },                         
             rowCallback: function( nRow, data, index, displayIndex ) {
                 // Generar columna índice
                 if(nRow){
