@@ -17,8 +17,7 @@
                         <img id="loading-image" alt="Cargando..." class="h-12 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}">Listado de usuarios sin gestión documental
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            <div class="dropdown ml-auto sm:ml-0">
-                                <button id="btn-send"  class="btn btn-secondary shadow-md mr-2" title="Enviar Mensaje"> <i data-lucide="send" class="w-5 h-5"></i> </button>
+                            <div class="dropdown ml-auto sm:ml-0">                                
                                 <button id="btn-modal-send"  class="btn btn-primary shadow-md mr-2" title="Enviar Mensaje"> <i data-lucide="send" class="w-5 h-5"></i> </button>
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -77,7 +76,7 @@
 
                     <!-- BEGIN: Send Modal Content -->
                     <div id="modal-due" class="modal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
+                        <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <!-- BEGIN: Modal Header -->
                                 <div class="modal-header">
@@ -86,9 +85,9 @@
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->
                                 <div class="modal-body intro-y box p-5 mt-5">
-                                    <form id="due-form" action="" method="POST">
+                                    <form id="due-form" action="{{ route('documents.control.follow.send') }}" method="POST">
                                         @csrf
-                                        <input type="hidden" id="status" value="">
+                                        <input type="hidden" name="uids"  value="">
                                         <div class="input-group  w-1/3">
                                             <div id="comment" class="input-group-text flex"><i data-lucide="{{ trans('document/followup.form.comment.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/followup.form.comment.title') }}</div>
                                             <textarea name="comment" class="form-control" aria-describedby="comment" placeholder="{{ trans('document/followup.form.comment.placeholder') }}" rows="3"  required>{{ old('comment') ?? '' }}</textarea>
@@ -97,14 +96,7 @@
                                     </form>
                                     <br>
                                     <table id="users-table" class="table table-bordered" width="100%">
-                                        <thead>
-                                            <tr>
-                                                <th>id</th>
-                                                <th>Nombre del Usuario</th>
-                                                <th>Cargo</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>                                                                            
+                                                                           
                                     </table>                       
                                 </div>
                                 <!-- END: Modal Body -->
@@ -130,6 +122,21 @@
     <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/datatables/Select-1.6.2/css/select.dataTables.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+    <style>
+        #users-table {
+            font-size: 0.8em;
+        }
+
+        #users-table th, #users-table td {
+            padding: 0 1em;
+        }
+
+        .modal-body {
+            max-height: calc(100vh - 210px);
+            overflow-y: auto;
+        }        
+       
+    </style>
 
 @endpush
 
@@ -146,6 +153,7 @@
 
 <script document="text/javascript">
     let $lang = {!! $gridLanguage !!};
+    var $selectedIds = [];
     let $myTable;
     $(function () {
         
@@ -156,9 +164,10 @@
             var jsonObj = [];
             var arrStr = [];
             var route = "{{ route('documents.control.follow.get', ':slug') }}";
-            var count = $myTable.rows( { selected: true } ).count();            
+            var count = $myTable.rows( { selected: true } ).count();
+            $("#loading-image").show();
+            
             if( count > 0 ) {
-                //alert('Open Modal');
                 // Generar Modal
                 var selected = $myTable.rows( { selected: true } ).data();
                 $.each(selected, function(i, value) {    
@@ -171,29 +180,27 @@
                     type: 'GET',
                     dataType: 'json',                
                     success: function(data) {
-                        console.dir(data);                        
+                        //console.dir(data);                        
                         if( data.success) {
                             $("textarea[name='comment']").val(data.message);
                             // Generar tabla
-                            var output = '<tbody>';
+                            var output = '<tr><th>Documento</th><th>Código</th><th>Estado</th><th>Días</th></tr>';
                             var id = 0;
-                            // $.each(data.list, function(uid, row) {
-                            //     if( uid != id ) {
-                            //         output += '<tr><th colspan="4">'+uid+'</th></tr>';
-                            //         id = uid;
-                            //     }
-                            //     output += '<tr><td>'+row.name+'</td><td>'+row.code+'</td><td>'+row.due+'</td><td>'+row.status+'</td></tr>';
-                            // });
-                            $.each(data.list, function(uid, rows) {
-                                output += '<tr><th colspan="4">'+uid+'</th></tr>';
+                            $.each(data.list, function(user, rows) {
+                                output += '<tr><th colspan="4">'+user+'</th></tr>';
                                 $.each(rows, function(i, row) {
-                                    output += '<tr><td>'+row.name+'</td><td>'+row.code+'</td><td>'+row.due+'</td><td>'+row.status+'</td></tr>';
+                                    output += '<tr><td>'+row.name+'</td><td>'+row.code+'</td><td>'+row.status+'</td><td>'+row.due+'</td></tr>';
                                 });
                             });
-                            output += '</tbody>';
-                            $("table#users-table thead").append(output);
+                            output += '';
+                            $("#users-table").html(output);
+                            $("input[name='uids']").val(arrStr);
+                            $("#loading-image").hide();
+                            // mostrar modal
                             $("#modal-due-open")[0].click();
+                        
                         } else {
+                            $("#loading-image").hide();
                             setSuccessNotification('error', 'Oops!', data.message+' [error: '+data.error+']');
                         }
 
@@ -207,66 +214,32 @@
                     text: "{{ trans('document/followup.send.empty') }}"
                 });                 
             }                
-        }); // btn-modal-send            
+        }); // btn-modal-send 
+        
+        $('body').on('click', '#btn-due-ok', function (e) {
+            e.preventDefault();         
+            var form = $("#due-form");
+            var actionUrl = form.attr('action');
+            $("#btn-due-ko").click();
+            $("#loading-image").show();
+            $.ajax({
+                type: "POST",
+                url: actionUrl,
+                data: form.serialize(), // serializes the form's elements.
+                success: function(json) {
+                    console.dir(json);
+                    $("#loading-image").hide();
+                    if( json.success) {
+                        setSuccessNotification('success', 'Felicitaciones', json.message);
+                    } else {
+                        setSuccessNotification('error', 'Oops!', json.message+' [error: '+json.error+']');
+                    }
+                }
+            });                        
 
-        $('#btn-send').on("click", function(e) {
-            e.preventDefault();
-            //alert('Sending...');
-            var jsonObj = [];
-            var count = $myTable.rows( { selected: true } ).count();            
-            if( count > 0 ) {
-                var selected = $myTable.rows( { selected: true } ).data();
-                $.each(selected, function(i, value) {    
-                    console.dir(value);                
-                    jsonObj.push(value.uid);
-                });
-                var arrStr = encodeURIComponent(JSON.stringify(jsonObj));
-                swal({
-                    title: "{{ trans('document/followup.send.title') }}",
-                    text: "{{ trans('document/followup.send.text') }}",
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                })
-                .then((willDelete) => {
-                    if (willDelete) {
-                        var route = "{{ route('documents.control.follow.send', ':slug') }}";
-                        console.log('Enviando con '+ route.replace(':slug', arrStr));
-                        $("#loading-image").show();
-                        $.ajax({
-                            url: route.replace(':slug', arrStr),
-                            type: 'GET',
-                            dataType: 'json',                
-                            success: function(json) {
-                                console.dir(json);
-                                $("#loading-image").hide();
-                                if( json.success) {
-                                    setSuccessNotification('success', '', json.message);
-                                } else {
-                                    setSuccessNotification('error', 'Oops!', json.message+' [error: '+json.error+']');
-                                }
 
-                            } // success
-                        }); // ajax   
-                    } // if
-                })                                                    
-
-                //console.log('JSON:');
-                //console.dir(jsonObj);
-            } else {
-                swal({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "{{ trans('document/followup.send.empty') }}"
-                });                 
-            }
-
-        }); // #btn-send         
-
-        $('body').on('change', '#scope-selected', function (e) {
-            $myTable.clear().destroy();
-            setTable();
-        });
+        }); // btn-due-ok
+       
                 
         $("#btn-download").on("click", function() {
             $myTable.button('.buttons-excel').trigger();
@@ -384,35 +357,19 @@
                     }
                 }
             }          
-        });              
-
-    } // setTable
-
-    function gridFormatFollowup(d) {     
-        return '<table class=""display compact responsive" width="100%"><tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Página</th><th>Sección</th><th>Contenido</th></tr>'+d.sights+'</table>';
-    } // gridFormatFollowup
-    
-    function checkFollowup(id) {
-        var route = "{{ route('documents.control.observacion.edit', ':id') }}";
-        route = route.replace(':id', id);        
-        $.ajax({
-            url: route,
-            type: 'GET',
-            dataType: 'json',                
-            success: function(json) {
-                console.dir(json);
-                if (json.success) {
-                    $myTable.clear().destroy();
-                    setTable();
-                }
-            } // success
-        }); // ajax
-    } // checkFollowup
-
-
-
-
+        });
         
+        // Select row
+        // $myTable.on('select.dt', function(e, dt, type, indexes) {
+        //     $selectedIds.push(indexes[0])
+        //     console.log($selectedIds);
+        // })
+
+        // $myTable.on('deselect.dt', function(e, dt, type, indexes) {
+        //     $selectedIds.splice($selectedIds.indexOf(indexes[0]), 1);
+        //     console.log($selectedIds);
+        // })      
+    } // setTable
 
 </script>
 

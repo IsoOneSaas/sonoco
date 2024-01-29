@@ -138,7 +138,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Gestión Documental
             Route::resource('seguimiento', \App\Http\Controllers\Document\FollowupController::class);
-            Route::get('seguimiento/enviar/{slug}', [\App\Http\Controllers\Document\FollowupController::class, 'send'])->name('follow.send'); // a eliminar?
+            //Route::get('seguimiento/enviar/{slug}', [\App\Http\Controllers\Document\FollowupController::class, 'send'])->name('follow.send'); // a eliminar?
+            Route::post('seguimiento/enviar', [\App\Http\Controllers\Document\FollowupController::class, 'send'])->name('follow.send');
             Route::get('seguimiento/documentos/{slug}', [\App\Http\Controllers\Document\FollowupController::class, 'get'])->name('follow.get');
 
             // Anexos (links)

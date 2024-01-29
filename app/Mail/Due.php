@@ -17,20 +17,23 @@ class Due extends Mailable
     public $set;
     public $sign;
     public $message;
-    //public $path;
+    public $role;
+    public $email;
+    public $subject;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($name, $documents)
+    public function __construct($name, $message, $sign, $email, $role, $documents)
     {
         $this->set = SettingModel::find(1)->settings;
         $this->name = $name;
         $this->documents = $documents;
-        $this->sign = $this->set['signature_edit'];
-        $this->message = 'Los siguientes documentos en proceso requieren de su pronta gestión:';
-        //$this->path = route('documents.control.manage.edit') .'/user';
-
+        $this->sign = $sign;
+        $this->email = $email;
+        $this->message = $message;
+        $this->role = $role;
+        $this->subject = ( key_exists('due_email', $this->set) ) ? $this->set['due_email']['subject'] : config('settings.document_due_email.subject');
 
         // Verificar si agrega copia oculta
         if (!empty($this->set['bcc_edit'])) {
@@ -40,15 +43,7 @@ class Due extends Mailable
         // Verificar si agrega reply to
         if (!empty($this->set['reply_to_edit'])) {
             $this->replyTo($this->set['reply_to_edit']);
-        }
-        
-        // agregar confirmación de lectura FIXME: Undefined array key 0
-        //if ( $this->set['confirm_reading_edit'] ) {
-            //$this->withSwiftMessage()->getHeaders()->addTextHeader('X-Confirm-Reading-To', $this->set['from_email_edit']);
-            // $this->withSwiftMessage(function ($message) {
-            //     $message->getHeaders()->addTextHeader('X-Confirm-Reading-To', $this->set['from_email_edit']);
-            // });
-        //}        
+        }      
 
     }
 
@@ -58,7 +53,7 @@ class Due extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->set['subject_edit'],
+            subject: $this->subject,
         );
     }
 
@@ -83,10 +78,10 @@ class Due extends Mailable
     }
 
     public function build()
-    {        
+    {         
         return $this->markdown('emails.alert_due')
-            ->from( $this->set['from_email_edit'], $this->set['from_name_edit'])
-            ->subject($this->set['subject_edit']);
+            ->from( $this->email, $this->sign)
+            ->subject($this->subject);
     }
 
 } // class

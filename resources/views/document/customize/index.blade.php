@@ -130,8 +130,22 @@
                                                 <input type="checkbox" class="form-check-input" id="confirm-reading-edit" name="confirm_reading_edit" @if( old('confirm_reading_edit', $data['confirm_reading_edit']) ) checked @endif>
                                             </div>                                             
                                             <div id="input-group-27" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.confirm_reading_edit.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>                                                                                                                       
+                                        </div>
+                                        <div class="inline-flex items-center justify-center w-full">
+                                            <hr class="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700">
+                                            <span class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-white left-1/2 dark:text-white dark:bg-gray-900">---------------------</span>
+                                        </div>
+                                        <div class="input-group mt-3">
+                                            <div id="due-subject" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/customize.form.due_subject.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/customize.form.due_subject.title') }}</div>
+                                            <input type="text"  name="due_subject" value="{{ old('due_subject', $data['due_email']['subject'] ?? '') }}" class="form-control" aria-describedby="due_subject" placeholder="{{ trans('document/customize.form.due_subject.placeholder') }}">
+                                            <div id="input-group-25" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.due_subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+
+                                            <div id="due-text" class="input-group-text flex w-full ml-1"><i data-lucide="{{ trans('document/customize.form.due_text.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/customize.form.due_text.title') }}</div>
+                                            <textarea  name="due_text" class="form-control  w-full" aria-describedby="due_text" placeholder="{{ trans('document/customize.form.due_text.placeholder') }}">{{ old('due_text', $data['due_email']['text'] ?? '') }}</textarea>
+                                            <div id="input-group-26" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.due_text.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                        </div>                                                                                                                                                               
                                     </div>
+
                                     <div id="example-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="example-5-tab">
                                         <div class="input-group mt-3">
                                             <div id="notice-new-suggestion" class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/customize.form.notice_new_suggestion.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/customize.form.notice_new_suggestion.title') }}</div>

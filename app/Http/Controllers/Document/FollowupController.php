@@ -3,10 +3,11 @@
 use App\Classes\ToolsClass;
 use App\Http\Controllers\Controller;
 use App\Interfaces\Document\FollowupRepositoryInterface;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+
 
 class FollowupController extends Controller
 {
@@ -40,12 +41,12 @@ class FollowupController extends Controller
     /**
      * Send Email Notification to users
      */    
-    public function send($slug) // ELIMINAR?
+    public function send(Request $request)
     {
-        $data = json_decode(urldecode($slug));
-        return $this->followupRepo->sendNotification($data);
-    } // send Method
-
+        $input = $request->all();
+        $uids = json_decode(urldecode($input['uids']));
+        return $this->followupRepo->sendNotification($input['comment'], $uids);
+    } // send Method    
 
     /**
      * Get list of followups to the document

@@ -453,7 +453,13 @@
                                                     <div class="side-menu__icon"> <i data-lucide="eye"></i> </div>
                                                     <div class="side-menu__title">Observaciones</div>
                                                 </a>
-                                            </li>                                                                                
+                                            </li>  
+                                            <li>
+                                                <a href="{{ route('documents.control.seguimiento.index') }}" class="side-menu  @if( Str::contains( request()->route()->getName(), 'documents.control.seguimiento') ) side-menu--active @endif ">
+                                                    <div class="side-menu__icon"> <i data-lucide="bell"></i> </div>
+                                                    <div class="side-menu__title">Gestión</div>
+                                                </a>
+                                            </li>                                                                                                                            
                                             @endcan 
                                         @endif                                                                              
                                         <li>

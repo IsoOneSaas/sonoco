@@ -22,7 +22,7 @@ class DueNotification
     {
         //Log::debug(['OUTPUT USER' => $event->user->toArray(), 'DOC' => $event->document->toArray()]);
         Mail::to($event->user->email)->queue(
-            new Due($event->user->name, $event->user->documents)
+            new Due($event->user->name, $event->user->content, $event->user->adminName, $event->user->adminEmail, $event->user->role, $event->user->documents)
         );
     } // handle
 } // class

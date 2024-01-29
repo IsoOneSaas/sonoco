@@ -36,11 +36,11 @@
                     <x-application-logo class="w-40 h-40 fill-current text-gray-500" />
                 </a>
             </div>
-			<div class="iso-text-color-green font-extrabold">Versión 4.0</div>
+			<div class="iso-text-color-black font-bold">Versión 4.2</div>
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
-            <div class="iso-text-color-green font-extrabold">Powered by MPR Consulting (c) 2023</div>
+            <div class="iso-text-color-black font-bold">Powered by <em>MPR Consulting</em> (c) {{ date('Y') }}</div>
         </div>
 
 

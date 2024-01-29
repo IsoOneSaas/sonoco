@@ -96,8 +96,20 @@ return [
                             'placeholder'   => 'Texto de la notificación',
                             'tooltip'       => 'Escriba un texto que aparecerá al visualizar el documento publicado para todos los usuarios. Seleccione el tipo de mensaje a mostrar.  Deje el texto vacío si no quiere mostrar algún mensaje.',
             ],
-                                                            
-    ],    
+            'due_subject'                   =>  [
+                            'icon'          => 'bug',
+                            'title'         => 'Asunto Gestión Documental',
+                            'placeholder'   => 'Texto de asunto para gestión documental',
+                            'tooltip'       => 'Escriba el asunto que será enviado en el email para la notificación de gestión documental.',
+            ],
+            'due_text'                      =>  [
+                            'icon'          => 'code',
+                            'title'         => 'Texto Gestión Documental',
+                            'placeholder'   => 'Texto para el cuerpo del email en gestión documental',
+                            'tooltip'       => 'Escriba el contenido del cuerpo que será enviado en el email para la notificación de gestión documental.',
+            ],           
+                                                                        
+        ],    
 
     'request' => [
                 'code_format'         =>  [

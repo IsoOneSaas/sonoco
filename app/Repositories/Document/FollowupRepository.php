@@ -36,11 +36,6 @@ class FollowupRepository implements FollowupRepositoryInterface
        $n = 0;
        $admin = Auth::user();
 
-       $array_scope = [
-            1 => ''
-       ];
-
-
        // Filtrar los usuarios para lo que son responsable el administrador
        if( $admin->can('setup_admins') ) {
             // Webmaster
@@ -108,7 +103,6 @@ class FollowupRepository implements FollowupRepositoryInterface
             $n++;            
         }        
 
-
         return json_encode([
             "draw" => 1,
             "recordsTotal" => $n,
@@ -120,7 +114,7 @@ class FollowupRepository implements FollowupRepositoryInterface
 
     public function getDocumentsList(array $data)
     {
-        Log::debug(['GET DOCUMENT LIST - DATA' => $data]);
+        //Log::debug(['GET DOCUMENT LIST - DATA' => $data]);
         $documents = [];
         $text = '';
         $d0 = Carbon::now();
@@ -141,7 +135,7 @@ class FollowupRepository implements FollowupRepositoryInterface
                             $d1 = Carbon::createFromFormat('Y-m-d H:i:s', $forward->deadline);
                             $days = $d0->diffInDays($d1);
                             $status = config('settings.document_status_texts.'. $document->status .'.actual');
-                            $documents[$uid][] = ['name' => $document->name, 'code' => $document->code, 'due' => $days, 'status' => ucfirst(mb_strtolower($status))];
+                            $documents[$user->name][] = ['name' => $document->name, 'code' => $document->code, 'due' => $days, 'status' => ucfirst(mb_strtolower($status))];
                         } // if                                        
                     } // foreach
                 } // if
@@ -157,13 +151,22 @@ class FollowupRepository implements FollowupRepositoryInterface
     } // getDocumentsList
 
 
-    public function sendNotification(array $data)
-    {
-        Log::debug(['SEND NOTIFICATION - DATA' => $data]);
+    public function sendNotification($text, array $data)
+    {        
+        $admin = Auth::user();
         $d0 = Carbon::now();
         $n = 0;
+        $role = '';
+        //Log::debug(['SEND NOTIFICATION - DATA' => $data , 'OPTIONS' => $admin->options]);
 
         try{
+            // Género del administrador
+            $options = $admin->options;            
+            if( is_array($options) && key_exists('personal_info', $options) ) {
+                $role = ($options['personal_info']['genre'] == 'F') ? 'Administradora' : 'Administrador';
+            }
+
+            // Obtener listado y enviar
             foreach($data as $key => $uid) {                
                 $user = UserModel::find($uid);
                 if($user) {
@@ -180,6 +183,10 @@ class FollowupRepository implements FollowupRepositoryInterface
                         } // if                                        
                     } // foreach
                     $user->documents = $documents_array;
+                    $user->content = $text;
+                    $user->adminName = $admin->name;
+                    $user->adminEmail = $admin->email;
+                    $user->role = $role;
                     Log::debug(['NOTICE MANAGEMENT TO USER' => $user->email, 'DOCUMENTS' => $user->documents]);
                     // Enviar Email
                     Event::dispatch(new EmailDueEvent($user));
@@ -189,16 +196,11 @@ class FollowupRepository implements FollowupRepositoryInterface
 
         } catch (Exception $e) {
             Log::error('FoolowupRepository::sendNotification Exception: '. $e->getMessage());
+            //return json_encode(['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/followup.send.no-success')]);
             return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/followup.send.no-success')];
         } 
 
-        return json_encode(['success' => true, 'message' => trans('document/followup.send.success', ['no' => $n])]);  
+        return ['success' => true, 'message' => trans('document/followup.send.success', ['no' => $n])];  
     } // sendNotification
-
-
-
-
-
-
 
 } // class

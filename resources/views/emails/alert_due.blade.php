@@ -25,7 +25,7 @@
             </div>
             <hr class="mt-2 mb-3" />
             <p class=" pl-4 pr-4">Atentamente:</p>
-            <p class=" pl-4 pr-4 font-weight-light">{{$sign}}</p>
+            <p class=" pl-4 pr-4"><span class="font-weight-light">{{$sign}}</span><br /><span>{{$role}}</span></p>
         </div>
         <div class="text-muted text-center my-6">
             ISO-ONE (c) {{ date("Y") }}
