@@ -366,7 +366,7 @@
             sAjaxSource: $route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsDef,
             retrieve: true,
-            pageLength: initRecords,
+            pageLength: parseInt(initRecords),
             order: initOrder,
             orderClasses: false,
             responsive: true,

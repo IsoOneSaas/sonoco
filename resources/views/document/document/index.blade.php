@@ -380,10 +380,11 @@
         .DataTable({
             dom: 'lrtip',
             bProcessing: true,
+            //serverSide: true,
             sAjaxSource: route.replace(':slug', JSON.stringify(param)),
             aoColumns: $columnsConf,
             retrieve: true,
-            pageLength: initRecords,
+            pageLength: parseInt(initRecords),
             order: initOrder,
             page: initPage,
             orderClasses: false,
@@ -651,8 +652,11 @@
             var ls =  $("#location-selected").val();
             var ts =  $("#type-selected").val();
             var tx = $("#text-input").val();            
-            var param = {status: ss, sids: rs, lids: ls, tids: ts, din: $dateInDefault, dout: $dateOutDefault, txt: tx};
-            var info = $myTable.page.info(); 
+            var info = $myTable.page.info();
+            var param = {status: ss, sids: rs, lids: ls, tids: ts, din: $dateInDefault, dout: $dateOutDefault, txt: tx, page: info.page};
+            
+            console.log('INFO:');
+            console.dir(info); 
             var url =  route.replace(':slug', JSON.stringify(param))
 
             console.log('Searching...');

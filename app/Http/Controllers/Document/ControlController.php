@@ -149,6 +149,7 @@ class ControlController extends Controller
      */
     public function print($hash)
     {
+        ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
         $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl);
         $enclosed = $this->documentRepo->getAttachment($hash, $this->contentUrl); 
         $print = new PdfClass('document.control.render');
@@ -252,6 +253,8 @@ class ControlController extends Controller
                 $print = new PdfClass('document.control.render');
                 $html = $print->render($data, $enclosed);
                 $fileName = uniqid('PDF') .'.pdf';
+
+                ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
 
                 // Configuración de la hoja
                 $setup = $this->tool->getPaperSetup($settings);

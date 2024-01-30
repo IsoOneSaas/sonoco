@@ -55,6 +55,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $auto = ($this->set['control_flow'] === 'AUTO' ) ? true : false;
         // Parámetros recibidos
         $params = json_decode($slug, true);
+        //Log::debug(['PARAMETERS' => $params]);
 
         if($params) {
 
@@ -143,6 +144,7 @@ class DocumentRepository implements DocumentRepositoryInterface
 
         $results = [
             "sEcho" => 1,
+            "draw" => ( key_exists('page', $params) ) ? intval($params['page']) : 0,
             "iTotalRecords" => count($data),
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
