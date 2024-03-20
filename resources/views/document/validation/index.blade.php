@@ -76,12 +76,12 @@
                                 <div class="input-group mt-3">
                                     <div id="type" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/validation.form.type.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/validation.form.type.title') }}</div>                                
 
-                                    <select multiple id="type-ids" name="type_ids[]" class="form-control ml-2" size="3" required>
+                                    <select multiple id="type-ids" name="type_ids[]" class="form-control ml-2" size="3">
                                         <option value=''>{{ trans('document/validation.form.type.placeholder') }}</option>
                                     </select>
                                     <button id="btn-modal-type" class="btn btn-primary shadow-md mr-2" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>
-                                    <input type="number"  name="type_value" value="{{ old('type_value') }}" class="form-control  w-full" aria-describedby="type_value" placeholder="{{ trans('document/validation.form.type_value.placeholder') }}" min="1" step="1" required>
-                                    <select name="type_text" class="form-control ml-2" required>
+                                    <input type="number"  name="type_value" value="{{ old('type_value') }}" class="form-control  w-full" aria-describedby="type_value" placeholder="{{ trans('document/validation.form.type_value.placeholder') }}" min="1" step="1">
+                                    <select name="type_text" class="form-control ml-2">
                                         <option value=''>{{ trans('document/validation.form.type_text.placeholder') }}</option>
                                         @foreach( trans('document/validation.select.period') as $key => $value )
                                         <option value="{{ $key }}" {{ old('type_text') == $key ? 'selected ' : ''}}>{{ $value }}</option>
@@ -92,12 +92,12 @@
                                 <div class="input-group mt-3">
                                     <div id="document" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/validation.form.document.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/validation.form.document.title') }}</div>                                
 
-                                    <select multiple id="document-ids" name="document_ids[]" class="form-control ml-2" size="3" required>
+                                    <select multiple id="document-ids" name="document_ids[]" class="form-control ml-2" size="3">
                                         <option value=''>{{ trans('document/validation.form.document.placeholder') }}</option>
                                     </select>
                                     <button id="btn-modal-document" class="btn btn-primary shadow-md mr-2" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>
-                                    <input type="number"  name="document_value" value="{{ old('document_value') }}" class="form-control  w-full" aria-describedby="document_value" placeholder="{{ trans('document/validation.form.document_value.placeholder') }}" min="1" step="1" required>
-                                    <select name="document_text" class="form-control ml-2" required>
+                                    <input type="number"  name="document_value" value="{{ old('document_value') }}" class="form-control  w-full" aria-describedby="document_value" placeholder="{{ trans('document/validation.form.document_value.placeholder') }}" min="1" step="1">
+                                    <select name="document_text" class="form-control ml-2">
                                         <option value=''>{{ trans('document/validation.form.document_text.placeholder') }}</option>
                                         @foreach( trans('document/validation.select.period') as $key => $value )
                                         <option value="{{ $key }}" {{ old('document_text') == $key ? 'selected ' : ''}}>{{ $value }}</option>

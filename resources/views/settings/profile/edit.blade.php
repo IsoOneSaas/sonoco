@@ -261,8 +261,8 @@
                     //console.dir(json);
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
-                        $("#avatar-img").attr('src', json.url);
-                        $("#avatar-tiny").attr('src', json.url);
+                        $("#avatar-img").attr('src', json.url+"?"+(new Date()).getTime());
+                        $("#avatar-tiny").attr('src', json.url+"?"+(new Date()).getTime());
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  
@@ -285,8 +285,8 @@
                     //console.dir(json);
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
-                        $("#sign-img").attr('src', json.url);
-                        $signaturePad.clear();                                                
+						$signaturePad.clear();                                                
+                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());                                                
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  

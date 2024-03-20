@@ -709,8 +709,7 @@ class ControlRepository implements ControlRepositoryInterface
         $links = LinkModel::where('document_id', $id)->get(['link_id','name','link','type','size']);    
         if($links) {
             foreach($links as $link) {
-                //$link->url = $path . $link->link;
-                $link->url = $link->link;
+                $link->url = $path . $link->link;
                 $mime = $this->tool->getFileMimeName($link->type);
                 $link->mime = 'assets/images/mimes/'. $mime .'.png';
                 $n++;

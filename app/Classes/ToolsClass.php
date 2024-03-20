@@ -156,13 +156,13 @@ class ToolsClass
         $plucked = $user->jobs->pluck('job_id');
         $jobs = $plucked->all();
         if( count($jobs) > 0 ) {            
-            Log::debug(['JOBS' => $jobs]);
+            //Log::debug(['JOBS' => $jobs]);
             $plucked = DepartmentModel::whereHas('jobs', function(Builder $query) use($jobs) {
                 $query->whereIn('set_department_job.job_id', $jobs);
             })->pluck('department_id');
             $departments = $plucked->all();
             if( count($departments) > 0 ) {
-                Log::debug(['DEPARTMENTS' => $departments]);
+                //Log::debug(['DEPARTMENTS' => $departments]);
                 $plucked = LocationModel::with('department', function(Builder $query) use($departments) {
                     $query->whereIn('department_id', $departments);
                 })->pluck('location_id');                 
@@ -187,11 +187,11 @@ class ToolsClass
         $array_activity = ( $inactives ) ? [0,1] : [1];
     
         if( $user->hasAnyRole('MASTER','SUPER') ) { // ($user->role == 'MASTER') || ($user->role == 'SUPER') 
-            Log::debug('1st Level...');
+            //Log::debug('1st Level...');
             $plucked = UserModel::whereIn('is_active', $array_activity)->whereIn('role', array_keys($array_roles))->pluck('user_id');
             $users = $plucked->all();
         } elseif( $user->hasRole('ADMIN')  )  {   // $user->role == 'ADMIN'
-            Log::debug('2st Level...');        
+            //Log::debug('2st Level...');        
             $locations = $this->getAdminAuthorizedLocations($user);
             if( count($locations) > 0 ) {
                 //Log::debug(['LOCATIONS' => $locations]);
@@ -228,11 +228,11 @@ class ToolsClass
         $jobs = [];
         $user = Auth::user(); 
         if( $user->hasAnyRole('MASTER','SUPER') ) {
-            Log::debug('1st Level...');
+            //Log::debug('1st Level...');
             $plucked = JobModel::all()->pluck('job_id');
             $jobs = $plucked->all();
         } elseif(  $user->hasRole('ADMIN') )  {
-            Log::debug('2nd Level...');      
+            //Log::debug('2nd Level...');      
             $locations = $this->getAdminAuthorizedLocations($user);
             if( count($locations) > 0 ) {
                 //Log::debug(['LOCATIONS' => $locations]);
@@ -348,11 +348,11 @@ class ToolsClass
         $processes = [];
         $user = Auth::user(); 
         if( $user->hasAnyRole('MASTER','SUPER') ) {
-            Log::debug('1st Level...');
+            //Log::debug('1st Level...');
             $plucked = ProcessModel::all()->pluck('process_id');
             $processes = $plucked->all();
         } elseif(  $user->hasRole('ADMIN') )  {
-            Log::debug('2nd Level...');      
+            //Log::debug('2nd Level...');      
             $locations = $this->getAdminAuthorizedLocations($user);
             if( count($locations) > 0 ) {
                 //Log::debug(['LOCATIONS' => $locations]);
@@ -438,7 +438,7 @@ class ToolsClass
                     $departments = $job->department;
                     if($departments) {
                         foreach($departments as $department) {
-                            Log::debug(['DPTO' => $department->toArray()]);
+                            //Log::debug(['DPTO' => $department->toArray()]);
                             $did = $department->department_id;
                             $locations = LocationModel::join('set_location_department', function($query) {
                                 $query->on('set_location_department.location_id', '=', 'set_locations.location_id');
@@ -773,7 +773,7 @@ class ToolsClass
     public function setAuthorizedCodes($codes, $uid = null) // Dismissed
     {
         $t0 = count($codes);
-        Log::debug('== Número de códigos iniciales: '. $t0);
+        //Log::debug('== Número de códigos iniciales: '. $t0);
 
         if( $uid === null ) {
             $user = Auth::user();
@@ -791,7 +791,7 @@ class ToolsClass
             $codes = array_unique($codes);          
         } // if
         $t1 = count($codes);
-        Log::debug('== Número de códigos agregados: '. ($t1 - $t0) );          
+        //Log::debug('== Número de códigos agregados: '. ($t1 - $t0) );          
 
         // Códigos para eliminar
         $plucked = AuthorizationModel::where('user_id', $uid)->where('permissions', 'LIKE', '%"view":0%')->pluck('document_id');
@@ -805,9 +805,9 @@ class ToolsClass
             } // foreach                          
         } // if
         $t2 = count($codes);
-        Log::debug('== Número de códigos eliminados: '. ($t1 - $t2) ); 
+        //Log::debug('== Número de códigos eliminados: '. ($t1 - $t2) ); 
 
-        Log::debug('== Número de códigos finales: '. $t2);
+        //Log::debug('== Número de códigos finales: '. $t2);
 
         return $codes;
     } 
@@ -877,7 +877,7 @@ class ToolsClass
     public function setPublishedDocumentsCollection($role, $auth, $uid = null, $params = null)
     {
         $target = config('settings.document_status.publish');
-        Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
+        //Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
 
         if( $role == 'admin' ) {
             $dptos = $this->setDepartmentsFilter($uid);
@@ -914,8 +914,19 @@ class ToolsClass
             // Procesos & Localizaciones
             $user = ($uid === null) ? Auth::user() : UserModel::find($uid);
             if( $user->hasAnyRole('MASTER','SUPER') ) {
-                $pids = ProcessModel::all()->pluck('process_id');
-                $lids = LocationModel::all()->pluck('location_id');
+				// Procesos
+				if( in_array('', $params['pids']) ) {
+					$pids = ProcessModel::all()->pluck('process_id');	
+				} else {
+					$pids = $params['pids'];
+				}
+				
+                // Localizaciones
+                if( in_array('', $params['lids']) ) {
+                    $lids = LocationModel::all()->pluck('location_id');
+                } else {
+                    $lids = $params['lids'];
+                }				                                
             } else {
                 // Procesos 
                 if( in_array('', $params['pids']) ) {               
@@ -952,7 +963,7 @@ class ToolsClass
                 if( count($dids) == 0 ) $dids = [0];               
             }
             
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
+            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)
@@ -1093,7 +1104,7 @@ class ToolsClass
                 } // foreach
             } // foreach
 
-            Log::debug('== Número de usuarios iniciales sólo por departamento: '. count($users_array));
+            //Log::debug('== Número de usuarios iniciales sólo por departamento: '. count($users_array));
 
             // cargos por procesos adicionales asignados
             if($pid !== null) {
@@ -1115,7 +1126,7 @@ class ToolsClass
                 } // if
             } // if
             $users_array = array_unique($users_array);
-            Log::debug('== Número de usuarios después de agregar por procesos añadidos: '. count($users_array));
+            //Log::debug('== Número de usuarios después de agregar por procesos añadidos: '. count($users_array));
             //Log::debug(['USERS 0 ' => $users_array]);
 
             if( $did !== null ) {
@@ -1127,7 +1138,7 @@ class ToolsClass
                     } // foreach
                 } // if
                 $users_array = array_unique($users_array);
-                Log::debug('== Número de usuarios después de agregar por authorizaciones: '. count($users_array));
+                //Log::debug('== Número de usuarios después de agregar por authorizaciones: '. count($users_array));
                 // Usuarios que NO tienen permiso para el documento
                 $plucked = AuthorizationModel::where('document_id', $did)->where('permissions', 'LIKE', '%"view":0%')->pluck('user_id');
                 if($plucked && ( count($plucked->all()) > 0 ) ) {
@@ -1140,7 +1151,7 @@ class ToolsClass
             } // if $did
         } // if $dpto
         $users_array = array_unique($users_array);
-        Log::debug('== Número de usuarios después de eliminar por authorizaciones: '. count($users_array));
+        //Log::debug('== Número de usuarios después de eliminar por authorizaciones: '. count($users_array));
         //Log::debug(['USERS 2 ' => $users_array]);
 
         return $users_array;
@@ -1242,12 +1253,12 @@ class ToolsClass
         $set = ValidationDocModel::where('document_id', $did)->first();
         if($set) {
             // tienes validez por documento
-            $data = $this->getValidationDate($dt, $set->expiration_date, $set->expiration_text, $alarm, $settings['date_format']);
+            $data = $this->getValidationDate($dt, $set->expiration_value, $set->expiration_text, $alarm, $settings['date_format']);
         } else {
             $set = ValidationTypeModel::where('type_id', $tid)->first();
             if($set) {
                 // tiene validez por tipo
-                $data = $this->getValidationDate($dt, $set->expiration_date, $set->expiration_text, $alarm, $settings['date_format']);
+                $data = $this->getValidationDate($dt, $set->expiration_value, $set->expiration_text, $alarm, $settings['date_format']);
             } else {
                 if( isset($settings->lapse) ) {
                     $set = $settings->lapse;
@@ -1259,7 +1270,7 @@ class ToolsClass
                 } // if else
             } // if else
         } // if else 
-        //Log::debug(['DATA VALIDITY' => $data]);
+        //Log::debug(['VALIDITY ID' => $did, 'DATA' =>  $data]);
         return $data;            
     } // getValidityData
 

@@ -654,9 +654,6 @@
             var tx = $("#text-input").val();            
             var info = $myTable.page.info();
             var param = {status: ss, sids: rs, lids: ls, tids: ts, din: $dateInDefault, dout: $dateOutDefault, txt: tx, page: info.page};
-            
-            console.log('INFO:');
-            console.dir(info); 
             var url =  route.replace(':slug', JSON.stringify(param))
 
             console.log('Searching...');

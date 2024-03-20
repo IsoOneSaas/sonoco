@@ -60,7 +60,7 @@ class ValidationRepository implements ValidationRepositoryInterface
      */    
     public function store(array $data) 
     {
-        Log::debug(['STORE VALIDITY DATA' => $data]);
+        //Log::debug(['STORE VALIDITY DATA' => $data]);
         try {
             $val_array['validation'] = [
                 'default' => ['text' => $data['default_text'], 'value' => $data['default_value'] ],
@@ -76,7 +76,8 @@ class ValidationRepository implements ValidationRepositoryInterface
             if( $set->save() ) {
 
                 // salvar validez por tipo
-                if( key_exists('type_ids', $data) ) {
+                if( key_exists('type_ids', $data) && ( count($data['type_ids']) > 0 ) && ( (int)$data['type_value'] > 0 ) && ( $data['type_text'] != '' ) ) {
+					Log::debug('Save Validation by typ...');
                     foreach($data['type_ids'] as $id) {
                         $val = ValidationTypeModel::firstOrNew(['type_id' => $id]);
                         $val->expiration_value = $data['type_value'];
@@ -86,7 +87,7 @@ class ValidationRepository implements ValidationRepositoryInterface
                 } // if
 
                 // salvar validez por documento
-                if( key_exists('document_ids', $data) ) {
+                if( key_exists('document_ids', $data) && ( count($data['document_ids']) > 0 ) && ( (int)$data['document_value'] > 0 ) && ( $data['document_text'] != '' ) ) {
                     foreach($data['document_ids'] as $id) {
                         $val = ValidationDocModel::firstOrNew(['document_id' => $id]);
                         $val->expiration_value = $data['document_value'];
@@ -112,15 +113,15 @@ class ValidationRepository implements ValidationRepositoryInterface
     {
         $success = false;
         $grid = [];
-
-        Log::debug(['DATA' => $data]);
+		$lapse_array = config('settings.document_validity_texts');
+        //Log::debug(['DATA' => $data]);
 
         $types = TypeModel::all();
          if( $types ) {
             $success = true;
             foreach($types as $type) {
                 if( $type->validation ) {
-                    $validity =  $type->validation->expiration_value .' '. $type->validation->expiration_text;
+                    $validity =  $type->validation->expiration_value .' '. $lapse_array[$type->validation->expiration_text];
                 } else {
                     $validity = '';
                 }
@@ -155,19 +156,19 @@ class ValidationRepository implements ValidationRepositoryInterface
                 }
                 //$dt = Carbon::createFromFormat('Y-m-d H:i:s', $dids[$document->document_id]['date']);
                 $status = StatusModel::where(['document_id' => $document->document_id, 'action' => $target])->first(['return_date']);
-                if($status) {
-                    $dt = Carbon::createFromFormat('Y-m-d H:i:s', $status->return_date);
-                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
-                    $validity = $val['text'];
-                    $status = $this->status_text[(int)$val['status']];
-                    //Log::debug(['ID' => $document->document_id, 'DATE' => $dids[$document->document_id]['date'] ]);
-                    $process = ( $document->process) ? $document->process->name : '';
-                    $type = ( $document->type) ? $document->type->name : '';
-                    //$location = ( $document->location) ? $document->location->name : '';
-                    $selected = ( key_exists('dids', $data) && in_array($document->document_id, $data['dids']) ) ? 1 : 0;
-                    //$grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
-                    $grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
-                } // if
+				if($status) {
+					$dt = Carbon::createFromFormat('Y-m-d H:i:s', $status->return_date);
+					$val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);
+					$validity = $val['text'];
+					$status = $this->status_text[(int)$val['status']];
+					//Log::debug(['ID' => $document->document_id, 'DATE' => $dids[$document->document_id]['date'] ]);
+					$process = ( $document->process) ? $document->process->name : '';
+					$type = ( $document->type) ? $document->type->name : '';
+					//$location = ( $document->location) ? $document->location->name : '';
+					$selected = ( key_exists('dids', $data) && in_array($document->document_id, $data['dids']) ) ? 1 : 0;
+					//$grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
+					$grid[] = [$document->document_id, $document->code, $document->name, $process, $type, $validity, $status, $selected];
+				}
             } // foreach            
          } // if
 

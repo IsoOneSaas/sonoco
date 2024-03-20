@@ -30,6 +30,7 @@ class ControlController extends Controller
     protected $masterUrl;
     protected $tenantUrl;
     protected $uploadUrl;
+    protected $attachUrl;
 
     public function __construct(ControlRepositoryInterface $documentRepository, ToolsClass $Tools) 
     {
@@ -41,6 +42,7 @@ class ControlController extends Controller
         $this->contentUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_CONTENT');
         $this->masterUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_MASTER');
         $this->uploadUrl = 'tenants/sonoco'.  config('settings.PATH_DOC_IMAGE');
+        $this->attachUrl = 'documentos/control/anexos/';
     }       
     /**
      * Display a listing of the resource.
@@ -132,7 +134,7 @@ class ControlController extends Controller
     public function preview($hash) : View
     {  
         $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl); 
-        $attachment = $this->documentRepo->getAttachment($hash, $this->contentUrl);
+        $attachment = $this->documentRepo->getAttachment($hash, $this->attachUrl);
         
         // Configuración de la hoja
         $setup = $this->tool->getPaperSetup($data->settings);       
@@ -151,7 +153,7 @@ class ControlController extends Controller
     {
         ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
         $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl);
-        $enclosed = $this->documentRepo->getAttachment($hash, $this->contentUrl); 
+        $enclosed = $this->documentRepo->getAttachment($hash, $this->attachUrl); 
         $print = new PdfClass('document.control.render');
         $html = $print->render($data, $enclosed);
 
@@ -249,7 +251,7 @@ class ControlController extends Controller
                     $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
                 }            
             } else {
-                $enclosed = $this->documentRepo->getAttachment($hash, $this->contentUrl); 
+                $enclosed = $this->documentRepo->getAttachment($hash, $this->attachUrl); 
                 $print = new PdfClass('document.control.render');
                 $html = $print->render($data, $enclosed);
                 $fileName = uniqid('PDF') .'.pdf';
