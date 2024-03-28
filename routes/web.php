@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -182,5 +183,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
     });  
 });
+
+Route::fallback(FallbackController::class);
 
 require __DIR__.'/auth.php';

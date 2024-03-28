@@ -18,7 +18,7 @@ class LinkModelController extends Controller
         //$this->tool = $Tools;
         $this->contentPath = public_path() .'/tenants/sonoco/'.  config('settings.PATH_DOC_CONTENT');
         $this->prefix = [
-            'link' => 'lKN',
+            'link' => 'LKN',
             'support' => 'SPT',
             'hint' => 'ADS',
         ];

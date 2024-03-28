@@ -30,7 +30,7 @@ class ControlController extends Controller
     protected $masterUrl;
     protected $tenantUrl;
     protected $uploadUrl;
-    protected $attachUrl;
+	protected $attachUrl;
 
     public function __construct(ControlRepositoryInterface $documentRepository, ToolsClass $Tools) 
     {
@@ -42,7 +42,7 @@ class ControlController extends Controller
         $this->contentUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_CONTENT');
         $this->masterUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_MASTER');
         $this->uploadUrl = 'tenants/sonoco'.  config('settings.PATH_DOC_IMAGE');
-        $this->attachUrl = 'documentos/control/anexos/';
+		$this->attachUrl = 'documentos/control/anexos/';
     }       
     /**
      * Display a listing of the resource.
@@ -135,6 +135,7 @@ class ControlController extends Controller
     {  
         $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl); 
         $attachment = $this->documentRepo->getAttachment($hash, $this->attachUrl);
+		//Log::debug(['ATTACHMENTS' => $attachment->toArray()]);
         
         // Configuración de la hoja
         $setup = $this->tool->getPaperSetup($data->settings);       
@@ -151,11 +152,12 @@ class ControlController extends Controller
      */
     public function print($hash)
     {
-        ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
         $data = $this->documentRepo->get('admin', $hash, $this->tenantUrl, $this->masterUrl);
         $enclosed = $this->documentRepo->getAttachment($hash, $this->attachUrl); 
         $print = new PdfClass('document.control.render');
         $html = $print->render($data, $enclosed);
+		
+		ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
 
         // Configuración de la hoja
         $setup = $this->tool->getPaperSetup($data->settings);       
@@ -164,6 +166,7 @@ class ControlController extends Controller
         Log::info('To Print PDF...');
         // FIXME: Se está generando error al no encontrar la Facada
         $pdf = Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation']);
+
         if( $pdf ) {
             $fileName = Str::slug($data->name, '_');
             return $pdf->download($fileName .'.pdf');
@@ -251,12 +254,13 @@ class ControlController extends Controller
                     $response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
                 }            
             } else {
+				
+				ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
+				
                 $enclosed = $this->documentRepo->getAttachment($hash, $this->attachUrl); 
                 $print = new PdfClass('document.control.render');
                 $html = $print->render($data, $enclosed);
                 $fileName = uniqid('PDF') .'.pdf';
-
-                ini_set('xdebug.max_nesting_level', 10000);	// SOLUCION: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames
 
                 // Configuración de la hoja
                 $setup = $this->tool->getPaperSetup($settings);

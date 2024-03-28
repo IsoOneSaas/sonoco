@@ -18,8 +18,8 @@
                         @if( $attachment )
                             <h2>Anexos: </h2>
                             <ul>
-                                @foreach($attachment as $item)
-                                <li><a href="{{ url($item->url) }}" target="_blank">{{$item->name }} [{{ round($item->size/1000,0) }}kB]</a></li>
+                                @foreach($attachment as $item)                                
+								<li><a href="{{ url($item->url) }}" target="_blank">{{$item->name }} [{{ round($item->size/1000,0) }}kB]</a></li>
                                 @endforeach
                             </ul>
                         @endif

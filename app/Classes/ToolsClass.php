@@ -639,36 +639,37 @@ class ToolsClass
             $tids = [];                
         }
         
-        $dids = false;
-        // Responsables
-        // $params['uids'] = ['AF25092C-6B53-B99F-D38C-BADBAA7223F2'];
-        // 
-        // if( key_exists('uids', $params) && (count($params['uids']) > 0) ) {
-        //     $plucked = ForwardModel::whereIn('user_uid', $params['uids'])->pluck('document_id');
-        //     $dids = $plucked->all();
-        //     if( count($dids) == 0 ) $dids = false;               
-        // }        
+       
 
-        //Log::debug(['PARAMETERS' => $params, 'DIDS' => $dids, 'DATE' => $rangeIn .' | '. $rangeOut, 'ARRAY' => $groupArray]);
-        if( $admin->hasRole('ADMIN') ) {
-            // Si es Administrador            
-            $documents =  DocumentModel::whereIn('status', $groupArray)
+        if( $params['status'] == 1 ) {
+            // Filtro para publicados
+            $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
                 ->whereIn('location_id', $lids)
                 ->whereIn('system_id', $sids)
-                ->whereIn('type_id', $tids)
+                ->whereIn('type_id', $tids)            
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
-                })                
-                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
-                // ->when($dids, function($query) use($dids) {
-                //     $query->whereIn('document_id', array_unique($dids));
-                //     // deben tener el mismo estado <documents -> forwards
-                // })                 
+                })             
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])                
+                ->orderBy('created_at', 'desc')
+                ->pluck('code');
+                
+            //Log::debug(['OBSOLETOS' => $obsoletes->all()]);
+
+            $documents =  DocumentModel::whereIn('status', $groupArray)
+                ->whereNotIn('code', $obsoletes->all())
+                ->whereIn('location_id', $lids)
+                ->whereIn('system_id', $sids)
+                ->whereIn('type_id', $tids)            
+                ->where(function($query) use($search) {
+                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                })             
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])                
                 ->orderBy('created_at', 'desc')
                 ->get()->unique('code');            
-            
+
         } else {
-            // No administrador
+            // otros filtros
             $documents =  DocumentModel::whereIn('status', $groupArray)
                 ->whereIn('location_id', $lids)
                 ->whereIn('system_id', $sids)
@@ -676,14 +677,18 @@ class ToolsClass
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })             
-                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
-                // ->when($dids, function($query) use($dids) {
-                //     $query->whereIn('document_id', array_unique($dids));
-                // })                
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])                
                 ->orderBy('created_at', 'desc')
                 ->get()->unique('code');
+        } 
 
+        foreach($documents as $document) {
+            Log::debug(['ID' => $document->document_id, 'CODE' => $document->code, 'VER' => $document->version, 'STATUS' => $document->status]);
         }        
+        
+
+
+
         Log::debug('== Número de documentos final: '. $documents->count());
 
         return $documents; 
@@ -962,6 +967,21 @@ class ToolsClass
                 $dids = $plucked->all();
                 if( count($dids) == 0 ) $dids = [0];               
             }
+
+            $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
+                ->whereIn('system_id', $sids)
+                ->whereIn('process_id', $pids)
+                ->whereIn('location_id', $lids)
+                ->whereIn('type_id', $tids)          
+                ->where(function($query) use($search) {
+                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+                })             
+                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+                ->when($dids, function($query) use($dids) {
+                    $query->whereIn('document_id', $dids);
+                })                                
+                ->orderBy('created_at', 'desc')
+                ->pluck('code');            
             
             //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
@@ -969,6 +989,7 @@ class ToolsClass
                 ->whereIn('process_id', $pids)
                 ->whereIn('location_id', $lids)
                 ->whereIn('type_id', $tids)
+                ->whereNotIn('code', $obsoletes->all())
                 ->where(function($query) use($search) {
                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
                 })
@@ -984,6 +1005,11 @@ class ToolsClass
             $user = Auth::user();
             $uid = $user->user_id;
         }
+
+        // Determinar los obsoletos
+        // $plucked = DocumentModel::where('status', $caduced)->pluck('codes');
+        // Log::debug(['CADUCED' => $plucked->all()]);
+
         Log::debug('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 

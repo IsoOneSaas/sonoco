@@ -511,13 +511,22 @@ class ControlRepository implements ControlRepositoryInterface
                     //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
                     $total = (  env('APP_URL') == 'http://127.0.0.1:8000' ) ? 5 : count($uids);
                     //Log::debug(['TOTAL' => $total, 'UIDS' => $uids]);
+                    /* for($i=0; $i<$total; $i++) {                
+                        $user = UserModel::find($uids[$i]);
+                        //Log::debug(['USER' => $user->toArray(), 'DEADLINE' => $forward->deadline, 'FORMAT' => $this->set['date_format'], 'DATE' => $document->date ]);
+                        Log::debug(['NOTICE NEW DOCUMENT TO USER' => $user->email]);
+                        Event::dispatch(new EmailSent($document, $user));
+                    } /*/ 
+
                     foreach($uids as $key => $uid) {                
                         $user = UserModel::find($uid);
 						if($user) {
 							Log::debug(['NOTICE NEW DOCUMENT TO USER' => $user->email]);
 							Event::dispatch(new EmailSent($document, $user));
 						}
-                    } // foreach 
+                    } // foreach
+
+					
                 } // if
 
             } else {
@@ -710,6 +719,7 @@ class ControlRepository implements ControlRepositoryInterface
         if($links) {
             foreach($links as $link) {
                 $link->url = $path . $link->link;
+				//Log::debug(['URL' => $link->url]);
                 $mime = $this->tool->getFileMimeName($link->type);
                 $link->mime = 'assets/images/mimes/'. $mime .'.png';
                 $n++;
