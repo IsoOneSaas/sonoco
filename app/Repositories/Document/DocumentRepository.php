@@ -19,6 +19,7 @@ use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
+use App\Models\User;
 //use App\Traits\Document\ControlDocumentsTrait;
 use Carbon\Carbon;
 use Exception;
@@ -204,30 +205,35 @@ class DocumentRepository implements DocumentRepositoryInterface
                     } // if
                     //Log::debug('AQUI VOY 0...');
 
+                    //**  EDITING  **************************************************************************************************************************/
+
+                    $dataLinkEdit = $this->validUserByJob($data['user_edit_id'], $data['job_edit_id']);
+                    Log::debug(['NEW DATA LINK EDIT' => $dataLinkEdit]);
+
 
                     // SAVE FORWARDING FIXME: No se utiliza las variables $data['job_edit_id'] $data['user_edit_id']
                     $data['link_edit'] = $this->normalizeLinks($data['link_edit']);
                     //Log::debug('AQUI VOY 1...');
-                    //Log::debug(['ACTION' => $data['link_edit']]);
+                    Log::debug(['ACTION' => $data['link_edit']]);
                     //Log::debug('AQUI VOY 1.5 ..');
                     $edit_array = $this->saveForwarding(config('settings.document_status.edit'), $data['deadline_edit'], $data['link_edit']);
                     //Log::debug('AQUI VOY 2...');
                     if( $edit_array ) {
                         //Log::debug('AQUI VOY 3...');
-                        //Log::debug(['EDIT ARRAY' => $edit_array]);
+                        Log::debug(['EDIT ARRAY' => $edit_array]);
 
                         // Nuevo algoritmo 9.12.2023
                         if( $idExisting) {
                             // Documento existente
                             $keys = $this->updateForward($document->document_id, config('settings.document_status.edit'), $edit_array, $auth);
-                            //Log::debug(['EDIT KEYS' => $keys]);
+                            Log::debug(['EDIT KEYS' => $keys]);
                             // Agregar actualizados (si tiene autorización)
                             $newKeys = $keys;
                             if( $auth ) {
                                 foreach($edit_array as $responsive) {
                                     if( !in_array($responsive['user_uid'], $keys) ) {
                                         // Registro nuevo que no se encontró existente -> agregar 
-                                        //Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
+                                        Log::debug('Inserta reponsable '.  $responsive['name'] );                                      
                                         $document->forwards()->create($responsive);
                                         $newKeys[] = $responsive['user_uid'];
                                     } // if
@@ -261,6 +267,8 @@ class DocumentRepository implements DocumentRepositoryInterface
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'editar'])];
                     }
                     //Log::debug('AQUI VOY 5...');
+
+                    //**  REVIEWING  **************************************************************************************************************************/
                     $data['link_review'] = $this->normalizeLinks($data['link_review']);
                     $review_array = $this->saveForwarding(config('settings.document_status.review'), $data['deadline_review'], $data['link_review']);
                     if( $review_array ) {
@@ -308,6 +316,7 @@ class DocumentRepository implements DocumentRepositoryInterface
                         return ['status' => 'error', 'message' => trans('document/document.create.no-users', ['txt' => 'revisar'])];
                     }                
                            
+                    //**  APPROVING  **************************************************************************************************************************/
                     $data['link_approve'] = $this->normalizeLinks($data['link_approve']);
                     $approve_array = $this->saveForwarding(config('settings.document_status.approve'), $data['deadline_approve'], $data['link_approve']);
                     if( $approve_array ) {
@@ -1206,7 +1215,7 @@ class DocumentRepository implements DocumentRepositoryInterface
     {
         $forward = [];
         $array = json_decode($links, true);
-        Log::debug(['ACTION' => $action, 'DEADLINE' => $deadline, 'LINKS' => $links, 'ARRAY' => $array[0]]);
+        //Log::debug(['ACTION' => $action, 'DEADLINE' => $deadline, 'LINKS' => $links, 'ARRAY' => $array[0]]);
         if( $array[0] && is_array($array[0]) ) {
             foreach($array[0] as $uid => $jid ) {
                 $dt0 = Carbon::today();
@@ -1216,13 +1225,13 @@ class DocumentRepository implements DocumentRepositoryInterface
                     
                     // Validar si el cargo es actual
                     $plucked = $user->jobs()->pluck('set_jobs.job_id');
-                    Log::debug(['USER' => $user->name, 'JOBS' => $plucked->all()]);
+                    //Log::debug(['USER' => $user->name, 'JOBS' => $plucked->all()]);
                     if( $plucked && in_array($jid, $plucked->all()) ) {
 
                         $job = JobModel::find($jid);
                     
                         if( $job ) {
-                            Log::debug(['NAME' => $job->name]);
+                            //Log::debug(['NAME' => $job->name]);
                             if( is_numeric($deadline) ) {
                                 //Log::debug(['DL' => $deadline]);
                                 if( $deadline == 0 ) {
@@ -1279,6 +1288,31 @@ class DocumentRepository implements DocumentRepositoryInterface
 
         return $newStr;
     } // normalizeLinks
+
+
+    /**
+     * Obtiene relaciones usuario-cargo de responsables
+     * @param  array $usersArray arreglo de identificadores de usuarios seleccionados como responsables
+     * @param  array $jobsArray arreglo de identificadores de cargos seleccionados como responsables
+     * @return string/boolean    Resultado de la relación, error -> false
+     */ 
+    private function validUserByJob($usersArray, $jobsArray)
+    {
+        $valid = false;
+        $newLink = [];
+        foreach($usersArray as $uid) {
+            $user = UserModel::find($uid);
+            $plucked = $user->jobs()->pluck('set_jobs.job_id');
+            foreach($plucked->all() as $jid  ) {
+                if( is_array($jobsArray) && in_array($jid, $jobsArray) ) {   
+                    $valid = true;
+                    $newLink[$uid] = $jid;
+                }  // if                          
+            } // foreach
+        } // foreach
+
+        return ($valid) ? json_encode($newLink) : false;       
+    } // validUserByJob
 
     /**
      * Determina si se está repitiendo la creación de un documento
