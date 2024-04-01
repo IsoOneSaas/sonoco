@@ -643,16 +643,18 @@ class ToolsClass
 
         if( $params['status'] == 1 ) {
             // Filtro para publicados
-            $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
-                ->whereIn('location_id', $lids)
-                ->whereIn('system_id', $sids)
-                ->whereIn('type_id', $tids)            
-                ->where(function($query) use($search) {
-                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
-                })             
-                ->whereBetween('updated_at', [$rangeIn, $rangeOut])                
-                ->orderBy('created_at', 'desc')
-                ->pluck('code');
+            // $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
+            //     ->whereIn('location_id', $lids)
+            //     ->whereIn('system_id', $sids)
+            //     ->whereIn('type_id', $tids)            
+            //     ->where(function($query) use($search) {
+            //         $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+            //     })             
+            //     ->whereBetween('updated_at', [$rangeIn, $rangeOut])                
+            //     ->orderBy('created_at', 'desc')
+            //     ->pluck('code');
+
+            $obsoletes =  DocumentModel::where('status', '=', config('settings.document_status.obsolete'))->pluck('code');                
                 
             //Log::debug(['OBSOLETOS' => $obsoletes->all()]);
 
@@ -682,9 +684,9 @@ class ToolsClass
                 ->get()->unique('code');
         } 
 
-        foreach($documents as $document) {
-            Log::debug(['ID' => $document->document_id, 'CODE' => $document->code, 'VER' => $document->version, 'STATUS' => $document->status]);
-        }        
+        // foreach($documents as $document) {
+        //     Log::debug(['ID' => $document->document_id, 'CODE' => $document->code, 'VER' => $document->version, 'STATUS' => $document->status]);
+        // }        
         
 
 
@@ -968,20 +970,22 @@ class ToolsClass
                 if( count($dids) == 0 ) $dids = [0];               
             }
 
-            $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
-                ->whereIn('system_id', $sids)
-                ->whereIn('process_id', $pids)
-                ->whereIn('location_id', $lids)
-                ->whereIn('type_id', $tids)          
-                ->where(function($query) use($search) {
-                    $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
-                })             
-                ->whereBetween('updated_at', [$rangeIn, $rangeOut])
-                ->when($dids, function($query) use($dids) {
-                    $query->whereIn('document_id', $dids);
-                })                                
-                ->orderBy('created_at', 'desc')
-                ->pluck('code');            
+            // $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
+            //     ->whereIn('system_id', $sids)
+            //     ->whereIn('process_id', $pids)
+            //     ->whereIn('location_id', $lids)
+            //     ->whereIn('type_id', $tids)          
+            //     ->where(function($query) use($search) {
+            //         $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
+            //     })             
+            //     ->whereBetween('updated_at', [$rangeIn, $rangeOut])
+            //     ->when($dids, function($query) use($dids) {
+            //         $query->whereIn('document_id', $dids);
+            //     })                                
+            //     ->orderBy('created_at', 'desc')
+            //     ->pluck('code');
+                
+            $obsoletes =  DocumentModel::where('status', '=', config('settings.document_status.obsolete'))->pluck('code'); 
             
             //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
