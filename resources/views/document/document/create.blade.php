@@ -331,13 +331,14 @@
     var $isSaved = true;  
     var $selectize; 
     $(function () {
-        var json = {!! $default !!};
+        var json = '{!! $default !!}';
         var flow = "{{ isset($document) ? $document->flow : 0; }}";
 
-        //console.dir(json);
-        if( json != 0 ) {
-            $("input[name='name']").val(json.name);
-            $("#system-id option[value='"+json.sid+"']").attr('selected', true);
+        if( json !== '' ) {
+            var obj = $.parseJSON(json);
+            console.dir(obj);
+            $("input[name='name']").val(obj.name);
+            $("#system-id option[value='"+obj.sid+"']").attr('selected', true);
         }
         
         var $select = $('#select-tags').selectize({

@@ -10,13 +10,25 @@ Dropzone.options.uploadForm = {
         var myDropzone = this;		
 		this.removeAllFiles();
 
+		// for Dropzone to process the queue (instead of default form behavior):
+		$("#btn-attachments-ok").on('click', function (e) {
+			// Make sure that the form isn't actually being sent.
+			e.preventDefault();
+			e.stopPropagation();
+			var nameValue = document.getElementById("file-name").value;
+			document.getElementById('modal-attachments-message').innerHTML="";
+			if (nameValue === '') document.getElementById('modal-attachments-message').innerHTML="<font color=red size=3 face='Verdana'> &#8673; Nombre para identificar el anexo faltante!</font>";			
+			else myDropzone.processQueue();
+		});		
+
         // Update selector to match your button
-        $("#btn-attachments-ok").on('click', function (e) {
-            e.preventDefault();
-            myDropzone.processQueue();
-        });
+        // $("#btn-attachments-ok").on('click', function (e) {
+        //     e.preventDefault();
+        //     myDropzone.processQueue();
+        // });
 
         $("#btn-attachments-clear").on('click', function (e) {
+			document.getElementById('modal-attachments-message').innerHTML="";
             myDropzone.removeAllFiles();
         });		
 

@@ -59,7 +59,7 @@
                                     <th class="all">Sistema</th>
                                     <th class="all">Usuario</th>
                                     <th class="all">Documento</th>
-                                    <th class="all"></th>                                                
+                                    <th class="all">&nbsp;</th>                                                
                                     <th class="none"></th>
                                     <th class="none"></th>
                                 </tr>
@@ -70,7 +70,7 @@
                                     <th class="th-filter">Sistema</th>
                                     <th class="th-filter">Usuario</th>
                                     <th class="th-filter">Documento</th>
-                                    <th class="th-filter"></th>                                                
+                                    <th class="th-filter">&nbsp;</th>                                                
                                     <th class="none" style="width:0"></th>
                                     <th class="none" style="width:0"></th>
                                 </tr>                                
@@ -148,24 +148,26 @@
                 buttons: true,
                 dangerMode: true,
             })
-            .then((willDelete) => {
-                if (willDelete) {
+            .then((willOpen) => {
+                if (willOpen) {
                     var route = "{{ route('documents.control.solicitud.new', ':id') }}";
+                    //console.log('ROUTE:'+route);
                     $.ajax({
                         url: route.replace(':id', id),
                         type: 'GET',
                         dataType: 'json',                
                         success: function(json) {
-                            console.dir(json);
-                            var uri = "{{ route('documents.control.new', ':code') }}"
-                            uri = uri.replace(':code', json.code);
-                            location.href = uri;
+                            //console.dir(json);
+                            var uri = "{{ route('documents.control.new', ':hash') }}"
+                            uri = uri.replace(':hash', json.hash);
+                            //console.log('URI: '+ uri);
+                            window.open(uri, '_self');   
                         } // success
                     }); // ajax                    
                 } // if
             });            
             
-        });         
+        });              
  
     }); // document
 
@@ -330,8 +332,8 @@
                 }
             } // success
         }); // ajax
-    } // checkSuggestion       
-
+    } // checkSuggestion 
+    
 </script>
 
 

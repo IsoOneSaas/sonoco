@@ -160,7 +160,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-       Log::debug(['STORE DOCUMENT DATA' => $data]);
+       //Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $auth = true;    // Autorización para reemplazar responsables
        $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
@@ -438,7 +438,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function update($id, array $data) 
     {
-        Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
+        //Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
         try {
             DB::beginTransaction();
             $document = DocumentModel::find($id);
@@ -1202,7 +1202,28 @@ class DocumentRepository implements DocumentRepositoryInterface
     public function getTypesList()
     {
         return TypeModel::orderBy('name')->get(['type_id', 'name']);
-    } // setTypesList Method     
+    } // setTypesList Method
+    
+    /**
+     * Obtiene los valores por defecto del formulario cuando se crea un nuevo documento desde Solicitudes
+     * @param  string $hash Hash del identificador de la solicitud
+     * @return json    valores de defecto
+     */    
+    public function default($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        //Log::debug(['ID' => $id]);
+        //if( is_integer(($id) ) {
+            $suggestion = \App\Models\Document\SuggestionModel::find($id);
+            if($suggestion) {
+                return json_encode([
+                    'name' => $suggestion->document,
+                    'sid' => $suggestion->system_id,
+                ]);                
+            } // if
+        //} // if
+        return '';
+    } // default Method
 
     /**
      * Contruye el array del responsable para ser almacenado en la tabla de Forwards

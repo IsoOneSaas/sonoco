@@ -190,6 +190,7 @@
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->
                                 <div class="modal-body intro-y box p-5">
+                                    <div id="modal-attachments-message"></div>
                                     <form id="uploadForm" method="post" action="{{ route('documents.control.anexos.store') }}" enctype="multipart/form-data" class="dropzone">
                                         @csrf
                                         <input type="hidden" name="did" value={{ $document->document_id }} />
@@ -197,7 +198,7 @@
                                         <input type="hidden" name="route" value="link" />
                                         <div class="input-group mt-3">
                                             <div id="name" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/link.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/link.form.name.title') }}</div>
-                                            <input type="text" name="name" class="form-control w-full" aria-describedby="name" placeholder="{{ trans('document/link.form.name.placeholder') }}" minlength="2" maxlength="64" required>
+                                            <input type="text" id="file-name" name="name" class="form-control w-full" aria-describedby="name" placeholder="{{ trans('document/link.form.name.placeholder') }}" minlength="2" maxlength="64" required>
                                             <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/link.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                         </div>
                                         <div id="upload-zone" >

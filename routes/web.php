@@ -89,7 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('documento/proceso/{id}', [\App\Http\Controllers\Document\DocumentModelController::class, 'setProcess']);
             Route::get('documento/etiquetas/{slug}', [\App\Http\Controllers\Document\DocumentModelController::class, 'setTags']);
             Route::post('documento/codigo', [\App\Http\Controllers\Document\DocumentModelController::class, 'setCode']);
-            Route::get('documento/nuevo/{slug}', [\App\Http\Controllers\Document\DocumentModelController::class, 'setNew'])->name('new'); 
+            Route::get('documento/nuevo/{hash}', [\App\Http\Controllers\Document\DocumentModelController::class, 'setNew'])->name('new'); 
 
             Route::post('documento/eliminar', [\App\Http\Controllers\Document\DocumentModelController::class, 'deleteDocument'])->name('documento.delete');
             Route::post('documento/versionar', [\App\Http\Controllers\Document\DocumentModelController::class, 'versionDocument'])->name('documento.version');

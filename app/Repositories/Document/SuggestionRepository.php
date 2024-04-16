@@ -42,6 +42,8 @@ class SuggestionRepository implements SuggestionRepositoryInterface
         $array_output = [];
         $n = 0;
         $admin = Auth::user();
+        $openImage = 'assets/images/filenew.png';
+        $openLink = 'documento/nuevo/';
 
         if( $admin->can('setup_admins') ) {
             // $plucked = LocationModel::all()->pluck('location_id');
@@ -70,7 +72,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
 
         $uids = array_unique($plucked->all());
         
-        Log::debug(['SCOPE' => $scope, 'UIDS' => $uids]);
+        //Log::debug(['SCOPE' => $scope, 'UIDS' => $uids]);
 
         if( $scope == 'all' ) {
             //$hints = SuggestionModel::orderBy('created_at', 'desc')->whereIn('system_id', $adminSids)->get();
@@ -89,14 +91,15 @@ class SuggestionRepository implements SuggestionRepositoryInterface
                 //if( $this->isLocation($user, $adminLids) ) {
                     $system = SystemModel::find($hint->system_id);
                     $checked = ($hint->status == 1 ) ? ' checked' : '';
+                    $open = '<a class="btn-new" data-id='. $hint->suggestion_id .' href="javascript:;" title="Crear nuevo documento"><span class="text-base font-medium underline text-blue-600"><img src="'. url($openImage) .'" alt="Crear" style="width:1.2em"  class="inline-block" /></span></a>';
                     if( $hint->filename === null ) {
                         $link = '';
                     } else {
                         $size = ($hint->size !== null) ? ' ('. round($hint->size/1000,0) .' kB)' : '';
                         $type = ($hint->mimetype !== null) ? $hint->mimetype : '';                        
                         $mime = $this->tool->getFileMimeName($type);
-                        $image = 'assets/images/mimes/'. $mime .'.png';
-                        $link = '<a class="btn-file-show" data-file="'. $hint->filename .'" href="javascript:;" title="abrir el archivo anexo '. $hint->name . $size .'"><span class="text-base font-medium underline text-blue-600"><img src="'. url($image) .'" alt="Mime" style="width:1.2em"  class="inline-block" /></span></a>';
+                        $image1 = 'assets/images/mimes/'. $mime .'.png';
+                        $link = '<a class="btn-file-show" data-file="'. $hint->filename .'" href="javascript:;" title="abrir el archivo anexo '. $hint->name . $size .'"><span class="text-base font-medium underline text-blue-600"><img src="'. url($image1) .'" alt="Mime" style="width:1.2em"  class="inline-block" /></span></a>';                        
                     }
                     $array_output[] = [
                         'empty' => '',
@@ -107,7 +110,7 @@ class SuggestionRepository implements SuggestionRepositoryInterface
                         'document' =>  $hint->document,
                         'content' =>  $hint->justification,   // 
                         //'id' => $hint->suggestion_id,
-                        'checked' => '<input type="checkbox" title="Cambiar de estado" onClick="checkSuggestion('. $hint->suggestion_id .')"'. $checked .' />&nbsp;&nbsp;'. $link,
+                        'checked' => '<input type="checkbox" title="Cambiar de estado" onClick="checkSuggestion('. $hint->suggestion_id .')"'. $checked .' />&nbsp;&nbsp;'. $open .'&nbsp;&nbsp;'. $link,
                         //'link' => $link,
                         'order' => $hint->created_at,
                     ];

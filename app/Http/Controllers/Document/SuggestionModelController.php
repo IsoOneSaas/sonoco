@@ -123,13 +123,9 @@ class SuggestionModelController extends Controller
      */        
     public function new($id)
     {
-        $json =  $this->suggestionRepo->getSuggestion($id);
-        Log::debug(['ID' => $id, 'NEW SUGGESTION' => urlencode($json)]);
-        //return redirect()->route('documents.control.new', urlencode($json));
-        //return urlencode($json);
-        return json_encode(['code' => urlencode($json)]);
-
-    } // check Method 
+        $hash = $this->tool->setIdHash($id);
+        return json_encode(['hash' => $hash]);
+    } // new Method 
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

@@ -27,4 +27,6 @@ interface DocumentRepositoryInterface
     public function getSystemsList();
     public function getLocationsList();
     public function getTypesList();
+
+    public function default($hash);
 }

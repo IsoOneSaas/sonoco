@@ -225,7 +225,7 @@ class SightingRepository implements SightingRepositoryInterface
      */     
     public function storeSighting(array $data, $path = null, $name = null)
     {
-       Log::debug(['STORE SIGHTING DATA' => $data]);
+       //Log::debug(['STORE SIGHTING DATA' => $data]);
        $n = 1;
        try {
             DB::beginTransaction();
