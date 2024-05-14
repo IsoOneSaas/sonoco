@@ -333,10 +333,11 @@
     $(function () {
         var json = '{!! $default !!}';
         var flow = "{{ isset($document) ? $document->flow : 0; }}";
-
-        if( json !== '' ) {
+        //console.log('json: '+json);
+        if( (json !== '0') && (json !== '') ) {
             var obj = $.parseJSON(json);
-            console.dir(obj);
+            //console.log('Entering...');
+            //console.dir(obj);
             $("input[name='name']").val(obj.name);
             $("#system-id option[value='"+obj.sid+"']").attr('selected', true);
         }
@@ -383,6 +384,7 @@
         });
 
        $selectize = $select[0].selectize;
+
 
        // ALERTA DE ESTADO
        //console.log('FLOW: '+flow);
@@ -629,7 +631,7 @@
 
     }); // document
 
-    function setDepartmentSelect(id, txt1, txt2) {                       
+    function setDepartmentSelect(id, txt1, txt2) {                    
         $.ajax({
             url: '/documentos/control/documento/departamento/'+id,
             type: 'GET',
@@ -914,7 +916,7 @@
                     var reviewOutput = '';
                     var approveOutput = '';
                     var n;
-                    // console.log('=== ARRAY JOBS ===');
+                    //console.log('=== ARRAY JOBS ===');
                     //console.dir(editJobs);
                     $.each(data, function(i, job) {
                         n = job.job_id.toString();
@@ -959,7 +961,7 @@
                     var checked;
                     var j = 0;
                     //console.log('=== ARRAY USERS ===');
-                    //console.dir(editChecks);
+                    //console.dir(editUsers);
                     $.each(data, function(i, user) {
                         n = user.user_id.toString();
                         //console.log('check: '+n+' in ');

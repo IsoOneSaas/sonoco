@@ -685,13 +685,13 @@ class ToolsClass
         } 
 
         // foreach($documents as $document) {
-        //     Log::debug(['ID' => $document->document_id, 'CODE' => $document->code, 'VER' => $document->version, 'STATUS' => $document->status]);
+        //    //Log::debug(['ID' => $document->document_id, 'CODE' => $document->code, 'VER' => $document->version, 'STATUS' => $document->status]);
         // }        
         
 
 
 
-        Log::debug('== Número de documentos final: '. $documents->count());
+       //Log::debug('== Número de documentos final: '. $documents->count());
 
         return $documents; 
 
@@ -1012,9 +1012,9 @@ class ToolsClass
 
         // Determinar los obsoletos
         // $plucked = DocumentModel::where('status', $caduced)->pluck('codes');
-        // Log::debug(['CADUCED' => $plucked->all()]);
+        ////Log::debug(['CADUCED' => $plucked->all()]);
 
-        Log::debug('== Número de documentos iniciales: '. $documents->count());
+       //Log::debug('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 
         // FIXME: Validar si están en la fecha y son de tipo
@@ -1043,7 +1043,7 @@ class ToolsClass
                             //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
                             // }
                             // $doc =  DocumentModel::find($did);
-                            // Log::debug(['DOC' => $doc->document_id]);
+                            ////Log::debug(['DOC' => $doc->document_id]);
                             
                             $new =  DocumentModel::where('document_id', $did)
                                 ->where('status', $target)
@@ -1073,7 +1073,7 @@ class ToolsClass
                     } // if
                 } // foreach
             } // if
-            Log::debug('== Número de documentos agregados: '. $n ); 
+           //Log::debug('== Número de documentos agregados: '. $n ); 
 
             // Documentos para eliminar
             $n = 0;
@@ -1093,10 +1093,10 @@ class ToolsClass
                     }                
                 } // foreach
             } // if
-            Log::debug('== Número de documentos eliminados: '. $n ); 
+           //Log::debug('== Número de documentos eliminados: '. $n ); 
         }
 
-        Log::debug('== Número de documentos final: '. $documents->count());
+       //Log::debug('== Número de documentos final: '. $documents->count());
         return $documents;
     } // setPublishedDocumentsCollection
 

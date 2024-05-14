@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-use Yajra\DataTables\DataTables;
+//use Yajra\DataTables\DataTables;
 
 class DocumentModelController extends Controller
 {
@@ -76,8 +76,8 @@ class DocumentModelController extends Controller
         $response = $this->documentRepo->store($request->all());
         //$response = ['status' => 'error', 'message' => 'Testing...'];
         if( $response['status'] == 'error' ) {
-            //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']); // producía error 2024.01.15
-            return redirect()->back()->with($response['status'], $response['message']); 
+            return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']); // producía error 2024.01.15
+            //return redirect()->back()->with($response['status'], $response['message']); 
         }
         return redirect()->route('documents.control.documento.index')->with($response['status'], $response['message']); 
     } // store Method
@@ -222,7 +222,7 @@ class DocumentModelController extends Controller
     {
         // Obtener información default    
         $default =  $this->documentRepo->default($hash);
-        Log::debug(['DEFAULT DATA' => $default]);  
+       //Log::debug(['DEFAULT DATA' => $default]);  
         
         //Method = created
         $systems = $this->documentRepo->systems(null);
