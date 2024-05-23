@@ -882,6 +882,9 @@
         var className = "{{ old('class', isset($document) ? $document->class : '' ) }}";
         var str = "{{ old('tags', isset($document) ? $document->tags : '' ) }}";
         var tags = new Array();
+        var existsEditJob = false;
+        var existsReviewJob = false;
+        var existsApproveJob = false;
         //console.log('*** SETUP');
 
         if( dpto != '')  {
@@ -923,14 +926,17 @@
                         //console.log('check: '+ job.job_id);
                         // Edit
                         if( $.inArray( n, editJobs) != -1 ) {
+                            existsEditJob = true;
                             editOutput += '<option value='+job.job_id+' selected >'+job.name+'</option>';
                         }
                         // Review
                         if( $.inArray( n, reviewJobs) != -1 ) {
+                            existsReviewJob = true;
                             reviewOutput += '<option value='+job.job_id+' selected >'+job.name+'</option>';
                         }
                         // Approve
                         if( $.inArray( n, approveJobs) != -1 ) {
+                            existsApproveJob = true;
                             approveOutput += '<option value='+job.job_id+' selected >'+job.name+'</option>';
                         }                                                      
                     });
@@ -960,13 +966,16 @@
                     var n;
                     var checked;
                     var j = 0;
+                    var jobEditOptions = '';
+                    var jobReviewOptions = '';
+                    var jobApproveOptions = '';
                     //console.log('=== ARRAY USERS ===');
                     //console.dir(editUsers);
                     $.each(data, function(i, user) {
                         n = user.user_id.toString();
                         //console.log('check: '+n+' in ');
                         //console.dir(editUsers);
-                        // Edit
+                        // Edit                        
                         if( ($.inArray( user.user_id, editUsers) != -1) || ($.inArray( n, editUsers) != -1) ) {
                             if( editChecks[n] == 'SI' ) {
                                 checked = ' class="text-red-500"';
@@ -975,7 +984,14 @@
                                 checked = '';    
                             }                            
                             editOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
-                        }
+                            if( !existsEditJob ) {
+                                console.log('Add Edit jobs...');
+                                $.each(user.jobs, function(j, job) {
+                                    console.log(j +' | '+ job.name);
+                                    jobEditOptions += '<option value='+job.job_id+' selected >'+job.name+'</option>';
+                                });                                
+                            } // if
+                        } // if
                         // Review
                         if( ($.inArray( user.user_id, reviewUsers) != -1) || ($.inArray( n, reviewUsers) != -1) ) {
                             if( reviewChecks[n] == 'SI' ) {
@@ -985,6 +1001,13 @@
                                 checked = '';
                             }                    
                             reviewOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
+                            if( !existsReviewJob ) {
+                                console.log('Add Review jobs...');
+                                $.each(user.jobs, function(j, job) {
+                                    console.log(j +' | '+ job.name);
+                                    jobReviewOptions += '<option value='+job.job_id+' selected >'+job.name+'</option>';
+                                });                                
+                            } // if                            
                         }
                         // Approve
                         if( ($.inArray( user.user_id, approveUsers) != -1) || ($.inArray( n, approveUsers) != -1) ) {
@@ -995,13 +1018,31 @@
                                 checked = '';
                             }                          
                             approveOutput += '<option'+checked+' value='+user.user_id+' selected >'+user.name+'</option>';
-                        }
-                        j = j + 1;                                                      
+                            if( !existsApproveJob ) {
+                                console.log('Add Approve jobs...');
+                                $.each(user.jobs, function(j, job) {
+                                    console.log(j +' | '+ job.name);
+                                    jobApproveOptions += '<option value='+job.job_id+' selected >'+job.name+'</option>';
+                                });                                
+                            } // if                              
+                        } // if
+                        j = j + 1;
+                        
+                        
                     });
                     $("#select-user-edit").html(editOutput);
                     $("#select-user-review").html(reviewOutput);
                     $("#select-user-approve").html(approveOutput);
                     $("#loading-image").hide();
+                    if( jobEditOptions != '' ) {
+                        $("#select-job-edit").html(jobEditOptions);
+                    }
+                    if( jobReviewOptions != '' ) {
+                        $("#select-job-review").html(jobReviewOptions);
+                    }
+                    if( jobApproveOptions != '' ) {
+                        $("#select-job-approve").html(jobApproveOptions);
+                    }                                          
                 } // success
             }); // ajax            
         } else {

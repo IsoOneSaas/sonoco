@@ -1055,7 +1055,14 @@ class DocumentRepository implements DocumentRepositoryInterface
 
     public function getUsersSelect()
     {
-        return UserModel::all();
+        $users = UserModel::whereIn('set_users.role', config('settings.roles_select_documents') )
+            ->get(['user_id', 'name']);
+
+        foreach($users as $user) {
+            $user->jobs = $user->jobs;
+        } // foreach
+
+        return $users;
     } // getJobsSelect    
 
     /**
