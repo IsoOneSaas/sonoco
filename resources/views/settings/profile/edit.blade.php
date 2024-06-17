@@ -223,10 +223,9 @@
     <script type="text/javascript">
         var $signaturePad = new SignaturePad(document.getElementById('signature-pad'));
         $(function () {            
-            $('body').on('click', '#btn-signing-clear', function (e) {
+            $('body').on('click', '#btn-signing-clear', function (e) {                
                 e.preventDefault();
-                $signaturePad.clear();
-                $("#signature64").val('');
+                $signaturePad.clear();                
             });
             
             $('body').on('click', '#btn-signing-save', function (e) {

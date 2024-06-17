@@ -5,6 +5,7 @@ use App\Classes\ToolsClass;
 use App\Events\DocumentTracing;
 use App\Events\EmailDocumentEvent;
 use App\Interfaces\Document\MasterRepositoryInterface;
+use App\Models\Document\AuthorizationModel;
 use App\Models\Document\changeModel;
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
@@ -452,11 +453,24 @@ class MasterRepository implements MasterRepositoryInterface
             $process_array = $plucked->all();
         } else {        
             // Obtener procesos pertenecientes
-            $pids1 = $this->tool->getOwnProcessesByJob($user); 
+            $pids1 = $this->tool->getOwnProcessesByJob($user);
+            Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
             // Procesos de la tabla de relaciones con cargos                  
             $pids2 = $this->tool->setProcessesFromJobs($user);
+            Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
+
+            // Procesos de autorizados
+            $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
+                ->join('documents', function($query) {
+                    $query->on('documents.document_id', '=', 'document_authorizations.document_id');
+                })            
+                ->pluck('documents.process_id');
+            $pids3 = $plucked->all();
+            Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
+
             // Concatenar
-            $process_array = array_unique(array_merge($pids1, $pids2));            
+            $process_array = array_unique(array_merge($pids1, $pids2, $pids3));      
+            //Log::debug(['PIDS' =>  $process_array]);      
         }
 
         // Obtener el listado para el filtro
@@ -479,24 +493,29 @@ class MasterRepository implements MasterRepositoryInterface
             $locations = LocationModel::all();
         } else {
             // Obtener locatlizaciones pertenecientes
-            //$location_array = $this->tool->getOwnLocationsByJob($user);
-            //$location_array = $this->tool->getOwnLocationsByUser($user);    // array
-            $lids = $this->tool->getOwnLocationsByUser($user);
-            $locations = LocationModel::findMany($lids);
+            $lids1 = $this->tool->getOwnLocationsByUser($user);        
+            //Log::debug(['OWN LOCATIONS IDS' => $lids1]); 
+
+            // Localizaciones de autorizados
+            $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
+                ->join('documents', function($query) {
+                    $query->on('documents.document_id', '=', 'document_authorizations.document_id');
+                })            
+                ->pluck('documents.location_id');
+            $lids2 = $plucked->all();
+            //Log::debug(['AUTH LOCATIONS IDS' =>  array_unique($lids2)]); 
+            
+            // Concatenar
+            $location_array = array_unique(array_merge($lids1, $lids2));  
+            //$location_array = $lids1;
+            $locations = LocationModel::findMany($location_array);
         }
+
         // Obtener el listado para el filtro
-        //$locations = LocationModel::orderBy('name')->get(['location_id', 'name']);
-        //$locations = $this->tool->getOwnLocationsByJob($user);  // objects
         //Log::debug(['LOCATIONS' => $locations]);
         foreach($locations as $location) {
-            //Log::debug(['LOCATION' => $location->toArray()]);
-            //if( isset($location->location_id) ) {
-                //$location->selected = ( in_array($location->location_id, $location_array) ) ? true : false;
-                $location->selected = true;
-            //}
+            $location->selected = true;
         } // foreach
-
-
 
         return $locations;
     } // locations 

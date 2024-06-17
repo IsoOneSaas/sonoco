@@ -2,7 +2,7 @@ Dropzone.options.uploadForm = {
     autoProcessQueue: false,
 	maxFilesize: 8, // MB
 	maxFiles: 1,
-	acceptedFiles: ".jpeg,.jpg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pps,.pptx,.ppsx,.pub,.one,.dwg,.cad",
+	acceptedFiles: ".jpeg,.jpg,.pdf,.doc,.docx,.xls,.xlsx,.xlsm,.ppt,.pps,.pptx,.ppsx,.pub,.one,.dwg,.cad",
     addRemoveLinks: true,
     url: $('#uploadForm').attr('action'),
     init: function () {

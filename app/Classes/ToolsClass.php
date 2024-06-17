@@ -896,11 +896,20 @@ class ToolsClass
             $documents =  DocumentModel::where('status', $target)->orderBy('created_at', 'desc')->get()->unique('code');
         } else {
 
-            // Range Date // TODO: si no existe 
-            $arr = explode('T', $params['din'] );
-            $rangeIn = $arr[0] .' 00:00:00';
-            $arr = explode('T', $params['dout'] ); 
-            $rangeOut = $arr[0] .' 23:59:59';  
+            // Range Date
+			if( key_exists('din', $params) ) {
+				$arr = explode('T', $params['din'] );
+				$rangeIn = $arr[0] .' 00:00:00';				
+			} else {
+				$rangeIn = '1970-01-01 00:00:00';
+			}
+			
+			if( key_exists('dout', $params) ) {
+				$arr = explode('T', $params['dout'] ); 
+				$rangeOut = $arr[0] .' 23:59:59';  				
+			} else {
+				$rangeOut = Carbon::today()->format('Y-m-d 23:59:59');
+			}	
 
             // Tipos
             if( key_exists('tids', $params) ) {
@@ -935,26 +944,47 @@ class ToolsClass
                     $lids = $params['lids'];
                 }				                                
             } else {
-                // Procesos 
-                if( in_array('', $params['pids']) ) {               
-                    // Procesos conforme su cargo     
-                    $pids1 = $this->getOwnProcessesByJob($user); 
-                    //Log::debug(['PIDS 1' => $pids1]); 
-                    // Procesos de la tabla de relaciones con cargos                  
-                    $pids2 = $this->setProcessesFromJobs($user);
-                    //Log::debug(['PIDS 2' => $pids2]);
-                    // Concatenar
-                    $pids = array_unique(array_merge($pids1, $pids2));
-                    //Log::debug(['PIDS' => $pids]);
+
+                // Procesos
+                $pids = []; 
+                // Procesos conforme su cargo     
+                $pids1 = $this->getOwnProcessesByJob($user); 
+                // Procesos de la tabla de relaciones con cargos                  
+                $pids2 = $this->setProcessesFromJobs($user);
+                // Concatenar
+                $pids_array = array_unique(array_merge($pids1, $pids2));
+
+                if( in_array('', $params['pids']) ) {             
+                    $pids = $pids_array;
                 } else {
-                    $pids = $params['pids'];
-                }
+                                      
+                    Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
+
+                    foreach($params['pids'] as $pid) {
+                        if( in_array($pid, $pids_array) ) {
+                            $pids[] = $pid;
+                        } // if                 
+                    } // foreach
+
+                    $pids_array = $params['pids'];
+                } // if else
                 
                 // Localizaciones
+                $lids = [];
+                // Localizaciones conforme su depatamento
+                $lids1 = $this->getOwnLocationsByUser($user);
+                // Concatenar
+                $lids_array = array_unique($lids1);
+
                 if( in_array('', $params['lids']) ) {
-                    $lids = $this->getOwnLocationsByUser($user);
+                    $lids = $lids_array;
                 } else {
-                    $lids = $params['lids'];
+                    foreach($params['lids'] as $lid) {
+                        if( in_array($lid, $lids_array) ) {
+                            $lids[] = $lid;
+                        } // if                 
+                    } // foreach                    
+                    $lids_array = $params['lids'];
                 }                 
             } // IF
 
@@ -970,24 +1000,10 @@ class ToolsClass
                 if( count($dids) == 0 ) $dids = [0];               
             }
 
-            // $obsoletes =  DocumentModel::whereIn('status', [config('settings.document_status.obsolete')])
-            //     ->whereIn('system_id', $sids)
-            //     ->whereIn('process_id', $pids)
-            //     ->whereIn('location_id', $lids)
-            //     ->whereIn('type_id', $tids)          
-            //     ->where(function($query) use($search) {
-            //         $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
-            //     })             
-            //     ->whereBetween('updated_at', [$rangeIn, $rangeOut])
-            //     ->when($dids, function($query) use($dids) {
-            //         $query->whereIn('document_id', $dids);
-            //     })                                
-            //     ->orderBy('created_at', 'desc')
-            //     ->pluck('code');
-                
+            // Obsoletos
             $obsoletes =  DocumentModel::where('status', '=', config('settings.document_status.obsolete'))->pluck('code'); 
             
-            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
+            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)
@@ -1010,11 +1026,7 @@ class ToolsClass
             $uid = $user->user_id;
         }
 
-        // Determinar los obsoletos
-        // $plucked = DocumentModel::where('status', $caduced)->pluck('codes');
-        ////Log::debug(['CADUCED' => $plucked->all()]);
-
-       //Log::debug('== Número de documentos iniciales: '. $documents->count());
+        Log::info('== Número de documentos iniciales: '. $documents->count());
         //Log::debug(['DOCS' => $documents->toArray()]);
 
         // FIXME: Validar si están en la fecha y son de tipo
@@ -1030,26 +1042,12 @@ class ToolsClass
                         if( $params === null ) {
                             $new = DocumentModel::find($did);
                         } else {                             
-                            //$new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
-                            // if( in_array('', $params['lids']) && in_array('', $params['pids']) ) {
-                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->first();
-                            // }
-                            // elseif( in_array('', $params['lids']) ) {
-                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->first();
-                            // }
-                            // elseif( in_array('', $params['pids']) ) {
-                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('location_id', $lids)->first();
-                            // } else {
-                            //     $new = DocumentModel::where('document_id', $did)->whereIn('system_id', $sids)->whereIn('process_id', $pids)->whereIn('location_id', $lids)->first();
-                            // }
-                            // $doc =  DocumentModel::find($did);
-                            ////Log::debug(['DOC' => $doc->document_id]);
                             
                             $new =  DocumentModel::where('document_id', $did)
                                 ->where('status', $target)
                                 ->whereIn('system_id', $sids)
-                                ->whereIn('process_id', $pids)
-                                ->whereIn('location_id', $lids)
+                                ->whereIn('process_id', $pids_array)
+                                ->whereIn('location_id', $lids_array)
                                 ->whereIn('type_id', $tids)
                                 ->where(function($query) use($search) {
                                     $query->orWhere('name', 'LIKE', "%{$search}%")->orWhere('code', 'LIKE', "%{$search}%");
@@ -1058,7 +1056,9 @@ class ToolsClass
                                 ->when($dids, function($query) use($dids) {
                                     $query->whereIn('document_id', $dids);
                                 })
-                                ->first();                              
+                                ->first();    
+                            
+                            //$new = DocumentModel::find($did);	// 2024.06.01 Modificado porque no se listaban los documentos autorizados debido a los filtros							
 
                         }
                         if( $new ) { 
@@ -1073,7 +1073,7 @@ class ToolsClass
                     } // if
                 } // foreach
             } // if
-           //Log::debug('== Número de documentos agregados: '. $n ); 
+           Log::info('== Número de documentos agregados: '. $n ); 
 
             // Documentos para eliminar
             $n = 0;
@@ -1093,10 +1093,10 @@ class ToolsClass
                     }                
                 } // foreach
             } // if
-           //Log::debug('== Número de documentos eliminados: '. $n ); 
+            Log::info('== Número de documentos eliminados: '. $n ); 
         }
 
-       //Log::debug('== Número de documentos final: '. $documents->count());
+        Log::info('== Número de documentos final: '. $documents->count());
         return $documents;
     } // setPublishedDocumentsCollection
 

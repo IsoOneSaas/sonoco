@@ -2,7 +2,7 @@ Dropzone.options.dropzone =
          {
 	        maxFiles: 1, 
             maxFilesize: 8,	// MB
-            acceptedFiles: ".jpeg,.jpg,.png,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pps,.pptx,.ppsx,.pub,.one,.dwg,.cad",
+            acceptedFiles: ".jpeg,.jpg,.png,.pdf,.doc,.docx,.xls,.xlsx,.xlsm,.ppt,.pps,.pptx,.ppsx,.pub,.one,.dwg,.cad",
             addRemoveLinks: false,
             timeout: 50000,
             success: function(file, response) 
