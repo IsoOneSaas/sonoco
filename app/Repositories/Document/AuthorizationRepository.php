@@ -245,6 +245,8 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
         $grid = [];
 
         $document = DocumentModel::find($id);
+
+        /*
         $did = $document->department_id;
         $lid = $document->location_id;
 
@@ -302,7 +304,9 @@ class AuthorizationRepository implements AuthorizationRepositoryInterface
         $t2 = count($uids);
         Log::debug('== Número de usuarios eliminados: '. ($t1 - $t2) ); 
         Log::debug('== Número de usuarios finales: '. $t2);
+        */
 
+        $uids = $this->tool->setPublishedUsers($document->department_id, $document->location_id, $document->process_id, $id);
         $success = true;
 
         foreach( array_unique($uids) as $uid) {

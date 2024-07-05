@@ -16,6 +16,9 @@ use App\Models\Document\TagModel;
 use App\Models\Set\UserModel;
 use Illuminate\Support\Facades\DB;
 
+use App\Events\DocumentTracing;
+use App\Events\DocumentSwitch;
+use Illuminate\Support\Facades\Event;
 
 class DashboardController extends Controller
 {
@@ -35,6 +38,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         // TODO: dasboard to GUEST / SUPER
+        //Log::debug(['USER' => $user->toArray()]);
         if($user) {
 
             ini_set('max_execution_time', 3600);
@@ -119,7 +123,7 @@ class DashboardController extends Controller
         echo 'Sent Email...';
     } 
     
-    public function contentMigration()  // /documentos/dashboard/migration/content
+    public function contentMigration1()  // /documentos/dashboard/migration/content
     {
         //$contents = DB::table('document-contents')->get();
 
@@ -334,5 +338,37 @@ class DashboardController extends Controller
             }
         } // for
     }
+
+    /** =================================================
+     * AJUSTES - PASAR A OBSOLETO
+    */  
+    
+    public function setBatchObsolete()  // /documentos/dashboard/test/obsolete
+    {
+        $n = 0;
+        $lid = 7;
+        $did = 10290;
+        $note = 'Solicitado por Efren Aguilar: Documento de planta cerrada';
+
+
+        $documents = DocumentModel::where('location_id', $lid)->where('status', config('settings.document_status.publish'))->get();
+        foreach($documents as $document) {
+            $n++;
+            Log::debug('OBSOLETED '. $n .' TO DID='. $document->document_id);
+        }
+
+        $document = DocumentModel::find($did);
+        // SAVE STATUS
+        //Event::dispatch(new DocumentSwitch($document));
+        // SAVE TRACING
+        //$document->action = ($document->status == config('settings.document_status.publish')) ? 'publish' : 'obsolete';
+        //$document->trace = $note;            
+        //Event::dispatch(new DocumentTracing($document));           
+
+        echo 'Ran setBatchObsolete...';
+
+        // $this->documentRepo->obsolete($data);
+    } // setBatchObsolet
+
 
 } // Class

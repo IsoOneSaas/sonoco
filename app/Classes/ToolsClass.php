@@ -884,6 +884,8 @@ class ToolsClass
     public function setPublishedDocumentsCollection($role, $auth, $uid = null, $params = null)
     {
         $target = config('settings.document_status.publish');
+        $pids_array = [];
+        $lids_array = [];
         //Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
 
         if( $role == 'admin' ) {
@@ -1110,15 +1112,16 @@ class ToolsClass
      *                  - controlRepository@flow
      *                  - controlRepository@post
      * @param  integer $xid identificador del departamento al cual pertenece el documento
+     * @param  integer $lid identificador de la localización del documento 
      * @param  integer $pid identificador del proceso al cual pertenece el documento
      * @param  integer $did identificador del documento para determinar los permisos especiales (if null : no determina)
      * @return array    Arreglo multidimiensional con key: id de documento y valores del status : acción y fecha de la acción
      */    
-    public function setPublishedUsers($xid, $pid = null, $did = null)
+    public function setPublishedUsers($xid, $lid, $pid = null, $did = null)
     {  
         $users_array = [];
 
-        //Log::debug(['ID' => $did, 'DID' => $xid, 'PID' => $pid]);
+        //Log::debug(['ID' => $did, 'DID' => $xid, 'LID  => $lid, 'PID' => $pid]);
         
         $dpto = DepartmentModel::find($xid);
         if ($dpto) {
@@ -1128,7 +1131,9 @@ class ToolsClass
             foreach($jobs as $job) {
                 $users = $job->users;
                 foreach($users as $user) {
-                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) ) {
+                    $locations = $user->locations;
+                    $plucked = $locations->pluck('location_id');                 
+                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) && (in_array($lid, $plucked->all())) ) {
                         $users_array[] = $user->user_id;
                     }                
                 } // foreach
@@ -1146,7 +1151,9 @@ class ToolsClass
                             $users = $job->users;
                             if($users) {
                                 foreach($users as $user) {
-                                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) ) {
+                                    $locations = $user->locations;
+                                    $plucked = $locations->pluck('location_id');                                    
+                                    if( ($user->is_active == 1) && (in_array($user->role, config('settings.document_roles'))) && (in_array($lid, $plucked->all())) ) {
                                         $users_array[] = $user->user_id;
                                     }  // if              
                                 } // foreach

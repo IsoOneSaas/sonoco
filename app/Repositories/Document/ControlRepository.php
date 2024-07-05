@@ -506,7 +506,7 @@ class ControlRepository implements ControlRepositoryInterface
                     $document->action = '';
                     $document->link = '';  //FIXME: //route('documents.control.manage.index', ['slug' => $key]); 
                     $document->date = '';               
-                    $uids = $this->tool->setPublishedUsers($document->department_id, $document->process_id, $id);
+                    $uids = $this->tool->setPublishedUsers($document->department_id, $document->location_id, $document->process_id, $id);
 
                     //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
                     $total = (  env('APP_URL') == 'http://127.0.0.1:8000' ) ? 5 : count($uids);
@@ -729,7 +729,7 @@ class ControlRepository implements ControlRepositoryInterface
         return false;
     } // getAttachment
 
-    public function flow($did, $xid, $pid)
+    public function flow($did, $xid, $lid, $pid)
     {
         $grid_array = [];
         $list_array = [];
@@ -782,7 +782,7 @@ class ControlRepository implements ControlRepositoryInterface
         //Log::debug(['ARRAY GRID' => $grid_array]);
 
         // TABLA DE USUARIOS DEL DOCUMENTO
-        $uids = $this->tool->setPublishedUsers($xid, $pid, $did);
+        $uids = $this->tool->setPublishedUsers($xid, $lid, $pid, $did);
         $users = UserModel::orderBy('name')->findMany($uids);
         foreach ($users as $user) {
             $jobs_str = '';
