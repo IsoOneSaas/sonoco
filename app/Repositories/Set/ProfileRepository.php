@@ -21,11 +21,13 @@ class ProfileRepository implements ProfileRepositoryInterface
 {
     private $tool;
     private $imgUrl;
+    private $startpageDefault;
 
     public function __construct(ToolsClass $Tools)
     {
         $this->tool = $Tools;
         $this->imgUrl = '/tenants/sonoco/images/';
+        $this->startpageDefault = config('settings.user.startpage');
     }
 
     /**
@@ -44,6 +46,12 @@ class ProfileRepository implements ProfileRepositoryInterface
             $user->mobile = $options['personal_info']['mobile'];
             $user->address = $options['personal_info']['address'];
             $user->phone = $options['personal_info']['phone'];
+        }
+
+        if( is_array($options) && key_exists('startpage', $options) ) {
+            $user->page = (int)$options['startpage'];
+        } else {
+            $user->page = $this->startpageDefault;
         }
 
         // Departamentos
@@ -104,8 +112,8 @@ class ProfileRepository implements ProfileRepositoryInterface
 
 
     /**
-     * Guarda los datos del formulario en la base de datos del registro editado
-     * @param  integer $id Identificador del departamento editado
+     * Guarda los datos del formulario en la base de datos del usuario editado
+     * @param  integer $id Identificador del usuario editado
      * @param  array $data datos del formulario
      * @return json    Resultado del método
      */    
@@ -126,6 +134,7 @@ class ProfileRepository implements ProfileRepositoryInterface
                     'phone' => ($data['phone'] !== null) ?  $data['phone'] : '',
                     'address' => ($data['address'] !== null) ?  $data['address'] : '',
                 ];
+                $options['startpage'] = $data['page'];
                 $profile->options = $options;
                 $profile->save();
                 DB::commit();

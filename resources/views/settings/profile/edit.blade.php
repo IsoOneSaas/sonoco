@@ -90,6 +90,24 @@
                                         </div>
                                     </form>
                                 </div>
+                            </div>
+                            
+                            <div class="intro-y box mt-5">
+                                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                    <h2 class="font-medium text-base mr-auto">
+                                        Ajustes Personales
+                                    </h2>
+                                </div>
+                                <div class="p-5">
+                                    <h6>Página de inicio</h6>
+                                    <ul>
+                                        <li><input id="start-0" type="radio" name="start" value="0">&nbsp; Dashboard</li>
+                                        <li><input id="start-11" type="radio" name="start" value="11">&nbsp; Dashboard Documentos</li>
+                                        <li><input id="start-12" type="radio" name="start" value="12">&nbsp; Maestro de Documentos</li>
+                                        <li><input id="start-13" type="radio" name="start" value="13">&nbsp; Procesamiento Documentos</li>
+                                        <li><input id="start-14" type="radio" name="start" value="14">&nbsp; Maestro de Registros</li>
+                                    </ul>
+                                </div>
                             </div>                            
 
                         </div>
@@ -110,6 +128,7 @@
                                             <form id="user-form" action="{{ route('perfil.update', $profile->user_id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
+                                            <input type="hidden" name="page" value={{ $profile->page }} >
                                             <div class="flex-1 mt-6 xl:mt-0">
                                                 <div class="grid grid-cols-12 gap-x-5">
                                                     <div class="col-span-12 2xl:col-span-6">
@@ -222,7 +241,11 @@
 <script src="{{ url('assets/js/signature_pad-4.1.5/signature_pad.umd.min.js') }}"></script>
     <script type="text/javascript">
         var $signaturePad = new SignaturePad(document.getElementById('signature-pad'));
-        $(function () {            
+        $(function () {  
+            var startPage = $('input[name="page"]').val();
+
+            $('#start-'+startPage).attr('checked', true);
+
             $('body').on('click', '#btn-signing-clear', function (e) {                
                 e.preventDefault();
                 $signaturePad.clear();                
@@ -243,6 +266,11 @@
                 $("#password-form")[0].reset();
             }); //btn-signing-clear
 
+            $('body').on('change', 'input[name="start"]', function (e) {
+                e.preventDefault();              
+                var v = $(this).val();
+                $('input[name="page"]').val(v);
+            }); //btn-signing-clear            
 
         }); // document
 

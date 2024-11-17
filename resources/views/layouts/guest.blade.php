@@ -36,7 +36,7 @@
                     <x-application-logo class="w-40 h-40 fill-current text-gray-500" />
                 </a>
             </div>
-			<div class="iso-text-color-black font-bold">Versión 4.2</div>
+			<div class="iso-text-color-black font-bold">Versión {{ config('settings.iso.version') }}</div>
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
