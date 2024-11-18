@@ -11,7 +11,7 @@ return [
     ],
 
     'user' => [
-        'startpage' => 11,
+        'startpage' => 12,
         'pages' => [
             0 => ['id' => 1, 'name' => 'Dashboard', 'link' => ''],
             1 => ['id' => 11, 'name' => 'Dashboard documentos', 'link' => '/documentos/dashboard'],

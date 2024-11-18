@@ -179,12 +179,12 @@
                                             <input type="hidden" name="uid" value="{{ $profile->user_uid }}">
                                             <div class="w-52 mx-auto xl:mr-0 xl:ml-6">
                                                 <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5">
-                                                    <div class="h-40 relative image-fit cursor-pointer zoom-in mx-auto">
+                                                    <div class="h-40 relative image-fit zoom-in mx-auto">
                                                         <img id="avatar-img" class="rounded-md" alt="Avatar" src="{{ url($profile->avatar) }}">                                                    
                                                     </div>
-                                                    <div class="mx-auto cursor-pointer relative mt-5">
-                                                        <button type="button" class="btn btn-primary w-full">Seleccionar</button>
-                                                        <input type="file" name="avatar" class="w-full h-full top-0 left-0 absolute opacity-0" onChange="setAvatar();">
+                                                    <div class="mx-auto relative mt-5">
+                                                        <button type="button" class="btn btn-primary w-full cursor-pointer">Seleccionar</button>
+                                                        <input type="file" name="avatar" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setAvatar();">
                                                     </div>
                                                 </div>
                                             </div>
@@ -216,12 +216,19 @@
                                                 </div>
                                                 <div class="flex justify-center">
                                                     <button id="btn-signing-clear" type="button" class="btn btn-secondary mr-5">Borrar</button>
+                                                    <button id="btn-signing-upload" type="button" class="btn btn-primary mr-5">Cargar</button>
                                                     <button id="btn-signing-save" type="button" class="btn btn-primary">Salvar</button>
                                                 </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
+                            </div>
+                            <div>
+                                <form id="image-form" action="{{ route('perfil.image') }}" method="POST" enctype="multipart/form-data" role="form" onSubmit="return false;">
+                                    @csrf
+                                    <input type="file" id="image" name="image" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setImage();">
+                                </form>                               
                             </div>
                             <!-- END: Display Information -->
 
@@ -268,7 +275,11 @@
                 e.preventDefault();              
                 var v = $(this).val();
                 $('input[name="page"]').val(v);
-            }); //btn-signing-clear            
+            }); //btn-signing-clear 
+            
+            $('body').on('click', '#btn-signing-upload', function (e) {
+                $('#image').trigger("click");
+            }); // btn-signing-upload
 
         }); // document
 
@@ -339,7 +350,28 @@
                     }                  
                 } // success
             }); // ajax         
-        } // setPassword Fx        
+        } // setPassword Fx 
+
+        function setImage() {
+            var form = $("#image-form");
+            $.ajax({
+                type: form.attr("method"),
+                data: new FormData(form[0]),
+                dataType: 'json',
+                url: form.attr("action"),
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                processData: false,
+                contentType: false,                
+                success: function(json) {
+                    console.dir(json);
+                    // if( json.success ) {
+                    //     setSuccessNotification('success', '', json.message);                                              
+                    // } else {
+                    //     setSuccessNotification('error', 'Oops!', json.message);
+                    // }                  
+                } // success
+            }); // ajax   
+        } // seImage Fx    
 
     </script>
 

@@ -46,7 +46,7 @@ class DashboardController extends Controller
                 
         if( $options['startpage'] == 1 ) {
             // Dashboard General
-            Log::debug('Go to Dashboard');
+            //Log::debug('Go to Dashboard');
             if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
                 $template = 'dashboard.master';
                 $admin = [
@@ -70,7 +70,7 @@ class DashboardController extends Controller
             ]);
         } else {  
             // Página configurada 
-            Log::debug('Go to Page '. $options['startpage']);         
+            //Log::debug('Go to Page '. $options['startpage']);         
             return view('dashboard.intro', [
                 'link' => $this->setPageLink($options['startpage']),
             ]);

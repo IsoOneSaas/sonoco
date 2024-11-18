@@ -110,6 +110,14 @@ class ProfileController extends Controller
         return response()->json($response);
     } // upload Method
 
+    public function image(Request $request)
+    {
+        $response = ['success' => false, 'message' => 'No se encontró imagen'];
+        $input = $request->all();
+        // TODO: Validar si es imagen, validar si tamaño se ajusta
+        return response()->json($response);
+    } // image Method            
+
     public function password(Request $request)
     {
         //Log::debug(['PASSWORD PROFILE ' =>$request->all()]);
