@@ -40,6 +40,7 @@ class ProfileController extends Controller
      */
     public function index() : View
     {
+        $pages = config('settings.user.pages');
         $profile = $this->profileRepo->get();
         $pickerDefault = [
             'format'    => 'YYYY-MM-DD',
@@ -47,7 +48,7 @@ class ProfileController extends Controller
             'min'       => date("Y") - 80,
             'start'     => ( isset($profile->birth) && ($profile->birth != '') ) ? 'data-start-date="'. $profile->birth .'"' : 'data-start-date=null',
         ];
-        return view('settings.profile.edit', compact('profile', 'pickerDefault'));            
+        return view('settings.profile.edit', compact('profile', 'pickerDefault', 'pages'));            
     } // index Method
 
     /**
@@ -67,7 +68,7 @@ class ProfileController extends Controller
     {
         $response = ['success' => true, 'message' => 'Testing...'];
         $input = $request->all();
-        Log::debug(['STORE PROFILE ' => $input]);
+        //Log::debug(['STORE PROFILE ' => $input]);
         if( $file = $request->file('avatar') ) {
             $fileInfo = $file->getClientOriginalName();        
             $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);

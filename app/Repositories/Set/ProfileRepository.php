@@ -119,7 +119,7 @@ class ProfileRepository implements ProfileRepositoryInterface
      */    
     public function update($id, array $data) 
     {
-        Log::debug(['UPDATE PROFILE ID' => $id, 'DATA' => $data]);
+        //Log::debug(['UPDATE PROFILE ID' => $id, 'DATA' => $data]);
         try {
             DB::beginTransaction();
             $profile = UserModel::find($id);

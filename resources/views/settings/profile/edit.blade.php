@@ -99,13 +99,11 @@
                                     </h2>
                                 </div>
                                 <div class="p-5">
-                                    <h6>Página de inicio</h6>
+                                    <h3 class="font-light text-lg mr-auto">Página de inicio</h3>
                                     <ul>
-                                        <li><input id="start-0" type="radio" name="start" value="0">&nbsp; Dashboard</li>
-                                        <li><input id="start-11" type="radio" name="start" value="11">&nbsp; Dashboard Documentos</li>
-                                        <li><input id="start-12" type="radio" name="start" value="12">&nbsp; Maestro de Documentos</li>
-                                        <li><input id="start-13" type="radio" name="start" value="13">&nbsp; Procesamiento Documentos</li>
-                                        <li><input id="start-14" type="radio" name="start" value="14">&nbsp; Maestro de Registros</li>
+                                        @foreach($pages as $page)
+                                        <li><input id="start-{{ $page['id'] }}" type="radio" name="start" value={{ $page['id'] }} >&nbsp; {{ $page['name'] }}</li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>                            

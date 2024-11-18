@@ -13,7 +13,7 @@
                 <div class="content background-dashboard">
                     <div class="intro-y col-span-11 alert alert-warning show flex items-center mb-6" role="alert">
                         <span><i data-lucide="info" class="w-4 h-4 mr-2"></i></span>
-                        <span>Bienvenido a ISO-ONE... un momento mientras se prepara su dashboard</span>
+                        <span>Bienvenido a ISO-ONE... un momento mientras se prepara su página inicial</span>
                     </div>                    
                     <div class="text-center">
                         <img id="loading-image" alt="Cargando..." class="h-auto max-w-xs mx-auto" width="140" height="140" src="{{ url('/assets/images/loading.gif') }}">
@@ -23,8 +23,10 @@
 @push('scripts-bottom')
 <script type="text/javascript">
     // Check if the page has loaded completely                                         
-    $(document).ready( function() { 
-        window.location.href = '/documentos/dashboard';
+    $(document).ready( function() {
+        var url = '{{ $link }}';
+        window.location.href = url;
+        //window.location.href = '/documentos/dashboard';
     }); 
 </script>               
 @endpush 

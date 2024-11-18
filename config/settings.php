@@ -12,6 +12,13 @@ return [
 
     'user' => [
         'startpage' => 11,
+        'pages' => [
+            0 => ['id' => 1, 'name' => 'Dashboard', 'link' => ''],
+            1 => ['id' => 11, 'name' => 'Dashboard documentos', 'link' => '/documentos/dashboard'],
+            2 => ['id' => 12, 'name' => 'Maestro de documentos', 'link' => '/documentos/master/listado'],
+            3 => ['id' => 13, 'name' => 'Procesamiento documentos', 'link' => '/documentos/control/documento'],
+            4 => ['id' => 14, 'name' => 'Maestro de registros', 'link' => '/registros/master/listado'],
+        ],
     ],
 
     /*

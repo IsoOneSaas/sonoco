@@ -27,44 +27,70 @@ class DashboardController extends Controller
         $this->tool = $Tools;
     } 
 
-    public function index(): View
+    public function index2(): View
     {
+        $user = AUTH::user();
+        $options = $user->options;
+        $link = $this->setPageLink($options['startpage']);
+        Log::debug(['PAGE' => $link]);
         return view('dashboard.intro');
     }    
 
     /**
      * Show the general docboard
      */
-    public function index2(): View
+    public function index(): View
     {
         $user = AUTH::user();
-        if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
-            $template = 'document.dashboard_admin';
-            $admin = [
-                'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
-                'SPR'   => $this->dashRepo->getSuggestionStatus(),
-                'OPR'   => $this->dashRepo->getSightingsStatus(),
-            ];
-        } else {
-            $template = 'document.dashboard_user';
-            $admin = [];
-        }
-
-        return view($template, [
-            'badgeEdit' => $this->setControlBadge('edit'),
-            'badgeReview' => $this->setControlBadge('review'),
-            'badgeApprove' => $this->setControlBadge('approve'),
-            'badgeMaster' => $this->tool->getBadgeMasterCount(),
-            'status' => $admin,
-            'documents' => $this->dashRepo->getFavorityDocuments(),
-            
-        ]);
+        $options = $user->options;
+                
+        if( $options['startpage'] == 1 ) {
+            // Dashboard General
+            Log::debug('Go to Dashboard');
+            if( $user->hasAnyRole('ADMIN','MASTER','SUPER') ) {
+                $template = 'dashboard.master';
+                $admin = [
+                    'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
+                    'SPR'   => $this->dashRepo->getSuggestionStatus(),
+                    'OPR'   => $this->dashRepo->getSightingsStatus(),
+                ];
+            } else {
+                $template = 'dashboard.user';
+                $admin = [];
+            }
+    
+            return view($template, [
+                'badgeEdit' => $this->setControlBadge('edit'),
+                'badgeReview' => $this->setControlBadge('review'),
+                'badgeApprove' => $this->setControlBadge('approve'),
+                'badgeMaster' => $this->tool->getBadgeMasterCount(),
+                'status' => $admin,
+                'documents' => $this->dashRepo->getFavorityDocuments(),
+                
+            ]);
+        } else {  
+            // Página configurada 
+            Log::debug('Go to Page '. $options['startpage']);         
+            return view('dashboard.intro', [
+                'link' => $this->setPageLink($options['startpage']),
+            ]);
+        }        
     } // index method
 
     public function setControlBadge($action)
     {
         return $this->tool->getBadgeControlCount($action);
     }
+
+    private function setPageLink($page)
+    {
+        $array = config('settings.user.pages');
+        $key = array_search($page, array_column($array, 'id'));
+        if( $key ) {
+            return $array[$key]['link'];
+        }
+        return $array[0]['link'];
+    } // setPageLink
 
 
     /** =================================================
