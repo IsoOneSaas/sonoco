@@ -1,12 +1,13 @@
 <?php namespace App\Http\Controllers\Set;
 
-//use App\Classes\ToolsClass;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-//use App\Http\Requests\StoreProfileRequest;
 use App\Interfaces\Set\ProfileRepositoryInterface;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Intervention\Image\ImageManager;
+//use Intervention\Image\Drivers\Imagick\Driver;
+use File;
 use Log;
 
 class ProfileController extends Controller
@@ -112,9 +113,48 @@ class ProfileController extends Controller
 
     public function image(Request $request)
     {
-        $response = ['success' => false, 'message' => 'No se encontró imagen'];
+        $manager = new ImageManager(
+            new \Intervention\Image\Drivers\Gd\Driver()
+            // https://image.intervention.io/v3/modifying/resizing#fitted-image-resizing
+        );       
+        $response = ['success' => false, 'message' => trans('profile.image.no-success')];
         $input = $request->all();
-        // TODO: Validar si es imagen, validar si tamaño se ajusta
+        Log::debug(['UPLOAD IMAGE ' => $input]);
+        
+        if ($file = $request->hasFile('image')) {
+            $file = $request->file('image');
+            $ext = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+            if( $ext == 'png' || $ext == 'PNG' ) {
+                $fileName = 'signature_'. $input['uid'] .'.'. $ext;   
+               //Log::debug(['FILENAME ' => $fileName, 'PATH' => $this->imagePath . $fileName]);
+                if ($file->move($this->imagePath, $fileName)) {
+                    $path = $this->imagePath . $fileName;
+                    if( File::exists($path) ) {
+                        $image = $manager->read($path);
+                        $height = $image->height();
+                        $width = $image->width();
+                        if( $width >= $height ) {
+                            $new = round( $height * 300/$width, 0 );
+                            $image->resize(300, $new);
+                        } else {
+                            $new = round( $width * 300/$height, 0 );
+                            $image->resize($new, 300);
+                        }
+                        $image->save($path);
+                        
+                        return response()->json(['success' => true, 'url' => $this->imageURI . $fileName, 'message' => trans('profile.image.success')]);
+                    } else {
+                        Log::error('Archivo de imagen no encontrado');
+                        return response()->json(['success' => false, 'message' => trans('profile.image.no-exists')]);
+                    }
+                } else {
+                    Log::error('Archivo de imagen no cargado');
+                    return response()->json(['success' => false, 'message' => trans('profile.image.no-move')]);
+                }  
+            } else {
+                return response()->json(['success' => false, 'message' => trans('profile.image.no-mime')]);
+            }                   
+        }        
         return response()->json($response);
     } // image Method            
 

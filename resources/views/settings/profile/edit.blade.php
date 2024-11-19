@@ -112,89 +112,87 @@
                         <!-- END: Profile Menu -->
                         <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
 
+                            <!-- BEGIN: Personal Information -->
+                            <div class="intro-y box mt-5">
+                                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                    <h2 class="font-medium text-base mr-auto">
+                                        Información Personal
+                                    </h2>
+                                </div>
+                                <div class="p-5">
+                                    <div class="flex flex-col-reverse xl:flex-row flex-col">
 
-                                <!-- BEGIN: Personal Information -->
-                                <div class="intro-y box mt-5">
-                                    <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                                        <h2 class="font-medium text-base mr-auto">
-                                            Información Personal
-                                        </h2>
-                                    </div>
-                                    <div class="p-5">
-                                        <div class="flex flex-col-reverse xl:flex-row flex-col">
-
-                                            <form id="user-form" action="{{ route('perfil.update', $profile->user_id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="hidden" name="page" value={{ $profile->page }} >
-                                            <div class="flex-1 mt-6 xl:mt-0">
-                                                <div class="grid grid-cols-12 gap-x-5">
-                                                    <div class="col-span-12 2xl:col-span-6">
-                                                        <div>
-                                                            <label for="update-profile-form-6" class="form-label">Email</label>
-                                                            <input id="update-profile-form-6" type="text" class="form-control" placeholder="Digite su correo electrónico" value="{{ $profile->email }}" disabled>
-                                                        </div>
-                                                        <div class="mt-3">
-                                                            <label for="update-profile-form-7" class="form-label">Nombre</label>
-                                                            <input id="update-profile-form-7" type="text"  name="name" class="form-control" placeholder="Digite su nombre completo" value="{{ $profile->name }}">
-                                                        </div>
+                                        <form id="user-form" action="{{ route('perfil.update', $profile->user_id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="page" value={{ $profile->page }} >
+                                        <div class="flex-1 mt-6 xl:mt-0">
+                                            <div class="grid grid-cols-12 gap-x-5">
+                                                <div class="col-span-12 2xl:col-span-6">
+                                                    <div>
+                                                        <label for="update-profile-form-6" class="form-label">Email</label>
+                                                        <input id="update-profile-form-6" type="text" class="form-control" placeholder="Digite su correo electrónico" value="{{ $profile->email }}" disabled>
                                                     </div>
-                                                    <div class="col-span-12 2xl:col-span-6 mb-3">
-                                                        <div class="mt-3 2xl:mt-0">
-                                                            <label for="update-profile-form-8" class="form-label">Género</label>
-                                                            <select id="update-profile-form-8" name="genre" class="form-select">
-                                                                <option value="">Seleccione género</option>
-                                                                <option value="F" @if( isset($profile->genre) && ($profile->genre == 'F') ) selected @endif >Femenino</option>
-                                                                <option value="M" @if( isset($profile->genre) && ($profile->genre == 'M') ) selected @endif >Masculino</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="mt-3">
-                                                            <label for="update-profile-form-9" class="form-label">Fecha nacimiento</label>
-                                                            <input id="update-profile-form-9" type="text" name="birth" class="datepicker form-control" data-single-mode="true" data-auto-apply="true" data-show-week-numbers="false" {{ $pickerDefault['start'] }} data-format="{{ $pickerDefault['format'] }}"  data-min-year="{{ $pickerDefault['min'] }}"  data-max-year="{{ $pickerDefault['max'] }}" placeholder="Digite su fecha de nacimiento" value="{{ $profile->birth ?? '' }}">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-span-12 2xl:col-span-6">
-                                                        <div class="mt-3 2xl:mt-0">
-                                                            <label for="update-profile-form-10" class="form-label">Teléfono fijo</label>
-                                                            <input id="update-profile-form-10" type="text" name="phone" class="form-control" placeholder="Digite su número telefonico" value="{{ $profile->phone ?? '' }}">
-                                                        </div>
-                                                        <div class="mt-3">
-                                                            <label for="update-profile-form-13" class="form-label">Teléfono Móvil</label>
-                                                            <input id="update-profile-form-13" type="text" name="mobile" class="form-control" placeholder="Digite su número móvil" value="{{ $profile->mobile ?? '' }}">                                                        
-                                                        </div>
-                                                    </div>                                              
-
-                                                    <div class="col-span-12">
-                                                        <div class="mt-3">
-                                                            <label for="update-profile-form-5" class="form-label">Dirección</label>
-                                                            <textarea id="update-profile-form-5" name="address" class="form-control" placeholder="Escriba su dirección">{{ $profile->address ?? '' }}</textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>                                                                                                      
-                                            </div>
-                                            </form>
-                                            <form id="avatar-form" action="{{ route('perfil.store') }}" method="POST" enctype="multipart/form-data" role="form" onSubmit="return false;">
-                                            @csrf
-                                            <input type="hidden" name="uid" value="{{ $profile->user_uid }}">
-                                            <div class="w-52 mx-auto xl:mr-0 xl:ml-6">
-                                                <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5">
-                                                    <div class="h-40 relative image-fit zoom-in mx-auto">
-                                                        <img id="avatar-img" class="rounded-md" alt="Avatar" src="{{ url($profile->avatar) }}">                                                    
-                                                    </div>
-                                                    <div class="mx-auto relative mt-5">
-                                                        <button type="button" class="btn btn-primary w-full cursor-pointer">Seleccionar</button>
-                                                        <input type="file" name="avatar" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setAvatar();">
+                                                    <div class="mt-3">
+                                                        <label for="update-profile-form-7" class="form-label">Nombre</label>
+                                                        <input id="update-profile-form-7" type="text"  name="name" class="form-control" placeholder="Digite su nombre completo" value="{{ $profile->name }}">
                                                     </div>
                                                 </div>
-                                            </div>
-                                            </form>
-                                        </div>                                   
-                                    </div>
-                                </div>
-                                <!-- END: Personal Information -->
-                            
+                                                <div class="col-span-12 2xl:col-span-6 mb-3">
+                                                    <div class="mt-3 2xl:mt-0">
+                                                        <label for="update-profile-form-8" class="form-label">Género</label>
+                                                        <select id="update-profile-form-8" name="genre" class="form-select">
+                                                            <option value="">Seleccione género</option>
+                                                            <option value="F" @if( isset($profile->genre) && ($profile->genre == 'F') ) selected @endif >Femenino</option>
+                                                            <option value="M" @if( isset($profile->genre) && ($profile->genre == 'M') ) selected @endif >Masculino</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <label for="update-profile-form-9" class="form-label">Fecha nacimiento</label>
+                                                        <input id="update-profile-form-9" type="text" name="birth" class="datepicker form-control" data-single-mode="true" data-auto-apply="true" data-show-week-numbers="false" {{ $pickerDefault['start'] }} data-format="{{ $pickerDefault['format'] }}"  data-min-year="{{ $pickerDefault['min'] }}"  data-max-year="{{ $pickerDefault['max'] }}" placeholder="Digite su fecha de nacimiento" value="{{ $profile->birth ?? '' }}">
+                                                    </div>
+                                                </div>
 
+                                                <div class="col-span-12 2xl:col-span-6">
+                                                    <div class="mt-3 2xl:mt-0">
+                                                        <label for="update-profile-form-10" class="form-label">Teléfono fijo</label>
+                                                        <input id="update-profile-form-10" type="text" name="phone" class="form-control" placeholder="Digite su número telefonico" value="{{ $profile->phone ?? '' }}">
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <label for="update-profile-form-13" class="form-label">Teléfono Móvil</label>
+                                                        <input id="update-profile-form-13" type="text" name="mobile" class="form-control" placeholder="Digite su número móvil" value="{{ $profile->mobile ?? '' }}">                                                        
+                                                    </div>
+                                                </div>                                              
+
+                                                <div class="col-span-12">
+                                                    <div class="mt-3">
+                                                        <label for="update-profile-form-5" class="form-label">Dirección</label>
+                                                        <textarea id="update-profile-form-5" name="address" class="form-control" placeholder="Escriba su dirección">{{ $profile->address ?? '' }}</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>                                                                                                      
+                                        </div>
+                                        </form>
+                                        <form id="avatar-form" action="{{ route('perfil.store') }}" method="POST" enctype="multipart/form-data" role="form" onSubmit="return false;">
+                                        @csrf
+                                        <input type="hidden" name="uid" value="{{ $profile->user_uid }}">
+                                        <div class="w-52 mx-auto xl:mr-0 xl:ml-6">
+                                            <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5">
+                                                <div class="h-40 relative image-fit zoom-in mx-auto">
+                                                    <img id="avatar-img" class="rounded-md" alt="Avatar" src="{{ url($profile->avatar) }}">                                                    
+                                                </div>
+                                                <div class="mx-auto relative mt-5">
+                                                    <button type="button" class="btn btn-primary w-full cursor-pointer">Seleccionar</button>
+                                                    <input type="file" name="avatar" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setAvatar();">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
+                                    </div>                                   
+                                </div>
+                            </div>
+                            <!-- END: Personal Information -->
+                            
 
                             <!-- BEGIN: Display Information -->
                             <div class="intro-y box lg:mt-5">
@@ -224,18 +222,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <form id="image-form" action="{{ route('perfil.image') }}" method="POST" enctype="multipart/form-data" role="form" onSubmit="return false;">
-                                    @csrf
-                                    <input type="file" id="image" name="image" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setImage();">
-                                </form>                               
-                            </div>
+
                             <!-- END: Display Information -->
 
                         </div>
                     </div>
                     <!-- END: Form -->
                 </div>
+                <div class="hidden">
+                    <form id="image-form" action="{{ route('perfil.image') }}" method="POST" enctype="multipart/form-data" role="form" onSubmit="return false;">
+                        @csrf
+                        <input type="hidden" name="uid" value="{{ $profile->user_uid }}">
+                        <input type="file" id="btn-file-upload" name="image" class="w-full h-full top-0 left-0 absolute opacity-0 cursor-pointer" onChange="setImage();">
+                    </form>
+                </div>                
                 <!-- END: Content -->
 
 @push('meta')                
@@ -243,7 +243,7 @@
 @endpush                
 
 @push('scripts-bottom')                
-<script src="{{ url('assets/js/signature_pad-4.1.5/signature_pad.umd.min.js') }}"></script>
+    <script src="{{ url('assets/js/signature_pad-4.1.5/signature_pad.umd.min.js') }}"></script>
     <script type="text/javascript">
         var $signaturePad = new SignaturePad(document.getElementById('signature-pad'));
         $(function () {  
@@ -278,7 +278,7 @@
             }); //btn-signing-clear 
             
             $('body').on('click', '#btn-signing-upload', function (e) {
-                $('#image').trigger("click");
+                $('#btn-file-upload').trigger("click");
             }); // btn-signing-upload
 
         }); // document
@@ -364,11 +364,12 @@
                 contentType: false,                
                 success: function(json) {
                     console.dir(json);
-                    // if( json.success ) {
-                    //     setSuccessNotification('success', '', json.message);                                              
-                    // } else {
-                    //     setSuccessNotification('error', 'Oops!', json.message);
-                    // }                  
+                    if( json.success ) {
+                        setSuccessNotification('success', '', json.message);
+                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());                                              
+                    } else {
+                        setSuccessNotification('error', 'Oops!', json.message);
+                    }                  
                 } // success
             }); // ajax   
         } // seImage Fx    

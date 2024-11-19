@@ -177,6 +177,7 @@ return [
 		Emadadly\LaravelUuid\LaravelUuidServiceProvider::class,     // Laravel Uuid https://github.com/EmadAdly/laravel-uuid
 		Yajra\DataTables\DataTablesServiceProvider::class,			// https://yajrabox.com/docs/laravel-datatables/10.0
 		Spatie\Permission\PermissionServiceProvider::class,         // https://spatie.be/docs/laravel-permission/v5/installation-laravel
+        
 		
     ])->toArray(),
 
@@ -194,7 +195,8 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,
-        'PDF' => Barryvdh\DomPDF\Facade::class,		
+        'PDF' => Barryvdh\DomPDF\Facade::class,	
+        
     ])->toArray(),
 
 ];

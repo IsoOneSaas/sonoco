@@ -19,7 +19,7 @@ return [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'no-file'       => 'No se encuentra archivo para cargar',
                 'no-mime'       => 'El archivo de avatar no es <em>jpg</em> o <em>jpeg</em>',
-                'no-move'       => 'No se pudo mover el archivo se su avatar a la carperta respectiva',
+                'no-move'       => 'No se pudo mover el archivo de su avatar a la carperta respectiva',
                 'no-exists'     => 'el archivo de avatar no se ha encontrado en el servidor',
                 'success'       => 'Se ha cargado el archivo de avatar correctamente',
     ],
@@ -27,8 +27,16 @@ return [
     'store' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'success'       => 'Firma de usuario actualizada correctamente',
-    ],     
+    ],
 
+    'image' => [
+                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                'no-mime'       => 'La extensión del archivo imagen debe ser PNG',
+                'no-move'       => 'No se pudo mover el archivo de su firma a la carperta respectiva',
+                'no-exists'     => 'el archivo de firma no se ha encontrado en el servidor',
+                'success'       => 'Se ha cargado el archivo de firma correctamente',
+    ],    
+    
     'delete' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'success'       => 'Archivo anexo eliminado correctamente',
