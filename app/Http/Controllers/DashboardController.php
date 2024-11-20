@@ -61,7 +61,7 @@ class DashboardController extends Controller
 
         // Documentos abiertos recientes
         $documents_array = $this->dashRepo->getDocuments($user->user_uid);
-        Log::debug(['DOCS' => $documents_array]);
+        //Log::debug(['DOCS' => $documents_array]);
 
         return view('dashboard.user', [
             'week' => $days_array,

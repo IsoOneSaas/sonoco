@@ -76,9 +76,20 @@
                                             </h2>
                                         </div>
                                         <div class="p-5">
-                                            @foreach($docs as $doc)
-                                            
-                                            @endforeach
+
+                                            <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
+                                                @foreach($docs as $doc)                                            
+                                                <li class="px-6 py-2  border-2">
+                                                    <div class="text-right"><span class="text-gray-500 text-xs">{{ $doc['date'] }}</span></div>
+                                                    <div class="flex justify-between">                                                                    
+                                                        <a href="{{ $doc['link'] }}"><span class="font-semibold text-lg">{{ $doc['code'] }}</span></a>
+                                                    </div>
+                                                    <a href="{{ $doc['link'] }}"><span class="text-gray-700">{{ $doc['name'] }}</span></a>
+                                                </li>                                            
+                                                @endforeach
+                                            </ul>                                        
+
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-span-6">

@@ -53,7 +53,7 @@ class DashboardRepository implements DashboardRepositoryInterface
 
     public function getEvents($uid, $start, $end, $today)
     {
-        Log::debug(['USER' =>  $uid, 'START' => $start .' 00:00:00', 'END' => $end .' 23:59:59']);
+        //Log::debug(['USER' =>  $uid, 'START' => $start .' 00:00:00', 'END' => $end .' 23:59:59']);
         $events_array = [];
         $icon_array = config('settings.document_status_texts');
 
@@ -102,16 +102,23 @@ class DashboardRepository implements DashboardRepositoryInterface
             ->get([
                 'documents.document_id',
                 'documents.name',
+                'documents.code',
+                'document_tracing.created_at as date',
             ]);
             
         if($documents) {
             foreach($documents as $document) {
                 $hash = $this->tool->setIdHash($document->document_id);
-                $docs_array[$document->document_id] = [
-                    'name' => $document->name,
-                    'link' => $this->openLink.$hash,
-                ];
-                if( count($docs_array) == $this->docsTake ) break;
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $document->date);
+                if( !key_exists($document->document_id, $docs_array) ) {
+                    $docs_array[$document->document_id] = [
+                        'name' => $document->name,
+                        'code' => $document->code,
+                        'date' => $dt->diffForHumans(Carbon::now()),
+                        'link' => $this->openLink.$hash,
+                    ];
+                    if( count($docs_array) == $this->docsTake ) break;
+                }                
             } // foreach
         } // if
         return $docs_array;
