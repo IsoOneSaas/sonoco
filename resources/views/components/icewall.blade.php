@@ -397,7 +397,13 @@
                 <nav class="side-nav">
                     <ul>
                         <li>
-                            <a href="{{ url('dashboard') }}" class="side-menu @if( request()->route()->getName() == 'dashboard' ) side-menu--active @endif">
+                            <a href="{{ url('dashboard') }}" class="side-menu @if( request()->route()->getName() == 'home' ) side-menu--active @endif">
+                                <div class="side-menu__icon"> <i data-lucide="home"></i> </div>
+                                <div class="side-menu__title"> Home </div>
+                            </a>
+                        </li>                         
+                        <li>
+                            <a href="{{ route('documents.dashboard') }}" class="side-menu @if( request()->route()->getName() == 'dashboard' ) side-menu--active @endif">
                                 <div class="side-menu__icon"> <i data-lucide="gauge"></i> </div>
                                 <div class="side-menu__title"> Dashboard </div>
                             </a>

@@ -4,6 +4,8 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Document\DashboardRepositoryInterface;
 use App\Http\Controllers\Controller;
 //use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,26 +22,48 @@ class DashboardController extends Controller
 {
     protected $dashRepo;
     private $tool;
+    private $days;
 
     public function __construct(DashboardRepositoryInterface $dashRepository, ToolsClass $Tools) 
     {
         $this->dashRepo = $dashRepository;
         $this->tool = $Tools;
+        $this->days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     } 
 
-    public function index2(): View
+    public function index(): View
     {
         $user = AUTH::user();
         $options = $user->options;
         $link = $this->setPageLink($options['startpage']);
         Log::debug(['PAGE' => $link]);
-        return view('dashboard.intro');
+
+        // Agenda
+        $now = Carbon::now();
+        $actualDay = $now->format('d');
+        $startDay = $now->startOfWeek()->format('d');
+        Log::debug(['D1' => $actualDay, 'D0' => $startDay]);
+        $days_array = [];
+        $n = $startDay;
+        foreach( $this->days as $day ) {
+            $days_array[] = [
+                'name' => $day,
+                'number' => $n,
+                'today' => ( $n == $actualDay ) ? true : false,
+                'events' => [],
+            ];
+            $n++;
+        }
+
+        return view('dashboard.user', [
+            'week' => $days_array,
+        ]);
     }    
 
     /**
      * Show the general docboard
      */
-    public function index(): View
+    public function index2(): View
     {
         $user = AUTH::user();
         $options = $user->options;
