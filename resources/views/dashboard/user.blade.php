@@ -36,23 +36,27 @@
                                                         </span>
                                                         <div class='flex items-center px-4 py-4'>
                                                             <div class='text-center'>
-                                                                <p class='text-gray-100 text-sm'> {{ $day['name'] }} </p>
-                                                                <p class='text-gray-100  mt-3 font-bold'> {{ $day['number'] }} </p>
-                                                                <div>
-                                                                    <p>Este es un evento</p>
-                                                                </div>                                                                
+                                                                <p class='text-gray-100 text-lg'> {{ $day['name'] }} </p>
+                                                                <p class='text-gray-100 text-xl  mt-1 mb-3 font-bold'> {{ $day['number'] }} </p>                                                                
+                                                                @foreach( $day['events'] as $event )
+                                                                <div class="flex justify-center">
+                                                                    <a href="{{ $event['link'] }}" class="btn btn-{{ $event['color'] }} w-50 mr-2 mb-2"> <i data-lucide="{{ $event['icon'] }}" class="w-8 h-8 mr-2"></i> <span class="text-sm">{{ $event['code'] }}</span> </a>
+                                                                </div>                                                                     
+                                                                @endforeach                                                               
                                                             </div>
                                                         </div>
                                                     </div>                                                    
                                                     @else
-                                                    <div class='flex group hover:bg-purple-500 hover:shadow-lg hover-dark-shadow rounded-lg mx-1 transition-all	duration-300	 cursor-pointer justify-center w-full'>
+                                                    <div class='flex group hover:bg-purple-500 hover:shadow-lg hover-dark-shadow rounded-lg mx-1 transition-all	duration-300 justify-center w-full'>
                                                         <div class='flex items-center px-4 py-4'>
                                                             <div class='text-center'>
-                                                            <p class='text-gray-900 group-hover:text-gray-100 text-sm transition-all	duration-300'>{{ $day['name'] }} </p>
-                                                            <p class='text-gray-900 group-hover:text-gray-100 mt-3 group-hover:font-bold transition-all	duration-300'> {{ $day['number'] }} </p>
-                                                            <div>
-                                                                    
-                                                            </div>
+                                                                <p class='text-gray-900 group-hover:text-gray-100 text-lg transition-all duration-300'>{{ $day['name'] }} </p>
+                                                                <p class='text-gray-900 group-hover:text-gray-100 text-xl mt-1 mb-3 group-hover:font-bold transition-all  duration-300'> {{ $day['number'] }} </p>
+                                                                @foreach( $day['events'] as $event )
+                                                                <div class="flex justify-center">
+                                                                    <a href="{{ $event['link'] }}" class="btn btn-{{ $event['color'] }} w-50 mr-2 mb-2"> <i data-lucide="{{ $event['icon'] }}" class="w-8 h-8 mr-2"></i> <span class="text-sm">{{ $event['code'] }}</span> </a>
+                                                                </div>                                                                     
+                                                                @endforeach
                                                             </div>
                                                         </div>
                                                     </div>                                                    
@@ -72,8 +76,9 @@
                                             </h2>
                                         </div>
                                         <div class="p-5">
-                                            <h2>Contenido</h2>
-                                        </div>
+                                            @foreach($docs as $doc)
+                                            
+                                            @endforeach
                                     </div>
                                 </div>
                                 <div class="col-span-6">

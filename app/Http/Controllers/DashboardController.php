@@ -1,10 +1,11 @@
 <?php namespace App\Http\Controllers;
 
 use App\Classes\ToolsClass;
-use App\Interfaces\Document\DashboardRepositoryInterface;
+use App\Interfaces\DashboardRepositoryInterface;
 use App\Http\Controllers\Controller;
 //use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -22,13 +23,11 @@ class DashboardController extends Controller
 {
     protected $dashRepo;
     private $tool;
-    private $days;
 
     public function __construct(DashboardRepositoryInterface $dashRepository, ToolsClass $Tools) 
     {
         $this->dashRepo = $dashRepository;
         $this->tool = $Tools;
-        $this->days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     } 
 
     public function index(): View
@@ -36,27 +35,37 @@ class DashboardController extends Controller
         $user = AUTH::user();
         $options = $user->options;
         $link = $this->setPageLink($options['startpage']);
-        Log::debug(['PAGE' => $link]);
+        //Log::debug(['PAGE' => $link]);
 
         // Agenda
+        $days_array = [];
         $now = Carbon::now();
         $actualDay = $now->format('d');
-        $startDay = $now->startOfWeek()->format('d');
-        Log::debug(['D1' => $actualDay, 'D0' => $startDay]);
-        $days_array = [];
-        $n = $startDay;
-        foreach( $this->days as $day ) {
+        $startDay = $now->startOfWeek()->format('Y-m-d');
+        $endDay = $now->endOfWeek()->format('Y-m-d');
+        $period = CarbonPeriod::create($startDay, $endDay);
+        //Log::debug(['D1' => $actualDay, 'D0' => $startDay]);
+        
+        // Eventos de Documentos
+        $events = $this->dashRepo->getEvents($user->user_uid, $startDay, $endDay, $actualDay);
+        foreach ($period as $date) {
+            $n = $date->format('d');            
             $days_array[] = [
-                'name' => $day,
-                'number' => $n,
+                'name' => $date->dayName,
+                'number' => $n, 
                 'today' => ( $n == $actualDay ) ? true : false,
-                'events' => [],
+                'events' => ( key_exists($n, $events) ) ? $events[$n] : [],
             ];
-            $n++;
-        }
+        } // foreach
+        //Log::debug(['WEEK' => $days_array]);
+
+        // Documentos abiertos recientes
+        $documents_array = $this->dashRepo->getDocuments($user->user_uid);
+        Log::debug(['DOCS' => $documents_array]);
 
         return view('dashboard.user', [
             'week' => $days_array,
+            'docs' => $documents_array,
         ]);
     }    
 
