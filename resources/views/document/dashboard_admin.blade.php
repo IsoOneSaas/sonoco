@@ -178,7 +178,7 @@
             font-size: 0.9em;
         }          
     </style>
-@endpush                
+@endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/chart-2.9.4/2.9.4/chart.js') }}"></script>

@@ -24,9 +24,8 @@
 <script type="text/javascript">
     // Check if the page has loaded completely                                         
     $(document).ready( function() {
-        //var url = '{ { $link } }';
-        //window.location.href = url;
-        //window.location.href = '/documentos/dashboard';
+        var url = '{{ $link }}';
+        window.location.href = url;
     }); 
 </script>               
 @endpush 

@@ -32,6 +32,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register(): void
     {
         // General
+        $this->app->bind(\App\Interfaces\HomeRepositoryInterface::class, \App\Repositories\HomeRepository::class);         
         $this->app->bind(\App\Interfaces\DashboardRepositoryInterface::class, \App\Repositories\DashboardRepository::class);         
         // Settings
         $this->app->bind(LocationRepositoryInterface::class, LocationRepository::class);

@@ -397,13 +397,13 @@
                 <nav class="side-nav">
                     <ul>
                         <li>
-                            <a href="{{ url('dashboard') }}" class="side-menu @if( request()->route()->getName() == 'home' ) side-menu--active @endif">
+                            <a href="{{ url('home') }}" class="side-menu @if( request()->route()->getName() == 'home' ) side-menu--active @endif">
                                 <div class="side-menu__icon"> <i data-lucide="home"></i> </div>
                                 <div class="side-menu__title"> Home </div>
                             </a>
                         </li>                         
                         <li>
-                            <a href="{{ route('documents.dashboard') }}" class="side-menu @if( request()->route()->getName() == 'dashboard' ) side-menu--active @endif">
+                            <a href="{{ route('documents.dashboard') }}" class="side-menu @if( request()->route()->getName() == 'documents.dashboard' ) side-menu--active @endif">
                                 <div class="side-menu__icon"> <i data-lucide="gauge"></i> </div>
                                 <div class="side-menu__title"> Dashboard </div>
                             </a>
@@ -561,10 +561,12 @@
                 <button id="basic-non-sticky-notification-toggle" class="" style="display:none">X</button>
                 <div id="success-notification-content" class="toastify-content hidden flex"><i id="success-message-icon" class="text-success" data-lucide="check-circle"></i> <div class="ml-4 mr-4"><div id="success-message-1" class="font-medium">Message Saved!</div><div id="success-message-2" class="text-slate-500 mt-1">The message will be sent in 5 minutes.</div></div></div>
                 <button id="success-notification-toggle" class="" style="display:none">X</button>
+
                 <!-- BEGIN: Content -->
                 {{ $slot }}
                 <!-- END: Content -->
             </div>
+
             <!-- BEGIN: ISO-ONE Content -->
 
             <!-- END: ISO-ONE Content -->

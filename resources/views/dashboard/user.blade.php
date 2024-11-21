@@ -2,11 +2,11 @@
 <x-icewall>
 
     <x-slot:title>
-            Dashboard de Usuario
+            Inicio de Usuario
     </x-slot:title>
 
     <x-slot:breadcrumb>
-        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        <li class="breadcrumb-item active" aria-current="page">Inicio</li>
     </x-slot:breadcrumb>       
 
                 <!-- BEGIN: Content -->
