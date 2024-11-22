@@ -187,7 +187,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // REGISTROS
         Route::group(['prefix' => 'registro', 'as' => 'records.'], function () {
-            Route::get('listado', [\App\Http\Controllers\Document\ModelController::class, 'index'])->name('index');
+            Route::get('listado', [\App\Http\Controllers\Document\RecordModelController::class, 'index'])->name('index');
+            Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'render'])->name('index.render');
         });
     });  
 });

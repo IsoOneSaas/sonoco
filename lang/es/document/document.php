@@ -338,6 +338,7 @@ return [
         'row_sight' => 'Seleccione el documento para revisar comentarios',
         'row_sheet' => 'Seleccione el documento para ver la ficha técnica',
         'row_publish' => 'El documento seleccionado no ha sido publicado',
+        'row_create' => 'Seleccione un documento para crear su registro',
         'title_edit' => 'Documentos para Editar',
         'head_edit' => 'Listado de Documentos para Editar',
         'title_review' => 'Documentos para Revisar',

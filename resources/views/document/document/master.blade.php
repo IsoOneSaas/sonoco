@@ -20,6 +20,7 @@
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-modal-suggestion" title="Sugerir documento"><i data-lucide="file-plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-record" title="Crear registro"><i data-lucide="library" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -130,6 +131,7 @@
                                                 <th>H</th>
                                                 <th>A</th>
                                                 <th>T</th>
+                                                <th>R</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -143,6 +145,7 @@
                                                 <th class="th-filter">H</th>
                                                 <th class="th-filter">A</th>
                                                 <th class="th-filter">T</th>
+                                                <th class="th-filter">R</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -158,6 +161,7 @@
                                                 <th>H</th>
                                                 <th>A</th>
                                                 <th>T</th>
+                                                <th>R</th>
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -545,6 +549,17 @@
             }
         }); // btn-view
 
+        // Redirigir a la creación de registro
+        $('#btn-record').on("click", function() {
+            var rowdata = $myTable.rows('.selected').data()[0];            
+            console.log(rowdata);
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/document.grid.row_create') }}");
+            } else {            
+                $(location).attr('href', '/documentos/registros/crear/'+rowdata.hash); // FIXME: route
+            }
+        }); // btn-record
+
         // UTILIDADES        
         $("#btn-download").on("click", function() {
             $myTable.button('.buttons-excel').trigger();
@@ -564,11 +579,19 @@
         
         // Seleccionar fila
         $('#documents-table').on('click', 'tr', function () {
+            var data = $myTable.row(this).data();
+            //console.log('RECO: '+ data.record);
             if ( $(this).hasClass('selected') ) {
                 $(this).removeClass('selected');
+                $('#btn-record').addClass('iso-disabled');
             } else {
                 $myTable.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');                
+                $(this).addClass('selected'); 
+                if( data.record == 1 ) {
+                    $('#btn-record').removeClass('iso-disabled');
+                }  else {
+                    $('#btn-record').addClass('iso-disabled');
+                }             
             } // if selected
         }); // row selects
 

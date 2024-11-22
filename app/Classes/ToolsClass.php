@@ -960,7 +960,7 @@ class ToolsClass
                     $pids = $pids_array;
                 } else {
                                       
-                    Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
+                    //Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
 
                     foreach($params['pids'] as $pid) {
                         if( in_array($pid, $pids_array) ) {

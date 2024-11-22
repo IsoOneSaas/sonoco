@@ -89,6 +89,9 @@ return [
     'document_type_categories' => [
         'externo', 'formato', 'instructivo', 'manual', 'procedimiento', 'registro',
     ],
+    'document_record_categories' => [
+        'formato', 'registro',
+    ],    
     'document_expire_alarm' => 30,  // days
     'document_validity_lapse_val' => 1,
     'document_validity_lapse_txt' => 'year', 

@@ -1,8 +1,8 @@
-<!-- resources/views/document/master.blade.php -->
+<!-- resources/views/document/index.blade.php -->
 <x-icewall>
 
     <x-slot:title>
-        Listado Maestro de Documentos Publicados
+        Listado Maestro de Registros
     </x-slot:title>
 
     <x-slot:breadcrumb>
@@ -14,11 +14,10 @@
                 <div class="content">
                     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
                         <h2 class="text-lg font-medium mr-auto">
-                            Listado Maestro de Documentos Publicados
+                            Listado Maestro de Registros
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-modal-suggestion" title="Sugerir documento"><i data-lucide="file-plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
@@ -51,7 +50,7 @@
 
                                         <div class="accordion-item">
                                             <div id="faq-accordion-content-6" class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en documentos</span></button>
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en registros</span></button>
                                             </div>
                                             <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
 
@@ -116,7 +115,7 @@
 
                                     <br />
                                     <!-- BEGIN: DataTables -->
-                                    <table id="documents-table" class="table table-bordered" style="width:100%">
+                                    <table id="records-table" class="table table-bordered" style="width:100%">
                                         <thead>
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
@@ -170,65 +169,6 @@
                     </div>
                     <!-- END: HTML Table Data -->
 
-                    <!-- BEGIN: Modal Suggestion -->
-                    <div id="modal-suggestions" class="modal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-xl">
-                            <div class="modal-content">
-                                <!-- BEGIN: Modal Header -->
-                                <div class="modal-header">
-                                    <h2 id="modal-suggestions-title" class="font-medium text-base mr-auto">Editar sugerencia de nuevo documento</h2>
-                                </div>
-                                <!-- END: Modal Header -->
-                                <!-- BEGIN: Modal Body -->
-                                <div class="modal-body intro-y box p-5 mt-5">
-                                    <form id="uploadForm" method="post" action="{{ route('documents.control.solicitud.store') }}" enctype="multipart/form-data" class="dropzone">
-                                        @csrf
-
-                                        <div class="input-group mt-0">
-                                            <div id="document" class="input-group-text flex"><i data-lucide="{{ trans('document/suggestion.form.document.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/suggestion.form.document.title') }}</div>
-                                            <input type="text"  name="document" value="{{ old('document') }}" class="form-control  w-full" aria-describedby="document" placeholder="{{ trans('document/suggestion.form.document.placeholder') }}" minlength="2" maxlength="255" required>
-                                            <div id="input-group-11" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/suggestion.form.document.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                                            
-                                        
-                                            <div id="system" class="input-group-text flex ml-4"><i data-lucide="{{ trans('document/suggestion.form.system.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/suggestion.form.system.title') }}</div>
-                                            <select  name="system_id" class="form-control w-full" required>                                                
-                                                <option value="">{{ trans('document/suggestion.form.system.placeholder') }}</option>
-                                                @foreach($systems as $system)   
-                                                <option value={{ $system->system_id }} {{ old('system_id') == $system->system_id ? 'selected ' : '' }}>{{ $system->name }}</option>
-                                                @endforeach
-                                            </select> 
-                                            <div id="input-group-12" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/suggestion.form.system.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                                        
-                                        </div>
-                                        <div class="input-group mt-3">
-                                            <div id="justification" class="input-group-text flex"><i data-lucide="{{ trans('document/suggestion.form.justification.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/suggestion.form.justification.title') }}</div>
-                                            <textarea name="justification" class="form-control  w-full" aria-describedby="name" placeholder="{{ trans('document/suggestion.form.justification.placeholder') }}" rows="3" minlength="8" required>{{ old('justification') }}</textarea>
-                                            <div id="input-group-21" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/suggestion.form.justification.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>
-                                        <div class="input-group mt-3">
-                                            <div id="name" class="input-group-text flex"><i data-lucide="{{ trans('document/suggestion.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/suggestion.form.name.title') }}</div>
-                                            <input type="text"  name="name" value="{{ old('name') }}" class="form-control  w-full" aria-describedby="name" placeholder="{{ trans('document/suggestion.form.name.placeholder') }}" minlength="2" maxlength="255">
-                                            <div id="input-group-31" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/suggestion.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>   
-                                        </div>
-
-                                        <div id="upload-zone" >
-                                            <div class="dz-default dz-message"><h4>Mueva el archivo anexo aquí para ser cargado</h4></div>
-                                        </div>
-                                    </form>
-                                </div>
-                                <!-- END: Modal Body -->
-                                <!-- BEGIN: Modal Footer -->
-                                <div class="modal-footer">
-                                    <button id="btn-suggestion-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary mr-1">Cancelar</button>
-                                    <button id="btn-suggestion-clear" type="button" class="btn btn-outline-secondary mr-1">Limpiar</button>
-                                    <button id="btn-suggestion-ok" type="button" form="uploadForm" class="btn btn-primary">Salvar</button>
-                                    <a id="modal-suggestions-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-suggestions" class="">.</a>
-
-                                </div>
-                                <!-- END: Modal Footer -->
-                            </div>
-                        </div>
-                    </div>
-                    <!-- END: Modal Suggestion -->
-
                 </div>
                 <!-- END: Content -->
 @push('meta')                
@@ -243,40 +183,7 @@
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
-    <style>
-            span.deleteicon {
-                position: relative;
-                display: inline-flex;
-                align-items: center;                
-            }
-            span.deleteicon span {
-                position: absolute;
-                display: block;
-                right: 3px;
-                width: 15px;
-                height: 15px;
-                border-radius: 50%;
-                color: #fff;
-                background-color: #ccc;
-                font: 13px monospace;
-                text-align: center;
-                line-height: 1em;
-                cursor: pointer;
-                
-            }
-            span.deleteicon input {
-                padding-right: 18px;
-                box-sizing: border-box;
-            }
-            .iso-input {
-                padding: 0.15em 0.6em; 
-                font-size: 0.95em; 
-                border-radius: 5px;                
-            }
-            .input-filter {
-                width: 100%
-            }            
-        </style>    
+   
 @endpush
 
 @push('scripts-bottom')
@@ -307,7 +214,7 @@
     var $columnAlert = 9;
     var $columnSort = 10;
     var $lang = {!! $gridLanguage !!};
-    var $route = "{{ route('documents.master.index.render', ':slug') }}";
+    var $route = "{{ route('records.index.render', ':slug') }}";
 
     $(function () {
         let columnsDef = {!! $gridColDef !!};
@@ -316,34 +223,34 @@
         var startTime = Date.now();
                        
         var sCol = null;
-        var sCol = isoGetStorage('iso_masterReturnCol');
-        var sDir = isoGetStorage('iso_masterReturnDir');
-        var initPage = ( isoGetStorage('iso_masterReturnPage') === null ) ? 1 : isoGetStorage('iso_masterReturnPage'); 
+        var sCol = isoGetStorage('iso_recordReturnCol');
+        var sDir = isoGetStorage('iso_recordReturnDir');
+        var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage'); 
         var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ $columnSort, sDir]]; // sCol
-        var initRecords = ( isoGetStorage('iso_masterReturnRows') === null ) ? 10 : isoGetStorage('iso_masterReturnRows');
+        var initRecords = ( isoGetStorage('iso_recordReturnRows') === null ) ? 10 : isoGetStorage('iso_recordReturnRows');
 
         // Sistema
-        var sidsStoraged = isoGetStorage('iso_masterSystems');
+        var sidsStoraged = isoGetStorage('iso_recordSystems');
         var sidsArray = setStorageArray("system-selected", sidsStoraged);   
 
         // Procesos       
-        var pidsStoraged = isoGetStorage('iso_masterProcesses');        
+        var pidsStoraged = isoGetStorage('iso_recordProcesses');        
         var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
         
         // Localizaciones               
-        var lidsStoraged = isoGetStorage('iso_masterLocations');
+        var lidsStoraged = isoGetStorage('iso_recordLocations');
         var lidsArray = setStorageArray("location-selected", lidsStoraged);  
 
         // Tipos
-        var tidsStoraged = isoGetStorage('iso_masterTypes');
+        var tidsStoraged = isoGetStorage('iso_recordTypes');
         var tidsArray = setStorageArray("type-selected", tidsStoraged);                  
         
         // Rango In
-        var dateIn = isoGetStorage('iso_masterDatein');
+        var dateIn = isoGetStorage('iso_recordDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
         
         // Rango Out
-        var dateOut = isoGetStorage('iso_masterDateout');
+        var dateOut = isoGetStorage('iso_recordDateout');
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;       
 
         // DATATABLES
@@ -351,7 +258,7 @@
 
         console.log('Datatables init starts now: ', Date.now() - startTime);
 
-        $myTable = $('#documents-table')
+        $myTable = $('#records-table')
         .on('preXhr.dt', function () {
             console.log('Send ajax request ', Date.now() - startTime + ' milliseconds.');
         })
@@ -461,7 +368,7 @@
         }); // datatables
         
         // Filtros : generación
-        $('#documents-table thead tr:eq(1) th').each( function (i) {
+        $('#records-table thead tr:eq(1) th').each( function (i) {
             var tag;
             var item = columnsDef[i+1];
             //console.dir(item);
@@ -534,11 +441,11 @@
                 // Storage
                 var info = $myTable.page.info();
                 var order = $myTable.order();             
-                isoSetStorage('iso_masterReturnUrl', isoGetCurrentURL());
-                isoSetStorage('iso_masterReturnPage', info.page);
-                isoSetStorage('iso_masterReturnCol', order[0][0]);
-                isoSetStorage('iso_masterReturnDir', order[0][1]);
-                isoSetStorage('iso_masterReturnRows', info.length);
+                isoSetStorage('iso_recordReturnUrl', isoGetCurrentURL());
+                isoSetStorage('iso_recordReturnPage', info.page);
+                isoSetStorage('iso_recordReturnCol', order[0][0]);
+                isoSetStorage('iso_recordReturnDir', order[0][1]);
+                isoSetStorage('iso_recordReturnRows', info.length);
                 // Ref
                 uri = uri.replace(':hash', hash);
                 location.href = uri;                                 
@@ -563,7 +470,7 @@
         }));        
         
         // Seleccionar fila
-        $('#documents-table').on('click', 'tr', function () {
+        $('#records-table').on('click', 'tr', function () {
             if ( $(this).hasClass('selected') ) {
                 $(this).removeClass('selected');
             } else {
@@ -599,13 +506,13 @@
                 $myTable.state.clear();
 
                 // Store            
-                isoSetStorage('iso_masterSystems', sidsValue);
-                isoSetStorage('iso_masterProcesses', pidsArray);
-                isoSetStorage('iso_masterLocations', lidsArray);
-                isoSetStorage('iso_masterTypes', tidsArray);
-                isoSetStorage('iso_masterDatein', $dateInDefault);
-                isoSetStorage('iso_masterDateout', $dateOutDefault); //
-                isoSetStorage('iso_masterReturnRows', info.length);
+                isoSetStorage('iso_recordSystems', sidsValue);
+                isoSetStorage('iso_recordProcesses', pidsArray);
+                isoSetStorage('iso_recordLocations', lidsArray);
+                isoSetStorage('iso_recordTypes', tidsArray);
+                isoSetStorage('iso_recordDatein', $dateInDefault);
+                isoSetStorage('iso_recordDateout', $dateOutDefault); //
+                isoSetStorage('iso_recordReturnRows', info.length);
             } else {
                 swal({
                     icon: "error",
@@ -626,13 +533,6 @@
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });
         
-
-        // GEMERA EL MODAL PARA OBSERVACIONES
-        $('body').on('click', '#btn-modal-suggestion', function (e) {
-            e.preventDefault();
-            $('#uploadForm')[0].reset();
-            $("#modal-suggestions-open")[0].click();
-        });
                         
     }); // document
 
@@ -691,7 +591,6 @@
 @if ($message = Session::get('alert'))
     <script>
         setSuccessNotification('error', 'Oops!', '{!! $message !!}');
-        $("#modal-suggestions-open")[0].click();
     </script> 
 @endif 
 

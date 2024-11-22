@@ -57,6 +57,7 @@ class MasterRepository implements MasterRepositoryInterface
         $target = config('settings.document_status.publish');
         $light = false;
         $params = json_decode($slug, true);
+        $records_array = config('settings.document_record_categories');
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
@@ -71,7 +72,6 @@ class MasterRepository implements MasterRepositoryInterface
                 $date = '';
             } else {
                 // Publicación
-                //$status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
                 $status = $document->status()->where('action', $target)->first(['action_date']);
                 if($status) {
                     $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
@@ -86,16 +86,7 @@ class MasterRepository implements MasterRepositoryInterface
             
 
             if($date) {
-                
-                // Keywords
-                // $output = '';
-                // $tags = $document->tags;
-                // if($tags) {
-                //     foreach($tags as $tag) {
-                //         $output .= $tag->tag .' ';
-                //     }
-                // }
-                
+                                
                 $data[$i]['document_id'] = $document->document_id;
 
                 $data[$i]['DT_RowIndex'] = $i+1;
@@ -108,12 +99,12 @@ class MasterRepository implements MasterRepositoryInterface
                 $data[$i]['life']  = $val['date'];
 
                 $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
-                //$data[$i]['system_id']  = $document->system_id; 
-                //$data[$i]['location_id']  = $document->location_id;
                 $data[$i]['alert']  = $val['status'];
-                //$data[$i]['keys']  = $output;
 
                 $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
+
+                // Record 
+                $data[$i]['record'] = ( in_array($document->type->category, $records_array) ) ? 1 : 0;
 
                 $i++;
             } // if $date valid
