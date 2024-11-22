@@ -553,6 +553,22 @@
                             </ul>
                         </li>
 
+                        <li>
+                            <a href="javascript:;" class="side-menu @if( Str::contains( request()->route()->getName(), 'records.') ) side-menu--active @endif ">
+                                <div class="side-menu__icon"> <i data-lucide="clipboard-type"></i> </div>
+                                <div class="side-menu__title"> Registros <i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
+                            </a>                            
+                            <ul class=" @if( Str::contains( request()->route()->getName(), 'records.') ) side-menu__sub-open @endif ">
+                                <li>
+                                    <a href="{{ route('records.index') }}" class="side-menu @if( request()->route()->getName() == 'documents.master') side-menu--active @endif ">
+                                        
+                                        <div class="side-menu__icon"> <i data-lucide="library"></i> </div>
+                                        <div class="side-menu__title"> Listado Maestro </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>                        
+
                         <li class="side-nav__devider my-6"></li>
                     </ul>
                 </nav>

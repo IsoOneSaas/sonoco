@@ -183,8 +183,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::get('test', [\App\Http\Controllers\Document\MasterController::class, 'test'])->name('test');
             Route::get('test2', [\App\Http\Controllers\Document\MasterController::class, 'test2'])->name('test2');
-        });            
+        });
         
+        // REGISTROS
+        Route::group(['prefix' => 'registro', 'as' => 'records.'], function () {
+            Route::get('listado', [\App\Http\Controllers\Document\ModelController::class, 'index'])->name('index');
+        });
     });  
 });
 
