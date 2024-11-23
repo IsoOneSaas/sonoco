@@ -4,6 +4,8 @@ interface RecordRepositoryInterface
 {
     public function render($slug);
 
+    public function store(array $data);
+
     public function setDocument($hash, $slug1, $id, $slug2);
 
     public function getSystemsList();

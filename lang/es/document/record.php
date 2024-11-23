@@ -11,16 +11,9 @@ return [
     |
     */
 
-    'create' => [
+    'store' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'no-users'      => 'Se ha presentado un error. Hay una inconsistencia al seleccionar usuarios para :txt',
-                'success'       => 'Documento salvado correctamente',
-                'exists'        => 'Documento ya existe con este código y versión',
-    ],
-
-    'update' => [
-                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'success'       => 'Documento actualizado correctamente',
+                'success'       => 'Registro salvado correctamente',
     ],
     
     'get' => [
@@ -42,8 +35,8 @@ return [
         'name'         =>  [
                             'icon'          => 'bookmark',
                             'title'         => 'Nombre',
-                            'placeholder'   => 'Digite el nombre del documento',
-                            'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 64 caracteres',
+                            'placeholder'   => 'Digite el nombre del registro',
+                            'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
         ],    
         
     ],    

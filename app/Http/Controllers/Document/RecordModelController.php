@@ -4,7 +4,10 @@ use App\Classes\ToolsClass;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Interfaces\Document\RecordRepositoryInterface;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 
 class RecordModelController extends Controller
 {
@@ -73,6 +76,9 @@ class RecordModelController extends Controller
         
         // Obtener datos del documento original
         $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
+
+        //Log::debug(['SETTINGS' => $this->set]);
+        Log::debug(['SETTINGS' => $this->set]);
         
         // View
         return view('document.record.edit', [
@@ -82,9 +88,50 @@ class RecordModelController extends Controller
             'groups'    => $groups,
             'origin'    => $slug1,
 
-            'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed']],
+            //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
         ]);         
-    } // set Method    
+    } // set Method
+    
+    /**
+     * Almacenamiento de la información del registro
+     * @param  json \iso\Http\Requests\DocumentRecordRequest $request Datos validados del formulario
+     * @return json Resultado de la inserción
+     */
+    public function store(Request $request) : RedirectResponse // \iso\Http\Requests\DocumentRegister
+    {  
+        $response = ['status' => 'success', 'message' => 'Testing...'];
+        //$input = $request->all();
+        //Log::debug(['STORE DATA' => $input]);
+        
+        // $output = '';
+        // $settings = $this->registerRepo->getSettings();
+        // $fileformat = $settings->record_extention_allowed;
+        // $mimes = ( $fileformat != 'ALL' ) ? '|mimes:'. strtolower($fileformat) : '';
+        
+       
+        // unset($input['document-record_id'], $input['_token']);
+
+        // // Validar formulario
+        // if( $result = $this->validateForm('new', $settings, $input) ) {
+        //     return response(json_encode(['success' => false, 'message' => $result]))->header('Content-type','application/json');
+        // }
+
+        // // validar etiquetas si existen (added on 2024.09.06)
+        // if( $result = $this->validateTags($input) ) {
+        //     return response(json_encode(['success' => false, 'message' => $result]))->header('Content-type','application/json');
+        // }
+        
+        // // Validar archivo adjunto
+        // $input = $this->validateFile($request, $input);
+        // if( !$input['success'] ) {
+        //     return response(json_encode(['success' => false, 'message' => trans('record.message.alert.no-move')]))->header('Content-type','application/json');
+        // }
+
+        // $response = $this->registerRepo->create($input); 
+        //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
+        $response = $this->recordRepo->store($request->all());       
+        return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+    } // create Method    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

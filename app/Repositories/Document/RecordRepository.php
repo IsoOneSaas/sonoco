@@ -208,7 +208,7 @@ class RecordRepository implements RecordRepositoryInterface
         // Recuperar settings (desde el documento master)        
         $sizeDefault = config('settings.document_print_format')['size'];
         $dirDefault = config('settings.document_print_format')['orientation']; 
-        $json_array = json_decode($document->settings, true);
+        $json_array = $document->settings;
         LOG::DEBUG(['VALIDACION ARRAY' => $json_array]);         
         if( is_array($json_array) ) {
             if(key_exists('print_format', $json_array)) {
@@ -240,7 +240,44 @@ class RecordRepository implements RecordRepositoryInterface
         
         Log::debug(['SET DOCUMENT' => $output_array]);
         return $output_array;         
-    } // setDocument Repository    
+    } // setDocument Repository
+    
+    /**
+     * Guarda los datos del formulario en la base de datos del registro
+     * @param  array $data datos del formulario
+     * @return json    Resultado del método
+     */      
+    public function store(array $data)
+    {
+        Log::debug(['STORE DATA' => $data]);
+        try {
+            //DB::beginTransaction();
+
+            $record = RecordModel::firstOrNew([
+                'record_id' => $data['record_id'],
+                'document_id' => $data['document_id']
+            ],[
+                
+                'name' => $data['name'],
+                'content' => '', //$data['content'],
+                'author_id' => 0, //$data['author_id'],
+                'author_name' => '', // $data['author_name'],
+                'author_job' => '', //$data['author_job'],
+                'filename' => '', //$data['filename'],
+                'status' => $data['status'],
+            ]);
+
+            $record->save();
+
+            // TODO: Tracing
+            //DB::commit();
+        } catch (Exception $e) {
+            //DB::rollBack();
+            Log::error('RecordRepository::store Exception: '. $e->getMessage());
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
+        }
+        return ['status' => 'success', 'message' => trans('document/record.store.success')];
+    } // store Repository
 
     /**
      * Listado de requisitos para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
