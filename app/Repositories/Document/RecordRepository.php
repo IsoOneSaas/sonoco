@@ -114,8 +114,8 @@ class RecordRepository implements RecordRepositoryInterface
         $document = DocumentModel::find($did);
 
         $output_array = [
-            'rid' => '',
-            'did' => $did,
+            'record_id' => '',
+            'document_id' => $did,
             'name' => '',
             'txt' => false,  
             'file' => false,
@@ -209,7 +209,7 @@ class RecordRepository implements RecordRepositoryInterface
         $sizeDefault = config('settings.document_print_format')['size'];
         $dirDefault = config('settings.document_print_format')['orientation']; 
         $json_array = $document->settings;
-        LOG::DEBUG(['VALIDACION ARRAY' => $json_array]);         
+        //LOG::DEBUG(['VALIDACION ARRAY' => $json_array]);         
         if( is_array($json_array) ) {
             if(key_exists('print_format', $json_array)) {
                 $format = $json_array['print_format'];
@@ -246,12 +246,14 @@ class RecordRepository implements RecordRepositoryInterface
      * Guarda los datos del formulario en la base de datos del registro
      * @param  array $data datos del formulario
      * @return json    Resultado del método
-     */      
+     */ 
+    
+     
     public function store(array $data)
     {
         Log::debug(['STORE DATA' => $data]);
         try {
-            //DB::beginTransaction();
+            
 
             $record = RecordModel::firstOrNew([
                 'record_id' => $data['record_id'],
@@ -267,6 +269,7 @@ class RecordRepository implements RecordRepositoryInterface
                 'status' => $data['status'],
             ]);
 
+            //DB::beginTransaction();
             $record->save();
 
             // TODO: Tracing
@@ -274,9 +277,9 @@ class RecordRepository implements RecordRepositoryInterface
         } catch (Exception $e) {
             //DB::rollBack();
             Log::error('RecordRepository::store Exception: '. $e->getMessage());
-            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
+            return ['status' => 'error','record_id' => $data['record_id'], 'status' => $data['status'], 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
         }
-        return ['status' => 'success', 'message' => trans('document/record.store.success')];
+        return ['status' => 'success', 'record_id' => $record->record_id, 'status' => $record->status, 'message' => trans('document/record.store.success')];
     } // store Repository
 
     /**

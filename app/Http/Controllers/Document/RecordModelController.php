@@ -78,7 +78,7 @@ class RecordModelController extends Controller
         $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
 
         //Log::debug(['SETTINGS' => $this->set]);
-        Log::debug(['SETTINGS' => $this->set]);
+        //Log::debug(['SETTINGS' => $this->set]);
         
         // View
         return view('document.record.edit', [
@@ -91,6 +91,8 @@ class RecordModelController extends Controller
             //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
         ]);         
     } // set Method
+
+    // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InpQSnVNV3B1TXFWUTk3TmhVSmNPVlE9PSIsInZhbHVlIjoiVml5b3RraGN3SDd0c3FzVkVqWmpHZz09IiwibWFjIjoiMDA2Y2E1ZjBjMjI1M2M0YjMxYTBhMTRmZWI5ODQ3NjgxODRmZjc4ZWRiNWNiYjBiMDU1ODI1ZWU3YTAxZmJjMiIsInRhZyI6IiJ9
     
     /**
      * Almacenamiento de la información del registro
@@ -100,7 +102,7 @@ class RecordModelController extends Controller
     public function store(Request $request) : RedirectResponse // \iso\Http\Requests\DocumentRegister
     {  
         $response = ['status' => 'success', 'message' => 'Testing...'];
-        //$input = $request->all();
+        $input = $request->input();
         //Log::debug(['STORE DATA' => $input]);
         
         // $output = '';
@@ -129,8 +131,11 @@ class RecordModelController extends Controller
 
         // $response = $this->registerRepo->create($input); 
         //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
-        $response = $this->recordRepo->store($request->all());       
-        return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+        $response = $this->recordRepo->store($input);
+        $input['record_id'] = $response['record_id'];
+        $input['status'] = $response['status']; //  FIXME: AMBIGUEDAD!!!!
+        Log::debug(['INPUT' => $input]);
+        return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
     } // create Method    
     
     /**
