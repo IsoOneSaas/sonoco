@@ -50,7 +50,41 @@ class RecordModelController extends Controller
     public function render($param)
     {
         return $this->recordRepo->render($param);
-    }  // show      
+    }  // show
+    
+
+    /**
+     * Establece la base del registro a ser creado : /documentos/registro/crear/$hash
+     * @param  string $hash Id encriptado del documento base
+     * @param  string $slug1 módulo de procedencia 
+     * @param  integer $id Id de referencia de la procedencia
+     * @param  string $slug2 parámetro auxiliar de la procedencia
+     * @return View Vista del formulario de creación de registro
+     */    
+    public function set($hash, $slug1 = null, $id = 0, $slug2 = null)
+    {
+       Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
+
+        // obtener temas
+        $topics = $this->recordRepo->getTopics();
+
+        // Obtener grupos de etiquetas
+        $groups = $this->recordRepo->getGroups();
+        
+        // Obtener datos del documento original
+        $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
+        
+        // View
+        return view('document.record.edit', [
+            'action'    => 'new',
+            'DATA'      => $data,
+            'topics'    => $topics,
+            'groups'    => $groups,
+            'origin'    => $slug1,
+
+            'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed']],
+        ]);         
+    } // set Method    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

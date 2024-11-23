@@ -74,6 +74,22 @@ return [
         ],                  
     ],
 
+    'message' => [
+            'alert' =>  [
+                        'no-show'   => 'Se ha presentado un problema al abrir el registro. ¡Comuníquese con el Administrador!',
+                        'no-move'   => 'Se ha presentado un problema al cargar el archivo al servidor. ¡Comuníquese con el Administrador!',
+                        'no-file'   => 'No se ha encontrado un archivo válido',
+                        'no-group'   => 'No se definido correctamente un grupo',
+                        'no-tag'   => 'No se definido correctamente un grupo',
+                        'no-selected'   => 'No ha seleccionado un registro en la tabla',
+                        'no-auth'   => 'No es posible ver el registro en este momento',
+            ],
+            'allowed' => [
+                'ALL'   => '',
+                'PDF'   => ' (Sólo con extensión PDF)',
+            ],
+    ],     
+
 
 
     'grid'      => [

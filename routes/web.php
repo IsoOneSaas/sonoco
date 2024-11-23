@@ -181,6 +181,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('listado/tipos', [\App\Http\Controllers\Document\MasterController::class, 'setTypesList'])->name('master.types');
             Route::post('listado/usuarios', [\App\Http\Controllers\Document\MasterController::class, 'setUsersList'])->name('master.users');
 
+
+
             Route::get('test', [\App\Http\Controllers\Document\MasterController::class, 'test'])->name('test');
             Route::get('test2', [\App\Http\Controllers\Document\MasterController::class, 'test2'])->name('test2');
         });
@@ -189,6 +191,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group(['prefix' => 'registro', 'as' => 'records.'], function () {
             Route::get('listado', [\App\Http\Controllers\Document\RecordModelController::class, 'index'])->name('index');
             Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'render'])->name('index.render');
+            Route::get('crear/{hash}/{slug1?}/{id?}/{slug2?}', [\App\Http\Controllers\Document\RecordModelController::class, 'set'])->name('create');
         });
     });  
 });

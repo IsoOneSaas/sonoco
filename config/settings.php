@@ -22,6 +22,45 @@ return [
         ],
     ],
 
+    'print_layout_default' => [
+        'portrait' => [
+            'letter' => [
+                'size' => '216mm 279mm',
+                'margin' => '15mm 15mm 12mm 25mm', 
+                'marginspecial' => '15mm 15mm -12mm 25mm',  
+                'pdfwidth' => '176mm', // change if margin changes
+                'pdfsize' => 'letter', 
+                'orientation' => 'portrait',                     
+            ],
+            'folio' => [
+                'size' => '216mm 330mm',
+                'margin' => '15mm 15mm 12mm 25mm',
+                'marginspecial' => '15mm 15mm -12mm 25mm',  
+                'pdfwidth' => '176mm',
+                'pdfsize' => 'folio', 
+                'orientation' => 'portrait',                      
+            ],                
+        ],
+        'landscape' => [
+            'letter' => [
+                'size' => '279mm 216mm',
+                'margin' => '25mm 15mm 15mm 15mm',
+                'marginspecial' => '25mm 15mm -15mm 15mm',  
+                'pdfwidth' => '249mm',
+                'pdfsize' => 'letter', 
+                'orientation' => 'landscape',                   
+            ],
+            'folio' => [
+                'size' => '330mm 216mm',
+                'margin' => '25mm 15mm 15mm 15mm',
+                'marginspecial' => '25mm 15mm -15mm 15mm',  
+                'pdfwidth' => '300mm',
+                'pdfsize' => 'folio', 
+                'orientation' => 'landscape',                     
+            ],                  
+        ],
+    ],     
+
     /*
     |--------------------------------------------------------------------------
     | Roles de la aplicación
@@ -179,6 +218,10 @@ return [
         "notice_new_suggestion" => true,
         "notice_new_sighting" => true,
         "notice_new_document" => true,
+        // Records
+        'record_storage_default' => 'iso-one',
+        'record_extention_allowed_default' => 'ALL',
+        'record_size_allowed_default' => '16000', // kb 
     ],
 
     'document_validity_texts' => [

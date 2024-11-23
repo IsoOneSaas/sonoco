@@ -556,7 +556,7 @@
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/document.grid.row_create') }}");
             } else {            
-                $(location).attr('href', '/documentos/registros/crear/'+rowdata.hash); // FIXME: route
+                $(location).attr('href', '/documentos/registro/crear/'+rowdata.hash); // FIXME: route
             }
         }); // btn-record
 

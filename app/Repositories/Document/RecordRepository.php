@@ -3,12 +3,14 @@
 use App\Classes\ToolsClass;
 use App\Interfaces\Document\RecordRepositoryInterface;
 use App\Models\Document\AuthorizationModel;
+use App\Models\Document\DocumentModel;
+use App\Models\Document\LinkModel;
 use App\Models\Document\RecordModel;
 use App\Models\Document\TypeModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
-
+use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -95,7 +97,150 @@ class RecordRepository implements RecordRepositoryInterface
         ];
         return json_encode($results);          
 
-    } // render   
+    } // render
+    
+    
+    /**
+     * Establece los datos del registro a crear
+     * @param  string $hash Hash del Id del Documento origen
+     * @param  string $slug1 Procedencia de la solicitud de creación
+     * @param  integer $id Identificador asociado a la procedencia
+     * @param  string $slug2 parámetro auxiliar de la procedencia
+     * @return Array   Objeto de datos del registro
+     */ 
+    public function setDocument($hash, $slug1, $id, $slug2)
+    {
+        $did = $this->tool->getIdHash($hash);
+        $document = DocumentModel::find($did);
+
+        $output_array = [
+            'rid' => '',
+            'did' => $did,
+            'name' => '',
+            'txt' => false,  
+            'file' => false,
+            'link_name' => '',
+            'link_file' => false,
+            'topic' => '',
+            'subject' => '',
+            'tags' => [],
+            'document' => $document->name,
+            'attachment' => ['exists' => false],
+            'status' => 0,
+            'records' => [],
+            'hash' => $hash,
+            'xid' => $id,
+            'selected' => 0,
+        ];  
+
+        if( $slug1 === 'planificacion' ) {
+            $records_array = [];
+            $rid = $nid = 0;
+            $records = RecordModel::where('document_id', $did)->orderBy('updated_at', 'asc')->get();
+            foreach($records as $current) {
+                $nid = $current->record_id;
+                if( $nid == $slug2 ) {
+                    $rid = $slug2;
+                }
+                $records_array[] = ['id' => $nid, 'name' => $current->name];
+            } // foreach
+
+            // Determinar qué indicador de registro encontrar
+            if( $slug2 !== null ) { 
+                $rid = (int)$slug2;
+                
+            } else {
+                $rid = ($rid == 0) ? $nid : $rid;
+            }            
+            $output_array['selected'] = $rid;
+
+            // Base tomada de un registro anterior            
+            $record = RecordModel::find($rid);  
+            if( $record ) {
+                //$rid = $record->getAttribute('document-record_id');
+               //Log::debug('Recuperado el registro : '. $rid);
+                $output_array['name'] = $record->name;
+                $output_array['txt'] = ($record->content != null && $record->content != '') ? $record->content : false;
+                $output_array['file'] = ($record->filename != null) ? $record->filename : false;
+                $output_array['records'] = $records_array;
+                // Recuperar archivo fuente si existe
+                $link = LinkModel::where('document_id', $record->document_id)->orderBy('created_at', 'desc')->first(['name', 'link']);
+                if($link) {
+                    $output_array['link_name'] = $link->name;
+                    $output_array['link_file'] = $link->link;
+                } // if
+                // Recuperar Tema y Subtema si existe (added 2024.09.05)
+                $output_array['topic'] = '';
+                $output_array['subject'] = '';        
+                $topic = DB::table('document_record_topics')->where('record_id', $rid)->first();
+                if($topic) {
+                    $output_array['topic'] = $topic->topic;
+                    $output_array['subject'] = $topic->subject;
+                } // if
+
+                // REcupearar Etiquetas si existe (added 2024.09.05)
+                $output_array['tags'] = [];
+                $tags = [];
+                $init = '';            
+                $groups = DB::table('document_record_tags')->where('record_id', $rid)->orderBy('group')->orderBy('tag')->get();
+                if($groups) {
+                    foreach($groups as $item) {
+                        if( $item->group != $init ) {
+                            $tags[$item->group] = [];
+                            $init = $item->group;
+                            $options = DB::table('document_record_tags')->select('tag')->where('group', $item->group)->orderBy('tag')->groupBy('tag')->get();
+                            $tags[$item->group]['options'] = $options;
+                        } // if
+                        $tags[$item->group]['labels'][] = $item->tag;                      
+                    } // foreach
+                    $output_array['tags'] = $tags;
+                } // if
+                                               
+            } // if
+        } else {
+            // Viene de Documentos
+            $txt = DB::table('document_record_contents')->where('document_id', $did)->first();
+            if( $txt ) {
+                $output_array['txt'] = $txt->content;
+            }            
+        } // if/else
+
+        // Recuperar settings (desde el documento master)        
+        $sizeDefault = config('settings.document_print_format')['size'];
+        $dirDefault = config('settings.document_print_format')['orientation']; 
+        $json_array = json_decode($document->settings, true);
+        LOG::DEBUG(['VALIDACION ARRAY' => $json_array]);         
+        if( is_array($json_array) ) {
+            if(key_exists('print_format', $json_array)) {
+                $format = $json_array['print_format'];
+                $sizeDefault = $format['size'];
+                $dirDefault = $format['orientation'];
+            }
+        }
+        // Generar selects de settings
+        $textArray = trans('record.layout');
+        $printLayout =  config('settings.print_layout_default');
+        foreach($printLayout as $dir => $sizeArray) {
+            $output_array['dir_select'][] = [
+                'text' => ( isset($textArray[$dir]) ) ? $textArray[$dir] : 'Otra dirección', 
+                'value' => $dir,
+                'selected' => ( $dir == $dirDefault ) ? true : false,
+            ];
+        }
+        
+        $sizeArray = $printLayout[$dirDefault];
+
+        foreach($sizeArray as $size => $value) {
+            $output_array['size_select'][] = [
+                'text' => ( isset($textArray[$size]) ) ? $textArray[$size] : 'Otro tamaño', 
+                'value' => $size,
+                'selected' => ( $size == $sizeDefault ) ? true : false,
+            ];
+        } // foreach        
+        
+        Log::debug(['SET DOCUMENT' => $output_array]);
+        return $output_array;         
+    } // setDocument Repository    
 
     /**
      * Listado de requisitos para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
@@ -197,7 +342,29 @@ class RecordRepository implements RecordRepositoryInterface
         return TypeModel::orderBy('name')->get(['type_id', 'name']);
     } // setTypesList Method
     
+    /**
+    * Genera listado de temas
+    * @return json    listado
+    */        
+    public function getTopics()
+    {
+        // TODO: Crear Modelo?
+        $topics = DB::table('document_record_topics')->select('topic')->orderBy('topic')->groupBy('topic')->get();
+        if( $topics ) return $topics;
+        else return true;
+    } // getTopics Method 
     
+    /**
+    * Genera listado de grupos
+    * @return json    listado
+    */       
+    public function getGroups()
+    {
+        // TODO: Crear Modelo?
+        $groups =  DB::table('document_record_tags')->select('group')->orderBy('group')->groupBy('group')->get();
+        if( $groups ) return $groups;
+        else return true;            
+    } // getGroups Method    
 
 
 } // class
