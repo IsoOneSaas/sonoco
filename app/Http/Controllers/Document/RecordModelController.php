@@ -64,7 +64,7 @@ class RecordModelController extends Controller
      * @param  string $slug2 parámetro auxiliar de la procedencia
      * @return View Vista del formulario de creación de registro
      */    
-    public function set($hash, $slug1 = null, $id = 0, $slug2 = null)
+    public function set($hash, $slug1 = null, $id = 0, $slug2 = null) : View
     {
        Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
 
@@ -82,7 +82,6 @@ class RecordModelController extends Controller
         
         // View
         return view('document.record.edit', [
-            'action'    => 'new',
             'DATA'      => $data,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -91,6 +90,34 @@ class RecordModelController extends Controller
             //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
         ]);         
     } // set Method
+
+    /**
+     * Edición de los datos del registro
+     * @param  json \iso\Http\Requests\DocumentRecordRequest $request Datos validados del formulario
+     * @return json Resultado de la actualización
+     */
+    public function edit($hash) : View
+    {
+        
+        // obtener temas
+        $topics = $this->recordRepo->getTopics();
+
+        // Obtener grupos de etiquetas
+        $groups = $this->recordRepo->getGroups();
+        
+        // Obtener datos del documento original
+        $data = $this->recordRepo->setRecord($hash);
+
+        // View
+        return view('document.record.edit', [
+            'DATA'      => $data,
+            'topics'    => $topics,
+            'groups'    => $groups,
+            'origin'    => 'records',
+            //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
+        ]);         
+
+    } // Edit Method 
 
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InpQSnVNV3B1TXFWUTk3TmhVSmNPVlE9PSIsInZhbHVlIjoiVml5b3RraGN3SDd0c3FzVkVqWmpHZz09IiwibWFjIjoiMDA2Y2E1ZjBjMjI1M2M0YjMxYTBhMTRmZWI5ODQ3NjgxODRmZjc4ZWRiNWNiYjBiMDU1ODI1ZWU3YTAxZmJjMiIsInRhZyI6IiJ9
     
@@ -132,10 +159,14 @@ class RecordModelController extends Controller
         // $response = $this->registerRepo->create($input); 
         //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
         $response = $this->recordRepo->store($input);
-        $input['record_id'] = $response['record_id'];
-        $input['status'] = $response['status']; //  FIXME: AMBIGUEDAD!!!!
-        Log::debug(['INPUT' => $input]);
-        return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        if($response['status'] == 'success') {
+            Log::debug(['RESPONSE' => $response]); // 
+            return redirect()->route('records.edit', $response['hash'])->with($response['status'], $response['message']); ;
+        } else {
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        }
+
+        
     } // create Method    
     
     /**

@@ -8,6 +8,8 @@ interface RecordRepositoryInterface
 
     public function setDocument($hash, $slug1, $id, $slug2);
 
+    public function setRecord($hash);
+
     public function getSystemsList();
 
     public function getProcessesList();

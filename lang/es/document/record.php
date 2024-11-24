@@ -13,12 +13,28 @@ return [
 
     'store' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'success'       => 'Registro salvado correctamente',
+                'success'       => 'Registro salvado y archivado correctamente',
+                'title'         => 'Está seguro de salvar y archivar el registro?',
+                'text'          => 'Al archivar el registro no podrá ser actualizado nuevamente.', 
+                'trace'         => ':action : :trace',               
     ],
+    'create' => [
+                'success'       => 'Registro creado correctamente',
+                'trace'         => ':action : :trace',  
+    ],    
+    'edit' => [
+                'success'       => 'Registro salvado correctamente',
+                'trace'         => ':action : :trace',  
+    ],     
+ 
+
+    // aqui voy
     
     'get' => [
             'no-success'    => 'Se ha presentado un error al recuperar la información del documento',
-    ],     
+    ], 
+    
+    
 
     'delete' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',

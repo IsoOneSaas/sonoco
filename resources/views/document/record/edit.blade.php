@@ -12,9 +12,9 @@
                             Editar Registro
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            <button id="btn-save" type="submit" form="record-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0); return true;" > <i data-lucide="save" class="w-5 h-5"></i> </button>
-                            <button id="btn-store" type="submit" form="record-form" class="btn btn-success shadow-md mr-2" onClick="setStatus(1); return true;" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
-                            <a class="btn btn-primary shadow-md mr-2" href=""><i data-lucide="skip-back" class="w-5 h-5"></i></a>    
+                            <button id="btn-save" type="button" form="record-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
+                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" onClick="setStatus(1)" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
+                            <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}"><i data-lucide="skip-back" class="w-5 h-5"></i></a>    
                         </div>
                     </div>
                     <!-- BEGIN: Form -->
@@ -22,12 +22,12 @@
                         <div>
                             <form id="record-form" action="{{ route('records.store', $DATA['record_id']) }}" method="POST">
                                 @csrf 
-                                <input type="hidden" name="record_id"  id="record_id" value={{ $DATA['record_id'] }} >                             
-                                <input type="hidden" name="document_id" value={{ $DATA['document_id'] }} id="document_id">
+                                <input type="hidden" name="record_id"  id="record-id" value={{ $DATA['record_id'] }} >                             
+                                <input type="hidden" name="document_id" value={{ $DATA['document_id'] }} id="document-id">
                                 <input type="hidden" name="origin" value="{{ $origin }}">                                 
                                 <input type="hidden" name="xid" value={{ $DATA['xid'] }}>
                                 <input type="hidden" name="file" value="{{ $DATA['file'] }}"> 
-                                <input type="hidden" name="status" value={{ $DATA['status'] }} id="status">                                                                 
+                                <input type="hidden" name="status_id" value={{ $DATA['status_id'] }} id="status-id">                                                                 
                                 <div class="input-group">
                                     <div id="name" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.name.title') }}</div>
                                     <input type="text" name="name" value="{{ old('name', isset($DATA) ? $DATA['name'] : '') }}" class="form-control w-full input-status" aria-describedby="name" placeholder="{{ trans('document/record.form.name.placeholder') }}" minlength="2" maxlength="255" required>
@@ -45,27 +45,44 @@
 @endpush
 
 @push('scripts-bottom')
+<script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
 <script document="text/javascript">
     $(function () {
-        var status = {{ $DATA['status'] }};
-        alert(status);
+        var status = {{ $DATA['status_id'] }};
         if( status == 1 ) {
             // Bloquear inputs y botones
             $("#btn-save, #btn-store").attr('disabled', true);
             $(".input-status").attr('readonly', true);
-        }
+        } // if
 
     });
 
     function setStatus(status) {
-        $("input[name='status']").val(status);
-    }
+         
+        if( status == 1 ) {
+            swal({
+                title: "{{ trans('document/record.store.title') }}",
+                text: "{{ trans('document/record.store.text') }}",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    $("input[name='status_id']").val(status);
+                    var form = $("#record-form");
+                    form.submit();
+                }
+            });  
+        } else {
+            var form = $("#record-form");
+            form.submit();
+        }                
+    } // set Status Fx
 </script>
-@endpush 
+               
 
-@push('scripts-bottom')                
-
-    @include('components.notification_error')
+    @include('components.notification_index')
 
 @endpush                
 </x-icewall> 

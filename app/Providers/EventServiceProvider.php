@@ -6,6 +6,7 @@ use App\Events\DocumentPublished;
 use App\Events\DocumentSent;
 use App\Events\DocumentSwitch;
 use App\Events\DocumentTracing;
+use App\Events\RecordTracing;
 use App\Events\EmailSent;
 use App\Events\EmailDocumentEvent;
 use App\Events\EmailDueEvent;
@@ -16,6 +17,7 @@ use App\Listeners\ChangeDocumentStatus;
 use App\Listeners\PublishDocumentStatus;
 use App\Listeners\SwitchDocumentStatus;
 use App\Listeners\SetDocumentTrace;
+use App\Listeners\SetRecordTrace;
 use App\Listeners\SendNotification;
 use App\Listeners\DocumentNotification;
 use App\Listeners\DueNotification;
@@ -54,6 +56,9 @@ class EventServiceProvider extends ServiceProvider
         DocumentTracing::class => [
             SetDocumentTrace::class
         ],
+        RecordTracing::class => [
+            SetRecordTrace::class
+        ],        
         EmailSent::class => [
             SendNotification::class,
         ],

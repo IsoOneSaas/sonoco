@@ -1,6 +1,7 @@
 <?php   namespace App\Repositories\Document;
 
 use App\Classes\ToolsClass;
+use App\Events\RecordTracing;
 use App\Interfaces\Document\RecordRepositoryInterface;
 use App\Models\Document\AuthorizationModel;
 use App\Models\Document\DocumentModel;
@@ -13,6 +14,7 @@ use App\Models\Set\SystemModel;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 
 use App\Models\Document\ForwardModel; // Eliminar
@@ -126,7 +128,7 @@ class RecordRepository implements RecordRepositoryInterface
             'tags' => [],
             'document' => $document->name,
             'attachment' => ['exists' => false],
-            'status' => 0,
+            'status_id' => 0,
             'records' => [],
             'hash' => $hash,
             'xid' => $id,
@@ -241,45 +243,179 @@ class RecordRepository implements RecordRepositoryInterface
         Log::debug(['SET DOCUMENT' => $output_array]);
         return $output_array;         
     } // setDocument Repository
+
+   /**
+     * Establece los datos del registro existente para editar/mostrar
+     * @param  string $hash Hash del Id del Regigostro
+     * @return Object   Objeto de datos del registro
+     */ 
+    public function setRecord($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        
+        $record = RecordModel::find($id);
+        $output_array = [
+            'record_id' => $record->record_id,
+            'document_id' => $record->document_id,
+            'name' => $record->name,
+            'txt' => ($record->content != null && $record->content != '') ? $record->content : false,  
+            'file' => ($record->filename != null) ? $record->filename : false,
+            'link_name' => '',
+            'link_file' => false,
+            'document' => '',
+            'status_id' => $record->status,
+            'records' => [],
+            'hash' => $hash,
+            'xid' => 0,
+        ];
+        //Log::debug(['SET RECORD' => $output_array]);
+
+        // Recuperar archivo fuente si existe
+        $link = LinkModel::where('document_id', $record->document_id)->orderBy('created_at', 'desc')->first(['name', 'link']);
+        if($link) {
+            $output_array['link_name'] = $link->name;
+            $output_array['link_file'] = $link->link;
+        }
+        // Recuperar settings (desde el documento master)
+        $document = DocumentModel::find($record->document_id);
+        $sizeDefault = config('settings.document_print_format')['size'];
+        $dirDefault = config('settings.document_print_format')['orientation']; 
+        $json_array = $document->settings;         
+        if( is_array($json_array) ) {
+            if(key_exists('print_format', $json_array)) {
+                $format = $json_array['print_format'];
+                $sizeDefault = $format['size'];
+                $dirDefault = $format['orientation'];
+            } // if
+        } // if
+        // Generar selects de settings
+        $textArray = trans('record.layout');
+        $printLayout =  config('settings.print_layout_default');
+        foreach($printLayout as $dir => $sizeArray) {
+            $output_array['dir_select'][] = [
+                'text' => ( isset($textArray[$dir]) ) ? $textArray[$dir] : 'Otra dirección', 
+                'value' => $dir,
+                'selected' => ( $dir == $dirDefault ) ? true : false,
+            ];
+        } // foreach
+        
+        $sizeArray = $printLayout[$dirDefault];
+
+        foreach($sizeArray as $size => $value) {
+            $output_array['size_select'][] = [
+                'text' => ( isset($textArray[$size]) ) ? $textArray[$size] : 'Otro tamaño', 
+                'value' => $size,
+                'selected' => ( $size == $sizeDefault ) ? true : false,
+            ];
+        } // foreach
+
+        // FIXME: Archivos anexos al registro
+        // $output_array['attachment']['exists'] = false;
+        // $output_array['attachment']['files'] = [];
+        // $output_array['attachment']['exists'] = true;
+        // $attachments =  \iso\Models\Document\AttachModel::where('record_id', $id)->get();
+        // foreach($attachments as $attachment) {
+        //     $output_array['attachment']['files'][] = $attachment;
+        // } // foreach
+
+        // Recuperar Tema y Subtema si existe (added 2024.09.05)
+        $output_array['topic'] = '';
+        $output_array['subject'] = '';        
+        $topic = DB::table('document_record_topics')->where('record_id', $id)->first();
+        if($topic) {
+            $output_array['topic'] = $topic->topic;
+            $output_array['subject'] = $topic->subject;
+        }
+
+        // REcupearar Etiquetas si existe (added 2024.09.05)
+        $output_array['tags'] = [];
+        $tags = [];
+        $init = '';            
+        $groups = DB::table('document_record_tags')->where('record_id', $id)->orderBy('group')->orderBy('tag')->get();
+        if($groups) {
+            foreach($groups as $item) {
+                if( $item->group != $init ) {
+                    $tags[$item->group] = [];
+                    $init = $item->group;
+                    $options = DB::table('document_record_tags')->select('tag')->where('group', $item->group)->orderBy('tag')->groupBy('tag')->get();
+                    $tags[$item->group]['options'] = $options;
+                }
+                $tags[$item->group]['labels'][] = $item->tag;                      
+            } // foreach
+            $output_array['tags'] = $tags;
+        } // if
+
+       Log::debug(['RECORD EXISTING' => $output_array]);
+       return $output_array; 
+    }  // setRecord     
     
     /**
      * Guarda los datos del formulario en la base de datos del registro
      * @param  array $data datos del formulario
      * @return json    Resultado del método
-     */ 
-    
-     
+     */      
     public function store(array $data)
     {
-        Log::debug(['STORE DATA' => $data]);
-        try {
-            
+        Log::debug(['STORE DATA' => $data]);        
 
+        try { 
+            // USER PARAMETERS
+            $user = Auth::user();
+            if( $user->role == config('settings.roles.master') ) {
+                $jobName = 'Webmaster';
+            } else {
+                $jobs = $user->jobs;
+                foreach($jobs as $job) {
+                    $jobs_array[] = $job->name;
+                }
+                $jobName = implode(', ', $jobs_array);
+            }            
+            
+            // SAVE RECORD
             $record = RecordModel::firstOrNew([
-                'record_id' => $data['record_id'],
-                'document_id' => $data['document_id']
+                'record_id' => $data['record_id']                
             ],[
-                
-                'name' => $data['name'],
-                'content' => '', //$data['content'],
-                'author_id' => 0, //$data['author_id'],
-                'author_name' => '', // $data['author_name'],
-                'author_job' => '', //$data['author_job'],
-                'filename' => '', //$data['filename'],
-                'status' => $data['status'],
+                'document_id' => $data['document_id']
             ]);
+
+            $record->name = $data['name'];
+            $record->content = ''; //$data['content']
+            $record->author_id = $user->user_id;
+            $record->author_name = $user->name; // $data['author_name']
+            $record->author_job = $jobName;
+            $record->filename = ''; //$data['filename']
+            $record->status = $data['status_id'];
 
             //DB::beginTransaction();
             $record->save();
 
-            // TODO: Tracing
+            // SAVE TOPIC/SUBJECT
+
+            // SAVE GROUP/TAG
+
+            // SAVE FILE
+
+
+            // SAVE TRACING
+            $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
+            $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';                  
+            Event::dispatch(new RecordTracing($record));
+
             //DB::commit();
         } catch (Exception $e) {
             //DB::rollBack();
             Log::error('RecordRepository::store Exception: '. $e->getMessage());
-            return ['status' => 'error','record_id' => $data['record_id'], 'status' => $data['status'], 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
         }
-        return ['status' => 'success', 'record_id' => $record->record_id, 'status' => $record->status, 'message' => trans('document/record.store.success')];
+        $hash = $this->tool->setIdHash($record->record_id);
+        // Mensaje de feedback
+        if( $data['status_id'] == 1 ) {
+            $msg = trans('document/record.store.success');
+        } else {
+            $msg =  ( $data['record_id'] > 0 ) ? trans('document/record.edit.success') : trans('document/record.create.success');
+        }
+        
+        return ['status' => 'success', 'hash' => $hash, 'message' => $msg];
     } // store Repository
 
     /**

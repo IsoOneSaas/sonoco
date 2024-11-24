@@ -192,6 +192,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('listado', [\App\Http\Controllers\Document\RecordModelController::class, 'index'])->name('index');
             Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'render'])->name('index.render');
             Route::get('crear/{hash}/{slug1?}/{id?}/{slug2?}', [\App\Http\Controllers\Document\RecordModelController::class, 'set'])->name('create');
+            Route::get('editar/{hash}', [\App\Http\Controllers\Document\RecordModelController::class, 'edit'])->name('edit');
             Route::post('salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'store'])->name('store');
         });
     });  
