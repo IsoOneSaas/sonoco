@@ -22,6 +22,8 @@ interface RecordRepositoryInterface
 
     public function getGroups();
 
-    public function getSubjectList($target);
+    public function getSubjectList($data);
+
+    public function getTagList($data);
 
 }

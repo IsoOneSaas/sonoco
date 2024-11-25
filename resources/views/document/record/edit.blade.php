@@ -75,8 +75,8 @@
                                         <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">                                            
                                             <!-- BEGIN: Topic -->
                                             <div class="intro-y box p-5 mt-5">
-                                                <p>Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
-                                                <div class="input-group mt-3">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
+                                                <div class="input-group mt-5">
                                                     <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.topic.title') }}</div>
                                                     <input type="text" name="topic" value="{{ old('topic', isset($DATA) ? $DATA['topic'] : '') }}" class="form-control w-full input-status" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="255" required>
                                                     <select id="topic-select" class="form-control w-full input-status ml-2">
@@ -101,7 +101,42 @@
                                             <!-- END: Topic -->                                            
                                         </div>
                                         <div id="record-tab-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-4-tab">
-                                            <h1>Content 4</h1>
+                                            <!-- BEGIN: Tags -->
+                                            <div id="div-tags" class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Crea o seleccione de la lista desplegable un nuevo grupo y luego crea o seleccione todas las etiquetas adecuadas para el registro.</p>                                                              
+                                                <div class="input-group mt-5">
+                                                    <div id="group" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.group.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.group.title') }}</div>
+                                                    <input type="text" id="group-input" class="form-control w-full input-status" aria-describedby="group" placeholder="{{ trans('document/record.form.group.placeholder') }}">
+                                                    <select id="group-select" class="form-control w-full input-status ml-2">
+                                                        <option value="">{{ trans('document/record.form.group.default') }}</option>
+                                                        @if( $groups !== true )
+                                                        @foreach($groups as $item)
+                                                        <option value="{{ $item->group }}">{{ $item->group }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                    </select>                                                    
+                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.group.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                    <button id="btn-group" type="button" class='btn btn-primary ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                </div>
+                                                @foreach($DATA['tags'] as $group => $tag)
+                                                    @foreach( $tag['labels'] as $n => $val )
+                                                    <div id="div-{{ $n }}" class="input-group mt-5">
+                                                        <div class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.tag.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.tag.title') }}</div>
+                                                        <input type="text" name="groups[]" value="{{ $group }}" class="form-control w-full input-status" readonly>
+                                                        <input id="tag-input-{{ $n }}" type="text" name="tags[]" value="{{ $val }}" class="form-control w-full input-status" aria-describedby="tag" placeholder="{{ trans('document/record.form.tag.placeholder') }}">
+                                                        <select class="form-control w-full input-status ml-2" onChange="selectTag({{ $n }},this.value)">
+                                                            <option value="">{{ trans('document/record.form.tag.default') }}</option>
+                                                            @foreach( $tag['options'] as $i => $option )
+                                                            <option value="{{ $option->tag }}">{{ $option->tag }}</option>
+                                                            @endforeach                                                            
+                                                        </select>
+                                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.tag.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                        <button type="button" class="btn btn-danger ml-5" onClick="deleteTag({{ $n }})"><i data-lucide="minus" class="w-4 h-4"></i></button>                                                        
+                                                    </div>
+                                                    @endforeach
+                                                @endforeach                                                    
+                                            </div>
+                                            <!-- END: Tags -->  
                                         </div>
                                         <div id="record-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-5-tab">
                                             <h1>Content 5</h1>
@@ -129,6 +164,7 @@
 <script src="{{ url('assets/js/ckeditor_4.21.0_full/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
 <script document="text/javascript">
+    var $n = {{ count($DATA['tags']) }};
     $(function () {        
         var status = {{ $DATA['status_id'] }};
         var tab = $("input[name='tab_active']").val();
@@ -172,26 +208,84 @@
         $("#topic-select").on("change", function() {
             var topic = this.value;
             if( topic != '' ) {
-                $("#topic").val(topic);
+                $("input[name='topic']").val(topic);
                 topicAjax(topic);
             } // if                
         }); // topic
 
-        $("#topic").on("change", function() {
-            $("#topic-selected").val("");
+        $("input[name='topic']").on("change", function() {
+            $("#topic-select").val("");
         });
         
         // Selección del subtema
         $("#subject-select").on("change", function() {
             var subject = this.value;
             if( subject != '' ) {
-                $("#subject").val(subject);            
+                $("input[name='subject']").val(subject);            
             }
         });
 
-        $("#subject").on("change", function() {
+        $("input[name='subject']").on("change", function() {
             $("#subject-select").val("");
-        });        
+        });
+        
+        // Selección del grupo
+        $("#btn-group").on("click", function() {
+            var success = true;
+            var newGroup = false;
+            var group = '';
+            var groupNew = $("#group-input").val();
+            var newGroupVal = ( groupNew == '' ) ? $("#group-select").val() : groupNew;
+
+            $('input[name="groups[]"]').each(function() {
+                console.log('new group: ' + $(this).val());
+                if( $(this).val() == newGroupVal ) {
+                    setSimpleNotification("{{ trans('document/record.form.group.no-way') }}");
+                    success = false;                        
+                }
+            });
+
+            if( groupNew == '') {
+                groupOld = $("#group-select").val();
+                if( groupOld == '' ) {
+                    success = false;
+                }
+                group = groupOld;
+            } else {
+
+                group = groupNew;
+                newGroup = true;
+            }
+
+            if(success) {
+                //alert(group);
+                $n = $n + 1;
+                var output = '<div id="div-'+$n+'" class="input-group mt-5">';
+                output += '<div class="input-group-text flex"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}' +' class="w-4 h-4 mr-1"></i>'+ '{{ trans("document/record.form.tag.title") }}' +'</div>';
+                output += '<input type="text" name="groups[]" value="'+group+'" class="form-control w-full input-status" readonly>';
+                if( newGroup ) {
+                    output += '<input id="tag-input-'+$n+'" type="text" name="tags[]" value="" class="form-control w-full input-status ml-2" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
+                    output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+' tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>';
+                    output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+$n+')"><i data-lucide="minus" class="w-4 h-4"></i></button>';
+                    output += '</div>';
+                    $("#div-tags").append(output);
+                } else {
+                    // Obtener etiquetas
+                    tagAjax(group, output, $n);
+                }
+            } else {
+                console.error('No se seleccionó grupo '+ group);
+            }
+            
+        })
+
+        $("#group-input").on("change", function() {
+            $("#group-select").val("");
+        });
+        
+        $("#group-select").on("change", function() {
+            $("#group-input").val("");
+        });              
 
 
     });
@@ -219,16 +313,17 @@
         }                
     } // set Status Fx
 
-    function topicAjax(param) {
-        console.log('Running topicAjax');
+    function topicAjax(param) {        
         var route = "{{ route('records.edit.subject') }}";
+        console.log('Running topicAjax with route: '+route);
         $.ajax({
             url: route,
             type: 'POST',
-            data: {'txt': param},
-            dataType: 'json',            
+            data: {'txt':param},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
             success: function(data) {
-                console.dir(data);
+                //console.dir(data);
                 var output = '<option value="">{{ trans("document/record.form.subject.default") }}</option>';
                 $.each(data, function(i, value) {
                     output += '<option value="'+value.subject+'">'+value.subject+'</option>';
@@ -237,6 +332,43 @@
             } // success
         }); // ajax  
     } // topicAjax Fx
+
+    function tagAjax(param, output, n) {
+        var route = "{{ route('records.edit.tag') }}";
+        console.log('Running tagAjax with route: '+route);
+        //$n = $n + 1;
+        //var output = '<tr id="tr-'+$n+'"><td><input name="group[]" value="'+param+'" class="form-control set" readonly></td>';
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'txt': param},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                console.dir(data);                                                                
+                var options  = '<option value="">{{ trans("document/record.form.tag.default") }}</option>';                                
+                $.each(data, function(i, value) {
+                    options += '<option value="'+value.tag+'">'+value.tag+'</option>';
+                });
+                output += '<input id="tag-input-'+n+'" type="text" name="tags[]" value="" class="form-control w-full input-status" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
+                output += '<select class="form-control w-full input-status ml-2" onChange="selectTag('+n+',this.value)">'+options+'</select>';
+                output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+' tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>';
+                output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+n+')"><i data-lucide="minus" class="w-4 h-4"></i></button>';
+                output += '</div>';
+                $("#div-tags").append(output);
+            } // success
+        }); // ajax 
+    } //tagAjax Fx 
+    
+
+    function selectTag(tagId, tagValue) {
+        $("#tag-input-"+tagId).val(tagValue);
+    }
+
+    function deleteTag(tagId) {
+        //console.log('eliminar tag tr-'+ tagId);
+        $("#div-"+tagId).remove();
+    }     
 
 </script>
                

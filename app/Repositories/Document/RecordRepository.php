@@ -345,7 +345,7 @@ class RecordRepository implements RecordRepositoryInterface
             $output_array['tags'] = $tags;
         } // if
 
-       Log::debug(['RECORD EXISTING' => $output_array]);
+       //Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -390,6 +390,13 @@ class RecordRepository implements RecordRepositoryInterface
             $record->save();
 
             // SAVE TOPIC/SUBJECT
+            if( key_exists('topic', $data) ) {
+                DB::table('document_record_topics')->insert([
+                    'record_id' => $record->record_id, 
+                    'topic' => $data['topic'], 
+                    'subject' => $data['subject']
+                ]);
+            } // if           
 
             // SAVE GROUP/TAG
 
@@ -567,17 +574,27 @@ class RecordRepository implements RecordRepositoryInterface
 
     /**
      * Genera listado de subtemas
-     * @param  string $target valor del tema
-     * @return boolean    Resultado del método
+     * @param  array $data arreglo de datos
+     * @return collection    Listado
      */      
-    public function getSubjectList($target)
+    public function getSubjectList($data)
     {
-        if( $target === '' ) {
+        if( $data['txt'] === '' ) {
             return DB::table('document_record_topics')->select('subject')->orderBy('subject')->groupBy('subject')->get();
         } else {
-            return DB::table('document_record_topics')->select('subject')->where('topic', $target)->orderBy('subject')->groupBy('subject')->get();
+            return DB::table('document_record_topics')->select('subject')->where('topic', $data['txt'])->orderBy('subject')->groupBy('subject')->get();
         }        
     } // getSubjectList Repository
+
+    /**
+     * Genera listado de etiquetas
+     * @param  array $data arreglo de datos
+     * @return collection Listado
+     */      
+    public function getTagList($data)
+    {
+        return DB::table('document_record_tags')->select('tag')->where('group', $data['txt'])->orderBy('tag')->groupBy('tag')->get();        
+    } // getTagList Repository    
     
     /**
     * Genera listado de grupos

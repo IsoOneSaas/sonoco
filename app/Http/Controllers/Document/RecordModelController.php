@@ -174,10 +174,20 @@ class RecordModelController extends Controller
      * @param  string $slug tema especificado
      * @return json Listado de subtemas
      */    
-    public function setSubjectList($slug)
+    public function setSubjectList(Request $request)
     {
-        return $this->recordRepo->getSubjectList($slug);
+        return $this->recordRepo->getSubjectList($request->all());
     } //setSubjectList Method
+
+    /**
+     * Obtiene el listado de etiquetas para el grupo especificado
+     * @param  string $slug grupo especificado
+     * @return json Listado de etiquetas
+     */    
+    public function setTagList(Request $request)
+    {
+        return $this->recordRepo->getTagList($request->all());
+    } //setTagList Method    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

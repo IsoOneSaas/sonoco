@@ -62,11 +62,26 @@ return [
                             'default'       => 'Seleccione un tema existente',
         ],
         'subject'         =>  [
-                            'icon'          => 'shapes',
+                            'icon'          => 'target',
                             'title'         => 'Subtema',
                             'placeholder'   => 'Digite el subtema del registro',
                             'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
                             'default'       => 'Seleccione un subtema existente',
+        ],
+        'group'         =>  [
+                            'icon'          => 'grip',
+                            'title'         => 'Grupo',
+                            'placeholder'   => 'Digite el grupo para el registro',
+                            'tooltip'       => 'Opcional. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
+                            'default'       => 'Seleccione un grupo existente',
+                            'no-way'        => 'Grupo digitado ya existente',
+        ],
+        'tag'         =>  [
+                            'icon'          => 'tag',
+                            'title'         => 'Etiqueta',
+                            'placeholder'   => 'Digite una etiqueta para el registro',
+                            'tooltip'       => 'Opcional. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
+                            'default'       => 'Seleccione una etiqueta existente',
         ],
         
     ],    
