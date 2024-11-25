@@ -4,7 +4,9 @@ use App\Classes\ToolsClass;
 use App\Events\RecordTracing;
 use App\Interfaces\Document\RecordRepositoryInterface;
 use App\Models\Document\AuthorizationModel;
+use App\Models\Document\ContentModel;
 use App\Models\Document\DocumentModel;
+use App\Models\Document\FileModel;
 use App\Models\Document\LinkModel;
 use App\Models\Document\RecordModel;
 use App\Models\Document\TypeModel;
@@ -160,7 +162,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record = RecordModel::find($rid);  
             if( $record ) {
                 //$rid = $record->getAttribute('document-record_id');
-               //Log::debug('Recuperado el registro : '. $rid);
+                Log::debug('Recuperado el registro : '. $rid);
                 $output_array['name'] = $record->name;
                 $output_array['txt'] = ($record->content != null && $record->content != '') ? $record->content : false;
                 $output_array['file'] = ($record->filename != null) ? $record->filename : false;
@@ -171,7 +173,7 @@ class RecordRepository implements RecordRepositoryInterface
                     $output_array['link_name'] = $link->name;
                     $output_array['link_file'] = $link->link;
                 } // if
-                // Recuperar Tema y Subtema si existe (added 2024.09.05)
+                // Recuperar Tema y Subtema
                 $output_array['topic'] = '';
                 $output_array['subject'] = '';        
                 $topic = DB::table('document_record_topics')->where('record_id', $rid)->first();
@@ -180,7 +182,7 @@ class RecordRepository implements RecordRepositoryInterface
                     $output_array['subject'] = $topic->subject;
                 } // if
 
-                // REcupearar Etiquetas si existe (added 2024.09.05)
+                // REcupearar Etiquetas
                 $output_array['tags'] = [];
                 $tags = [];
                 $init = '';            
@@ -201,10 +203,8 @@ class RecordRepository implements RecordRepositoryInterface
             } // if
         } else {
             // Viene de Documentos
-            $txt = DB::table('document_record_contents')->where('document_id', $did)->first();
-            if( $txt ) {
-                $output_array['txt'] = $txt->content;
-            }            
+            $content = ContentModel::where('document_id', $did)->first();
+            $output_array['txt'] = $content->content;
         } // if/else
 
         // Recuperar settings (desde el documento master)        
@@ -354,9 +354,9 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  array $data datos del formulario
      * @return json    Resultado del método
      */      
-    public function store(array $data)
+    public function update(array $data)
     {
-        Log::debug(['STORE DATA' => $data]);        
+        Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
@@ -379,7 +379,7 @@ class RecordRepository implements RecordRepositoryInterface
             ]);
 
             $record->name = $data['name'];
-            $record->content = ''; //$data['content']
+            $record->content = $data['content'];
             $record->author_id = $user->user_id;
             $record->author_name = $user->name; // $data['author_name']
             $record->author_job = $jobName;
@@ -410,6 +410,9 @@ class RecordRepository implements RecordRepositoryInterface
         $hash = $this->tool->setIdHash($record->record_id);
         // Mensaje de feedback
         if( $data['status_id'] == 1 ) {
+            // STORE AS FILE
+            $store = $this->store($record);
+            if( !$store ) Log::error('Registro '. $record->record_id .' con código de documento ya existente no fue almacenado');
             $msg = trans('document/record.store.success');
         } else {
             $msg =  ( $data['record_id'] > 0 ) ? trans('document/record.edit.success') : trans('document/record.create.success');
@@ -417,6 +420,38 @@ class RecordRepository implements RecordRepositoryInterface
         
         return ['status' => 'success', 'hash' => $hash, 'message' => $msg];
     } // store Repository
+
+    /**
+     * Almacenar el registro en el archivo
+     * @param  object $record colección de datos del registro
+     * @return boolean    Resultado del método
+     */      
+    public function store($record)
+    {
+        $result = false;
+        // Obtener documento y proceso fuente
+        $document = DocumentModel::find($record->document_id);
+        $process = ProcessModel::find($document->process_id);
+
+        // Validars si no está archivado ya este código de documento
+        $file = FileModel::where('code', $document->code)->first();
+        if(!$file) {
+                // creación del registor archivado
+                $file = new FileModel;
+                $file->system_id = $document->system_id;
+                $file->department_id = $document->department_id;
+                $file->document_id = $$record->document_id;
+                $file->record_id = $record->record_id;  
+                $file->job_id = $process->job_id;
+                $file->name = $document->name;
+                $file->code = $document->code;                                                   
+                $file->support = config('settings.record_support')[4];
+                $file->storage = config('settings.record_storage_default');
+                $file->settings = ['method' => 'auto'];
+                $result = $file->save() ? true : false;            
+        } // if
+        return $result;
+    } // store Method
 
     /**
      * Listado de requisitos para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
@@ -529,6 +564,20 @@ class RecordRepository implements RecordRepositoryInterface
         if( $topics ) return $topics;
         else return true;
     } // getTopics Method 
+
+    /**
+     * Genera listado de subtemas
+     * @param  string $target valor del tema
+     * @return boolean    Resultado del método
+     */      
+    public function getSubjectList($target)
+    {
+        if( $target === '' ) {
+            return DB::table('document_record_topics')->select('subject')->orderBy('subject')->groupBy('subject')->get();
+        } else {
+            return DB::table('document_record_topics')->select('subject')->where('topic', $target)->orderBy('subject')->groupBy('subject')->get();
+        }        
+    } // getSubjectList Repository
     
     /**
     * Genera listado de grupos

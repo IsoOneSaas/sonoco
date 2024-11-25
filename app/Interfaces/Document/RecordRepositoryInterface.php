@@ -4,7 +4,7 @@ interface RecordRepositoryInterface
 {
     public function render($slug);
 
-    public function store(array $data);
+    public function update(array $data);
 
     public function setDocument($hash, $slug1, $id, $slug2);
 
@@ -21,5 +21,7 @@ interface RecordRepositoryInterface
     public function getTopics();
 
     public function getGroups();
+
+    public function getSubjectList($target);
 
 }

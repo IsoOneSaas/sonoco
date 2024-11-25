@@ -53,7 +53,21 @@ return [
                             'title'         => 'Nombre',
                             'placeholder'   => 'Digite el nombre del registro',
                             'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
-        ],    
+        ],
+        'topic'         =>  [
+                            'icon'          => 'box',
+                            'title'         => 'Tema',
+                            'placeholder'   => 'Digite el tema del registro',
+                            'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
+                            'default'       => 'Seleccione un tema existente',
+        ],
+        'subject'         =>  [
+                            'icon'          => 'shapes',
+                            'title'         => 'Subtema',
+                            'placeholder'   => 'Digite el subtema del registro',
+                            'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
+                            'default'       => 'Seleccione un subtema existente',
+        ],
         
     ],    
 

@@ -158,7 +158,7 @@ class RecordModelController extends Controller
 
         // $response = $this->registerRepo->create($input); 
         //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
-        $response = $this->recordRepo->store($input);
+        $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
             Log::debug(['RESPONSE' => $response]); // 
             return redirect()->route('records.edit', $response['hash'])->with($response['status'], $response['message']); ;
@@ -167,7 +167,17 @@ class RecordModelController extends Controller
         }
 
         
-    } // create Method    
+    } // create Method 
+    
+    /**
+     * Obtiene el listado de subtemas para el tema especificado
+     * @param  string $slug tema especificado
+     * @return json Listado de subtemas
+     */    
+    public function setSubjectList($slug)
+    {
+        return $this->recordRepo->getSubjectList($slug);
+    } //setSubjectList Method
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

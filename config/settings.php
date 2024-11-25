@@ -127,10 +127,7 @@ return [
     'document_name_pattern' => '/^[a-zA-Z0-9 -_ÑñáéíóúÁÉÍÓÚüÜ\-]+$/',
     'document_type_categories' => [
         'externo', 'formato', 'instructivo', 'manual', 'procedimiento', 'registro',
-    ],
-    'document_record_categories' => [
-        'formato', 'registro',
-    ],    
+    ],  
     'document_expire_alarm' => 30,  // days
     'document_validity_lapse_val' => 1,
     'document_validity_lapse_txt' => 'year', 
@@ -218,7 +215,7 @@ return [
         "notice_new_suggestion" => true,
         "notice_new_sighting" => true,
         "notice_new_document" => true,
-        // Records
+        // REGISTROS
         'record_storage_default' => 'iso-one',
         'record_extention_allowed_default' => 'ALL',
         'record_size_allowed_default' => '16000', // kb 
@@ -237,7 +234,19 @@ return [
     'PATH_DOC_MASTER' => '/documents/master/',
     'PATH_DOC_CONTENT' => '/documents/content/',
     'PATH_DOC_IMAGE' => '/documents/images/',
-    'PATH_DOC_RECORD' => '/documents/records/', 
+    'PATH_DOC_RECORD' => '/documents/records/',
+    
+    // REGISTROS
+    'document_record_categories' => [
+        'formato', 'registro',
+    ],  
+    'record_support' => [
+        1 => 'Electrónico',
+        2 => 'Papel',
+        3 => 'Electrónico y Papel',
+        4 => 'Electrónico Iso-One',
+    ],
+    'record_storage_default' => 'iso-one',    
 
 
 ]; // end    
