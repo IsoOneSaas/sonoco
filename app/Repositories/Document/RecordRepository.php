@@ -399,6 +399,22 @@ class RecordRepository implements RecordRepositoryInterface
             } // if           
 
             // SAVE GROUP/TAG
+            if( key_exists('groups', $data) ) {
+                $insert_array = [];
+                $deleted = DB::table('document_record_tags')->where('record_id', $record->record_id)->delete();
+                for( $i = 0; $i < count($data['groups']) ; $i++) {
+                    $insert_array[] = [
+                        'record_id' => $record->record_id,
+                        'group' => $data['groups'][$i],
+                        'tag' => $data['tags'][$i],
+                    ];
+                } // for
+                if( count($insert_array) > 0) {
+                    //Log::debug('===Update Tag');
+                    DB::table('document_record_tags')->insert($insert_array);
+                } // if             
+            }  //if            
+            
 
             // SAVE FILE
 
@@ -425,7 +441,7 @@ class RecordRepository implements RecordRepositoryInterface
             $msg =  ( $data['record_id'] > 0 ) ? trans('document/record.edit.success') : trans('document/record.create.success');
         }
         
-        return ['status' => 'success', 'hash' => $hash, 'message' => $msg];
+        return ['status' => 'success', 'hash' => $hash, 'tab' => $data['tab_active'], 'message' => $msg];
     } // store Repository
 
     /**

@@ -82,6 +82,7 @@ class RecordModelController extends Controller
         
         // View
         return view('document.record.edit', [
+            'initTab'   => 'btn-1-tab',
             'DATA'      => $data,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -96,7 +97,7 @@ class RecordModelController extends Controller
      * @param  json \iso\Http\Requests\DocumentRecordRequest $request Datos validados del formulario
      * @return json Resultado de la actualización
      */
-    public function edit($hash) : View
+    public function edit($hash, $slug = '') : View
     {
         
         // obtener temas
@@ -110,6 +111,7 @@ class RecordModelController extends Controller
 
         // View
         return view('document.record.edit', [
+            'initTab'   => $slug,
             'DATA'      => $data,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -161,7 +163,7 @@ class RecordModelController extends Controller
         $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
             Log::debug(['RESPONSE' => $response]); // 
-            return redirect()->route('records.edit', $response['hash'])->with($response['status'], $response['message']); ;
+            return redirect()->route('records.edit', [$response['hash'], $response['tab']])->with($response['status'], $response['message']); ;
         } else {
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }

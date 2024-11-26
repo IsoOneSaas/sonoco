@@ -53,7 +53,7 @@
                                     <input type="hidden" name="xid" value={{ $DATA['xid'] }}>
                                     <input type="hidden" name="file" value="{{ $DATA['file'] }}"> 
                                     <input type="hidden" name="status_id" value={{ $DATA['status_id'] }} id="status-id">
-                                    <input type="hidden" name="tab_active" value="{{ old('tab_active', '') }}">
+                                    <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -261,12 +261,12 @@
                 //alert(group);
                 $n = $n + 1;
                 var output = '<div id="div-'+$n+'" class="input-group mt-5">';
-                output += '<div class="input-group-text flex"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}' +' class="w-4 h-4 mr-1"></i>'+ '{{ trans("document/record.form.tag.title") }}' +'</div>';
+                output += '<div class="input-group-text flex"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}'+'" class="w-4 h-4 mr-1">@</i> '+ '{{ trans("document/record.form.tag.title") }}' +'</div>';
                 output += '<input type="text" name="groups[]" value="'+group+'" class="form-control w-full input-status" readonly>';
                 if( newGroup ) {
                     output += '<input id="tag-input-'+$n+'" type="text" name="tags[]" value="" class="form-control w-full input-status ml-2" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
-                    output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+' tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>';
-                    output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+$n+')"><i data-lucide="minus" class="w-4 h-4"></i></button>';
+                    output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4">O</i></a></div>';
+                    output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+$n+')"><i data-lucide="minus" class="w-4 h-4">-</i></button>';
                     output += '</div>';
                     $("#div-tags").append(output);
                 } else {
@@ -350,10 +350,10 @@
                 $.each(data, function(i, value) {
                     options += '<option value="'+value.tag+'">'+value.tag+'</option>';
                 });
-                output += '<input id="tag-input-'+n+'" type="text" name="tags[]" value="" class="form-control w-full input-status" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
+                output += '<input id="tag-input-'+n+'" type="text" name="tags[]" value="" class="form-control w-full input-status" aria-describedby="tag" placeholder="'+'{{ trans("document/record.form.tag.placeholder") }}'+'">';
                 output += '<select class="form-control w-full input-status ml-2" onChange="selectTag('+n+',this.value)">'+options+'</select>';
-                output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+' tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a></div>';
-                output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+n+')"><i data-lucide="minus" class="w-4 h-4"></i></button>';
+                output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4">O</i></a></div>';
+                output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+n+')"><i data-lucide="minus" class="w-4 h-4">-</i></button>';
                 output += '</div>';
                 $("#div-tags").append(output);
             } // success
