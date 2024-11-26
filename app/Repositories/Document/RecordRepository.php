@@ -383,7 +383,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record->author_id = $user->user_id;
             $record->author_name = $user->name; // $data['author_name']
             $record->author_job = $jobName;
-            $record->filename = ''; //$data['filename']
+            $record->filename = $data['fileName'];
             $record->status = $data['status_id'];
 
             //DB::beginTransaction();
@@ -623,6 +623,7 @@ class RecordRepository implements RecordRepositoryInterface
         if( $groups ) return $groups;
         else return true;            
     } // getGroups Method    
+
 
 
 } // class

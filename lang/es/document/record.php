@@ -83,6 +83,13 @@ return [
                             'tooltip'       => 'Opcional. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
                             'default'       => 'Seleccione una etiqueta existente',
         ],
+        'file'         =>  [
+                            'icon'          => 'upload',
+                            'title'         => 'Cargar',
+                            'placeholder'   => 'Seleccione el archivo',
+                            'tooltip'       => 'Opcional. Cargue un archivo de su disco duro si no utiliza el editor para actualizar el registro.',
+                            'default'       => 'Seleccione un archivo del disco duro',
+        ],
         
     ],    
 

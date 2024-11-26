@@ -132,7 +132,7 @@ class RecordModelController extends Controller
     {  
         $response = ['status' => 'success', 'message' => 'Testing...'];
         $input = $request->input();
-        //Log::debug(['STORE DATA' => $input]);
+        Log::debug(['STORE DATA' => $input]);
         
         // $output = '';
         // $settings = $this->registerRepo->getSettings();
@@ -160,6 +160,16 @@ class RecordModelController extends Controller
 
         // $response = $this->registerRepo->create($input); 
         //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
+
+        // ARCHIVO SOPORTE
+        $file = $this->setFile($request);        
+        if( !$file['success'] ) {
+            $response = ['status' => 'error', 'message' => $file['message']];
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        } else {
+            $input['fileName'] = $file['name'];
+        }
+
         $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
             Log::debug(['RESPONSE' => $response]); // 
@@ -189,7 +199,32 @@ class RecordModelController extends Controller
     public function setTagList(Request $request)
     {
         return $this->recordRepo->getTagList($request->all());
-    } //setTagList Method    
+    } //setTagList Method
+    
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function setFile(Request $request)
+    {
+        if( $file = $request->file('file') ) {
+            $fileInfo = $file->getClientOriginalName();        
+            $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);
+            $prefix =  'REC';       
+            $fileName = uniqid($prefix) .'.'. $extension;            
+            if( $file->move($this->contentUrl, $fileName) ) {
+                $fileSize = filesize($this->contentUrl . $fileName);
+                if( $fileSize ) {
+                    Log::info('File loaded as support to record: '. $fileName . ' <'. $fileSize .' bytes>');
+                    return ['success'=> true, 'name' => $fileName];
+                } else {
+                    return ['success'=> false, 'message' => trans('document/link.upload.no-file')];
+                }                
+            } else {
+                return ['success'=> false, 'message' => trans('document/link.upload.no-move')];
+            }
+        }
+        return ['success'=> true, 'name' => ''];
+    } // setFile Method
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

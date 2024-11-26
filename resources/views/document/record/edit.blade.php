@@ -45,7 +45,7 @@
                                     </li>                                                                                                                                                                                    
                                 </ul>
                                 <!-- BEGIN: Form -->
-                                <form id="record-form" action="{{ route('records.store', $DATA['record_id']) }}" method="POST">
+                                <form id="record-form" action="{{ route('records.store', $DATA['record_id']) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <input type="hidden" name="record_id"  id="record-id" value={{ $DATA['record_id'] }} >                             
                                     <input type="hidden" name="document_id" value={{ $DATA['document_id'] }} id="document-id">
@@ -70,7 +70,22 @@
                                             <!-- END: Basic -->
                                         </div>
                                         <div id="record-tab-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-2-tab">
-                                            <h1>Content 2</h1>
+                                            <!-- BEGIN: Support -->
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Busque un archivo en el disco duro y seleccionelo para utilizarlo como archivo soporte del registro.</p>  
+                                                <div class="input-group mt-5">
+                                                    <div id="file" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.file.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.file.title') }}</div>
+                                                    <input type="file" name="file" value="" class="form-control w-full input-status pl-4 pt-2" aria-describedby="file" placeholder="{{ trans('document/record.form.file.placeholder') }}">                                                    
+                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.file.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                </div>
+                                                @if( isset($DATA) && ($DATA['file'] != '') )                                                
+                                                <div class="input-group mt-5">                                                    
+                                                    <button id="btn-file" type="button" data-name="{{ $DATA['file'] }}" class='btn btn-primary ml-5'><i data-lucide="file" class="w-12 h-12"></i></button>
+                                                    <span>&nbsp;Archivo existente</span>
+                                                </div>
+                                                @endif                                                                                                
+                                            </div>
+                                            <!-- END: Support -->
                                         </div>
                                         <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">                                            
                                             <!-- BEGIN: Topic -->
@@ -121,8 +136,9 @@
                                                 @foreach($DATA['tags'] as $group => $tag)
                                                     @foreach( $tag['labels'] as $n => $val )
                                                     <div id="div-{{ $n }}" class="input-group mt-5">
-                                                        <div class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.tag.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.tag.title') }}</div>
+                                                    <div id="group" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.group.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.group.title') }}</div>
                                                         <input type="text" name="groups[]" value="{{ $group }}" class="form-control w-full input-status" readonly>
+                                                        <div class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/record.form.tag.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.tag.title') }}</div>                                                        
                                                         <input id="tag-input-{{ $n }}" type="text" name="tags[]" value="{{ $val }}" class="form-control w-full input-status" aria-describedby="tag" placeholder="{{ trans('document/record.form.tag.placeholder') }}">
                                                         <select class="form-control w-full input-status ml-2" onChange="selectTag({{ $n }},this.value)">
                                                             <option value="">{{ trans('document/record.form.tag.default') }}</option>
@@ -142,7 +158,11 @@
                                             <h1>Content 5</h1>
                                         </div>
                                         <div id="record-tab-6" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-6-tab">
-                                            <h1>Content 6</h1>
+                                            <!-- BEGIN: Attachment -->
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Ingrese tanto archivos adjuntos sea necesario.</p>  
+                                            </div>
+                                            <!-- END: Attachment -->  
                                         </div>
                                         <div id="record-tab-7" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-7-tab">
                                             <h1>Content 7</h1>
@@ -261,8 +281,10 @@
                 //alert(group);
                 $n = $n + 1;
                 var output = '<div id="div-'+$n+'" class="input-group mt-5">';
-                output += '<div class="input-group-text flex"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}'+'" class="w-4 h-4 mr-1">@</i> '+ '{{ trans("document/record.form.tag.title") }}' +'</div>';
+                output += '<div id="group" class="input-group-text flex"><i data-lucide="'+'{{ trans("document/record.form.group.icon") }}'+'" class="w-4 h-4 mr-1"></i>'+'{{ trans("document/record.form.group.title") }}'+'</div>';
                 output += '<input type="text" name="groups[]" value="'+group+'" class="form-control w-full input-status" readonly>';
+                output += '<div class="input-group-text flex ml-2"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}'+'" class="w-4 h-4 mr-1">@</i>'+'{{ trans("document/record.form.tag.title") }}' +'</div>';
+                
                 if( newGroup ) {
                     output += '<input id="tag-input-'+$n+'" type="text" name="tags[]" value="" class="form-control w-full input-status ml-2" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
                     output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4">O</i></a></div>';
