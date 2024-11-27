@@ -160,7 +160,21 @@
                                         <div id="record-tab-6" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-6-tab">
                                             <!-- BEGIN: Attachment -->
                                             <div class="intro-y box p-5 mt-5">
-                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Ingrese tanto archivos adjuntos sea necesario.</p>  
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Ingrese tanto archivos adjuntos sea necesario. Pulse el botón para cargar uno nuevo.</p>  
+                                                <button id="btn-attachments-modal" type="button" class='btn btn-primary ml-4'><i data-lucide="upload" class="w-8 h-8"></i></button>
+                                                <div id="div-attachments">
+                                                    @foreach( $DATA['files'] as $file )
+                                                    <div class="input-group mt-5" id="link-{{ $file->link_id }}">
+                                                        <div class="input-group-text flex"><i data-lucide="file" class="w-4 h-4 mr-1"></i> Archivo</div>
+                                                        <input type="text" name="attachname[]" value="{{ $file->name }}" class="form-control w-full input-status" readonly>
+                                                        <input type="text" name="attachsize[]" value="{{ $file->size }}" class="form-control w-full input-status" readonly>
+                                                        <input type="text" name="attachmime[]" value="{{ $file->type }}" class="form-control w-full input-status" readonly>
+                                                        <input type="hidden" name="attachfile[]" value="{{ $file->link }}" class="form-control w-full">
+                                                        <button type="button" class="btn btn-primary ml-5" onClick="showFile('{{ $file->link }}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                                        <button type="button" class="btn btn-danger ml-5" onClick="deleteFile({{ $file->link_id }})"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                                                    </div>    
+                                                    @endforeach
+                                                </div>
                                             </div>
                                             <!-- END: Attachment -->  
                                         </div>
@@ -172,20 +186,71 @@
                                 <!-- END: Form -->
                             </div> 
                         </div>
-                    </div>        
+                    </div>
+                                        
+                    <!-- BEGIN: Modal Attachcment -->
+                    <div id="modal-attachments" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-attachments-title" class="font-medium text-base mr-auto">Diligenciar Anexos</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5">
+                                    <div id="modal-attachments-message"></div>
+                                    <form id="upload-form" method="post" action="{{ route('records.edit.store') }}" enctype="multipart/form-data" class="dropzone">
+                                        @csrf
+                                        <div class="input-group mt-3">
+                                            <div id="name" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/link.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/link.form.name.title') }}</div>
+                                            <input type="text" id="file-name" name="filename" class="form-control w-full" aria-describedby="name" placeholder="{{ trans('document/link.form.name.placeholder') }}" minlength="2" maxlength="64" required>
+                                            <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/link.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                        </div>
+                                        <div id="upload-zone" >
+                                            <div class="dz-default dz-message"><h4>Mueva los archivos aquí para ser cargados</h4></div>
+                                        </div>
+                                    </form>                                                                        
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-attachments-clear" type="button" class="btn btn-outline-secondary mr-1">Limpiar</button>
+                                    <button id="btn-attachments-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary mr-1">Cancelar</button>
+                                    <button id="btn-attachments-ok" type="button" class="btn btn-primary">Cargar</button>
+                                    <a id="modal-attachments-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-attachments" class="">.</a>
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Attachcment -->
+
                 </div>
                 <!-- END: Content -->
+
+                <!-- File Modal -->
+
+
+
 
 @push('meta')                
 <meta name="csrf-token" content="{{ csrf_token() }}">                
 @endpush
 
+@push('styles')
+    <link rel="stylesheet" href="{{ url('assets/js/dropzone-5.9.3/dropzone.min.css') }}" type="text/css" />
+@endpush
+
 @push('scripts-bottom')
 <script src="{{ url('assets/js/ckeditor_4.21.0_full/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
+<script src="{{ url('assets/js/dropzone-5.9.3/dropzone.min.js') }}"></script>
+<script src="{{ url('assets/js/dropzone-5.9.3/config_record_edit.js') }}"></script> 
 <script document="text/javascript">
     var $n = {{ count($DATA['tags']) }};
-    $(function () {        
+    $(function () {
+        //const dropzone = new Dropzone("#upload-form");        
         var status = {{ $DATA['status_id'] }};
         var tab = $("input[name='tab_active']").val();
         var id = ( tab == '') ? 'btn-1-tab' : tab;
@@ -309,6 +374,15 @@
             $("#group-input").val("");
         });              
 
+        // Genera un modal para anexos
+        $('body').on('click', '#btn-attachments-modal', function (e) {
+            e.preventDefault();
+            //setLinksGrid();
+            $("input[name='filename']").val('');
+            $("#btn-attachments-clear").trigger("click");
+            $("#modal-attachments-open")[0].click();
+        });        
+
 
     });
 
@@ -390,7 +464,18 @@
     function deleteTag(tagId) {
         //console.log('eliminar tag tr-'+ tagId);
         $("#div-"+tagId).remove();
-    }     
+    } 
+    
+    function deleteFile(tagId) {
+        $("#link-"+tagId).remove();
+    }
+    
+    function showFile(file) {
+        var url = "{{ route('records.edit.show', ':file') }}"; 
+        url = url.replace(':file', file);
+        var win = window.open(url, '_blank');
+        win.focus();        
+    } // showFile Fx
 
 </script>
                

@@ -129,12 +129,12 @@ class RecordRepository implements RecordRepositoryInterface
             'subject' => '',
             'tags' => [],
             'document' => $document->name,
-            'attachment' => ['exists' => false],
             'status_id' => 0,
             'records' => [],
             'hash' => $hash,
             'xid' => $id,
             'selected' => 0,
+            'files' => [],
         ];  
 
         if( $slug1 === 'planificacion' ) {
@@ -267,6 +267,7 @@ class RecordRepository implements RecordRepositoryInterface
             'records' => [],
             'hash' => $hash,
             'xid' => 0,
+            'files' => [],
         ];
         //Log::debug(['SET RECORD' => $output_array]);
 
@@ -309,14 +310,11 @@ class RecordRepository implements RecordRepositoryInterface
             ];
         } // foreach
 
-        // FIXME: Archivos anexos al registro
-        // $output_array['attachment']['exists'] = false;
-        // $output_array['attachment']['files'] = [];
-        // $output_array['attachment']['exists'] = true;
-        // $attachments =  \iso\Models\Document\AttachModel::where('record_id', $id)->get();
-        // foreach($attachments as $attachment) {
-        //     $output_array['attachment']['files'][] = $attachment;
-        // } // foreach
+        // Recuperar Archivos anexos
+        $files = DB::table('document_record_links')->where('record_id', $id)->get(); 
+        if($files) {
+            $output_array['files'] = $files->toArray();
+        }
 
         // Recuperar Tema y Subtema si existe (added 2024.09.05)
         $output_array['topic'] = '';
@@ -345,7 +343,7 @@ class RecordRepository implements RecordRepositoryInterface
             $output_array['tags'] = $tags;
         } // if
 
-       //Log::debug(['RECORD EXISTING' => $output_array]);
+       Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -409,14 +407,30 @@ class RecordRepository implements RecordRepositoryInterface
                         'tag' => $data['tags'][$i],
                     ];
                 } // for
-                if( count($insert_array) > 0) {
+                if(count($insert_array) > 0) {
                     //Log::debug('===Update Tag');
                     DB::table('document_record_tags')->insert($insert_array);
                 } // if             
             }  //if            
             
 
-            // SAVE FILE
+            // SAVE ATTACHMENTS            
+            if( key_exists('attachname', $data) ) {
+                $insert_array = [];
+                $deleted = DB::table('document_record_links')->where('record_id', $record->record_id)->delete();
+                for( $i = 0; $i < count($data['attachname']) ; $i++) {
+                    $insert_array[] = [
+                        'record_id' => $record->record_id,
+                        'name' => $data['attachname'][$i],
+                        'link' => $data['attachfile'][$i],
+                        'type' => substr($data['attachmime'][$i], 0, 64),
+                        'size' => $data['attachsize'][$i],
+                    ];
+                } // for
+                if(count($insert_array) > 0) {
+                    DB::table('document_record_links')->insert($insert_array);
+                } // if                  
+            } // if
 
 
             // SAVE TRACING

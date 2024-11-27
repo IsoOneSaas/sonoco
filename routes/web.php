@@ -197,6 +197,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::post('subtema/listar', [\App\Http\Controllers\Document\RecordModelController::class, 'setSubjectList'])->name('edit.subject');
             Route::post('etiqueta/listar', [\App\Http\Controllers\Document\RecordModelController::class, 'setTagList'])->name('edit.tag');
+            Route::post('anexo/salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'storeAttachment'])->name('edit.store');
+            Route::get('anexo/mostrar/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'showAttachment'])->name('edit.show');
         });
     });  
 });

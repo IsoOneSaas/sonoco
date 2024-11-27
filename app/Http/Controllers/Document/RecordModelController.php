@@ -162,7 +162,7 @@ class RecordModelController extends Controller
         //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
 
         // ARCHIVO SOPORTE
-        $file = $this->setFile($request);        
+        $file = $this->setFile($request, 'REC');        
         if( !$file['success'] ) {
             $response = ['status' => 'error', 'message' => $file['message']];
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
@@ -204,18 +204,17 @@ class RecordModelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function setFile(Request $request)
+    public function setFile(Request $request, $prefix)
     {
         if( $file = $request->file('file') ) {
             $fileInfo = $file->getClientOriginalName();        
-            $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);
-            $prefix =  'REC';       
+            $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);       
             $fileName = uniqid($prefix) .'.'. $extension;            
             if( $file->move($this->contentUrl, $fileName) ) {
                 $fileSize = filesize($this->contentUrl . $fileName);
                 if( $fileSize ) {
-                    Log::info('File loaded as support to record: '. $fileName . ' <'. $fileSize .' bytes>');
-                    return ['success'=> true, 'name' => $fileName];
+                    Log::info('File loaded to record: '. $fileName . ' <'. $fileSize .' bytes>');
+                    return ['success'=> true, 'name' => $fileName, 'size' => $fileSize, 'mime' => $file->getClientMimeType()];
                 } else {
                     return ['success'=> false, 'message' => trans('document/link.upload.no-file')];
                 }                
@@ -225,6 +224,29 @@ class RecordModelController extends Controller
         }
         return ['success'=> true, 'name' => ''];
     } // setFile Method
+
+    public function storeAttachment(Request $request)
+    {
+        $response = $this->setFile($request, 'ATC'); 
+        $response['filename'] = $request->input('filename'); 
+        return response()->json($response);
+    } // storeAttachment Method
+
+    /**
+     * Abrir los archivos anexos del contenido
+     * @param  string   $filename Nombre del archivo a abrir
+     * @return function abre el archivo en una ventana nueva
+     */
+    public function showAttachment($filename)
+    {
+        $url = $this->contentUrl . $filename;
+        if(file_exists($url)) {
+            return response()->file($url);
+         } else {
+            Log::error('File did not find: '. $url);
+            abort(404);
+        }
+    } // showAttachment Method    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables
