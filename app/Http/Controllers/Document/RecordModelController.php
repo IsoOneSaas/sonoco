@@ -52,7 +52,9 @@ class RecordModelController extends Controller
      */    
     public function render($param)
     {
-        return $this->recordRepo->render($param);
+        $systems = $this->recordRepo->getSystemsList();
+        $processes = $this->recordRepo->getProcessesList();
+        return $this->recordRepo->render($param, $systems, $processes, $this->set);
     }  // show
     
 
@@ -255,26 +257,24 @@ class RecordModelController extends Controller
     private function dataTableDefinition()
     {
         // **** AGREGAR COLUMNA AFECTA INDICE DE LAS COLUMNAS QUE SON UTILIZADAS PARA BUSQUEDA GLOBAL
-        $columnOrder = 10;   // published timestamp
+        $columnOrder = 2;   
         $columnExport = [2,3,4,5,6,7];
         $columns_basic = [
             ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"],                      
-            ["data" => "document_id", "title" => "ID", "visible" => false, "orderable" => false],            
+            ["data" => "record_id", "title" => "ID", "visible" => false, "orderable" => false],   // 1         
         ];
 
         $columns_array = [
-            ["data" => "code", "title" => "Código", "searchable" => true, "className" => "dt-nowrap"], // 2
-            ["data" => "name", "title" => "Nombre", "searchable" => true], // 3
-            ["data" => "version", "title" => "Versión", "searchable" => true, "className" => "dt-center"],
-            ["data" => "typeName", "title" => "Tipo Documento", "searchable" => true, 'filterable' => true],
-            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => true], //6
-            ["data" => "life", "title" => "Vigencia", "searchable" => true], //7
+            ["data" => "name", "title" => "Nombre", "searchable" => true, 'filterable' => false], // 2 , "className" => "dt-nowrap"
+            ["data" => "author", "title" => "Elaborado por", "searchable" => true, 'filterable' => true], // 3
+            ["data" => "topic", "title" => "Tema", "searchable" => true, 'filterable' => true], // , "className" => "dt-center"
+            ["data" => "subject", "title" => "Subtema", "searchable" => true, 'filterable' => true],
+            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => false], //6
+            ["data" => "document", "title" => "Origen", "searchable" => true, 'filterable' => false], //7
         ];
 
         $columns_extra = [
-            ["data" => "hash", "title" => "hash", "visible" => false,  "orderable" => false], // 8
-            ["data" => "alert", "title" => "A", "visible" => false,  "orderable" => false],  // 9
-            ["data" => "time", "title" => "Vida", "visible" => false,  "orderable" => true], // 10
+
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

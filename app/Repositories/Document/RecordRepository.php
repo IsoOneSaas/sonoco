@@ -37,59 +37,80 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de registros de la tabla
      */ 
-    public function render($slug)
+    public function render($slug, $systems, $processes, $setting)
     {
         $data = [];
         $i = 0;
-        $target = config('settings.document_status.publish');
-        $light = false;
         $params = json_decode($slug, true);
+
+        Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray()]);
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
 
-        $documents = $this->tool->setPublishedDocumentsCollection('user', true, null, $params);
-        foreach($documents as $document) {
+        // Range Date
+        $rangeIn = $params['din'] .' 00:00:00';
+        $rangeOut = $params['dout'] .' 23:59:59';
+        
+        // Requisitos
+        $sids = $this->setIds('sids', $params);
+        if( !$sids ) {
+            $plucked = $systems->pluck('system_id');
+            $sids = $plucked->all();
+        }
+        
+        // Procesos
+        $pids = $this->setIds('pids', $params);
+        if( !$pids ) {
+            $plucked = $processes->pluck('process_id');
+            $pids = $plucked->all();
+        }  
+        
+        Log::debug(['SIDS' => $sids, 'PIDS' => $pids]);
 
-            //Log::debug(['I' => $i,'ID' => $document->document_id, 'CODE' => $document->code]);
-            
-            if( $light ) {
-                $val = ['date' => '', 'status' => ''];
-                $date = '';
-            } else {
-                // Publicación
-                //$status = $document->status()->where('action', $target)->whereBetween('action_date', [$rangeIn, $rangeOut])->first(['action_date']);
-                $status = $document->status()->where('action', $target)->first(['action_date']);
-                if($status) {
-                    $dt = Carbon::createFromTimeStamp(strtotime($status->action_date)); 
-                    $date = $dt->diffForHumans();
-                    // Validacion
-                    $val = $this->tool->getValidityData($dt, $document->type_id, $document->document_id, $this->set);                     
-                } else {
-                    $val = ['date' => '', 'status' => ''];
-                    $date = false;
-                }                              
-            } // if
-            
+        // OBTENER LOS REGISTROS FILTRADOS
+        $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
+            join('documents AS T1', function($join){
+                $join->on('T1.document_id', '=', 'document_records.document_id');
+            })
+            ->join('document_record_topics AS T4', function($join) {
+                $join->on('T4.record_id', '=', 'document_records.record_id');
+            })              
+            ->join('set_processes AS T2', function($join) use($pids)  { // 
+                $join->on('T2.process_id', '=', 'T1.process_id');
+                $join->whereIn('T2.process_id', $pids);
+            })
+            ->join('set_systems AS T3', function($join) use($sids) {
+                $join->on('T3.system_id', '=', 'T1.system_id');
+                $join->whereIn('T3.system_id', $sids);
+            })          
+            ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])
+            ->get([
+                'document_records.record_id', 
+                'document_records.name AS recordName', 
+                'document_records.author_name AS authorName', 
+                'document_records.created_at as date',
+                'T1.name as documentName',
+                'T4.topic',
+                'T4.subject',            
+            ]);
 
-            if($date) {                                
-                $data[$i]['document_id'] = $document->document_id;
-                $data[$i]['DT_RowIndex'] = $i+1;
-                $data[$i]['code'] = $document->code;
-                $data[$i]['name'] = $document->name;
-                $data[$i]['version'] = $document->version;
-                $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
-                $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
-                $data[$i]['date']  = $date;
-                $data[$i]['life']  = $val['date'];
-                $data[$i]['hash']  =  $this->tool->setIdHash($document->document_id);
-                $data[$i]['alert']  = $val['status'];
-                $data[$i]['time'] = ( isset($dt) ) ? $dt->timestamp : '';
+        foreach($records as $record) {
+            $dt = Carbon::createFromTimeStamp(strtotime($record->date));
+            $data[$i]['record_id'] = $record->record_id;
+            $data[$i]['DT_RowIndex'] = $i+1;
+            $data[$i]['name'] = $record->recordName;
+            $data[$i]['author'] = $record->authorName;
+            $data[$i]['topic'] = $record->topic;
+            $data[$i]['subject']  = $record->subject;
+            $data[$i]['date']  = $dt->diffForHumans();
+            $data[$i]['document']  = $record->documentDate;
 
-                $i++;
-            } // if $date valid
+
+            $i++;                
 
         } // foreach
+        
         
        Log::debug('Número de registros filtrados: '. count($data));
 
@@ -389,8 +410,9 @@ class RecordRepository implements RecordRepositoryInterface
 
             // SAVE TOPIC/SUBJECT
             if( key_exists('topic', $data) ) {
-                DB::table('document_record_topics')->insert([
-                    'record_id' => $record->record_id, 
+                DB::table('document_record_topics')->updateOrInsert([
+                    'record_id' => $record->record_id
+                ],[ 
                     'topic' => $data['topic'], 
                     'subject' => $data['subject']
                 ]);
@@ -511,10 +533,10 @@ class RecordRepository implements RecordRepositoryInterface
         } else {        
             // Obtener procesos pertenecientes
             $pids1 = $this->tool->getOwnProcessesByJob($user);
-            Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
+            //Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
             // Procesos de la tabla de relaciones con cargos                  
             $pids2 = $this->tool->setProcessesFromJobs($user);
-            Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
+            //Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
 
             // Procesos de autorizados
             $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
@@ -523,7 +545,7 @@ class RecordRepository implements RecordRepositoryInterface
                 })            
                 ->pluck('documents.process_id');
             $pids3 = $plucked->all();
-            Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
+            //Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
 
             // Concatenar
             $process_array = array_unique(array_merge($pids1, $pids2, $pids3));      
@@ -638,6 +660,18 @@ class RecordRepository implements RecordRepositoryInterface
         else return true;            
     } // getGroups Method    
 
-
+    private function setIds($tag, $params)
+    {   
+        $output = [];
+        if( key_exists($tag, $params) && is_array($params[$tag]) ) {
+            foreach($params[$tag] as $id) {
+                if($id != '') {
+                    $output[] = $id;
+                }
+            }
+        }
+        if( count($output) > 0 ) return $output; 
+        return false;
+    }
 
 } // class

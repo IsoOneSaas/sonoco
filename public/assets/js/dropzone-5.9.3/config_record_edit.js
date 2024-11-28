@@ -1,3 +1,4 @@
+var $nitem = 1;
 Dropzone.options.uploadForm = {
     autoProcessQueue: false,
 	maxFilesize: 8, // MB
@@ -53,7 +54,8 @@ Dropzone.options.uploadForm = {
 		if( response.success ) {
             var message = '';
             var output = '';
-            var size = 0;			
+            var size = 0;
+			var id = '';			
 			// Limpiar
 			$("input[name='filename']").val('');
 			$("#btn-attachments-clear").trigger("click");
@@ -63,14 +65,18 @@ Dropzone.options.uploadForm = {
                 output = '<div class="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert"><i data-lucide="alert" class="w-4 h-4"></i><p>'+response.message+'</p></div>';
             } else {
                 size = Math.round(parseInt(response.size)/1000);
+				id = 'temp-'+$nitem;
                 message = 'Archivo anexo cargado exitósamente';
-                output += '<div class="input-group mt-5">'; 
+                output += '<div class="input-group mt-5" id="link-'+id+'">'; 
                 output += '<div class="input-group-text flex"><i data-lucide="file" class="w-4 h-4 mr-1"></i> Archivo</div>';
                 output += '<input type="text" name="attachname[]" value="'+response.filename+'" class="form-control w-full input-status" readonly>';
                 output += '<input type="text" name="attachsize[]" value="'+size+'" class="form-control w-full input-status" readonly>';
                 output += '<input type="text" name="attachmime[]" value="'+response.mime+'" class="form-control w-full input-status" readonly>';
                 output += '<input type="hidden" name="attachfile[]" value="'+response.name+'" class="form-control w-full">';
+				output += '<button type="button" class="btn btn-primary ml-5" onClick="showFile(\''+response.name+'\')"><i data-lucide="eye" class="w-4 h-4"></i></button>';
+				output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteFile(\''+id+'\')"><i data-lucide="minus" class="w-4 h-4"></i></button>';
                 output += '</div>';
+				$nitem = $nitem + 1;
             }
 			// Message
 			setSuccessNotification('success', '', message);

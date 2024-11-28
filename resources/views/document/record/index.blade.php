@@ -120,43 +120,34 @@
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>Id</th>
-                                                <th>Código</th>
                                                 <th>Nombre</th>
-                                                <th>Versión</th>
-                                                <th>Tipo Documento</th>
+                                                <th>Elaborado por</th>
+                                                <th>Tema</th>
+                                                <th>Subtema</th>
                                                 <th>Publicado</th>
-                                                <th>Vigencia</th>
-                                                <th>H</th>
-                                                <th>A</th>
-                                                <th>T</th>
+                                                <th>Origen</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
                                                 <th class="th-filter">Id</th>
-                                                <th class="th-filter">Código</th>
                                                 <th class="th-filter">Nombre</th>
-                                                <th class="th-filter">Versión</th>
-                                                <th class="th-filter">Tipo Documento</th>
+                                                <th class="th-filter">Elaborado por</th>
+                                                <th class="th-filter">Tema</th>
+                                                <th class="th-filter">Subtema</th>
                                                 <th class="th-filter">Publicado</th>
-                                                <th class="th-filter">Vigencia</th>
-                                                <th class="th-filter">H</th>
-                                                <th class="th-filter">A</th>
-                                                <th class="th-filter">T</th>
+                                                <th class="th-filter">Origen</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
                                             <tr>
                                                 <th>#</th>
                                                 <th>Id</th>
-                                                <th>Código</th>
                                                 <th>Nombre</th>
-                                                <th>Versión</th>
-                                                <th>Tipo Documento</th>
+                                                <th>Elaborado por</th>
+                                                <th>Tema</th>
+                                                <th>Subtena</th>
                                                 <th>Publicado</th>
-                                                <th>Vigencia</th>
-                                                <th>H</th>
-                                                <th>A</th>
-                                                <th>T</th>
+                                                <th>Origen</th>
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -254,8 +245,10 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;       
 
         // DATATABLES
-        param = {sids: [], pids: [], lids: [], tids: [], din: $dateInDefault, dout: $dateOutDefault, txt: '', tag: ''};
+        param = {sids: [], pids: [], din: $dateInDefault, dout: $dateOutDefault};
 
+        console.dir(param);
+        console.dir(columnsDef);
         console.log('Datatables init starts now: ', Date.now() - startTime);
 
         $myTable = $('#records-table')
