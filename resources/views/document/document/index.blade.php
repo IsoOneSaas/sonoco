@@ -239,39 +239,39 @@
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />    
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
     <style>
-            span.deleteicon {
-                position: relative;
-                display: inline-flex;
-                align-items: center;                
-            }
-            span.deleteicon span {
-                position: absolute;
-                display: block;
-                right: 3px;
-                width: 15px;
-                height: 15px;
-                border-radius: 50%;
-                color: #fff;
-                background-color: #ccc;
-                font: 13px monospace;
-                text-align: center;
-                line-height: 1em;
-                cursor: pointer;
-                
-            }
-            span.deleteicon input {
-                padding-right: 18px;
-                box-sizing: border-box;
-            }
-            .iso-input {
-                padding: 0.15em 0.6em; 
-                font-size: 0.95em; 
-                border-radius: 5px;                
-            }
-            .input-filter {
-                width: 100%
-            }
-        </style>    
+        span.deleteicon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;                
+        }
+        span.deleteicon span {
+            position: absolute;
+            display: block;
+            right: 3px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            color: #fff;
+            background-color: #ccc;
+            font: 13px monospace;
+            text-align: center;
+            line-height: 1em;
+            cursor: pointer;
+            
+        }
+        span.deleteicon input {
+            padding-right: 18px;
+            box-sizing: border-box;
+        }
+        .iso-input {
+            padding: 0.15em 0.6em; 
+            font-size: 0.95em; 
+            border-radius: 5px;                
+        }
+        .input-filter {
+            width: 100%
+        }
+    </style>    
 @endpush
 
 @push('scripts-bottom')

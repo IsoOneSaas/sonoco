@@ -49,8 +49,11 @@ class RecordRepository implements RecordRepositoryInterface
         set_time_limit(3600);
 
         // Range Date
-        $rangeIn = $params['din'] .' 00:00:00';
-        $rangeOut = $params['dout'] .' 23:59:59';
+        //
+        $range = explode('T', $params['din']);
+        $rangeIn = $range[0] .' 00:00:00';
+        $range = explode('T', $params['dout']);
+        $rangeOut = $range[0] .' 23:59:59';
         
         // Requisitos
         $sids = $this->setIds('sids', $params);
@@ -66,7 +69,7 @@ class RecordRepository implements RecordRepositoryInterface
             $pids = $plucked->all();
         }  
         
-        Log::debug(['SIDS' => $sids, 'PIDS' => $pids]);
+        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids]);
 
         // OBTENER LOS REGISTROS FILTRADOS
         $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
@@ -97,19 +100,21 @@ class RecordRepository implements RecordRepositoryInterface
 
         foreach($records as $record) {
             $dt = Carbon::createFromTimeStamp(strtotime($record->date));
-            $data[$i]['record_id'] = $record->record_id;
             $data[$i]['DT_RowIndex'] = $i+1;
+            $data[$i]['record_id'] = $record->record_id;            
             $data[$i]['name'] = $record->recordName;
             $data[$i]['author'] = $record->authorName;
             $data[$i]['topic'] = $record->topic;
             $data[$i]['subject']  = $record->subject;
             $data[$i]['date']  = $dt->diffForHumans();
-            $data[$i]['document']  = $record->documentDate;
+            $data[$i]['document']  = ($record->documentDate === NULL) ? '' : $record->documentDate;
 
 
             $i++;                
 
         } // foreach
+
+        
         
         
        Log::debug('Número de registros filtrados: '. count($data));
@@ -120,6 +125,7 @@ class RecordRepository implements RecordRepositoryInterface
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
+        //Log::debug(['DATA' => $results]);
         return json_encode($results);          
 
     } // render
@@ -559,58 +565,69 @@ class RecordRepository implements RecordRepositoryInterface
         } // foreach
 
         return $processes;
-    } // processes    
+    } // processes
+    
+    /**
+     * Listado de grupos existentes
+     * @return collection    Listado
+     */
+    public function getGroupsList()
+    {
+        return DB::table('document_record_tags')->select('group')->orderBy('group')->groupBy('group')->get(); 
+
+    } // getGroupsList Method   
+      
 
     /**
      * Listado de localizaciones para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
      * @return collection    Listado
      */
-    public function getLocationsList()
-    {
-        $location_array = [];
-        $user = Auth::user();
+    // public function getLocationsList()
+    // {
+    //     $location_array = [];
+    //     $user = Auth::user();
 
-        if( $user->hasAnyRole('MASTER','SUPER') ) {
-            //$plucked = LocationModel::all()->pluck('location_id');
-            //$location_array = $plucked->all();
-            $locations = LocationModel::all();
-        } else {
-            // Obtener locatlizaciones pertenecientes
-            $lids1 = $this->tool->getOwnLocationsByUser($user);        
-            //Log::debug(['OWN LOCATIONS IDS' => $lids1]); 
+    //     if( $user->hasAnyRole('MASTER','SUPER') ) {
+    //         //$plucked = LocationModel::all()->pluck('location_id');
+    //         //$location_array = $plucked->all();
+    //         $locations = LocationModel::all();
+    //     } else {
+    //         // Obtener locatlizaciones pertenecientes
+    //         $lids1 = $this->tool->getOwnLocationsByUser($user);        
+    //         //Log::debug(['OWN LOCATIONS IDS' => $lids1]); 
 
-            // Localizaciones de autorizados
-            $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
-                ->join('documents', function($query) {
-                    $query->on('documents.document_id', '=', 'document_authorizations.document_id');
-                })            
-                ->pluck('documents.location_id');
-            $lids2 = $plucked->all();
-            //Log::debug(['AUTH LOCATIONS IDS' =>  array_unique($lids2)]); 
+    //         // Localizaciones de autorizados
+    //         $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
+    //             ->join('documents', function($query) {
+    //                 $query->on('documents.document_id', '=', 'document_authorizations.document_id');
+    //             })            
+    //             ->pluck('documents.location_id');
+    //         $lids2 = $plucked->all();
+    //         //Log::debug(['AUTH LOCATIONS IDS' =>  array_unique($lids2)]); 
             
-            // Concatenar
-            $location_array = array_unique(array_merge($lids1, $lids2));  
-            //$location_array = $lids1;
-            $locations = LocationModel::findMany($location_array);
-        }
+    //         // Concatenar
+    //         $location_array = array_unique(array_merge($lids1, $lids2));  
+    //         //$location_array = $lids1;
+    //         $locations = LocationModel::findMany($location_array);
+    //     }
 
-        // Obtener el listado para el filtro
-        //Log::debug(['LOCATIONS' => $locations]);
-        foreach($locations as $location) {
-            $location->selected = true;
-        } // foreach
+    //     // Obtener el listado para el filtro
+    //     //Log::debug(['LOCATIONS' => $locations]);
+    //     foreach($locations as $location) {
+    //         $location->selected = true;
+    //     } // foreach
 
-        return $locations;           
-    } // setLocationsList Method
+    //     return $locations;           
+    // } // setLocationsList Method
     
     /**
      * Listado de tipos de documentos para el select del filtro en Listado de Documentos de proceso
      * @return collection    Listado
      */
-    public function getTypesList()
-    {
-        return TypeModel::orderBy('name')->get(['type_id', 'name']);
-    } // setTypesList Method
+    // public function getTypesList()
+    // {
+    //     return TypeModel::orderBy('name')->get(['type_id', 'name']);
+    // } // setTypesList Method
     
     /**
     * Genera listado de temas

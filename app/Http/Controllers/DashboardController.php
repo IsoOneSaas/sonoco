@@ -34,8 +34,9 @@ class DashboardController extends Controller
     {
         $user = AUTH::user();
         $options = $user->options;
+        $starpage = ( key_exists('startpage', $options) ) ? $options['startpage'] : config('settings.user.startpage');
         return view('dashboard.intro', [
-            'link' => $this->setPageLink($options['startpage']),
+            'link' => $this->setPageLink($starpage),
         ]);
     }    
 

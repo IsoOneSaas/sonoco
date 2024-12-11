@@ -14,9 +14,12 @@ interface RecordRepositoryInterface
 
     public function getProcessesList();
 
-    public function getLocationsList();
+    public function getGroupsList();
 
-    public function getTypesList();
+
+    //public function getLocationsList();
+
+    //public function getTypesList();
 
     public function getTopics();
 

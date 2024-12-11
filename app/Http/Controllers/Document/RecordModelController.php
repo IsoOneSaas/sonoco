@@ -31,9 +31,9 @@ class RecordModelController extends Controller
     {
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->recordRepo->getSystemsList();
-        $locations = $this->recordRepo->getLocationsList();
+        $groups = $this->recordRepo->getGroupsList();
         $processes = $this->recordRepo->getProcessesList();
-        $types = $this->recordRepo->getTypesList();
+        //$types = $this->recordRepo->getTypesList();
         return view('document.record.index', [
             'urlContent'  => $this->contentUrl,
             'gridColOrd'  => $columnDefinition['column_order'],
@@ -42,8 +42,7 @@ class RecordModelController extends Controller
             'gridLanguage' => json_encode(trans('document/record.datatable_master')),
             'systems'       => $systems,
             'processes'     => $processes,
-            'locations'     => $locations,
-            'types'         => $types,
+            'groups'        => $groups,
         ]);
     }  // index Method
     

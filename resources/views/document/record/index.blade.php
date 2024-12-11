@@ -61,14 +61,6 @@
                                                                 <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
                                                                 <input id="date-selected" type="text" class="form-control w-32 border-slate-500 iso-input" aria-label="Rango">
                                                             </div>
-                                                            <div class="form-inline">
-                                                                <label for="text-input" class="form-label sm:w-20 text-right">Texto:</label>
-                                                                <input id="text-input" type="text" class="form-control w-full border-slate-500 iso-input deletable" aria-label="Texto">
-                                                            </div>
-                                                            <div class="form-inline">
-                                                                <label for="tag-input" class="form-label sm:w-20 text-right">Etiqueta:</label>
-                                                                <input id="tag-input" type="text" class="form-control w-full border-slate-500 iso-input deletable" aria-label="Etiqueta">
-                                                            </div>
                                                         </div>
                                                         <div class="form-inline">
 
@@ -78,29 +70,25 @@
                                                                 <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
                                                             </select>
-                                                            
-                                                            <label for="type-selected" class="form-label sm:w-20 text-right pt-3">Tipos:</label>
-                                                            <select multiple id="type-selected" class="form-control mt-2 border-slate-500" aria-label="Tipo">
-                                                                @foreach($types as $type)
-                                                                <option value={{ $type->type_id }} selected >{{ $type->name }}</option>
-                                                                @endforeach
-                                                            </select>                                                             
-                                                                                                                                                
-                                                        </div>
-                                                        <div class="form-inline">
-                                                            <label for="process-selected" class="form-label sm:w-20 text-right pt-3">Procesos:</label>
+                                                            <label for="process-selected" class="form-label sm:w-20 text-right">Procesos:</label>
                                                             <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
                                                                 @foreach($processes as $process)
                                                                 <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
                                                                 @endforeach
-                                                            </select>                                                
-                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3 ml-3">Localizaciones:</label>
-                                                            <select multiple id="location-selected" class="form-control mt-2 border-slate-500" aria-label="Localización">
-                                                                @foreach($locations as $location)
-                                                                <option value={{ $location->location_id }} @if($location->selected) selected @endif>{{ $location->name }}</option>
+                                                            </select>                                                                                                                                                                                                                                                                         
+                                                        </div>
+                                                        <div class="form-inline">                                              
+                                                            <label for="group-selected-f" class="form-label sm:w-20 text-right pt-3">Grupo:</label>
+                                                            <select id="group-selected-f" class="form-control mt-2 border-slate-500 iso-input">
+                                                                <option value="">Todos seleccionados</option>
+                                                                @foreach($groups as $item)
+                                                                <option value="{{ $item->group }}">{{ $item->group }}</option>
                                                                 @endforeach
                                                             </select>
-                                                            
+                                                            <label for="tag-selected-f" class="form-label sm:w-20 text-right">Etiqueta:</label>
+                                                            <select id="tag-selected-f" class="form-control mt-2 border-slate-500 iso-input">
+                                                                <option value="">Todos seleccionados</option>
+                                                            </select>                                                                                                                          
                                                         </div>
 
                                                         <div class="flex mt-3 justify-center">
@@ -145,7 +133,7 @@
                                                 <th>Nombre</th>
                                                 <th>Elaborado por</th>
                                                 <th>Tema</th>
-                                                <th>Subtena</th>
+                                                <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
                                             </tr>                                            
@@ -174,7 +162,41 @@
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
-   
+    <style>
+        span.deleteicon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;                
+        }
+        span.deleteicon span {
+            position: absolute;
+            display: block;
+            right: 3px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            color: #fff;
+            background-color: #ccc;
+            font: 13px monospace;
+            text-align: center;
+            line-height: 1em;
+            cursor: pointer;
+            
+        }
+        span.deleteicon input {
+            padding-right: 18px;
+            box-sizing: border-box;
+        }
+        .iso-input {
+            padding: 0.15em 0.6em; 
+            font-size: 0.95em; 
+            border-radius: 5px;                
+        }
+        .input-filter {
+            width: 100%
+        }
+
+    </style>     
 @endpush
 
 @push('scripts-bottom')
@@ -213,7 +235,6 @@
         let columns = {!! $gridColExp !!};       
         var startTime = Date.now();
                        
-        var sCol = null;
         var sCol = isoGetStorage('iso_recordReturnCol');
         var sDir = isoGetStorage('iso_recordReturnDir');
         var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage'); 
@@ -228,13 +249,13 @@
         var pidsStoraged = isoGetStorage('iso_recordProcesses');        
         var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
         
-        // Localizaciones               
-        var lidsStoraged = isoGetStorage('iso_recordLocations');
-        var lidsArray = setStorageArray("location-selected", lidsStoraged);  
+        // Grupos
+        var gidsStoraged = isoGetStorage('iso_recordGroups');
+        var gidsArray = setStorageArray("group-selected-f", gidsStoraged);  
 
-        // Tipos
-        var tidsStoraged = isoGetStorage('iso_recordTypes');
-        var tidsArray = setStorageArray("type-selected", tidsStoraged);                  
+        // Etiquetas
+        var tidsStoraged = isoGetStorage('iso_recordTags');
+        var tidsArray = setStorageArray("tag-selected-f", tidsStoraged);                  
         
         // Rango In
         var dateIn = isoGetStorage('iso_recordDatein');
@@ -242,7 +263,7 @@
         
         // Rango Out
         var dateOut = isoGetStorage('iso_recordDateout');
-        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;       
+        $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;           
 
         // DATATABLES
         param = {sids: [], pids: [], din: $dateInDefault, dout: $dateOutDefault};
@@ -290,21 +311,7 @@
                     extend: 'colvis',
                     columns: columns
                 }
-            ],
-            columnDefs: [{
-                targets: 8,
-                createdCell: function(td, cellData, rowData, row, col) {
-                    if( rowData[$columnAlert] == 2 ) {
-                        $(td).css('background-color', 'red');
-                        console.log('row 2: '+ rowData[1]);
-                    } else if( rowData[$columnAlert] == 1 ) {
-                        $(td).css('background-color', 'yellow');
-                        console.log('row 1: '+ rowData[1]);
-                    }
-                }                
-            },{
-                "targets": 2, "className": "dt-nowrap"
-            }],
+            ],            
             rowCallback: function( nRow, data, index, displayIndex ) {
                 // Generar columna índice
                 if(nRow){
@@ -318,7 +325,6 @@
                 api.columns().every( function (i) {
                     var column = this;
                     if( columnsDef[i].filterable == true ) {                     
-                        //console.log('column: '+i);
                         var id =  columnsDef[i].data;
                         var output = '<option value="">Todos</option>';
                         var val = $("#filter-"+id).val();
@@ -335,15 +341,11 @@
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
                 $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
-
                 this.api().columns().every( function (i) {
                     var column = this;
-                    var id =  columnsDef[i].data;
-                    
+                    var id =  columnsDef[i].data;                    
                     if( columnsDef[i].filterable == true ) {
-                        //console.log('column: '+id);
                         $("#filter-"+id).on( 'change', function () {
-                            //console.log($(this).val());
                             var val = $(this).val();
                             column.search( val ? '^' + val + '$' : '', true, false).draw();
                         });                                                
@@ -355,16 +357,15 @@
                         });
                     }                        
                 });
-
             },
-            language: $lang
+            language: $lang                                   
         }); // datatables
         
+
         // Filtros : generación
         $('#records-table thead tr:eq(1) th').each( function (i) {
             var tag;
             var item = columnsDef[i+1];
-            //console.dir(item);
             if( typeof item.visible !== 'undefined' && item.visible === false ) {
                 $(this).html('');
             } else {
@@ -379,7 +380,8 @@
                     }
                 }
             }          
-        });        
+        });         
+      
      
         // DATERANGE
         //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
@@ -476,18 +478,18 @@
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
-            var lidsArray = $("#location-selected").val();
-            var tidsArray = $("#type-selected").val();
-            var text = $("#text-input").val();
-            var tag = $("#tag-input").val();
+            var gidsArray = $("#group-selected-f").val();
+            var tidsArray = $("#tag-selected-f").val();
+            //var text = $("#text-input").val();
+            //var tag = $("#tag-input").val();
             var info = $myTable.page.info();            
-            var params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
+            var params = {sids: sidsValue, pids: pidsArray, gids: gidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (pidsArray.length > 0) && (lidsArray.length > 0) && (tidsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (pidsArray.length > 0) && (gidsArray.length > 0) && (tidsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -501,8 +503,8 @@
                 // Store            
                 isoSetStorage('iso_recordSystems', sidsValue);
                 isoSetStorage('iso_recordProcesses', pidsArray);
-                isoSetStorage('iso_recordLocations', lidsArray);
-                isoSetStorage('iso_recordTypes', tidsArray);
+                isoSetStorage('iso_recordGroups', gidsArray);
+                isoSetStorage('iso_recordTags', tidsArray);
                 isoSetStorage('iso_recordDatein', $dateInDefault);
                 isoSetStorage('iso_recordDateout', $dateOutDefault); //
                 isoSetStorage('iso_recordReturnRows', info.length);
@@ -516,24 +518,51 @@
 
         }); // CHANGE selected
 
+        $('#group-selected-f').on('change', function() {
+            var group = this.value;
+            if( group != '' ) {
+                tagAjax(group);
+            } else {
+                $("#tag-selected-f").html('<option value="" selected>Todos seleccionados</option>');
+            }
+        });
                
         // Efectos Botón
         $('#date-selected, #text-input, #tag-input').on('blur', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });
 
-        $('#system-selected, #process-selected, #location-selected, #type-selected').on('change', function() {
+        $('#system-selected, #process-selected, #group-selected-f, #tag-selected-f').on('change', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });
         
                         
     }); // document
 
+    function tagAjax(group) {
+        var route = "{{ route('records.edit.tag') }}";
+        console.log('Running tagAjax with route: '+route+' and Group: '+group);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'txt': group},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                console.dir(data);                                                                
+                var output  = '<option value="">Todos</option>';                                
+                $.each(data, function(i, value) {
+                    output += '<option value="'+value.tag+'">'+value.tag+'</option>';
+                });
+                $("#tag-selected-f").html(output);
+            } // success
+        }); // ajax 
+    } //tagAjax Fx     
 
     function setFilters() {
         // Tipo de documento
         var output = '<option value="">Seleccione Tipo Documento</option>';
-        $("#type-selected > option:selected").each( function() {
+        $("#tag-selected > option:selected").each( function() {
             output += '<option value="' + $(this).text() + '">' + $(this).text() + '</option>';
         });
         $("#filter-typeName").html(output);
