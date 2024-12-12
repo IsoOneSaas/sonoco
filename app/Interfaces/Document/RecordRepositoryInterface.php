@@ -2,7 +2,7 @@
 
 interface RecordRepositoryInterface 
 {
-    public function render($slug, $systems, $processes, $settings);
+    public function render($slug, $systems, $processes, $groups, $settings);
 
     public function update(array $data);
 

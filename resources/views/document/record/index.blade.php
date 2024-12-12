@@ -243,19 +243,19 @@
 
         // Sistema
         var sidsStoraged = isoGetStorage('iso_recordSystems');
-        var sidsArray = setStorageArray("system-selected", sidsStoraged);   
+        var sidsArray = setStorageInteger("system-selected", sidsStoraged);   
 
         // Procesos       
         var pidsStoraged = isoGetStorage('iso_recordProcesses');        
-        var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
+        var pidsArray = setStorageInteger("process-selected", pidsStoraged);                 
         
         // Grupos
-        var gidsStoraged = isoGetStorage('iso_recordGroups');
-        var gidsArray = setStorageArray("group-selected-f", gidsStoraged);  
+        // var gidsStoraged = isoGetStorage('iso_recordGroups');
+        // var gidInteger = setStorageString("group-selected-f", gidsStoraged);  
 
         // Etiquetas
-        var tidsStoraged = isoGetStorage('iso_recordTags');
-        var tidsArray = setStorageArray("tag-selected-f", tidsStoraged);                  
+        // var tidsStoraged = isoGetStorage('iso_recordTags');
+        // var tidInteger = setStorageInteger("tag-selected-f", tidsStoraged);                  
         
         // Rango In
         var dateIn = isoGetStorage('iso_recordDatein');
@@ -266,7 +266,7 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;           
 
         // DATATABLES
-        param = {sids: [], pids: [], din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: [], pids: [], gid: '', tid: '', din: $dateInDefault, dout: $dateOutDefault};
 
         console.dir(param);
         console.dir(columnsDef);
@@ -478,18 +478,17 @@
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
             var pidsArray = $("#process-selected").val();
-            var gidsArray = $("#group-selected-f").val();
-            var tidsArray = $("#tag-selected-f").val();
-            //var text = $("#text-input").val();
-            //var tag = $("#tag-input").val();
+            var gidInteger = $("#group-selected-f").val();
+            var tidInteger = $("#tag-selected-f").val();
+
             var info = $myTable.page.info();            
-            var params = {sids: sidsValue, pids: pidsArray, gids: gidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
+            var params = {sids: sidsValue, pids: pidsArray, gid: gidInteger, tid: tidInteger, din: $dateInDefault, dout: $dateOutDefault};
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (pidsArray.length > 0) && (gidsArray.length > 0) && (tidsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (pidsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -503,8 +502,8 @@
                 // Store            
                 isoSetStorage('iso_recordSystems', sidsValue);
                 isoSetStorage('iso_recordProcesses', pidsArray);
-                isoSetStorage('iso_recordGroups', gidsArray);
-                isoSetStorage('iso_recordTags', tidsArray);
+                isoSetStorage('iso_recordGroups', gidInteger);
+                isoSetStorage('iso_recordTags', tidInteger);
                 isoSetStorage('iso_recordDatein', $dateInDefault);
                 isoSetStorage('iso_recordDateout', $dateOutDefault); //
                 isoSetStorage('iso_recordReturnRows', info.length);
@@ -568,7 +567,7 @@
         $("#filter-typeName").html(output);
     }
 
-    function setStorageArray(tag, storaged) {
+    function setStorageInteger(tag, storaged) {
         var output = '';
         //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
 
@@ -593,7 +592,33 @@
         $("#"+tag).html(output);
         $("#"+tag).multipleSelect(); 
         return array;
-    } // setStorageArray Fx 
+    } // setStorageInteger Fx 
+
+    function setStorageString(tag, storaged) {
+        var output = '';
+        //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
+
+        if( (storaged === null) || (storaged == '') ) {
+            var array = $("#"+tag).val();
+        } else {
+            var array = ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        }
+
+        //console.dir(array);
+        $('#'+tag+' option').each(function(i) {
+            
+            if( $.inArray( this.value , array ) !== -1 ) {
+                output += '<option value="'+ parseInt(this.value) +'" selected>'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, 'Selected');
+            } else {
+                output += '<option value="'+ parseInt(this.value) +'">'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, '');
+            }
+        });        
+
+        $("#"+tag).html(output);
+        return array;
+    } // setStorageString Fx     
 
 </script>
 

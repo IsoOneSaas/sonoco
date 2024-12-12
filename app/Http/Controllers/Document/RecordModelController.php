@@ -53,7 +53,8 @@ class RecordModelController extends Controller
     {
         $systems = $this->recordRepo->getSystemsList();
         $processes = $this->recordRepo->getProcessesList();
-        return $this->recordRepo->render($param, $systems, $processes, $this->set);
+        $groups =  $this->recordRepo->getGroupsList();
+        return $this->recordRepo->render($param, $systems, $processes, $groups, $this->set);
     }  // show
     
 

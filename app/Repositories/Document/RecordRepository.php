@@ -37,13 +37,13 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de registros de la tabla
      */ 
-    public function render($slug, $systems, $processes, $setting)
+    public function render($slug, $systems, $processes, $groups, $setting)
     {
         $data = [];
         $i = 0;
         $params = json_decode($slug, true);
 
-        Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray()]);
+        Log::debug(['PARAMS' => $params]); //, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
@@ -67,15 +67,41 @@ class RecordRepository implements RecordRepositoryInterface
         if( !$pids ) {
             $plucked = $processes->pluck('process_id');
             $pids = $plucked->all();
-        }  
+        }
         
-        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids]);
+        // Grupo
+        $groupArray = [];
+        if( $params['gid'] == '' ) {
+            foreach($groups as $i => $obj) {
+                $groupArray[] = $obj->group;
+            }
+        } else {
+            $groupArray  = [$params['gid']];
+        }
+
+        // Etiqueta
+        $tagArray = [];
+        if( $params['tid'] == '' ) {
+            $tagsCollection  = DB::table('document_record_tags')->select('tag')->whereIn('group', $groupArray)->orderBy('tag')->groupBy('tag')->get(); 
+            foreach($tagsCollection as $i => $obj) {
+                $tagArray[] = $obj->tag;
+            }
+        } else {
+            $tagArray  = [$params['tid']];
+        }
+        
+        
+        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
 
         // OBTENER LOS REGISTROS FILTRADOS
         $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
             join('documents AS T1', function($join){
                 $join->on('T1.document_id', '=', 'document_records.document_id');
             })
+            // ->join('document_record_tags AS T5', function($join) use($tagArray) {
+            //     $join->on('T5.record_id', '=', 'document_records.record_id');
+            //     $join->whereIn('T5.tag', $tagArray);
+            // })             
             ->join('document_record_topics AS T4', function($join) {
                 $join->on('T4.record_id', '=', 'document_records.record_id');
             })              
@@ -86,7 +112,7 @@ class RecordRepository implements RecordRepositoryInterface
             ->join('set_systems AS T3', function($join) use($sids) {
                 $join->on('T3.system_id', '=', 'T1.system_id');
                 $join->whereIn('T3.system_id', $sids);
-            })          
+            })                      
             ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])
             ->get([
                 'document_records.record_id', 
