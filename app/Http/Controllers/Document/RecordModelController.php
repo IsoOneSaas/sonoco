@@ -274,7 +274,7 @@ class RecordModelController extends Controller
         ];
 
         $columns_extra = [
-
+            ["data" => "hash", "title" => "HASH", "visible" => false, "orderable" => false, "searchable" => false, 'filterable' => false],
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

@@ -114,6 +114,7 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
+                                                <th>hash</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -124,6 +125,7 @@
                                                 <th class="th-filter">Subtema</th>
                                                 <th class="th-filter">Publicado</th>
                                                 <th class="th-filter">Origen</th>
+                                                <th class="th-filter">hash</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -136,6 +138,7 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
+                                                <th>hash</th>
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    

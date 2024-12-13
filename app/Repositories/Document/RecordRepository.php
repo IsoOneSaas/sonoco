@@ -72,7 +72,7 @@ class RecordRepository implements RecordRepositoryInterface
         // Grupo
         $groupArray = [];
         if( $params['gid'] == '' ) {
-            foreach($groups as $i => $obj) {
+            foreach($groups as $j => $obj) {
                 $groupArray[] = $obj->group;
             }
         } else {
@@ -83,7 +83,7 @@ class RecordRepository implements RecordRepositoryInterface
         $tagArray = [];
         if( $params['tid'] == '' ) {
             $tagsCollection  = DB::table('document_record_tags')->select('tag')->whereIn('group', $groupArray)->orderBy('tag')->groupBy('tag')->get(); 
-            foreach($tagsCollection as $i => $obj) {
+            foreach($tagsCollection as $j => $obj) {
                 $tagArray[] = $obj->tag;
             }
         } else {
@@ -97,11 +97,7 @@ class RecordRepository implements RecordRepositoryInterface
         $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
             join('documents AS T1', function($join){
                 $join->on('T1.document_id', '=', 'document_records.document_id');
-            })
-            // ->join('document_record_tags AS T5', function($join) use($tagArray) {
-            //     $join->on('T5.record_id', '=', 'document_records.record_id');
-            //     $join->whereIn('T5.tag', $tagArray);
-            // })             
+            })            
             ->join('document_record_topics AS T4', function($join) {
                 $join->on('T4.record_id', '=', 'document_records.record_id');
             })              
@@ -112,7 +108,7 @@ class RecordRepository implements RecordRepositoryInterface
             ->join('set_systems AS T3', function($join) use($sids) {
                 $join->on('T3.system_id', '=', 'T1.system_id');
                 $join->whereIn('T3.system_id', $sids);
-            })                      
+            })                                  
             ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])
             ->get([
                 'document_records.record_id', 
@@ -124,20 +120,23 @@ class RecordRepository implements RecordRepositoryInterface
                 'T4.subject',            
             ]);
 
+           
         foreach($records as $record) {
-            $dt = Carbon::createFromTimeStamp(strtotime($record->date));
-            $data[$i]['DT_RowIndex'] = $i+1;
-            $data[$i]['record_id'] = $record->record_id;            
-            $data[$i]['name'] = $record->recordName;
-            $data[$i]['author'] = $record->authorName;
-            $data[$i]['topic'] = $record->topic;
-            $data[$i]['subject']  = $record->subject;
-            $data[$i]['date']  = $dt->diffForHumans();
-            $data[$i]['document']  = ($record->documentDate === NULL) ? '' : $record->documentDate;
-
-
-            $i++;                
-
+            // Filtro de Etiqueta
+            $result =  DB::table('document_record_tags')->select('tag')->whereIn('tag', $tagArray)->get();
+            if($result) {
+                $dt = Carbon::createFromTimeStamp(strtotime($record->date));
+                $data[$i]['DT_RowIndex'] = $i+1;
+                $data[$i]['record_id'] = $record->record_id;            
+                $data[$i]['name'] = $record->recordName;
+                $data[$i]['author'] = $record->authorName;
+                $data[$i]['topic'] = $record->topic;
+                $data[$i]['subject']  = $record->subject;
+                $data[$i]['date']  = $dt->diffForHumans();
+                $data[$i]['document']  = ($record->documentDate === NULL) ? '' : $record->documentDate;
+                $data[$i]['hash']  = '';
+                $i++;  
+            }                          
         } // foreach
 
         
@@ -151,7 +150,7 @@ class RecordRepository implements RecordRepositoryInterface
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
-        //Log::debug(['DATA' => $results]);
+        Log::debug(['DATA' => $results]);
         return json_encode($results);          
 
     } // render
