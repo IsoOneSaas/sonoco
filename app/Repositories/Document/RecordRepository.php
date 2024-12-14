@@ -134,7 +134,6 @@ class RecordRepository implements RecordRepositoryInterface
                 $data[$i]['subject']  = $record->subject;
                 $data[$i]['date']  = $dt->diffForHumans();
                 $data[$i]['document']  = ($record->documentDate === NULL) ? '' : $record->documentDate;
-                $data[$i]['hash']  = '';
                 $i++;  
             }                          
         } // foreach
@@ -700,7 +699,32 @@ class RecordRepository implements RecordRepositoryInterface
         $groups =  DB::table('document_record_tags')->select('group')->orderBy('group')->groupBy('group')->get();
         if( $groups ) return $groups;
         else return true;            
-    } // getGroups Method    
+    } // getGroups Method 
+    
+    public function getDocument($id, $dateFormat)
+    {
+        $action = config('settings.document_status.publish');
+
+        $document = DocumentModel::find($id);
+        $type = TypeModel::find($document->type_id);
+        $document->type = $type->name;
+        $process = ProcessModel::find($document->process_id);
+        $document->process = $process->name;
+        $status = $document->status()->where('action', $action)->first(['return_date']);
+        $document->date = Carbon::createFromTimeStamp(strtotime($status->return_date))->format($this->set['date_format']);
+        $json_array = $document->settings;
+        $document->size = config('settings.document_print_format')['size'];
+        $document->dir = config('settings.document_print_format')['orientation'];            
+        if( is_array($json_array) ) {
+            if(key_exists('print_format', $json_array)) {
+                $format = $json_array['print_format'];
+                $document->size = $format['size'];
+                $document->dir = $format['orientation'];
+            }
+        }        
+        Log::debug(['DOCUMENT' => $document->toArray()]);
+        return $document;
+    }
 
     private function setIds($tag, $params)
     {   

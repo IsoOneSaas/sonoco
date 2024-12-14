@@ -248,7 +248,41 @@ class RecordModelController extends Controller
             Log::error('File did not find: '. $url);
             abort(404);
         }
-    } // showAttachment Method    
+    } // showAttachment Method 
+    
+    /**
+     * Establece el hash del registro actual
+     * @param  integer   $id Identificador del registro actual
+     * @return json resultado obtenido
+     */
+    public function setHash($id)
+    {
+        $response['hash'] = $this->tool->setIdHash($id);
+        return response()->json($response);
+    } // setHash
+    
+      /**
+     * show document in HTML format (visualizar documento)
+     */
+    public function show($hash) : View
+    {  
+        // Obtener datos del documento original
+        $data = $this->recordRepo->setRecord($hash);
+        
+        if($data) {
+            $document = $this->recordRepo->getDocument($data['document_id'], $this->set['date_format']);
+            //$attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
+            // Configuración de la hoja
+            $setup = $this->tool->getPaperSetup($document->settings);     
+
+            return view('document.record.show', [
+                'size' => $setup['size'] .'-'. $setup['orientation'],
+                'document' => $document,
+                'DATA' => $data,
+            ]); 
+        }
+        return abort(404);      
+    } // edit Method    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables
@@ -274,7 +308,7 @@ class RecordModelController extends Controller
         ];
 
         $columns_extra = [
-            ["data" => "hash", "title" => "HASH", "visible" => false, "orderable" => false, "searchable" => false, 'filterable' => false],
+            //["data" => "hash", "title" => "HASH", "visible" => false, "orderable" => false, "searchable" => false, 'filterable' => false],
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

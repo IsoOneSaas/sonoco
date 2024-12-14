@@ -29,6 +29,6 @@ interface RecordRepositoryInterface
 
     public function getTagList($data);
 
-
+    public function getDocument($id, $dateFormat);
 
 }

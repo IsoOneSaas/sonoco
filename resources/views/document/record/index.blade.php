@@ -114,7 +114,6 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
-                                                <th>hash</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -125,7 +124,6 @@
                                                 <th class="th-filter">Subtema</th>
                                                 <th class="th-filter">Publicado</th>
                                                 <th class="th-filter">Origen</th>
-                                                <th class="th-filter">hash</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -138,7 +136,6 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
-                                                <th>hash</th>
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -225,23 +222,19 @@
     let $dateInDefault;
     let $dateOutDefault;
     let $myTable;
-    var $columnType = 5;
-    var $columnPublished = 6;
-    var $columnAlert = 9;
-    var $columnSort = 10;
-    var $lang = {!! $gridLanguage !!};
-    var $route = "{{ route('records.index.render', ':slug') }}";
+    let $route = "{{ route('records.index.render', ':slug') }}";
 
     $(function () {
         let columnsDef = {!! $gridColDef !!};
         let col = {{ $gridColOrd }};        
-        let columns = {!! $gridColExp !!};       
-        var startTime = Date.now();
-                       
+        let columns = {!! $gridColExp !!};
+        let lang = {!! $gridLanguage !!};
+
+        var startTime = Date.now();                       
         var sCol = isoGetStorage('iso_recordReturnCol');
         var sDir = isoGetStorage('iso_recordReturnDir');
         var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage'); 
-        var initOrder = ( sCol === null ) ? [[ col, 'desc']] : [[ $columnSort, sDir]]; // sCol
+        var initOrder = ( sCol === null ) ? [[ col, 'asc']] : [[ sCol, sDir]]; // sCol
         var initRecords = ( isoGetStorage('iso_recordReturnRows') === null ) ? 10 : isoGetStorage('iso_recordReturnRows');
 
         // Sistema
@@ -273,8 +266,9 @@
 
         console.dir(param);
         console.dir(columnsDef);
+        console.dir(initOrder);
         console.log('Datatables init starts now: ', Date.now() - startTime);
-
+         
         $myTable = $('#records-table')
         .on('preXhr.dt', function () {
             console.log('Send ajax request ', Date.now() - startTime + ' milliseconds.');
@@ -291,7 +285,7 @@
             aoColumns: columnsDef,
             retrieve: true,
             pageLength: parseInt(initRecords),
-            order: initOrder,
+            order: initOrder[0],
             orderClasses: false,
             responsive: true,
             orderCellsTop: true,
@@ -361,7 +355,7 @@
                     }                        
                 });
             },
-            language: $lang                                   
+            language: lang                                   
         }); // datatables
         
 
@@ -383,8 +377,7 @@
                     }
                 }
             }          
-        });         
-      
+        });                 
      
         // DATERANGE
         //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
@@ -433,20 +426,20 @@
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/document.grid.row_show') }}");
             } else {
-                var hash = rowdata.hash;
-                var uri = "{{ route('documents.master.render', ':hash') }}"; 
+                var id = rowdata.record_id;
+                setView(id);
                 
                 // Storage
-                var info = $myTable.page.info();
-                var order = $myTable.order();             
-                isoSetStorage('iso_recordReturnUrl', isoGetCurrentURL());
-                isoSetStorage('iso_recordReturnPage', info.page);
-                isoSetStorage('iso_recordReturnCol', order[0][0]);
-                isoSetStorage('iso_recordReturnDir', order[0][1]);
-                isoSetStorage('iso_recordReturnRows', info.length);
-                // Ref
-                uri = uri.replace(':hash', hash);
-                location.href = uri;                                 
+                // var info = $myTable.page.info();
+                // var order = $myTable.order();             
+                // isoSetStorage('iso_recordReturnUrl', isoGetCurrentURL());
+                // isoSetStorage('iso_recordReturnPage', info.page);
+                // isoSetStorage('iso_recordReturnCol', order[0][0]);
+                // isoSetStorage('iso_recordReturnDir', order[0][1]);
+                // isoSetStorage('iso_recordReturnRows', info.length);
+                // // Ref
+                // uri = uri.replace(':hash', hash);
+                // location.href = uri;                                 
             }
         }); // btn-view
 
@@ -621,7 +614,22 @@
 
         $("#"+tag).html(output);
         return array;
-    } // setStorageString Fx     
+    } // setStorageString Fx
+    
+    function setView(id) {
+        var uri = "{{ route('records.render', ':hash') }}";
+        $.ajax({
+            url: '/documentos/registro/hash/'+id,
+            type: 'GET',
+            dataType: 'json',                
+            success: function(json) {
+                
+                uri = uri.replace(':hash', json.hash);
+                console.log('URI: '+uri);
+                location.href = uri;   
+            } // success
+        }); // ajax 
+    } // setView Fx
 
 </script>
 
