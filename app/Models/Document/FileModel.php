@@ -11,7 +11,9 @@ class FileModel extends Model
     protected $primaryKey = 'file_id';
     protected $fillable = ['system_id','department_id','document_id','record_id','job_id','code','name', 'support', 'storage', 'classification','index_id','disposal_id','dwell_date','dwell_value','dwell_frequency','dead_date','dead_value','dead_frequency','hold_value','hold_frequency','serial','setting'];
 
-    
+    protected $casts = [
+        'settings' => 'array',
+    ];    
 
     /**
     * Obtiene la relación con el registro

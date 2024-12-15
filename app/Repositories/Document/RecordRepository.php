@@ -536,12 +536,12 @@ class RecordRepository implements RecordRepositoryInterface
                 $file = new FileModel;
                 $file->system_id = $document->system_id;
                 $file->department_id = $document->department_id;
-                $file->document_id = $$record->document_id;
+                $file->document_id = $record->document_id;
                 $file->record_id = $record->record_id;  
                 $file->job_id = $process->job_id;
                 $file->name = $document->name;
                 $file->code = $document->code;                                                   
-                $file->support = config('settings.record_support')[4];
+                $file->support = 4; // 'Electrónico Iso-One'
                 $file->storage = config('settings.record_storage_default');
                 $file->settings = ['method' => 'auto'];
                 $result = $file->save() ? true : false;            

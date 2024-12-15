@@ -269,8 +269,8 @@
         param = {sids: [], pids: [], gid: '', tid: '', din: $dateInDefault, dout: $dateOutDefault};
 
         console.dir(param);
-        console.dir(columnsDef);
-        console.dir(initOrder);
+        //console.dir(columnsDef);
+        //console.dir(initOrder);
         console.log('Datatables init starts now: ', Date.now() - startTime);
          
         $myTable = $('#records-table')

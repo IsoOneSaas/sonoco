@@ -139,7 +139,7 @@ class RecordModelController extends Controller
         $input = $request->input();
         Log::debug(['STORE DATA' => $input]);
                 
-        // Validar formulario
+        // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
             'name'      => 'required|min:8|regex:'. config('settings.document_name_pattern'),
             'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
@@ -165,7 +165,7 @@ class RecordModelController extends Controller
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         } // if
 
-        // ARCHIVO SOPORTE
+        // VALIDAR ARCHIVO SOPORTE
         $file = $this->setFile($request, 'REC');        
         if( !$file['success'] ) {
             $response = ['status' => 'error', 'message' => $file['message']];
