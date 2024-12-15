@@ -886,7 +886,7 @@ class ToolsClass
         $target = config('settings.document_status.publish');
         $pids_array = [];
         $lids_array = [];
-        //Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
+        Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
 
         if( $role == 'admin' ) {
             $dptos = $this->setDepartmentsFilter($uid);
@@ -914,7 +914,7 @@ class ToolsClass
 			}	
 
             // Tipos
-            if( key_exists('tids', $params) ) {
+            if( key_exists('tids', $params) ) {    //  && ( count($params['tids']) > 0)
                 $tids =  $params['tids'];
             } else {
                 $plucked = TypeModel::all()->pluck('type_id');
@@ -922,7 +922,7 @@ class ToolsClass
             }
 
             // Requisitos
-            if( key_exists('sids', $params) ) {
+            if( key_exists('sids', $params) ) { //  && ( count($params['sids']) > 0)
                 $sids = $params['sids'];
             } else {                
                 $plucked = SystemModel::all()->pluck('system_id');
@@ -960,7 +960,7 @@ class ToolsClass
                     $pids = $pids_array;
                 } else {
                                       
-                    //Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
+                    Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
 
                     foreach($params['pids'] as $pid) {
                         if( in_array($pid, $pids_array) ) {

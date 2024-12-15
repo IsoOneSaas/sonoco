@@ -2,10 +2,12 @@
 
 use App\Classes\ToolsClass;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Document\StoreRecordModelRequest;
 use Illuminate\Http\Request;
 use App\Interfaces\Document\RecordRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 
@@ -130,38 +132,38 @@ class RecordModelController extends Controller
      * @param  json \iso\Http\Requests\DocumentRecordRequest $request Datos validados del formulario
      * @return json Resultado de la inserción
      */
-    public function store(Request $request) : RedirectResponse // \iso\Http\Requests\DocumentRegister
+    public function store(Request $request) : RedirectResponse 
     {  
         $response = ['status' => 'success', 'message' => 'Testing...'];
+        $msgs = '';
         $input = $request->input();
         Log::debug(['STORE DATA' => $input]);
-        
-        // $output = '';
-        // $settings = $this->registerRepo->getSettings();
-        // $fileformat = $settings->record_extention_allowed;
-        // $mimes = ( $fileformat != 'ALL' ) ? '|mimes:'. strtolower($fileformat) : '';
-        
-       
-        // unset($input['document-record_id'], $input['_token']);
+                
+        // Validar formulario
+        $validator = Validator::make($request->all(), [
+            'name'      => 'required|min:8|regex:'. config('settings.document_name_pattern'),
+            'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
+            'subject'   => 'required|min:2|regex:'. config('settings.document_name_pattern'),
+        ], [
+            'name.required'         => trans('document/record.request.name.required'),
+            'name.min'              => trans('document/record.request.name.format'),
+            'name.regex'           => trans('document/record.request.name.regex'),
+            'topic.required'         => trans('document/record.request.topic.required'),
+            'topic.min'              => trans('document/record.request.topic.format'),
+            'topic.regex'           => trans('document/record.request.topic.regex'),             
+            'subject.required'         => trans('document/record.request.subject.required'),
+            'subject.min'              => trans('document/record.request.subject.format'),
+            'subject.regex'           => trans('document/record.request.subject.regex'),  
+        ]);
 
-        // // Validar formulario
-        // if( $result = $this->validateForm('new', $settings, $input) ) {
-        //     return response(json_encode(['success' => false, 'message' => $result]))->header('Content-type','application/json');
-        // }
-
-        // // validar etiquetas si existen (added on 2024.09.06)
-        // if( $result = $this->validateTags($input) ) {
-        //     return response(json_encode(['success' => false, 'message' => $result]))->header('Content-type','application/json');
-        // }
-        
-        // // Validar archivo adjunto
-        // $input = $this->validateFile($request, $input);
-        // if( !$input['success'] ) {
-        //     return response(json_encode(['success' => false, 'message' => trans('record.message.alert.no-move')]))->header('Content-type','application/json');
-        // }
-
-        // $response = $this->registerRepo->create($input); 
-        //return redirect()->route('documents.record.create')->with($response['status'], $response['message']);
+        if ($validator->fails()) {
+            $messages = json_decode($validator->messages(), true);
+            foreach($messages as $message) {
+                $msgs = $message[0]; 
+            }            
+            $response = ['status' => 'error', 'message' => $msgs];
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        } // if
 
         // ARCHIVO SOPORTE
         $file = $this->setFile($request, 'REC');        
@@ -172,14 +174,21 @@ class RecordModelController extends Controller
             $input['fileName'] = $file['name'];
         }
 
+        // VALIDAR CONTENIDO
+        if( ($input['content'] === NULL) && ($input['file'] === NULL) ) {
+            $response = ['status' => 'error', 'message' => trans('document/record.request.content.no-exist')];
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        }
+
+        // SALVAR
+        unset($input['_token'], $input['file']);
         $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
-            Log::debug(['RESPONSE' => $response]); // 
+            //Log::debug(['RESPONSE' => $response]); // 
             return redirect()->route('records.edit', [$response['hash'], $response['tab']])->with($response['status'], $response['message']); ;
         } else {
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }
-
         
     } // create Method 
     
@@ -308,7 +317,7 @@ class RecordModelController extends Controller
         ];
 
         $columns_extra = [
-            //["data" => "hash", "title" => "HASH", "visible" => false, "orderable" => false, "searchable" => false, 'filterable' => false],
+            ["data" => "status", "title" => "STS", "visible" => false, "orderable" => false, "searchable" => false, 'filterable' => false],
         ];
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);

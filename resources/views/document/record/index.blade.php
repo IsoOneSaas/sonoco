@@ -18,7 +18,8 @@
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el documento"><i data-lucide="edit" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -114,6 +115,7 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
+                                                <th>STS</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -124,6 +126,7 @@
                                                 <th class="th-filter">Subtema</th>
                                                 <th class="th-filter">Publicado</th>
                                                 <th class="th-filter">Origen</th>
+                                                <th class="th-filter">STS</th>
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -136,6 +139,7 @@
                                                 <th>Subtema</th>
                                                 <th>Publicado</th>
                                                 <th>Origen</th>
+                                                <th>STS</th>
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -313,6 +317,9 @@
                 // Generar columna índice
                 if(nRow){
                     var ordinal = displayIndex + 1;
+                    if( data.status == 1 ) {
+                        ordinal = '<span class="inline-flex items-baseline">'+ordinal+' <img alt="(o)" class="h-2" src="/assets/images/redled.png"></span>'
+                    }
                     $('td:eq(0)', nRow).html(ordinal);
                 }
                 return nRow;                
@@ -418,30 +425,31 @@
         $('#btn-refresh').on("click", function() {
             $myTable.search('').columns().search('').draw();
             $(".col-filter").val('');
+            $('#btn-edit').addClass('iso-disabled');
+            $('#btn-view').addClass('iso-disabled'); 
         }); // btn-refresh
 
-        // Mostrar el documento en html
+        // Mostrar el registro en html
         $('#btn-view').on("click", function() {
             var rowdata = $myTable.rows('.selected').data()[0];
             if (rowdata === undefined || rowdata === null) {
-                setSimpleNotification("{{ trans('document/document.grid.row_show') }}");
+                setSimpleNotification("{{ trans('document/record.grid.row_show') }}");
             } else {
                 var id = rowdata.record_id;
-                setView(id);
-                
-                // Storage
-                // var info = $myTable.page.info();
-                // var order = $myTable.order();             
-                // isoSetStorage('iso_recordReturnUrl', isoGetCurrentURL());
-                // isoSetStorage('iso_recordReturnPage', info.page);
-                // isoSetStorage('iso_recordReturnCol', order[0][0]);
-                // isoSetStorage('iso_recordReturnDir', order[0][1]);
-                // isoSetStorage('iso_recordReturnRows', info.length);
-                // // Ref
-                // uri = uri.replace(':hash', hash);
-                // location.href = uri;                                 
+                setView(id);                              
             }
         }); // btn-view
+
+        // Editar el registro en html
+        $('#btn-edit').on("click", function() {
+            var rowdata = $myTable.rows('.selected').data()[0];
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/record.grid.row_show') }}");
+            } else {
+                var id = rowdata.record_id;
+                setEdit(id);
+            }
+        }); // btn-view        
 
         // UTILIDADES        
         $("#btn-download").on("click", function() {
@@ -462,11 +470,24 @@
         
         // Seleccionar fila
         $('#records-table').on('click', 'tr', function () {
+            data = $myTable.row(this).data();
             if ( $(this).hasClass('selected') ) {
+                // Deseleccionado
                 $(this).removeClass('selected');
+                $('#btn-edit').addClass('iso-disabled');
+                $('#btn-view').addClass('iso-disabled');
             } else {
+                // Seleccionado
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');                
+                if( data.status == 1 ) {
+                    // Bloqueado
+                    $('#btn-edit').addClass('iso-disabled');  
+                    $('#btn-view').removeClass('iso-disabled');
+                } else {
+                    $('#btn-edit').removeClass('iso-disabled');
+                    $('#btn-view').addClass('iso-disabled'); 
+                }               
             } // if selected
         }); // row selects
 
@@ -489,7 +510,9 @@
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
                 $("#loading-image").show();
-                $("#btn-filter").removeClass('btn-success').addClass('btn-primary');           
+                $("#btn-filter").removeClass('btn-success').addClass('btn-primary'); 
+                $('#btn-edit').addClass('iso-disabled');
+                $('#btn-view').addClass('iso-disabled');                           
                                 
                 // Ajax            
                 $myTable.ajax.url(url).load();
@@ -615,6 +638,17 @@
         $("#"+tag).html(output);
         return array;
     } // setStorageString Fx
+
+    function setStorage() {
+        // Storage
+        var info = $myTable.page.info();
+        var order = $myTable.order();             
+        isoSetStorage('iso_recordReturnUrl', isoGetCurrentURL());
+        isoSetStorage('iso_recordReturnPage', info.page);
+        isoSetStorage('iso_recordReturnCol', order[0][0]);
+        isoSetStorage('iso_recordReturnDir', order[0][1]);
+        isoSetStorage('iso_recordReturnRows', info.length);
+    } // setStorage
     
     function setView(id) {
         var uri = "{{ route('records.render', ':hash') }}";
@@ -623,13 +657,28 @@
             type: 'GET',
             dataType: 'json',                
             success: function(json) {
-                
+                setStorage();
                 uri = uri.replace(':hash', json.hash);
                 console.log('URI: '+uri);
                 location.href = uri;   
             } // success
         }); // ajax 
     } // setView Fx
+
+    function setEdit(id) {
+        var uri = "{{ route('records.edit', ':hash') }}";
+        $.ajax({
+            url: '/documentos/registro/hash/'+id,
+            type: 'GET',
+            dataType: 'json',                
+            success: function(json) {
+                setStorage();
+                uri = uri.replace(':hash', json.hash);
+                console.log('URI: '+uri);
+                location.href = uri;   
+            } // success
+        }); // ajax 
+    } // setView Fx    
 
 </script>
 

@@ -114,6 +114,7 @@ class RecordRepository implements RecordRepositoryInterface
                 'document_records.record_id', 
                 'document_records.name AS recordName', 
                 'document_records.author_name AS authorName', 
+                'document_records.status',
                 'document_records.created_at as date',
                 'T1.name as documentName',
                 'T4.topic',
@@ -133,7 +134,8 @@ class RecordRepository implements RecordRepositoryInterface
                 $data[$i]['topic'] = $record->topic;
                 $data[$i]['subject']  = $record->subject;
                 $data[$i]['date']  = $dt->diffForHumans();
-                $data[$i]['document']  = ($record->documentDate === NULL) ? '' : $record->documentDate;
+                $data[$i]['document'] = ($record->documentName === NULL) ? '' : $record->documentName;
+                $data[$i]['status'] = $record->status;
                 $i++;  
             }                          
         } // foreach
@@ -255,7 +257,12 @@ class RecordRepository implements RecordRepositoryInterface
         } else {
             // Viene de Documentos
             $content = ContentModel::where('document_id', $did)->first();
-            $output_array['txt'] = $content->content;
+            if($content) {
+                $output_array['txt'] =  $content->content;
+            } else {
+                $output_array['txt'] = '';
+            }
+            
         } // if/else
 
         // Recuperar settings (desde el documento master)        

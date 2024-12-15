@@ -97,26 +97,21 @@ return [
         'name'         =>  [
                     'required'      => 'Escriba el nombre completo del documento',
                     'format'        => 'El nombre del documento debe ser de al menos 8 caracteres alfa-numéricos',
+                    'regex'        => 'El nombre del documento debe sólo contener caracteres alfa-numéricos'
         ],
-        'code'   =>  [
-                    'format'        => 'El código debe contener sólo caracteres alfa-numéricos',
-                    'unique'        => 'Código ya usado en otro documento'
+        'topic'         =>  [
+                    'required'      => 'Escriba un tema para el registro',
+                    'format'        => 'El tema debe ser de al menos 2 caracteres alfa-numéricos',
+                    'regex'        => 'El tema debe sólo contener caracteres alfa-numéricos'
         ],
-        'version'   =>  [
-                    'format'        => 'La versión debe ser un número entero',
-        ],        
-        'system_id'   =>  [
-                    'format'        => 'Seleccione el sistema de gestión',
-        ],
-        'location_id'   =>  [
-                    'format'        => 'Seleccione una localización',
-        ],
-        'department_id'   =>  [
-                    'format'        => 'Seleccione un departamento',
-        ],
-        'type_id'   =>  [
-                    'format'        => 'Seleccione un tipo de documento',
-        ],                  
+        'subject'         =>  [
+                    'required'      => 'Escriba un subtema para el registro',
+                    'format'        => 'El subtema debe ser de al menos 2 caracteres alfa-numéricos',
+                    'regex'        => 'El subtema debe sólo contener caracteres alfa-numéricos'
+        ], 
+        'content'         =>  [
+                    'no-exist'      => 'Digite el texto del contenido o seleccione un archivo soporte para el regsitro',
+        ],                               
     ],
 
     'message' => [
