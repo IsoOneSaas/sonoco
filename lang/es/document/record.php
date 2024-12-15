@@ -45,6 +45,10 @@ return [
                 'no-comment'    =>  'Indique una razón para eliminar el documento',
                 'trace'         => ':action : :trace',
     ],     
+
+    'layout' => [
+        'portrait' => 'Vertical',
+    ],
    
 
     'form' => [
@@ -89,6 +93,20 @@ return [
                             'placeholder'   => 'Seleccione el archivo',
                             'tooltip'       => 'Opcional. Cargue un archivo de su disco duro si no utiliza el editor para actualizar el registro.',
                             'default'       => 'Seleccione un archivo del disco duro',
+        ],
+        'direction'         =>  [
+                            'icon'          => 'move',
+                            'title'         => 'Dirección',
+                            'placeholder'   => 'Seleccione la dirección de la hoja',
+                            'tooltip'       => 'Requerido. Seleccione una opción de dirección de la hoja',
+                            'default'       => 'Seleccione la dirección de la hoja',
+        ],
+        'size'         =>  [
+                            'icon'          => 'ruler',
+                            'title'         => 'Tamaño',
+                            'placeholder'   => 'Seleccione el tamaño de la hoja',
+                            'tooltip'       => 'Requerido. Seleccione una opción de tamaño de la hoja',
+                            'default'       => 'Seleccione el tamaño de la hoja',
         ],
         
     ],    

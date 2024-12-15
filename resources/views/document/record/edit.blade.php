@@ -179,7 +179,29 @@
                                             <!-- END: Attachment -->  
                                         </div>
                                         <div id="record-tab-7" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-7-tab">
-                                            <h1>Content 7</h1>
+                                            <!-- BEGIN: Support -->
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Modifique los ajustes de impresión si es necesario.</p>  
+                                                <div class="input-group mt-5">
+
+                                                    <div id="direction" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.direction.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.direction.title') }}</div>
+                                                    <select name="direction" class="form-control w-full input-status ml-2">
+                                                        @foreach( $DATA['dir_select'] as $item )
+                                                        <option value="{{ $item['value'] }}" @if($item['selected']) selected @endif >{{ $item['text'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.direction.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+
+                                                    <div id="size" class="input-group-text flex ml-3"><i data-lucide="{{ trans('document/record.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.size.title') }}</div>
+                                                    <select name="size" class="form-control w-full input-status ml-2">
+                                                        @foreach( $DATA['size_select'] as $item )
+                                                        <option value="{{ $item['value'] }}" @if($item['selected']) selected @endif >{{ $item['text'] }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                                                     
+
+                                                </div>
+                                            </div>
                                         </div>                                                                                                                                                                
                                     </div>
                                 </form>

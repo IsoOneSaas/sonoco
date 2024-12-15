@@ -109,7 +109,7 @@ class RecordModelController extends Controller
 
         // Obtener grupos de etiquetas
         $groups = $this->recordRepo->getGroups();
-        
+
         // Obtener datos del documento original
         $data = $this->recordRepo->setRecord($hash);
 
