@@ -112,6 +112,12 @@ return [
                             'tooltip'       => 'Requerido. Seleccione una opción de tamaño de la hoja',
                             'default'       => 'Seleccione el tamaño de la hoja',
         ],
+        'user'         =>  [
+                            'icon'          => 'users',
+                            'title'         => 'Usuarios',
+                            'placeholder'   => 'Seleccione los usuarios',
+                            'tooltip'       => 'Opcional. Al menos un usuario seleccionado',
+        ],          
         
     ],    
 
@@ -147,8 +153,13 @@ return [
                         'no-auth'   => 'No es posible ver el registro en este momento',
             ],
             'allowed' => [
-                'ALL'   => '',
-                'PDF'   => ' (Sólo con extensión PDF)',
+                        'ALL'   => '',
+                        'PDF'   => ' (Sólo con extensión PDF)',
+            ],
+            'user' => [
+                        'ids_default' => 'Seleccione usuario(s)',
+                        'error_no-selected' => 'No se ha seleccionado al menos un usuario',
+                        'error_fatal' => 'Se ha presentado un error al generar la tabla de usuarios',
             ],
     ],     
 
@@ -186,6 +197,23 @@ return [
         ],
         'decimal' => '.',
         'thousands' => "'"
-    ],    
+    ],
+    
+    'datatable_user' => [
+        'lengthMenu' => 'Mostrar _MENU_ usuarios por página',
+        'zeroRecords' => '<h4>No hay usuarios encontrados para la selección actual</h4>',
+        'info' => 'Mostrando página _PAGE_ de _PAGES_',
+        'infoEmpty' => '*',
+        'infoFiltered' => '(_TOTAL_ filtrados de _MAX_ usuarios totales)',
+        'loadingRecords' => 'Cargando...',
+        "processing" =>  "<span class='fa-stack fa-lg'><i class='fa fa-spinner fa-spin fa-stack-2x fa-fw'></i></span>&emsp;Cargando ...",
+        'search' => 'Buscar: ',
+        'paginate' => [
+            'next' => '>>',
+            'previous' => '<<'
+        ],
+        'decimal' => '.',
+        'thousands' => "'"    
+    ],     
       
 ];

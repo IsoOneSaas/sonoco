@@ -13,6 +13,7 @@ use App\Models\Document\TypeModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
+use App\Models\Set\UserModel;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -616,6 +617,90 @@ class RecordRepository implements RecordRepositoryInterface
 
         return $processes;
     } // processes
+
+    /**
+     * Recupera el listado de usuarios para el modal de selección
+     * @param  array $data registros seleccionados
+     * @return json    registros para generar el grid
+     */ 
+    public function getUsers(array $data)   // FIXME:  NO filtrar usuarios - tomar todos los activos
+    {
+        $success = false;
+        $grid = [];
+        $departments_array = [];
+        $jids = $this->tool->setJobsFilter(); // cargos de acuerdo a los permisos del administrador/webmaster
+
+        $plucked = UserModel::where('set_users.is_active', 1)
+            ->leftjoin('set_job_user', function($join) use($jids) {
+                $join->on('set_job_user.user_id', '=', 'set_users.user_id'); 
+                $join->whereIn('set_job_user.job_id', $jids); 
+            })
+            ->orderBy('set_users.name', 'asc')
+            ->pluck('set_users.user_id');        
+
+        if($plucked) {
+            $success = true;
+            $uids = $plucked->all();                       
+            foreach( array_unique($uids) as $uid) {
+                $user = UserModel::find($uid);
+                $jobs = $user->jobs()->orderBy('set_jobs.name')->get();
+
+                $jobs_array = [];                
+                foreach($jobs as $job) {
+                    $jid = $job->job_id;
+                    $jobs_array[$jid] = $job->name;                    
+                    $departments = \App\Models\Set\DepartmentModel::join('set_department_job', function($join) use($jid) {
+                        $join->on('set_departments.department_id', '=', 'set_department_job.department_id');
+                        $join->where('set_department_job.job_id', $jid); 
+                    })
+                    ->orderBy('set_departments.name')
+                    ->get(['set_departments.name', 'set_departments.department_id']);
+                    $departments_array = [];
+                    foreach($departments as $department) {
+                        $did = $department->department_id;
+                        $departments_array[$did] = $department->name;
+                        
+                        // $locations = LocationModel::join('set_location_department', function($join) use($did) {
+                        //     $join->on('set_locations.location_id', '=', 'set_location_department.location_id');
+                        //     $join->where('set_location_department.department_id', $did); 
+                        // })
+                        // ->orderBy('set_locations.name')
+                        // ->get(['set_locations.name', 'set_locations.location_id']);
+
+                        // $locations_array= [];
+                        // foreach($locations as $location) {
+                        //     $locations_array[$location->location_id] = $location->name;
+                        // } // foreach
+                    } // foreach
+                } // foreach
+
+                //Log::debug(['DPTO' => $departments_array[0]]);
+
+                $locations_array= [];
+                $lids = $this->tool->getOwnLocationsByUser($user);
+                $locations = LocationModel::findMany($lids);
+                if($locations) {
+                    foreach($locations as $location) {
+                        $locations_array[$location->location_id] = $location->name;
+                    } // foreach
+                } // if                
+
+                $locationsString = ( count($locations_array) > 0 ) ? implode(', ', $locations_array ) : '';
+                $departmentsString = ( count($departments_array) > 0 ) ? implode(', ', $departments_array ) : '';
+                $jobsString = ( count($jobs_array) > 0 ) ? implode(', ', $jobs_array ) : '';
+
+
+                $checked = ( key_exists('dids', $data) && in_array($user->user_id, $data['dids']) ) ? 'checked' : '';
+                $grid[] = ['<input id="check-user-'. $user->user_id .'" type="checkbox" class="check" data-id='. $user->user_id .' data-code="'. $user->name  .'" onClick="checkBoxUser('. $user->user_id .');" ' . $checked . ' />', $user->name, $locationsString, $departmentsString, $jobsString];
+            }              
+        }
+                  
+        return json_encode([
+            'success' => $success,
+            'grid'     => json_encode($grid),              
+        ]);         
+
+    } // getUsers    
     
     /**
      * Listado de grupos existentes

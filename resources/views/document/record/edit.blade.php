@@ -35,7 +35,7 @@
                                         <button id="btn-4-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-4" type="button" role="tab" aria-controls="record-tab-4" aria-selected="false" > Etiquetas </button>
                                     </li>
                                     <li id="record-5-tab" class="nav-item flex-1" role="presentation">
-                                        <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-5" type="button" role="tab" aria-controls="record-tab-5" aria-selected="false" > xxx </button>
+                                        <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-5" type="button" role="tab" aria-controls="record-tab-5" aria-selected="false" > Responsables </button>
                                     </li>
                                     <li id="record-6-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-6-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-6" type="button" role="tab" aria-controls="record-tab-6" aria-selected="false" > Anexos </button>
@@ -54,6 +54,7 @@
                                     <input type="hidden" name="file" value="{{ $DATA['file'] }}"> 
                                     <input type="hidden" name="status_id" value={{ $DATA['status_id'] }} id="status-id">
                                     <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
+                                    <input type="hidden" id="json-users" value="">
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -155,7 +156,19 @@
                                             <!-- END: Tags -->  
                                         </div>
                                         <div id="record-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-5-tab">
-                                            <h1>Content 5</h1>
+                                            <!-- BEGIN: Users -->
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Seleccione los usuarios relacionados con este registro.</p>  
+                                                <div class="input-group mt-5">
+                                                    <div id="user" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/record.form.user.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.user.title') }}</div>                                
+                                                    <select multiple id="user-ids" name="user_ids[]" class="form-control ml-2" size="10" required>
+                                                        <option value=''>{{ trans('document/record.form.user.placeholder') }}</option>
+                                                    </select>
+                                                    <button id="btn-modal-user" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>                                    
+                                                    <div id="input-group-10" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.user.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                </div>
+                                            </div>
+                                            <!-- END: Users -->
                                         </div>
                                         <div id="record-tab-6" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-6-tab">
                                             <!-- BEGIN: Attachment -->
@@ -248,6 +261,56 @@
                     </div>
                     <!-- END: Modal Attachcment -->
 
+
+                    <!-- BEGIN: Modal User -->
+                    <div id="modal-user" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xxl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-user-title" class="font-medium text-base mr-auto">Selección de usuarios</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    
+                                        <table id="users-table" class="table table-bordered" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th><input type="checkbox" name="checkout-user" /></th>
+                                                    <th>Nombre</th>
+                                                    <th>Localización</th>
+                                                    <th>Departamento</th>
+                                                    <th>Cargo</th>
+                                                </tr>
+                                            </thead>
+                                            <tfoot>
+                                                <tr>
+                                                    <th></th>
+                                                    <th><input type="text" class="col-filter" placeholder="Nombre" /></th>
+                                                    <th><input type="text" class="col-filter" placeholder="Localización" /></th>
+                                                    <th><input type="text" class="col-filter" placeholder="Departamento" /></th>
+                                                    <th><input type="text" class="col-filter" placeholder="Cargo" /></th>                                                    
+                                                </tr>
+                                            </tfoot>                                                                                                                          
+                                        </table>                       
+
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <img id="loading-modal-user-1" alt="Cargando..." class="h-12 inline-flex float-left" src="{{ url('/assets/images/loading_small.gif') }}" sytle="display:none">
+                                    <button id="btn-user-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-user-ok" type="button" class="btn btn-primary w-20">Confirmar</button>
+                                    <a id="modal-user-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-user" class="">.</a>
+                                    
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal User -->                     
+
                 </div>
                 <!-- END: Content -->
 
@@ -261,6 +324,11 @@
 @endpush
 
 @push('styles')
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/Buttons-2.3.6/css/buttons.dataTables.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/dataTables.bootstrap4.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/js/datatables/Select-1.6.2/css/select.dataTables.min.css') }}" />
+    <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/dropzone-5.9.3/dropzone.min.css') }}" type="text/css" />
 @endpush
 
@@ -268,9 +336,13 @@
 <script src="{{ url('assets/js/ckeditor_4.21.0_full/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
 <script src="{{ url('assets/js/dropzone-5.9.3/dropzone.min.js') }}"></script>
-<script src="{{ url('assets/js/dropzone-5.9.3/config_record_edit.js') }}"></script> 
+<script src="{{ url('assets/js/dropzone-5.9.3/config_record_edit.js') }}"></script>
+<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ url('assets/js/datatables/Select-1.6.2/js/dataTables.select.min.js') }}"></script> 
 <script document="text/javascript">
     var $n = {{ count($DATA['tags']) }};
+    var $userTable;
     $(function () {
         //const dropzone = new Dropzone("#upload-form");        
         var status = {{ $DATA['status_id'] }};
@@ -405,6 +477,71 @@
             $("#modal-attachments-open")[0].click();
         });        
 
+        // Genera un modal para usuarios
+        $('body').on('click', '#btn-modal-user', function (e) {
+            e.preventDefault();
+            var lang = {!! $gridLanguage !!};
+            var uids = $("#user-ids").val();
+
+            $("#json-users").val('');             
+            $("#modal-user-open")[0].click();
+            $("#loading-modal-user-1").show();
+
+            // Generar la tabla
+            $.ajax({
+                type: 'POST',
+                data: {'uids':uids},
+                dataType: 'json',
+                url: '/documentos/registro/usuarios/recuperar',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(json) {         
+                    if( json.success) {
+                        dataSet = $.parseJSON(json.grid);
+                        // Generar Tabla
+                        var selects = [];
+                        var inputs = [1,2,3,4];        
+                        $userTable = new DataTable("#users-table", {
+                            data: dataSet,                      
+                            order: [[1, 'asc' ]],
+                            columnDefs: [
+                                { targets: 0, orderable: false },
+                                { targets: 0, searchable: false }
+                            ],
+                            retrieve: true,
+                            processing: true,                        
+                            initComplete: function () {
+                                var $this = this.api();
+                                // Fitros
+                                setBottomFilter($this, selects, inputs);                            
+                                // Modal
+                                $("#loading-modal-user-1").hide();                                
+                            },
+                            language: lang                      
+                        }); // datatable
+                    } else {
+                        setSuccessNotification('error', 'Oops!', "{{ trans('document/record.message.user.error_fatal') }}"); 
+                    }
+                } // success
+            }); // ajax                        
+        }); // btn-modal-user
+
+        // Boton de confirmación para usuarios seleccionados      
+        $('body').on('click', '#btn-user-ok', function (e) {
+            var totalselected = false;
+            // Recorrer y selected todos
+            $('#user-ids option').each(function () {
+                if( $(this).val() != '' ) {
+                    this.selected = true; 
+                    totalselected = true;
+                }                     
+            });
+
+            if( !totalselected ) {
+                $("#user-ids option:selected").prop('selected', false);
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/record.message.user.error_no-selected") }}');
+            }
+            $("#btn-user-ko").click();
+        }); // btn-user-ok         
 
     });
 
@@ -498,6 +635,48 @@
         var win = window.open(url, '_blank');
         win.focus();        
     } // showFile Fx
+
+    function checkBoxUser(id) {
+        //alert('Checking...');
+        var now = $("#check-user-" + id).is(":checked");  
+        var ids = [];
+        //
+        output = '<option value="">{{ trans("document/record.message.user.ids_default") }}</option> ';
+        //console.log(now);
+        if(now) {
+            
+            // Recuperar actuales
+            $('#user-ids option').each(function () {  // :checked
+                var aid = $(this).val();
+                var code = $(this).text();
+                if(aid != '') {
+                    ids.push(aid);
+                    output += '<option value=' + aid + ' selected>' + code + '</option> ';
+                    //console.log('add old: ' + aid);
+                } 
+            });
+            // agregar nuevo
+            ids.push(id);
+            var code =  $("#check-user-" + id).data('code');
+            output += '<option value=' + id + ' selected>' + code + '</option> ';
+            //console.log('add new: ' + id);
+
+        } else {
+            // Recupera actuales excepto el deseleccionado
+            $('#user-ids option').each(function () {  // :checked
+                var aid = $(this).val();
+                var code = $(this).text();
+                if(aid != '' && aid != id) {
+                    ids.push(aid);
+                    output += '<option value=' + aid + ' selected>' + code + '</option> ';
+                    //console.log('add old*: ' + aid);
+                } 
+            });
+        }
+        $("#json-users").val(JSON.stringify(ids));  
+        $("#user-ids").html(output);             
+        return false;
+    } // checkBoxUser Fx    
 
 </script>
                

@@ -120,7 +120,7 @@ class RecordModelController extends Controller
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => 'records',
-            //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
+            'gridLanguage' => json_encode(trans('document/record.datatable_user')),
         ]);         
 
     } // Edit Method 
@@ -211,6 +211,11 @@ class RecordModelController extends Controller
     {
         return $this->recordRepo->getTagList($request->all());
     } //setTagList Method
+
+    public function setUsers(Request $request) 
+    {
+        return $this->recordRepo->getUsers($request->all());
+    } // setUsers    
     
     /**
      * Store a newly created resource in storage.

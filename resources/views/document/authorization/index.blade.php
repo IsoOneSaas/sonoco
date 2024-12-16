@@ -293,7 +293,7 @@
 <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />              
 
 <script type="text/javascript">
-    var $typeTable, $documentTable;
+    var $userTable, $documentTable;
     $(function () {
 
 

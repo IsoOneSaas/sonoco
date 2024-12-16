@@ -31,4 +31,6 @@ interface RecordRepositoryInterface
 
     public function getDocument($id, $dateFormat);
 
+    public function getUsers(array $data);
+
 }
