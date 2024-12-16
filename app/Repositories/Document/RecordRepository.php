@@ -278,9 +278,9 @@ class RecordRepository implements RecordRepositoryInterface
             }
         }
         // Generar selects de settings
-        $textArray = trans('record.layout');
+        $textArray = trans('document/record.layout'); 
         $printLayout =  config('settings.print_layout_default');
-        foreach($printLayout as $dir => $sizeArray) {
+        foreach($printLayout as $dir => $sizeArray) {            
             $output_array['dir_select'][] = [
                 'text' => ( isset($textArray[$dir]) ) ? $textArray[$dir] : 'Otra dirección', 
                 'value' => $dir,
@@ -348,7 +348,7 @@ class RecordRepository implements RecordRepositoryInterface
             } // if
         } // if
         // Generar selects de settings
-        $textArray = trans('record.layout');
+        $textArray = trans('document/record.layout');
         $printLayout =  config('settings.print_layout_default');
         foreach($printLayout as $dir => $sizeArray) {
             $output_array['dir_select'][] = [
@@ -444,6 +444,25 @@ class RecordRepository implements RecordRepositoryInterface
 
             //DB::beginTransaction();
             $record->save();
+
+            // SAVE SETTINGS
+            $document = DocumentModel::find($data['document_id']);
+            if($document) {
+                $json_array = $document->settings;         
+                if( is_array($json_array) ) {
+                    $json_array['print_format']['size'] = $data['size'];  
+                    $json_array['print_format']['orientation'] = $data['direction'];  
+                    $document->settings = $json_array;                    
+                } else {
+                    $new_array['print_format'] = [
+                        'size' => $data['size'],
+                        'orientation' => $data['direction'],
+                    ];
+                    $document->settings = $new_array;
+                } // if/else
+                $document->save();
+            }
+
 
             // SAVE TOPIC/SUBJECT
             if( key_exists('topic', $data) ) {

@@ -48,6 +48,10 @@ return [
 
     'layout' => [
         'portrait' => 'Vertical',
+        'landscape' => 'Horizontal',
+        'letter'    => 'Carta',
+        'folio'     => 'Folio',
+        'A4'     => 'DIN A4',
     ],
    
 

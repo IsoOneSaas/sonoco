@@ -39,7 +39,15 @@ return [
                 'pdfwidth' => '176mm',
                 'pdfsize' => 'folio', 
                 'orientation' => 'portrait',                      
-            ],                
+            ],
+            'A4' => [
+                'size' => '210mm 297mm',
+                'margin' => '15mm 15mm 12mm 25mm',
+                'marginspecial' => '15mm 15mm -12mm 25mm',  
+                'pdfwidth' => '170mm',
+                'pdfsize' => 'A4', 
+                'orientation' => 'portrait',                      
+            ],                          
         ],
         'landscape' => [
             'letter' => [
@@ -57,7 +65,15 @@ return [
                 'pdfwidth' => '300mm',
                 'pdfsize' => 'folio', 
                 'orientation' => 'landscape',                     
-            ],                  
+            ],
+            'A4' => [
+                'size' => '297mm 210mm',
+                'margin' => '25mm 15mm 15mm 15mm',
+                'marginspecial' => '25mm 15mm -15mm 15mm',  
+                'pdfwidth' => '267mm',
+                'pdfsize' => 'A4', 
+                'orientation' => 'landscape',                     
+            ],                              
         ],
     ],     
 
