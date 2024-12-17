@@ -402,7 +402,7 @@ class RecordRepository implements RecordRepositoryInterface
             $output_array['tags'] = $tags;
         } // if
 
-       Log::debug(['RECORD EXISTING' => $output_array]);
+       //Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -509,6 +509,21 @@ class RecordRepository implements RecordRepositoryInterface
                 if(count($insert_array) > 0) {
                     DB::table('document_record_links')->insert($insert_array);
                 } // if                  
+            } // if
+
+            // SAVE USERS
+            $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
+            if( count($data['user_ids']) > 0 ) {
+                $insert_array = [];
+                foreach($data['user_ids'] as $uid) {
+                    $user = UserModel::find($uid);
+                    $insert_array[] = [
+                        'user_id' => $uid,
+                        'record_id' => $record->record_id,
+                        'name' => $user->name,
+                        'job' => '',
+                    ];
+                } // foreach
             } // if
 
 
