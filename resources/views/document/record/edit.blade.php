@@ -348,6 +348,7 @@
         var status = {{ $DATA['status_id'] }};
         var tab = $("input[name='tab_active']").val();
         var id = ( tab == '') ? 'btn-1-tab' : tab;
+        //var lang = { !! $gridLanguage !! };
 
         // TAG ACTIVO
         $("#"+id).addClass('active');
@@ -442,7 +443,7 @@
                 var output = '<div id="div-'+$n+'" class="input-group mt-5">';
                 output += '<div id="group" class="input-group-text flex"><i data-lucide="'+'{{ trans("document/record.form.group.icon") }}'+'" class="w-4 h-4 mr-1"></i>'+'{{ trans("document/record.form.group.title") }}'+'</div>';
                 output += '<input type="text" name="groups[]" value="'+group+'" class="form-control w-full input-status" readonly>';
-                output += '<div class="input-group-text flex ml-2"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}'+'" class="w-4 h-4 mr-1">@</i>'+'{{ trans("document/record.form.tag.title") }}' +'</div>';
+                output += '<div class="input-group-text flex ml-2"><i data-lucide="'+ '{{ trans("document/record.form.tag.icon") }}'+'" class="w-4 h-4">@</i>'+'{{ trans("document/record.form.tag.title") }}' +'</div>';
                 
                 if( newGroup ) {
                     output += '<input id="tag-input-'+$n+'" type="text" name="tags[]" value="" class="form-control w-full input-status ml-2" aria-describedby="tag" placeholder="'+ '{{ trans("document/record.form.tag.placeholder") }}'+'">';
@@ -480,7 +481,7 @@
         // Genera un modal para usuarios
         $('body').on('click', '#btn-modal-user', function (e) {
             e.preventDefault();
-            var lang = {!! $gridLanguage !!};
+            
             var uids = $("#user-ids").val();
 
             $("#json-users").val('');             
@@ -516,13 +517,13 @@
                                 // Modal
                                 $("#loading-modal-user-1").hide();                                
                             },
-                            language: lang                      
+                            //language: lang                      
                         }); // datatable
                     } else {
                         setSuccessNotification('error', 'Oops!', "{{ trans('document/record.message.user.error_fatal') }}"); 
                     }
                 } // success
-            }); // ajax                        
+            }); // ajax
         }); // btn-modal-user
 
         // Boton de confirmación para usuarios seleccionados      
@@ -541,7 +542,31 @@
                 setSuccessNotification('error', 'Oops!', '{{ trans("document/record.message.user.error_no-selected") }}');
             }
             $("#btn-user-ko").click();
-        }); // btn-user-ok         
+        }); // btn-user-ok 
+        
+        // Check On/Off
+        $("input[name='checkout-user']").click(function() {
+            var id, code;
+            var now = this.checked;  
+            var ids = [];
+            var output = '<option value="">{{ trans("document/authorization.message.user_ids_default") }}</option> ';
+            $userTable.$('tr', {"filter":"applied"}).each( function () {
+                var td = $(this).find("td:eq(0)");
+                td.find('input').prop('checked', now);
+                if(now) {
+                    id = td.find('input').data("id");                        
+                    code = td.find('input').data("code");
+                    //console.log(code);       
+                    ids.push(id);
+                    output += '<option value=' + id + ' selected>' + code + '</option> ';
+                }                  
+            });
+
+            $("#json-users").val(JSON.stringify(ids)); 
+            $("#user-ids").html(output);
+            console.log('Users selected: ' + ids.length);
+            //console.dir(ids);
+        });  // input[name=checkout-user] 
 
     });
 

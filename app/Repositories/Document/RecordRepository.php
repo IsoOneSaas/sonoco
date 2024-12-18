@@ -513,24 +513,28 @@ class RecordRepository implements RecordRepositoryInterface
 
             // SAVE USERS
             $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
-            if( count($data['user_ids']) > 0 ) {
+            if( key_exists('user_ids', $data) && (count($data['user_ids']) > 0) ) {
                 $insert_array = [];
                 foreach($data['user_ids'] as $uid) {
-                    $user = UserModel::find($uid);
+                    $liable = UserModel::find($uid);
                     $insert_array[] = [
                         'user_id' => $uid,
                         'record_id' => $record->record_id,
-                        'name' => $user->name,
+                        'name' => $liable->name,
                         'job' => '',
                     ];
                 } // foreach
+                if(count($insert_array) > 0) {
+                    DB::table('document_record_users')->insert($insert_array);
+                } // if                  
             } // if
 
 
             // SAVE TRACING
+            $record->user_id = $user->user_id;  // Temporal
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
             $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';                  
-            Event::dispatch(new RecordTracing($record));
+            Event::dispatch(new RecordTracing($record));  // FIXME:  Dejó de funcionar
 
             //DB::commit();
         } catch (Exception $e) {
