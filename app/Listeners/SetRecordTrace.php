@@ -2,7 +2,6 @@
 
 use App\Events\RecordTracing;
 use App\Models\Document\TracingRecordModel;
-use Illuminate\Support\Facades\Auth;
 use Log;
 
 class SetRecordTrace
@@ -24,8 +23,7 @@ class SetRecordTrace
         //Log::debug(['TRACE' => $event->record->toArray()]);
         $trace->fill([
             'record_id'   => $event->record->record_id,
-            //'user_id'      => Auth::user()->user_id,
-            'user_id'      => $event->record->user_id,
+            'user_uid'      => auth()->user()->user_uid,
             'trace'         => ( isset($event->record->trace) ) ?
                                 trans('document/record.'. $event->record->action .'.trace', [
                                 'action' => config('settings.document_status.'. $event->record->action),

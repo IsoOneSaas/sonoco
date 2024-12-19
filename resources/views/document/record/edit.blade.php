@@ -163,6 +163,9 @@
                                                     <div id="user" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/record.form.user.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.user.title') }}</div>                                
                                                     <select multiple id="user-ids" name="user_ids[]" class="form-control ml-2" size="10" required>
                                                         <option value=''>{{ trans('document/record.form.user.placeholder') }}</option>
+                                                        @foreach($DATA['users'] as $user)
+                                                        <option value={{ $user['id'] }} selected>{{ $user['name'] }}</option>
+                                                        @endforeach
                                                     </select>
                                                     <button id="btn-modal-user" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>                                    
                                                     <div id="input-group-10" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.user.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
@@ -480,8 +483,7 @@
 
         // Genera un modal para usuarios
         $('body').on('click', '#btn-modal-user', function (e) {
-            e.preventDefault();
-            
+            e.preventDefault();            
             var uids = $("#user-ids").val();
 
             $("#json-users").val('');             
@@ -522,6 +524,7 @@
                     } else {
                         setSuccessNotification('error', 'Oops!', "{{ trans('document/record.message.user.error_fatal') }}"); 
                     }
+                    $("#loading-modal-user-1").hide();
                 } // success
             }); // ajax
         }); // btn-modal-user

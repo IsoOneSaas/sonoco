@@ -23,7 +23,7 @@ class SetDocumentTrace
         $trace = new TracingModel();
         $trace->fill([
             'document_id'   => $event->document->document_id,
-            'user_uid'      => auth()->user()->user_id,
+            'user_uid'      => auth()->user()->user_uid,
             'trace'         => ( isset($event->document->trace) ) ?
                                 trans('document/document.'. $event->document->action .'.trace', [
                                 'action' => config('settings.document_status.'. $event->document->action),

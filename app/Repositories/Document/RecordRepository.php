@@ -297,7 +297,10 @@ class RecordRepository implements RecordRepositoryInterface
                 'value' => $size,
                 'selected' => ( $size == $sizeDefault ) ? true : false,
             ];
-        } // foreach        
+        } // foreach
+        
+        // Recuperar usuarios
+        $output_array['users'] = [];
         
         Log::debug(['SET DOCUMENT' => $output_array]);
         return $output_array;         
@@ -402,6 +405,18 @@ class RecordRepository implements RecordRepositoryInterface
             $output_array['tags'] = $tags;
         } // if
 
+        // Recuperar usuarios
+        $output_array['users'] = [];
+        $users = DB::table('document_record_users')->where('record_id', $id)->orderBy('name')->get(['user_id','name']);
+        if($users) {
+            foreach($users as $user) {
+                $output_array['users'][] = [
+                    'id' => $user->user_id,
+                    'name' => $user->name,
+                ];
+            } // foreach
+        } // if
+
        //Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
@@ -443,7 +458,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record->filename = $data['fileName'];
             $record->status = $data['status_id'];
 
-            //DB::beginTransaction();
+            DB::beginTransaction();
             $record->save();
 
             // SAVE SETTINGS
@@ -531,14 +546,13 @@ class RecordRepository implements RecordRepositoryInterface
 
 
             // SAVE TRACING
-            $record->user_id = $user->user_id;  // Temporal
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
             $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';                  
-            Event::dispatch(new RecordTracing($record));  // FIXME:  Dejó de funcionar
+            Event::dispatch(new RecordTracing($record));
 
-            //DB::commit();
+            DB::commit();
         } catch (Exception $e) {
-            //DB::rollBack();
+            DB::rollBack();
             Log::error('RecordRepository::store Exception: '. $e->getMessage());
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
         }
@@ -644,19 +658,16 @@ class RecordRepository implements RecordRepositoryInterface
      */ 
     public function getUsers(array $data)   // FIXME:  NO filtrar usuarios - tomar todos los activos
     {
+        //Log::debug(['GETUSERS DATA' => $data]);
         $success = false;
         $grid = [];
-        $departments_array = [];
-        $jids = $this->tool->setJobsFilter(); // cargos de acuerdo a los permisos del administrador/webmaster
 
-        $plucked = UserModel::where('set_users.is_active', 1)
-            ->leftjoin('set_job_user', function($join) use($jids) {
-                $join->on('set_job_user.user_id', '=', 'set_users.user_id'); 
-                $join->whereIn('set_job_user.job_id', $jids); 
-            })
-            ->orderBy('set_users.name', 'asc')
-            ->pluck('set_users.user_id');        
+        $plucked = UserModel::where('is_active', 1)
+            ->whereIn('role', config('settings.roles_select_documents'))
+            ->orderBy('name', 'asc')
+            ->pluck('user_id');          
 
+    
         if($plucked) {
             $success = true;
             $uids = $plucked->all();                       
@@ -678,22 +689,8 @@ class RecordRepository implements RecordRepositoryInterface
                     foreach($departments as $department) {
                         $did = $department->department_id;
                         $departments_array[$did] = $department->name;
-                        
-                        // $locations = LocationModel::join('set_location_department', function($join) use($did) {
-                        //     $join->on('set_locations.location_id', '=', 'set_location_department.location_id');
-                        //     $join->where('set_location_department.department_id', $did); 
-                        // })
-                        // ->orderBy('set_locations.name')
-                        // ->get(['set_locations.name', 'set_locations.location_id']);
-
-                        // $locations_array= [];
-                        // foreach($locations as $location) {
-                        //     $locations_array[$location->location_id] = $location->name;
-                        // } // foreach
                     } // foreach
                 } // foreach
-
-                //Log::debug(['DPTO' => $departments_array[0]]);
 
                 $locations_array= [];
                 $lids = $this->tool->getOwnLocationsByUser($user);
@@ -708,8 +705,8 @@ class RecordRepository implements RecordRepositoryInterface
                 $departmentsString = ( count($departments_array) > 0 ) ? implode(', ', $departments_array ) : '';
                 $jobsString = ( count($jobs_array) > 0 ) ? implode(', ', $jobs_array ) : '';
 
+                $checked = ( key_exists('uids', $data) && in_array($user->user_id, $data['uids']) ) ? 'checked' : '';
 
-                $checked = ( key_exists('dids', $data) && in_array($user->user_id, $data['dids']) ) ? 'checked' : '';
                 $grid[] = ['<input id="check-user-'. $user->user_id .'" type="checkbox" class="check" data-id='. $user->user_id .' data-code="'. $user->name  .'" onClick="checkBoxUser('. $user->user_id .');" ' . $checked . ' />', $user->name, $locationsString, $departmentsString, $jobsString];
             }              
         }
