@@ -656,7 +656,7 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  array $data registros seleccionados
      * @return json    registros para generar el grid
      */ 
-    public function getUsers(array $data)   // FIXME:  NO filtrar usuarios - tomar todos los activos
+    public function getUsers(array $data)
     {
         //Log::debug(['GETUSERS DATA' => $data]);
         $success = false;

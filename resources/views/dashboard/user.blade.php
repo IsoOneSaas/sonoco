@@ -24,7 +24,11 @@
                                     </div>
                                     <div class="">
                                         <div class="intro-y box mt-5">
-                                            
+                                            <select class="form-control w-80">
+                                                @foreach( $range as $now )                                                
+                                                <option value={{ $now }} @if($now == $current) selected @endif>Semana {{ $now }}</option>
+                                                @endforeach
+                                            </select>
                                             <div  class='flex bg-white shadow-md justify-start md:justify-center rounded-lg overflow-x-scroll mx-auto py-4 px-2  md:mx-12 w-full'>
         
                                                 @foreach($week as $day)
@@ -80,11 +84,14 @@
                                             <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
                                                 @foreach($docs as $doc)                                            
                                                 <li class="px-6 py-2  border-2">
-                                                    <div class="text-right"><span class="text-gray-500 text-xs">{{ $doc['date'] }}</span></div>
+
+                                                    <div class="text-right"><a href="{{ $doc['link'] }}" class="btn py-1 px-2  text-xs">Ver</a></div> 
+                                                    <span class="text-gray-700">{{ $doc['name'] }}</span><br>                                                   
                                                     <div class="flex justify-between">                                                                    
-                                                        <a href="{{ $doc['link'] }}"><span class="font-semibold text-lg">{{ $doc['code'] }}</span></a>
+                                                        <span class="font-semibold text-lg">{{ $doc['code'] }}</span>
                                                     </div>
-                                                    <a href="{{ $doc['link'] }}"><span class="text-gray-700">{{ $doc['name'] }}</span></a>
+                                                    
+                                                    <span class="text-gray-500 text-xs">{{ $doc['date'] }}</span>
                                                 </li>                                            
                                                 @endforeach
                                             </ul>                                        
@@ -100,7 +107,21 @@
                                             </h2>
                                         </div>
                                         <div class="p-5">
-                                            <h2>Contenido</h2>
+
+                                            <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
+                                                @foreach($recs as $rec)                                            
+                                                <li class="px-6 py-2  border-2">
+
+                                                    <div class="text-right"><a href="{{ $rec['link'] }}" class="btn py-1 px-2  text-xs">@if( $rec['status'] == 0) Editar @else Ver @endif</a></div>                                                    
+                                                    <span class="text-gray-700">{{ $rec['name'] }}</span><br>
+                                                    <div class="flex justify-between">                                                                    
+                                                        <span class="font-semibold">{{ $rec['document'] }}</span>
+                                                    </div>                                                    
+                                                    <span class="text-gray-500 text-xs">{{ $rec['date'] }}</span>
+                                                </li>                                            
+                                                @endforeach
+                                            </ul>   
+
                                         </div>
                                     </div>
                                 </div>                                

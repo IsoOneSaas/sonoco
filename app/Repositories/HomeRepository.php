@@ -4,6 +4,7 @@ use App\Classes\ToolsClass;
 use App\Interfaces\HomeRepositoryInterface;
 use App\Models\Document\ForwardModel;
 use App\Models\Document\TracingModel;
+use App\Models\Document\TracingRecordModel;
 use App\Models\Set\DepartmentModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -13,14 +14,18 @@ class HomeRepository implements HomeRepositoryInterface
     private $tool;
     protected $adminTag;
     protected $editLink;
-    protected $openLink;
+    protected $openDocumentLink;
     protected $docsTake;
+    protected $openEditRecordLink;
+    protected $openViewRecordLink;
 
     public function __construct(ToolsClass $Tools)
     {
         $this->tool = $Tools;
         $this->editLink = '/documentos/control/gestion/editar/user/';
-        $this->openLink = '/documentos/master/publicado/';
+        $this->openDocumentLink = '/documentos/master/publicado/';
+        $this->openEditRecordLink = '/documentos/registro/editar/';
+        $this->openViewRecordLink = '/documentos/registro/ver/';
         $this->docsTake = 10;
     }
 
@@ -38,11 +43,11 @@ class HomeRepository implements HomeRepositoryInterface
             $rel = $department->processesCount();
             if(!$rel) {
                 $departments_array[] = $department->name;
-                Log::debug('Found: '.  $department->department_id);
+                //Log::debug('Found: '.  $department->department_id);
             }
         }
         if( count($departments_array) > 0) {
-            Log::debug(['RESULT' =>  $departments_array]);
+            //Log::debug(['RESULT' =>  $departments_array]);
             $alerts_array[] = trans('Home.alerts.settings.departments_missed', ['dptos' => implode(', ', $departments_array)]);
         }        
 
@@ -113,7 +118,7 @@ class HomeRepository implements HomeRepositoryInterface
                         'name' => $document->name,
                         'code' => $document->code,
                         'date' => $dt->diffForHumans(Carbon::now()),
-                        'link' => $this->openLink.$hash,
+                        'link' => $this->openDocumentLink.$hash,
                     ];
                     if( count($docs_array) == $this->docsTake ) break;
                 }                
@@ -121,5 +126,46 @@ class HomeRepository implements HomeRepositoryInterface
         } // if
         return $docs_array;
     } // getDocuments Repository
+
+    public function getRecords($uid)
+    {
+        $recs_array = [];
+        $records = TracingRecordModel::where('user_uid', $uid)
+            ->join('document_records', function($query) {
+                $query->on('document_records.record_id', '=', 'document_record_tracing.record_id');              
+            })
+            ->join('documents', function($query) {
+                $query->on('documents.document_id', '=', 'document_records.document_id');               
+            })            
+            ->where('document_record_tracing.trace', 'LIKE', '%CREATED%')
+            ->orderBy('document_record_tracing.created_at', 'desc') 
+            //->take($this->docsTake)
+            ->get([
+                'document_records.record_id',
+                'document_records.name as recordName',
+                'documents.name as documentName',
+                'document_records.status',
+                'document_record_tracing.created_at as date',
+            ]);
+            
+        if($records) {
+            foreach($records as $record) {
+                $hash = $this->tool->setIdHash($record->record_id);
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $record->date);
+                if( !key_exists($record->document_id, $recs_array) ) {
+                    $link = ( $record->status == 0 ) ? $this->openEditRecordLink.$hash : $this->openViewRecordLink.$hash;
+                    $recs_array[$record->document_id] = [
+                        'name' => $record->recordName,
+                        'document' => $record->documentName,
+                        'status' => $record->status,
+                        'date' => $dt->diffForHumans(Carbon::now()),
+                        'link' => $link,
+                    ];
+                    if( count($recs_array) == $this->docsTake ) break;
+                }                
+            } // foreach
+        } // if
+        return $recs_array;
+    } // getRecords Repository    
 
 } // class
