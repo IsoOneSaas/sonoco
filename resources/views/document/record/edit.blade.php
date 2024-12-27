@@ -14,7 +14,7 @@
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <button id="btn-save" type="button" form="record-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
                             <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" onClick="setStatus(1)" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
-                            <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}"><i data-lucide="skip-back" class="w-5 h-5"></i></a>    
+                            <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}" alt="Regresar a la tabla"><i data-lucide="menu" class="w-5 h-5"></i></a>    
                         </div>
                     </div>
                     <!-- BEGIN: Boxed Tab -->

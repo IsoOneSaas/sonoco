@@ -122,10 +122,18 @@ class RecordRepository implements RecordRepositoryInterface
                 'T4.subject',            
             ]);
 
+        Log::debug('Número de registros filtrados 1: '. $records->count());            
+
            
         foreach($records as $record) {
             // Filtro de Etiqueta
-            $result =  DB::table('document_record_tags')->select('tag')->whereIn('tag', $tagArray)->get();
+            if( $params['gid'] == '' ) {
+                $result = true;
+                //$tagArray = 'ALL';
+            } else {
+                $result =  DB::table('document_record_tags')->where('record_id', $record->record_id)->whereIn('tag', $tagArray)->first();
+            }            
+            //Log::debug(['RID' => $record->record_id, 'TAGS' => $tagArray]);
             if($result) {
                 $dt = Carbon::createFromTimeStamp(strtotime($record->date));
                 $data[$i]['DT_RowIndex'] = $i+1;
@@ -140,11 +148,8 @@ class RecordRepository implements RecordRepositoryInterface
                 $i++;  
             }                          
         } // foreach
-
         
-        
-        
-       Log::debug('Número de registros filtrados: '. count($data));
+       Log::debug('Número de registros filtrados 2: '. count($data));
 
         $results = [
             "sEcho" => 1,
@@ -152,7 +157,7 @@ class RecordRepository implements RecordRepositoryInterface
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
-        Log::debug(['DATA' => $results]);
+        //Log::debug(['DATA*' => $results]);
         return json_encode($results);          
 
     } // render

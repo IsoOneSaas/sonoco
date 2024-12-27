@@ -126,6 +126,8 @@ class RecordModelController extends Controller
     } // Edit Method 
 
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InpQSnVNV3B1TXFWUTk3TmhVSmNPVlE9PSIsInZhbHVlIjoiVml5b3RraGN3SDd0c3FzVkVqWmpHZz09IiwibWFjIjoiMDA2Y2E1ZjBjMjI1M2M0YjMxYTBhMTRmZWI5ODQ3NjgxODRmZjc4ZWRiNWNiYjBiMDU1ODI1ZWU3YTAxZmJjMiIsInRhZyI6IiJ9
+    // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6IlFVcWlsUTF1dS9RVEhUWFlocWs2bWc9PSIsInZhbHVlIjoiTC9TQXJOU2FCcmZ4YTh2NWx0ajd0Zz09IiwibWFjIjoiOTE4NmY2N2Q2ZDI2MDRiMDMyZGZmZDE0OTZmZGIwYjIzNTQxZjQ2NGRhNTI1OTkyYzI2OTZlMDhlZDBlZTFmMCIsInRhZyI6IiJ9
+    // alberto.lara@sonoco.com
     
     /**
      * Almacenamiento de la información del registro

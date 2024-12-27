@@ -60,7 +60,7 @@
                                                         <div class="grid grid-cols-3 gap-2">
                                                             <div class="form-inline">
                                                                 <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
-                                                                <input id="date-selected" type="text" class="form-control w-32 border-slate-500 iso-input" aria-label="Rango">
+                                                                <input id="date-selected" type="text" class="form-control w-36 border-slate-500 iso-input" aria-label="Rango">
                                                             </div>
                                                         </div>
                                                         <div class="form-inline">
