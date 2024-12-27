@@ -24,9 +24,9 @@
                                     </div>
                                     <div class="">
                                         <div class="intro-y box mt-5">
-                                            <select class="form-control w-80">
+                                            <select id="week-select" class="form-control w-40">
                                                 @foreach( $range as $now )                                                
-                                                <option value={{ $now }} @if($now == $current) selected @endif>Semana {{ $now }}</option>
+                                                <option value={{ $now['w'] }} label="Semana {{ $now['w'] }}" @if($now['w'] == $current) selected @endif>{{ $now['y'] }}</option>
                                                 @endforeach
                                             </select>
                                             <div  class='flex bg-white shadow-md justify-start md:justify-center rounded-lg overflow-x-scroll mx-auto py-4 px-2  md:mx-12 w-full'>
@@ -132,6 +132,21 @@
 
               
                 <!-- END: Content -->              
+@push('scripts-bottom')
 
+<script type="text/javascript">
+ 
+    $(function () {
+
+        $('body').on('change', "#week-select", function (e) {        
+            var week = $(this).val();
+            var year = $('#week-select option:selected').text();
+            //console.log('YEAR: '+year+' WEEK: '+week);
+            location.href = '/home/'+year+'/'+week; 
+        });  
+    }); // document
+</script>
+
+@endpush
 
 </x-icewall>

@@ -17,13 +17,18 @@ class HomeController extends Controller
         $this->homeRepo = $homeRepository;
     } 
 
-    public function index(): View
+    public function index($slug = null, $id = null): View
     {
         $user = AUTH::user();
         // Agenda
         $days_array = [];
         $now = Carbon::now();
         $actualDay = $now->format('d');
+
+        if( ($slug !== null) && ($id !== null) ) {
+            $now->setISODate($slug, $id);
+        }
+                
         $startDay = $now->startOfWeek()->format('Y-m-d');
         $endDay = $now->endOfWeek()->format('Y-m-d');
         $period = CarbonPeriod::create($startDay, $endDay);
@@ -32,17 +37,26 @@ class HomeController extends Controller
 
         // Rango de semanas
         $week_array = [];
-        $j = $week - 4;
-        if ( $j < 1 ) {
+        $w = $week - 4;
+        $y = (int)$now->format('Y');
+        if ( $w < 1 ) {
             $past = $now->copy()->subYear()->weeksInYear;
-            $j = $past + $week - 4;
+            $w = $past + $week - 4;
+            $y--;
         } 
         for( $i = 1; $i < 10; $i++ ) {
-            if( $j > $total ) $j = 1;
-            $week_array[] = $j;
-            $j++;
+            if( $w > $total ) {
+                $w = 1;
+                $y++;
+            } 
+            //$week_array[] = $j;
+            $week_array[] = [
+                'w' => $w,
+                'y' => $y,
+            ];
+            $w++;
         }
-        Log::debug(['D1' => $actualDay, 'D0' => $startDay, 'WEEK' => $week, 'WEEKS ARRAY' => $week_array, 'CURRENT WEEKS' => $now->weeksInYear, 'PAST WEEKS' => $now->copy()->subYear()->weeksInYear]);
+        //Log::debug(['D1' => $actualDay, 'D0' => $startDay, 'WEEK' => $week, 'WEEKS ARRAY' => $week_array, 'CURRENT WEEKS' => $now->weeksInYear, 'PAST WEEKS' => $now->copy()->subYear()->weeksInYear]);
         
         // Eventos de Documentos
         $events = $this->homeRepo->getEvents($user->user_uid, $startDay, $endDay, $actualDay);
