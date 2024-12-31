@@ -264,7 +264,6 @@
                     </div>
                     <!-- END: Modal Attachcment -->
 
-
                     <!-- BEGIN: Modal User -->
                     <div id="modal-user" class="modal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-xxl">
@@ -312,7 +311,110 @@
                             </div>
                         </div>
                     </div>
-                    <!-- END: Modal User -->                     
+                    <!-- END: Modal User -->
+                     
+                    <!-- BEGIN: Modal Template -->
+                    <div id="modal-template" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-template-title" class="font-medium text-base mr-auto">Selección de la plantilla a incorporar</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <table id="templates-table" class="table table-bordered nowrap" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nombre</th>
+                                            </tr>
+                                        </thead>                                                                              
+                                    </table>                       
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-template-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-template-ok" type="button" class="btn btn-primary w-20">Seleccionar</button>
+                                    <a id="modal-template-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-template" class="">.</a>
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Template --> 
+                     
+                    <!-- BEGIN: Modal Reference -->
+                    <div id="modal-reference" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-reference-title" class="font-medium text-base mr-auto">Selección de documento referencia</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <table id="references-table" class="table table-bordered nowrap" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Publicado</th>
+                                            </tr>
+                                        </thead>                                                                              
+                                    </table>                       
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-reference-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-reference-ok" type="button" class="btn btn-primary w-20">Seleccionar</button>
+                                    <a id="modal-reference-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-reference" class="">.</a>
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Reference --> 
+                     
+                    <!-- BEGIN: Modal Signing -->
+                    <div id="modal-signing" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-signing-title" class="font-medium text-base mr-auto">Diligenciar firmar</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <div class="grid grid-cols-2 gap-2 width-full">
+                                        <div><input type="radio" id="radio-signature-origin-manual" name="signature_origin" value="manual" @if( $disabled ) checked @endif ></div>
+                                        <div><input type="radio" id="radio-signature-origin-file" name="signature_origin" value="file" @if( $disabled ) disabled @else checked @endif ></div>
+                                        <div><canvas id="signature-pad" class="signature-pad" width="400px" height="300px" style='border:2px solid #000'></canvas></div>                                        
+                                        <div class="border-solid border-2 border-black p-4"><img id="sign-img" src="{{ $signUrl }}" ></div>
+                                    </div>
+
+                                    
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-signing-clear" type="button" class="btn btn-outline-secondary w-20 mr-1">Borrar</button>
+                                    <button id="btn-signing-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-signing-ok" type="button" class="btn btn-primary w-20">Seleccionar</button>
+                                    <a id="modal-signing-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-signing" class="">.</a>
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Signing -->                     
 
                 </div>
                 <!-- END: Content -->
@@ -339,6 +441,7 @@
 <script src="{{ url('assets/js/ckeditor_4.21.0_full/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
 <script src="{{ url('assets/js/dropzone-5.9.3/dropzone.min.js') }}"></script>
+<script src="{{ url('assets/js/signature_pad-4.1.5/signature_pad.umd.min.js') }}"></script> 
 <script src="{{ url('assets/js/dropzone-5.9.3/config_record_edit.js') }}"></script>
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/dataTables.bootstrap4.min.js') }}"></script>
@@ -346,12 +449,13 @@
 <script document="text/javascript">
     var $n = {{ count($DATA['tags']) }};
     var $userTable;
-    $(function () {
-        //const dropzone = new Dropzone("#upload-form");        
+    $(function () {      
         var status = {{ $DATA['status_id'] }};
         var tab = $("input[name='tab_active']").val();
         var id = ( tab == '') ? 'btn-1-tab' : tab;
         //var lang = { !! $gridLanguage !! };
+        // SIGNATURE
+        const signaturePad = new SignaturePad(document.getElementById('signature-pad'));        
 
         // TAG ACTIVO
         $("#"+id).addClass('active');
@@ -571,7 +675,90 @@
             //console.dir(ids);
         });  // input[name=checkout-user] 
 
-    });
+        // MODAL PARA TEMPLATE
+        $('body').on('click', '#btn-template-ok', function (e) {
+            e.preventDefault();
+            var count = $myTable.rows( { selected: true } ).count();
+            if( count > 0 ) {
+                var selected = $myTable.rows( { selected: true } ).data();                   
+                $.ajax({
+                    url: '/documentos/control/gestion/plantilla/recuperar/'+selected[0][0],
+                    type: 'GET',
+                    dataType: 'json',              
+                    success: function(json) { 
+                        if(json.success) {
+                            // Insert Template
+                            editor.insertHtml(json.text);
+                            // Cerrar modal
+                            $("#btn-template-ko").click();  
+                        } else {
+                            setSuccessNotification('error', 'Oops!', "{{ trans('document/document.grid.templates.error.generic') }}");
+                        }
+                    },
+                    error: function (request, status, error) {
+                        setSuccessNotification('error', 'Oops!', "ERROR: " + request.responseText);
+                        console.error(request.responseText);
+                    } // success
+                }); // Ajax
+            } else {
+                setSuccessNotification('error', 'Oops!', "{{ trans('document/document.grid.templates.error.no_selected') }}");
+            } 
+        }); //btn-template-ok
+
+        // MODAL PARA REFERENCE
+        $('body').on('click', '#btn-reference-ok', function (e) {
+            e.preventDefault();
+            var count = $ourTable.rows( { selected: true } ).count();
+            if( count > 0 ) {
+                var selected = $ourTable.rows( { selected: true } ).data();                   
+                $.ajax({
+                    url: '/documentos/control/gestion/referencia/recuperar/'+selected[0][0],
+                    type: 'GET',
+                    dataType: 'json',              
+                    success: function(json) { 
+                        if(json.success) {
+                            // Insert Reference
+                            editor.insertHtml('<em>'+json.text+'</em>');
+                            // Cerrar modal
+                            $("#btn-reference-ko").click();  
+                        } else {
+                            setSuccessNotification('error', 'Oops!', "{{ trans('document/document.grid.references.error.generic') }}");
+                        }
+                    },
+                    error: function (request, status, error) {
+                        setSuccessNotification('error', 'Oops!', "ERROR: " + request.responseText);
+                        console.error(request.responseText);
+                    } // success
+                }); // Ajax
+            } else {
+                setSuccessNotification('error', 'Oops!', "{{ trans('document/document.grid.references.error.no_selected') }}");
+            } 
+        }); //btn-reference-ok
+        
+        // MODAL PARA SIGNING
+        $('body').on('click', '#btn-signing-ok', function (e) {
+            e.preventDefault();
+            var data;
+            var option = $("input[name='signature_origin']:checked").val();
+
+            if( option == 'manual') {
+                data = signaturePad.toDataURL('image/png');                    
+            } else {
+                data = $("#sign-img").attr("src");
+            }
+            console.log('OPTION: '+option+' | SRC= '+data);
+            // insert Sign
+            editor.insertHtml('<img src="'+data+'" alt="Firma" />');
+            // Cerrar Modal
+            $("#btn-signing-ko").click(); 
+        }); //btn-signing-ok
+        
+        $('body').on('click', '#btn-signing-clear', function (e) {
+            signaturePad.clear();
+        }); 
+    
+      
+    }); // document
 
     function setStatus(status) {
          
@@ -704,7 +891,74 @@
         $("#json-users").val(JSON.stringify(ids));  
         $("#user-ids").html(output);             
         return false;
-    } // checkBoxUser Fx    
+    } // checkBoxUser Fx
+    
+    // Eventos Editor
+    function setTemplatesGrid() {
+        $('#templates-table').dataTable().fnDestroy();
+        let lang = {!! $templatesLang !!};
+        $.ajax({
+            url: '/documentos/control/gestion/plantillas/listado',
+            type: 'GET',
+            dataType: 'json',                
+            success: function(json) {               
+                if( json.success) {
+                    dataSet = $.parseJSON(json.grid);
+                    // // DATATABLE
+                    $myTable = new DataTable("#templates-table", {
+                        data: dataSet,
+                        columnDefs: [{target: 0, visible: false, searchable: false}],                          
+                        order: [[ 1, 'asc' ]],
+                        select: true,
+                        language: lang,                        
+                        initComplete: function () {
+                            // Modal
+                            $("#modal-template-open")[0].click();
+                        },
+                        //language: lang                        
+                    }); // datatable
+
+                } else {
+                    setSuccessNotification('error', 'Oops!', "{{ trans('document/document.templates.error.generic') }}");
+                }
+            } // success
+        }); // ajax        
+
+    } // setTemplateTable
+
+    function setReferencesGrid() {
+        $('#references-table').dataTable().fnDestroy();
+        let lang = {!! $referencesLang !!};
+        // MODAL
+        $("#modal-reference-open")[0].click();            
+        $.ajax({
+            url: '/documentos/control/gestion/referencias/listado',
+            type: 'GET',
+            dataType: 'json',                
+            success: function(json) {               
+                if( json.success) {
+                    // DATA
+                    dataSet = $.parseJSON(json.grid);
+                    // DATATABLE
+                    $ourTable = new DataTable("#references-table", {
+                        data: dataSet,
+                        columnDefs: [{target: 0, visible: false, searchable: false}],                     
+                        order: [[ 1, 'asc' ]],
+                        select: true,
+                        language: lang                     
+                    }); // datatable
+
+                } else {
+                    setSuccessNotification('error', 'Oops!', "{{ trans('document/document.references.error.generic') }}"); // FIXME: to document.php
+                }
+            } // success
+        }); // ajax            
+    } // setReferenceTable
+    
+    function renderSigning() {
+        $("#modal-signing-open")[0].click();         
+    } // renderSigning 
+     
 
 </script>
                

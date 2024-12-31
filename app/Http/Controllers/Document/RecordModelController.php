@@ -17,6 +17,8 @@ class RecordModelController extends Controller
     private $tool;
     protected $set;
     protected $contentUrl;
+    protected $imagesUrl; 
+    protected $tenantUrl;
 
     public function __construct(RecordRepositoryInterface $recordRepository, ToolsClass $Tools) 
     {
@@ -24,6 +26,8 @@ class RecordModelController extends Controller
         $this->tool = $Tools;
         $this->set = $this->tool->setSettings('document');
         $this->contentUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_CONTENT');
+        $this->tenantUrl = 'tenants/sonoco/images';
+        $this->imagesUrl = 'assets/images';
     }
     
     /**
@@ -72,6 +76,9 @@ class RecordModelController extends Controller
     {
        Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
 
+        // Obtener Firma del usuario
+        $path = $this->getSignature();       
+
         // obtener temas
         $topics = $this->recordRepo->getTopics();
 
@@ -91,7 +98,11 @@ class RecordModelController extends Controller
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => $slug1,
-
+            'signUrl'   => $path,
+            'disabled' => str_contains($path, 'blank'),
+            'templatesLang' => json_encode(trans('document/document.datatable_templates')),
+            'referencesLang' => json_encode(trans('document/document.datatable_references')),            
+            'gridLanguage' => json_encode(trans('document/record.datatable_user')),
             //'fileformat'    => trans('record.message.allowed')[$this->set['record_extention_allowed_default']],
         ]);         
     } // set Method
@@ -103,7 +114,9 @@ class RecordModelController extends Controller
      */
     public function edit($hash, $slug = '') : View
     {
-        
+        // Obtener Firma del usuario
+        $path = $this->getSignature();
+
         // obtener temas
         $topics = $this->recordRepo->getTopics();
 
@@ -120,6 +133,10 @@ class RecordModelController extends Controller
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => 'records',
+            'signUrl'   => $path,
+            'disabled' => str_contains($path, 'blank'),
+            'templatesLang' => json_encode(trans('document/document.datatable_templates')),
+            'referencesLang' => json_encode(trans('document/document.datatable_references')),            
             'gridLanguage' => json_encode(trans('document/record.datatable_user')),
         ]);         
 
@@ -298,7 +315,22 @@ class RecordModelController extends Controller
             ]); 
         }
         return abort(404);      
-    } // edit Method    
+    } // edit Method
+    
+    /**
+     * Get the images of signature to be rendered
+     */      
+    private function getSignature()
+    {
+        $path = public_path() .'/'. $this->tenantUrl .'/signature_'. auth()->user()->user_uid .'.png'; 
+        //Log::debug('PATH: '. $path);
+        if (file_exists($path)) {
+            // firma encontrada
+            return url($this->tenantUrl .'/signature_'. auth()->user()->user_uid .'.png');
+        } else {
+            return url($this->imagesUrl .'/signature_blank.png');
+        }
+    } // getSignature    
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables
