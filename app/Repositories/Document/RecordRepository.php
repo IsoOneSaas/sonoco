@@ -92,7 +92,7 @@ class RecordRepository implements RecordRepositoryInterface
         }
         
         
-        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
+        //Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
 
         // OBTENER LOS REGISTROS FILTRADOS
         $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
@@ -194,6 +194,7 @@ class RecordRepository implements RecordRepositoryInterface
             'xid' => $id,
             'selected' => 0,
             'files' => [],
+            'spt' => false,
         ];  
 
         if( $slug1 === 'planificacion' ) {
@@ -262,13 +263,16 @@ class RecordRepository implements RecordRepositoryInterface
             } // if
         } else {
             // Viene de Documentos
-            $content = ContentModel::where('document_id', $did)->first();
-            if($content) {
-                $output_array['txt'] =  $content->content;
+            if( ($document->pattern == 'FILE') && ($document->filename !== null) ) {
+                $output_array['spt'] = $document->filename;
             } else {
-                $output_array['txt'] = '';
-            }
-            
+                $content = ContentModel::where('document_id', $did)->first();
+                if($content) {
+                    $output_array['txt'] =  $content->content;
+                } else {
+                    $output_array['txt'] = '';
+                }
+            }            
         } // if/else
 
         // Recuperar settings (desde el documento master)        
@@ -335,6 +339,7 @@ class RecordRepository implements RecordRepositoryInterface
             'hash' => $hash,
             'xid' => 0,
             'files' => [],
+            'spt' => false,
         ];
         //Log::debug(['SET RECORD' => $output_array]);
 
@@ -433,7 +438,7 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        Log::debug(['UPDATE DATA' => $data]);        
+        //Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
@@ -460,11 +465,15 @@ class RecordRepository implements RecordRepositoryInterface
             $record->author_id = $user->user_id;
             $record->author_name = $user->name; // $data['author_name']
             $record->author_job = $jobName;
-            $record->filename = $data['fileName'];
             $record->status = $data['status_id'];
 
             DB::beginTransaction();
             $record->save();
+
+            // SALVAR ARCHIVO SOPORTE
+            if( ($data['fileName'] !== null) && ($data['fileName'] !== '') ) {
+                $record->update(['filename' => $data['fileName']]);
+            }            
 
             // SAVE SETTINGS
             $document = DocumentModel::find($data['document_id']);

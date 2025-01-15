@@ -17,6 +17,7 @@ class RecordModelController extends Controller
     private $tool;
     protected $set;
     protected $contentUrl;
+    protected $recordUrl;
     protected $imagesUrl; 
     protected $tenantUrl;
 
@@ -25,6 +26,7 @@ class RecordModelController extends Controller
         $this->recordRepo = $recordRepository;
         $this->tool = $Tools;
         $this->set = $this->tool->setSettings('document');
+        $this->recordUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_RECORD');
         $this->contentUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_CONTENT');
         $this->tenantUrl = 'tenants/sonoco/images';
         $this->imagesUrl = 'assets/images';
@@ -41,7 +43,7 @@ class RecordModelController extends Controller
         $processes = $this->recordRepo->getProcessesList();
         //$types = $this->recordRepo->getTypesList();
         return view('document.record.index', [
-            'urlContent'  => $this->contentUrl,
+            'urlContent'  => $this->recordUrl,
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
@@ -145,6 +147,8 @@ class RecordModelController extends Controller
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InpQSnVNV3B1TXFWUTk3TmhVSmNPVlE9PSIsInZhbHVlIjoiVml5b3RraGN3SDd0c3FzVkVqWmpHZz09IiwibWFjIjoiMDA2Y2E1ZjBjMjI1M2M0YjMxYTBhMTRmZWI5ODQ3NjgxODRmZjc4ZWRiNWNiYjBiMDU1ODI1ZWU3YTAxZmJjMiIsInRhZyI6IiJ9
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6IlFVcWlsUTF1dS9RVEhUWFlocWs2bWc9PSIsInZhbHVlIjoiTC9TQXJOU2FCcmZ4YTh2NWx0ajd0Zz09IiwibWFjIjoiOTE4NmY2N2Q2ZDI2MDRiMDMyZGZmZDE0OTZmZGIwYjIzNTQxZjQ2NGRhNTI1OTkyYzI2OTZlMDhlZDBlZTFmMCIsInRhZyI6IiJ9
     // alberto.lara@sonoco.com
+    // Con Soporte (Karen)
+    // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InZPUWtsbkVaQUdkS0pTd2VrSWVrNlE9PSIsInZhbHVlIjoiTkFnUFhjSlpyTEJCckdJbVhIWTZkQT09IiwibWFjIjoiZDNhNmJlYjQ2N2JjYzA4MmQ3YjA5MWMwM2E5YzY5Y2E2NWRjOTU4NzFlODBjMGVkOGFmYjk4ZjczMWUxYjkyMiIsInRhZyI6IiJ9
     
     /**
      * Almacenamiento de la información del registro
@@ -156,7 +160,7 @@ class RecordModelController extends Controller
         $response = ['status' => 'success', 'message' => 'Testing...'];
         $msgs = '';
         $input = $request->input();
-        Log::debug(['STORE DATA' => $input]);
+        //Log::debug(['STORE DATA' => $request->all()]);
                 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
@@ -187,6 +191,7 @@ class RecordModelController extends Controller
         // VALIDAR ARCHIVO SOPORTE
         $file = $this->setFile($request, 'REC');        
         if( !$file['success'] ) {
+            $input['fileName'] = NULL;
             $response = ['status' => 'error', 'message' => $file['message']];
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         } else {
@@ -194,7 +199,7 @@ class RecordModelController extends Controller
         }
 
         // VALIDAR CONTENIDO
-        if( ($input['content'] === NULL) && ($input['file'] === NULL) ) {
+        if( ($input['content'] === NULL) && ($input['fileName'] === NULL) ) {
             $response = ['status' => 'error', 'message' => trans('document/record.request.content.no-exist')];
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }
@@ -245,8 +250,8 @@ class RecordModelController extends Controller
             $fileInfo = $file->getClientOriginalName();        
             $extension = pathinfo($fileInfo, PATHINFO_EXTENSION);       
             $fileName = uniqid($prefix) .'.'. $extension;            
-            if( $file->move($this->contentUrl, $fileName) ) {
-                $fileSize = filesize($this->contentUrl . $fileName);
+            if( $file->move($this->recordUrl, $fileName) ) {
+                $fileSize = filesize($this->recordUrl . $fileName);
                 if( $fileSize ) {
                     Log::info('File loaded to record: '. $fileName . ' <'. $fileSize .' bytes>');
                     return ['success'=> true, 'name' => $fileName, 'size' => $fileSize, 'mime' => $file->getClientMimeType()];
@@ -274,7 +279,7 @@ class RecordModelController extends Controller
      */
     public function showAttachment($filename)
     {
-        $url = $this->contentUrl . $filename;
+        $url = $this->recordUrl . $filename;
         if(file_exists($url)) {
             return response()->file($url);
          } else {
@@ -282,6 +287,22 @@ class RecordModelController extends Controller
             abort(404);
         }
     } // showAttachment Method 
+
+    /**
+     * Abrir los archivo soporte del documento fuente
+     * @param  string   $filename Nombre del archivo a abrir
+     * @return function abre el archivo en una ventana nueva
+     */
+    public function showSupport($filename)
+    {
+        $url = $this->contentUrl . $filename;
+        if(file_exists($url)) {
+            return response()->file($url);
+         } else {
+            Log::error('File did not find: '. $url);
+            abort(404);
+        }
+    } // showSupport Method     
     
     /**
      * Establece el hash del registro actual
@@ -304,7 +325,7 @@ class RecordModelController extends Controller
         
         if($data) {
             $document = $this->recordRepo->getDocument($data['document_id'], $this->set['date_format']);
-            //$attachment = $this->controlRepo->getAttachment($hash, $this->contentUrl);
+            //$attachment = $this->controlRepo->getAttachment($hash, $this->recordUrl);
             // Configuración de la hoja
             $setup = $this->tool->getPaperSetup($document->settings);     
 

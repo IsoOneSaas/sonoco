@@ -35,7 +35,7 @@
                                         <button id="btn-4-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-4" type="button" role="tab" aria-controls="record-tab-4" aria-selected="false" > Etiquetas </button>
                                     </li>
                                     <li id="record-5-tab" class="nav-item flex-1" role="presentation">
-                                        <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-5" type="button" role="tab" aria-controls="record-tab-5" aria-selected="false" > Responsables </button>
+                                        <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-5" type="button" role="tab" aria-controls="record-tab-5" aria-selected="false" > Participantes </button>
                                     </li>
                                     <li id="record-6-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-6-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-6" type="button" role="tab" aria-controls="record-tab-6" aria-selected="false" > Anexos </button>
@@ -73,16 +73,25 @@
                                         <div id="record-tab-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-2-tab">
                                             <!-- BEGIN: Support -->
                                             <div class="intro-y box p-5 mt-5">
-                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Busque un archivo en el disco duro y seleccionelo para utilizarlo como archivo soporte del registro.</p>  
-                                                <div class="input-group mt-5">
+                                                <p class="inline-flex items-baseline">
+                                                    <i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Busque un archivo en el disco duro y seleccionelo para utilizarlo como archivo soporte del registro.
+                                                </p>  
+                                                <div class="input-group mt-5 mb-5">
                                                     <div id="file" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.file.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.file.title') }}</div>
                                                     <input type="file" name="file" value="" class="form-control w-full input-status pl-4 pt-2" aria-describedby="file" placeholder="{{ trans('document/record.form.file.placeholder') }}">                                                    
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.file.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
+                                                @if( isset($DATA) && $DATA['spt'] )                                                
+                                                <p class="inline-flex items-baseline"><i data-lucide="info" class="w-4 h-4"></i>&nbsp;Hay un archivo de soporte proveniente del documento fuente que puede consultar y utilizar como archivo soporte después de ser modificado.</p>
+                                                <div class="input-group mt-5"> 
+                                                    <a href="javascript:;" class="btn btn-primary" onClick="showSupport('{!! $DATA['spt'] !!}'); return false;" title="Abrir archivo soporte del documento"><i data-lucide="download" class="w-12 h-12"></i></a>
+                                                    <span>&nbsp;&nbsp;Archivo soporte del documento fuente</span>
+                                                </div>
+                                                @endif                                                
                                                 @if( isset($DATA) && ($DATA['file'] != '') )                                                
-                                                <div class="input-group mt-5">                                                    
-                                                    <button id="btn-file" type="button" data-name="{{ $DATA['file'] }}" class='btn btn-primary ml-5'><i data-lucide="file" class="w-12 h-12"></i></button>
-                                                    <span>&nbsp;Archivo existente</span>
+                                                <div class="input-group mt-5">
+                                                    <a href="javascript:;" class="btn btn-primary" onClick="showFile('{!! $DATA['file'] !!}'); return false;" title="Abrir archivo soporte"><i data-lucide="file" class="w-12 h-12"></i></a>                                                    
+                                                    <span>&nbsp;&nbsp;Archivo existente</span>
                                                 </div>
                                                 @endif                                                                                                
                                             </div>
@@ -844,12 +853,20 @@
         $("#link-"+tagId).remove();
     }
     
-    function showFile(file) {
+    function showFile(file) {        
         var url = "{{ route('records.edit.show', ':file') }}"; 
         url = url.replace(':file', file);
+        //console.log('OPEN: '+url);
         var win = window.open(url, '_blank');
         win.focus();        
     } // showFile Fx
+
+    function showSupport(file) {        
+        var url = "{{ route('records.support.show', ':file') }}"; 
+        url = url.replace(':file', file);
+        var win = window.open(url, '_blank');
+        win.focus();        
+    } // showSupport Fx    
 
     function checkBoxUser(id) {
         //alert('Checking...');

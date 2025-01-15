@@ -196,6 +196,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'store'])->name('store');
             Route::get('hash/{id}', [\App\Http\Controllers\Document\RecordModelController::class, 'setHash']);
             Route::get('ver/{hash}', [\App\Http\Controllers\Document\RecordModelController::class, 'show'])->name('render');
+            Route::get('soporte/mostrar/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'showSupport'])->name('support.show');
 
             Route::post('subtema/listar', [\App\Http\Controllers\Document\RecordModelController::class, 'setSubjectList'])->name('edit.subject');
             Route::post('etiqueta/listar', [\App\Http\Controllers\Document\RecordModelController::class, 'setTagList'])->name('edit.tag');
