@@ -33,8 +33,8 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = AUTH::user();
-        $options = $user->options;
-        $starpage = ( key_exists('startpage', $options) ) ? $options['startpage'] : config('settings.user.startpage');
+        $options = $user->options;        
+        $starpage = ( is_array($options) && key_exists('startpage', $options) ) ? $options['startpage'] : config('settings.user.startpage');
         return view('dashboard.intro', [
             'link' => $this->setPageLink($starpage),
         ]);

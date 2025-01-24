@@ -33,4 +33,6 @@ interface RecordRepositoryInterface
 
     public function getUsers(array $data);
 
+    public function setEmail($hash);
+
 }

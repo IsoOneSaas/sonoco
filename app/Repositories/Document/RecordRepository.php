@@ -1,6 +1,7 @@
 <?php   namespace App\Repositories\Document;
 
 use App\Classes\ToolsClass;
+use App\Events\RecordSent;
 use App\Events\RecordTracing;
 use App\Interfaces\Document\RecordRepositoryInterface;
 use App\Models\Document\AuthorizationModel;
@@ -9,6 +10,7 @@ use App\Models\Document\DocumentModel;
 use App\Models\Document\FileModel;
 use App\Models\Document\LinkModel;
 use App\Models\Document\RecordModel;
+//use App\Models\Document\SettingModel;
 use App\Models\Document\TypeModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
@@ -865,6 +867,34 @@ class RecordRepository implements RecordRepositoryInterface
         }        
         Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
+    }
+    public function setEmail($hash)
+    {
+        $n = 1;
+        $id = $this->tool->getIdHash($hash);
+        // Author
+        $author = Auth::user();
+        // Registro
+        $record = RecordModel::find($id);
+        $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($id)]);        
+        $record->sign = $author->name;
+        // Encontrar participantes
+        $plucked = DB::table('document_record_users')->where('record_id', $id)->pluck('user_id');
+        //Log::debug(['ID' => $id, 'AUTHOR' => $author->name, 'RECORD' => $record, 'USERS' => $plucked->all()]);
+        foreach($plucked->all() as $uid) {
+            $user = UserModel::where('user_id', $uid)->first();            
+            if($user) {
+                Log::debug(['NOTICE NEW RECORD TO USER' => $user->email]);
+                Event::dispatch(new RecordSent($record, $user, $this->set));
+                //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
+                if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
+                    break;
+                }                
+                $n++;
+            } // if
+        } // foreach
+
+        return true;
     }
 
     private function setIds($tag, $params)

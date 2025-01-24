@@ -1,11 +1,11 @@
 <?php namespace App\Listeners;
 
-use App\Events\EmailDocumentEvent;
-use App\Mail\NewDocumentAlert;
+use App\Events\RecordSent;
+use App\Mail\NewRecordNotice;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class DocumentNotification
+class RecordNotification
 {
     /**
      * Create the event listener.
@@ -18,10 +18,10 @@ class DocumentNotification
     /**
      * Handle the event.
      */
-    public function handle(EmailDocumentEvent $event): void
+    public function handle(RecordSent $event): void
     {
         Mail::to($event->user->email)->queue(
-            new NewDocumentAlert($event->setting, $event->user->name)
+            new NewRecordNotice($event->user, $event->record, $event->settings)
         );
     } // handle
 } // class

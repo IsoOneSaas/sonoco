@@ -45,7 +45,7 @@
                                     </li>                                                                                                                                                                                    
                                 </ul>
                                 <!-- BEGIN: Form -->
-                                <form id="record-form" action="{{ route('records.store', $DATA['record_id']) }}" method="POST" enctype="multipart/form-data">
+                                <form id="record-form" action="{{ route('records.store', $DATA['record_id']) }}" method="POST" enctype="multipart/form-data" onSubmit="return false;">
                                     @csrf
                                     <input type="hidden" name="record_id"  id="record-id" value={{ $DATA['record_id'] }} >                             
                                     <input type="hidden" name="document_id" value={{ $DATA['document_id'] }} id="document-id">
@@ -770,25 +770,36 @@
     }); // document
 
     function setStatus(status) {
-         
-        if( status == 1 ) {
-            swal({
-                title: "{{ trans('document/record.store.title') }}",
-                text: "{{ trans('document/record.store.text') }}",
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            })
-            .then((willDelete) => {
-                if (willDelete) {
-                    $("input[name='status_id']").val(status);
-                    var form = $("#record-form");
-                    form.submit();
-                }
-            });  
+        console.log('Saving...');
+        if ($('#record-form input[name="name"]').val() == "") {                
+            setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.name.required') }}");
+        } else if($('#record-form input[name="topic"]').val() == "") {
+            setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.topic.required') }}");
+        } else if($('#record-form input[name="subject"]').val() == "") {
+            setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.subject.required') }}");
         } else {
-            var form = $("#record-form");
-            form.submit();
+
+            if( status == 1 ) {
+                swal({
+                    title: "{{ trans('document/record.store.title') }}",
+                    text: "{{ trans('document/record.store.text') }}",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        $("input[name='status_id']").val(status);
+                        //var form = $("#record-form");
+                        //form.submit();
+                        $('#record-form')[0].submit();
+                    }
+                });  
+            } else {
+                //var form = $("#record-form");
+                //form.submit();
+                $('#record-form')[0].submit();
+            }
         }                
     } // set Status Fx
 

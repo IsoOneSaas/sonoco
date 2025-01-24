@@ -418,7 +418,9 @@ class MasterRepository implements MasterRepositoryInterface
         $users_array = [];
         foreach($uids as $i => $uid) {              
             $user = UserModel::find($uid);
-            $users_array[] = ['name' => $user->name, 'role' => config('settings.roles.'.$user->role)];
+            if($user) {
+                $users_array[] = ['name' => $user->name, 'role' => config('settings.roles.'.$user->role)];
+            }
         } // foreach
         $document->users =  $users_array;
 

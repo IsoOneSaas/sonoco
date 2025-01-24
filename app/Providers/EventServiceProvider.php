@@ -6,6 +6,7 @@ use App\Events\DocumentPublished;
 use App\Events\DocumentSent;
 use App\Events\DocumentSwitch;
 use App\Events\DocumentTracing;
+use App\Events\RecordSent;
 use App\Events\RecordTracing;
 use App\Events\EmailSent;
 use App\Events\EmailDocumentEvent;
@@ -21,6 +22,7 @@ use App\Listeners\SetRecordTrace;
 use App\Listeners\SendNotification;
 use App\Listeners\DocumentNotification;
 use App\Listeners\DueNotification;
+use App\Listeners\RecordNotification;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -67,7 +69,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         EmailDueEvent::class => [
             DueNotification::class,
-        ],                             
+        ],
+        RecordSent::class => [
+            RecordNotification::class,                      
+        ],                                     
     ];
 
     /**

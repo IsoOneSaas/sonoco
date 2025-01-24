@@ -147,6 +147,7 @@ class RecordModelController extends Controller
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InpQSnVNV3B1TXFWUTk3TmhVSmNPVlE9PSIsInZhbHVlIjoiVml5b3RraGN3SDd0c3FzVkVqWmpHZz09IiwibWFjIjoiMDA2Y2E1ZjBjMjI1M2M0YjMxYTBhMTRmZWI5ODQ3NjgxODRmZjc4ZWRiNWNiYjBiMDU1ODI1ZWU3YTAxZmJjMiIsInRhZyI6IiJ9
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6IlFVcWlsUTF1dS9RVEhUWFlocWs2bWc9PSIsInZhbHVlIjoiTC9TQXJOU2FCcmZ4YTh2NWx0ajd0Zz09IiwibWFjIjoiOTE4NmY2N2Q2ZDI2MDRiMDMyZGZmZDE0OTZmZGIwYjIzNTQxZjQ2NGRhNTI1OTkyYzI2OTZlMDhlZDBlZTFmMCIsInRhZyI6IiJ9
     // alberto.lara@sonoco.com
+    // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6IjlHTzVISlZ3M0RmZjBXK25RNnQrRUE9PSIsInZhbHVlIjoiMDlndVZpa3VpdEtHTHpyRFh0dm5Kdz09IiwibWFjIjoiZDFhMTA4YWUzMDYzZGYwYmNkZTJjZDc0OTg0MjcyZTFiNjFhMDBiNzJjMzA5Y2ViYmZjYjVmZWZiNjM0NTdjMSIsInRhZyI6IiJ9
     // Con Soporte (Karen)
     // http://127.0.0.1:8000/documentos/registro/crear/eyJpdiI6InZPUWtsbkVaQUdkS0pTd2VrSWVrNlE9PSIsInZhbHVlIjoiTkFnUFhjSlpyTEJCckdJbVhIWTZkQT09IiwibWFjIjoiZDNhNmJlYjQ2N2JjYzA4MmQ3YjA5MWMwM2E5YzY5Y2E2NWRjOTU4NzFlODBjMGVkOGFmYjk4ZjczMWUxYjkyMiIsInRhZyI6IiJ9
     
@@ -160,7 +161,7 @@ class RecordModelController extends Controller
         $response = ['status' => 'success', 'message' => 'Testing...'];
         $msgs = '';
         $input = $request->input();
-        //Log::debug(['STORE DATA' => $request->all()]);
+        Log::debug(['STORE DATA' => $request->all()]);
                 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
@@ -199,7 +200,7 @@ class RecordModelController extends Controller
         }
 
         // VALIDAR CONTENIDO
-        if( ($input['content'] === NULL) && ($input['fileName'] === NULL) ) {
+        if( ($input['content'] === NULL) && ( !key_exists('fileName', $input) || ($input['fileName'] === NULL)) ) {
             $response = ['status' => 'error', 'message' => trans('document/record.request.content.no-exist')];
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }
@@ -208,7 +209,10 @@ class RecordModelController extends Controller
         unset($input['_token'], $input['file']);
         $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
-            //Log::debug(['RESPONSE' => $response]); // 
+            // Enviar email a participantes (primer save = record_id=null)
+            if( $input['record_id'] === null ) {
+                $result = $this->recordRepo->setEmail($response['hash']);
+            }
             return redirect()->route('records.edit', [$response['hash'], $response['tab']])->with($response['status'], $response['message']); ;
         } else {
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);

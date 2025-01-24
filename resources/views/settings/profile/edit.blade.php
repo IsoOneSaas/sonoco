@@ -322,7 +322,8 @@
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
 						$signaturePad.clear();                                                
-                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());                                                
+                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());    
+                        $("#btn-signing-save").prop( "disabled", false );                                             
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  
@@ -366,7 +367,8 @@
                     console.dir(json);
                     if( json.success ) {
                         setSuccessNotification('success', '', json.message);
-                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());                                              
+                        $("#sign-img").attr('src', json.url+"?"+(new Date()).getTime());  
+                        $("#btn-signing-save").prop( "disabled", true );                                            
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                  
