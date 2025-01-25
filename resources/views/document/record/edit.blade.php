@@ -166,6 +166,34 @@
                                         </div>
                                         <div id="record-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-5-tab">
                                             <!-- BEGIN: Users -->
+                                            @if( $DATA['auth'] )
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Acepte su participación en el registros pulsando sobre la caja de chequeo.</p>
+                                                <div class="input-group mt-5">
+                                                    <div id="user-check" class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.check.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/record.form.check.title') }}</div>
+                                                    <div class="form-switch mt-2 ml-4 mr-2  w-fit">
+                                                        <input type="checkbox" class="form-check-input input-status" name="user_check" @if( old('user_check', $DATA['user_check'] ?? false) ) checked @endif>
+                                                    </div>                                             
+                                                    <div id="input-group-50" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.check.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                </div>
+                                            </div>
+                                            @endif
+                                            @if( $DATA['record_id'] != '' )
+                                            <div class="intro-y box p-5 mt-5">
+                                                @if( $DATA['auth'] || $DATA['author'] )
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Participe en la elaboración del registro con sus comentarios o sugerencias.</p>  
+                                                <div class="input-group mt-5">
+                                                    <div class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.feedback.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/record.form.feedback.title') }}</div>
+                                                    <textarea id="feedback" class="form-control input-status" rows="2"></textarea>
+                                                    <button id="btn-feedback" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="send" class="w-4 h-4"></i></button>
+                                                    <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                </div>
+                                                @else
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Chat del registro</p>  
+                                                @endif
+                                            </div>
+                                            @endif
+                                            @if( $DATA['author'] )                                            
                                             <div class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Seleccione los usuarios relacionados con este registro.</p>  
                                                 <div class="input-group mt-5">
@@ -180,6 +208,7 @@
                                                     <div id="input-group-10" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.user.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
                                             </div>
+                                            @endif
                                             <!-- END: Users -->
                                         </div>
                                         <div id="record-tab-6" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-6-tab">
@@ -683,6 +712,26 @@
             console.log('Users selected: ' + ids.length);
             //console.dir(ids);
         });  // input[name=checkout-user] 
+
+        // Enviar Mensaje
+        $("#btn-feedback").click(function() {
+            var txt = $("#feedback").val();
+            var rid = $("#record_id").val();
+            var route = "{{ route('records.chat.store') }}";
+            if( txt != '' ) {                
+                $.ajax({
+                    url: route,
+                    type: 'POST',
+                    data: {'id':rid,'txt':txt},
+                    dataType: 'json',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
+                    success: function(data) {
+                        console.dir(data);
+
+                    } // success
+                }); // ajax                 
+            }
+        }); // btn-feedback
 
         // MODAL PARA TEMPLATE
         $('body').on('click', '#btn-template-ok', function (e) {

@@ -117,7 +117,17 @@ return [
                             'title'         => 'Usuarios',
                             'placeholder'   => 'Seleccione los usuarios',
                             'tooltip'       => 'Opcional. Al menos un usuario seleccionado',
-        ],          
+        ],
+        'check'         =>  [
+                            'icon'          => 'check',
+                            'title'         => 'Confirmar',
+                            'tooltip'       => 'Pulse sobre la caja si desea confirmar',
+        ],
+        'feedback'         =>  [
+                            'icon'          => 'quote',
+                            'title'         => 'Mensaje',
+                            'tooltip'       => 'Digite un mensaje y pulse el botón para enviar',
+        ],              
         
     ],    
 

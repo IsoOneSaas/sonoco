@@ -22,9 +22,9 @@ class SetRecordTrace
         $trace = new TracingRecordModel();
         //Log::debug(['TRACE' => $event->record->toArray()]);
         $trace->fill([
-            'record_id'   => $event->record->record_id,
-            'user_uid'      => auth()->user()->user_uid,
-            'trace'         => ( isset($event->record->trace) ) ?
+            'record_id' => $event->record->record_id,
+            'user_uid'  => $event->record->user_uid,
+            'trace'     => ( isset($event->record->trace) ) ?
                                 trans('document/record.'. $event->record->action .'.trace', [
                                 'action' => config('settings.document_status.'. $event->record->action),
                                 'trace'  => $event->record->trace,

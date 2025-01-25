@@ -341,6 +341,14 @@ class RecordModelController extends Controller
         }
         return abort(404);      
     } // edit Method
+
+    public function storeChat(Request $request)
+    {
+        $input = $request->all();
+        //$response = $this->setFile($request, 'ATC'); 
+        $response = ['status' => 'success', 'message' => 'Testing...', 'INPUT' => $input];
+        return response()->json($response);
+    } // storeAttachment Method    
     
     /**
      * Get the images of signature to be rendered

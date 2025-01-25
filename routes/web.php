@@ -203,6 +203,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('anexo/salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'storeAttachment'])->name('edit.store');
             Route::get('anexo/mostrar/{slug}', [\App\Http\Controllers\Document\RecordModelController::class, 'showAttachment'])->name('edit.show');
             Route::post('usuarios/recuperar', [\App\Http\Controllers\Document\RecordModelController::class, 'setUsers']);
+            Route::post('chat/salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'storeChat'])->name('chat.store');
         });
     });  
 });

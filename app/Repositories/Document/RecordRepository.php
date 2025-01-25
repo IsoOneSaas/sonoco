@@ -197,6 +197,8 @@ class RecordRepository implements RecordRepositoryInterface
             'selected' => 0,
             'files' => [],
             'spt' => false,
+            'author' => true,
+            'auth' => false,
         ];  
 
         if( $slug1 === 'planificacion' ) {
@@ -325,6 +327,7 @@ class RecordRepository implements RecordRepositoryInterface
     public function setRecord($hash)
     {
         $id = $this->tool->getIdHash($hash);
+        $player = Auth::user();
         
         $record = RecordModel::find($id);
         $output_array = [
@@ -342,6 +345,8 @@ class RecordRepository implements RecordRepositoryInterface
             'xid' => 0,
             'files' => [],
             'spt' => false,
+            'author' => ( $record->author_id == $player->user_id ) ? true : false,
+            'auth' => false,
         ];
         //Log::debug(['SET RECORD' => $output_array]);
 
@@ -419,17 +424,21 @@ class RecordRepository implements RecordRepositoryInterface
 
         // Recuperar usuarios
         $output_array['users'] = [];
-        $users = DB::table('document_record_users')->where('record_id', $id)->orderBy('name')->get(['user_id','name']);
+        $users = DB::table('document_record_users')->where('record_id', $id)->orderBy('name')->get(['user_id','name', 'status']);
         if($users) {
             foreach($users as $user) {
                 $output_array['users'][] = [
                     'id' => $user->user_id,
                     'name' => $user->name,
                 ];
+                if( $user->user_id == $player->user_id ) {
+                    $output_array['auth'] = true;
+                    $output_array['user_check'] = ( $user->status == 1 ) ? true : false;
+                }                 
             } // foreach
         } // if
 
-       //Log::debug(['RECORD EXISTING' => $output_array]);
+       Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -440,22 +449,13 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        //Log::debug(['UPDATE DATA' => $data]);        
+        Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
             $user = Auth::user();
-            if( $user->role == config('settings.roles.master') ) {
-                $jobName = 'Webmaster';
-            } else {
-                $jobs = $user->jobs;
-                foreach($jobs as $job) {
-                    $jobs_array[] = $job->name;
-                }
-                $jobName = implode(', ', $jobs_array);
-            }            
-            
-            // SAVE RECORD
+                      
+            // FIRST OR NEW RECORD
             $record = RecordModel::firstOrNew([
                 'record_id' => $data['record_id']                
             ],[
@@ -464,10 +464,23 @@ class RecordRepository implements RecordRepositoryInterface
 
             $record->name = $data['name'];
             $record->content = $data['content'];
-            $record->author_id = $user->user_id;
-            $record->author_name = $user->name; // $data['author_name']
-            $record->author_job = $jobName;
             $record->status = $data['status_id'];
+
+            if( $data['record_id'] == '' ) {
+                // Primera vez
+                if( $user->role == config('settings.roles.master') ) {
+                    $jobName = 'Webmaster';
+                } else {
+                    $jobs = $user->jobs;
+                    foreach($jobs as $job) {
+                        $jobs_array[] = $job->name;
+                    }
+                    $jobName = implode(', ', $jobs_array);
+                }                  
+                $record->author_id = $user->user_id;
+                $record->author_name = $user->name; // $data['author_name']
+                $record->author_job = $jobName;
+            } // if
 
             DB::beginTransaction();
             $record->save();
@@ -543,27 +556,44 @@ class RecordRepository implements RecordRepositoryInterface
             } // if
 
             // SAVE USERS
-            $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
-            if( key_exists('user_ids', $data) && (count($data['user_ids']) > 0) ) {
-                $insert_array = [];
-                foreach($data['user_ids'] as $uid) {
-                    $liable = UserModel::find($uid);
-                    $insert_array[] = [
-                        'user_id' => $uid,
-                        'record_id' => $record->record_id,
-                        'name' => $liable->name,
-                        'job' => '',
-                    ];
-                } // foreach
-                if(count($insert_array) > 0) {
-                    DB::table('document_record_users')->insert($insert_array);
-                } // if                  
-            } // if
+            if( key_exists('user_ids', $data) ) {
+                // si es el author
+                $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
+                if( count($data['user_ids']) > 0 ) {                
+                    $insert_array = [];
+                    foreach($data['user_ids'] as $uid) {
+                        $jobs_array = [];
+                        $liable = UserModel::find($uid);
+                        $jobs = $liable->jobs;
+                        foreach($jobs as $job) {
+                            $jobs_array[] = $job->name;
+                        }
+                        $jobName = implode(', ', $jobs_array);                        
+                        $insert_array[] = [
+                            'user_id' => $uid,
+                            'record_id' => $record->record_id,
+                            'name' => $liable->name,
+                            'job' => $jobName,
+                        ];
+                    } // foreach
+                    if(count($insert_array) > 0) {
+                        DB::table('document_record_users')->insert($insert_array);
+                    } // if                  
+                } // if
+            } //if
+
+            // SAVE USER STATUS
+            if( key_exists('user_check', $data) ) {
+                $result = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $user->user_id)->update(['status' => 1]);
+            } else {
+                $result = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $user->user_id)->update(['status' => 0]);
+            }
 
 
             // SAVE TRACING
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
-            $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';                  
+            $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';  
+            $record->user_uid = $user->user_uid;
             Event::dispatch(new RecordTracing($record));
 
             DB::commit();
