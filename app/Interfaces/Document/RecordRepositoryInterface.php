@@ -35,4 +35,8 @@ interface RecordRepositoryInterface
 
     public function setEmail($hash);
 
+    public function setChat(array $data);
+
+    public function delChat($id);
+
 }

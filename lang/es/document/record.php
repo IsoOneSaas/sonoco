@@ -25,7 +25,18 @@ return [
     'edit' => [
                 'success'       => 'Registro salvado correctamente',
                 'trace'         => ':action : :trace',  
-    ],     
+    ],    
+    'chat' => [
+                'store' => [
+                    'success'       => 'Mensaje salvado correctamente',
+                    'no-success'    => 'Se ha presentado un error al salvar el mensaje. ¡inténtelo más tarde!',
+                ],
+                'delete' => [
+                    'success'       => 'Mensaje eliminado correctamente',
+                    'no-success'    => 'Se ha presentado un error al eliminar el mensaje. ¡inténtelo más tarde!',
+                ],                
+
+    ],      
  
 
     // aqui voy
@@ -125,8 +136,9 @@ return [
         ],
         'feedback'         =>  [
                             'icon'          => 'quote',
-                            'title'         => 'Mensaje',
-                            'tooltip'       => 'Digite un mensaje y pulse el botón para enviar',
+                            'title'         => 'Nuevo mensaje',
+                            'tooltip1'       => 'Digite un mensaje y pulse el botón para enviar',
+                            'tooltip2'       => 'Pulse el botón para eliminar su mensaje de la base de datos',
         ],              
         
     ],    
@@ -170,6 +182,10 @@ return [
                         'ids_default' => 'Seleccione usuario(s)',
                         'error_no-selected' => 'No se ha seleccionado al menos un usuario',
                         'error_fatal' => 'Se ha presentado un error al generar la tabla de usuarios',
+            ],
+            'feedback' => [
+                        'delete_title'   => 'Eliminar mensaje',
+                        'delete_text'   => 'Realmente quiere eliminar este mensaje del registro.',
             ],
     ],     
 

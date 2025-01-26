@@ -344,11 +344,15 @@ class RecordModelController extends Controller
 
     public function storeChat(Request $request)
     {
-        $input = $request->all();
-        //$response = $this->setFile($request, 'ATC'); 
-        $response = ['status' => 'success', 'message' => 'Testing...', 'INPUT' => $input];
+        $response = $this->recordRepo->setChat($request->all());         
         return response()->json($response);
-    } // storeAttachment Method    
+    } // storeChat Method    
+
+    public function deleteChat($id)
+    {
+        $response = $this->recordRepo->delChat($id);         
+        return response()->json($response);
+    } // deleteChat Method       
     
     /**
      * Get the images of signature to be rendered

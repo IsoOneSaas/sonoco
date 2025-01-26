@@ -181,12 +181,24 @@
                                             @if( $DATA['record_id'] != '' )
                                             <div class="intro-y box p-5 mt-5">
                                                 @if( $DATA['auth'] || $DATA['author'] )
-                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Participe en la elaboración del registro con sus comentarios o sugerencias.</p>  
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Participe en la elaboración del registro con sus comentarios o sugerencias.</p>
+                                                <div id="messages-list">
+                                                    @foreach($DATA['messages'] as $message)
+                                                    <div class="input-group mt-5" id="msg_{{ $message['id'] }}">
+                                                        <div class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.feedback.icon') }}" class="w-3 h-3 mr-1"></i>{{ $message['date'] }}</div>
+                                                        <textarea class="form-control" rows="2" readonly>{{ $message['author'] }}:  {{ $message['message'] }}</textarea>
+                                                        @if( $message['auth'] )
+                                                        <button class="btn btn-primary shadow-md btn-feedback-delete" type="button" data-id="{{ $message['id'] }}" data-te-ripple-init><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                                        <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip2') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                        @endif
+                                                    </div>
+                                                    @endforeach
+                                                </div>
                                                 <div class="input-group mt-5">
                                                     <div class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.feedback.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/record.form.feedback.title') }}</div>
                                                     <textarea id="feedback" class="form-control input-status" rows="2"></textarea>
-                                                    <button id="btn-feedback" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="send" class="w-4 h-4"></i></button>
-                                                    <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                    <button id="btn-feedback-save" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="send" class="w-4 h-4"></i></button>
+                                                    <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip1') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
                                                 @else
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Chat del registro</p>  
@@ -714,9 +726,10 @@
         });  // input[name=checkout-user] 
 
         // Enviar Mensaje
-        $("#btn-feedback").click(function() {
+        $('body').on('click', '#btn-feedback-save', function (e) {
+            e.preventDefault(); 
             var txt = $("#feedback").val();
-            var rid = $("#record_id").val();
+            var rid = $("#record-id").val();            
             var route = "{{ route('records.chat.store') }}";
             if( txt != '' ) {                
                 $.ajax({
@@ -725,13 +738,65 @@
                     data: {'id':rid,'txt':txt},
                     dataType: 'json',
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
-                    success: function(data) {
-                        console.dir(data);
-
+                    success: function(json) {
+                        console.dir(json);
+                        var output = '';
+                        if( json.success ) {
+                            setSuccessNotification('success', '', json.message);
+                            $("#feedback").val('');
+                            // Agregar mensaje
+                            var msg = '{{ trans("document/record.form.feedback.tooltip2") }}';
+                            output += '<div class="input-group mt-5" id="msg_'+ json.id +'">';
+                            output += '<div class="input-group-text flex w-fit"><i data-lucide="quote" class="w-3 h-3 mr-1"></i>'+ json.date +'</div>';
+                            output += '<textarea class="form-control" rows="2" readonly>'+ json.author +':  '+ json.text +'</textarea>';
+                            output += '<button class="btn btn-primary shadow-md btn-feedback-delete" type="button" data-id="'+ json.id +'" data-te-ripple-init><i data-lucide="trash" class="w-4 h-4"></i></button>';
+                            output += '<div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="'+msg+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>';
+                            output += '</div>';
+                            $("#messages-list").prepend(output);
+                        } else {
+                            setSuccessNotification('error', 'Oops!', json.message);
+                        } 
                     } // success
                 }); // ajax                 
             }
-        }); // btn-feedback
+        }); // btn-feedback-save
+
+        $('body').on('click', '.btn-feedback-delete', function (e) {
+            e.preventDefault(); 
+            var id = $(this).data('id');
+            var route = "{{ route('records.chat.delete') }}";
+            route = route.replace(':id', id);
+            swal({
+                title: "{{ trans('document/record.message.feedback.delete_title') }}"+data[1]+"?",
+                text: "{{ trans('document/record.message.feedback.delete_text') }}",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    //console.log('URL: '+ action);
+                    $.ajax({
+                        url: route,
+                        type: 'GET',
+                        dataType: 'json',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },                                             
+                        success: function(json) {  
+                            console.dir(json);
+                            if( json.success ) {
+                                setSuccessNotification('success', '', json.message);
+                                // Remover el mensaje
+                                $("#msg_"+id).remove();
+                            } else {
+                                setSuccessNotification('error', 'Oops!', json.message);
+                            }
+                        } // success
+                    }); // ajax
+                } // if
+            });            
+        }); // btn-feedback-delete
 
         // MODAL PARA TEMPLATE
         $('body').on('click', '#btn-template-ok', function (e) {

@@ -46,7 +46,7 @@ class RecordRepository implements RecordRepositoryInterface
         $i = 0;
         $params = json_decode($slug, true);
 
-        Log::debug(['PARAMS' => $params]); //, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()
+        //Log::debug(['PARAMS' => $params]); //, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
@@ -199,6 +199,7 @@ class RecordRepository implements RecordRepositoryInterface
             'spt' => false,
             'author' => true,
             'auth' => false,
+            'messages' => [],
         ];  
 
         if( $slug1 === 'planificacion' ) {
@@ -346,7 +347,7 @@ class RecordRepository implements RecordRepositoryInterface
             'files' => [],
             'spt' => false,
             'author' => ( $record->author_id == $player->user_id ) ? true : false,
-            'auth' => false,
+            'auth' => false
         ];
         //Log::debug(['SET RECORD' => $output_array]);
 
@@ -435,6 +436,21 @@ class RecordRepository implements RecordRepositoryInterface
                     $output_array['auth'] = true;
                     $output_array['user_check'] = ( $user->status == 1 ) ? true : false;
                 }                 
+            } // foreach
+        } // if
+
+        // Recuperar mensajes
+        $output_array['messages'] = [];
+        $messages = DB::table('document_record_messages')->where('record_id', $id)->orderBy('updated_at', 'desc')->get(['id','author_id','author','message','updated_at']);
+        if($messages) {
+            foreach($messages as $message) {
+                $output_array['messages'][] = [
+                    'id' => $message->id,
+                    'author' => $message->author,
+                    'date' => Carbon::createFromTimeStamp(strtotime($message->updated_at))->format($this->set['date_format']),
+                    'message' => $message->message,                    
+                    'auth' => ( $message->author_id = $player->user_id ) ? true : false,
+                ];
             } // foreach
         } // if
 
@@ -898,6 +914,12 @@ class RecordRepository implements RecordRepositoryInterface
         Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
     }
+
+    /**
+     * Envía mensajes de correo al notificar a los participantes del registro
+     * @param  string $hash Hash del identificador del registro
+     * @return Boolean Resultado del evento
+     */     
     public function setEmail($hash)
     {
         $n = 1;
@@ -925,7 +947,48 @@ class RecordRepository implements RecordRepositoryInterface
         } // foreach
 
         return true;
-    }
+    } // setEmail
+
+    /**
+     * Guarda mensaje del chat a la base de datos
+     * @param  array $input Datos del mensaje
+     * @return array Resultado del evento
+     */     
+    public function setChat(array $data) {
+        Log::debug(['SET CHAT DATA' => $data]);                   
+        try {
+            $user = Auth::user();
+            DB::beginTransaction(); 
+            $mid = DB::table('document_record_messages')->insertGetId([
+                'record_id' => $data['id'],
+                'author_id' => $user->user_id,
+                'author' => $user->name,
+                'message' => $data['txt']
+            ]);
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('RecordRepository::setChat Exception: '. $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/record.chat.store.no-success')];
+        }
+        $date = Carbon::now()->format($this->set['date_format']);
+        return ['success' => true, 'id' => $mid, 'date' => $date, 'author' => $user->name, 'text' => $data['txt'], 'message' =>  trans('document/record.chat.store.success')];            
+    } // setChat
+
+    /**
+     * Elimina mensaje del chat a la base de datos
+     * @param  integer $id Idenficador del mensaje
+     * @return array Resultado del evento
+     */     
+    public function delChat($id) {
+        try { 
+            $deleted = DB::table('document_record_messages')->where('id', $id)->delete();
+        } catch (Exception $e) {
+            Log::error('RecordRepository::delChat Exception: '. $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'message' => trans('document/record.chat.delete.no-success')];
+        }
+        return ['success' => true,  'message' =>  trans('document/record.chat.delete.success')];              
+    } // setChat        
 
     private function setIds($tag, $params)
     {   
