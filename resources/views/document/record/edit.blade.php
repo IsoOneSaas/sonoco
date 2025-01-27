@@ -764,11 +764,10 @@
         $('body').on('click', '.btn-feedback-delete', function (e) {
             e.preventDefault(); 
             var id = $(this).data('id');
-            var route = "{{ route('records.chat.delete') }}";
-            route = route.replace(':id', id);
+            var route = '/documentos/registro/chat/eliminar/'+id;
             swal({
-                title: "{{ trans('document/record.message.feedback.delete_title') }}"+data[1]+"?",
-                text: "{{ trans('document/record.message.feedback.delete_text') }}",
+                title: "{{ trans('document/record.message.feedback.delete_title') }}",
+                text: "{{ trans('document/record.message.feedback.delete_text') }}?",
                 icon: "warning",
                 buttons: true,
                 dangerMode: true,
@@ -796,6 +795,7 @@
                     }); // ajax
                 } // if
             });            
+            
         }); // btn-feedback-delete
 
         // MODAL PARA TEMPLATE

@@ -210,9 +210,9 @@ class RecordModelController extends Controller
         $response = $this->recordRepo->update($input);
         if($response['status'] == 'success') {
             // Enviar email a participantes (primer save = record_id=null)
-            if( $input['record_id'] === null ) {
-                $result = $this->recordRepo->setEmail($response['hash']);
-            }
+            // if( $input['record_id'] === null ) {
+            //     $result = $this->recordRepo->setEmail($response['hash']);
+            // }
             return redirect()->route('records.edit', [$response['hash'], $response['tab']])->with($response['status'], $response['message']); ;
         } else {
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);

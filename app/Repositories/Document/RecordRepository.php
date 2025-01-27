@@ -316,7 +316,7 @@ class RecordRepository implements RecordRepositoryInterface
         // Recuperar usuarios
         $output_array['users'] = [];
         
-        Log::debug(['SET DOCUMENT' => $output_array]);
+        //Log::debug(['SET DOCUMENT' => $output_array]);
         return $output_array;         
     } // setDocument Repository
 
@@ -444,17 +444,18 @@ class RecordRepository implements RecordRepositoryInterface
         $messages = DB::table('document_record_messages')->where('record_id', $id)->orderBy('updated_at', 'desc')->get(['id','author_id','author','message','updated_at']);
         if($messages) {
             foreach($messages as $message) {
+                //Log::debug(['AID' => $message->author_id, 'UID' => $player->user_id]);
                 $output_array['messages'][] = [
                     'id' => $message->id,
                     'author' => $message->author,
                     'date' => Carbon::createFromTimeStamp(strtotime($message->updated_at))->format($this->set['date_format']),
                     'message' => $message->message,                    
-                    'auth' => ( $message->author_id = $player->user_id ) ? true : false,
+                    'auth' => ( $message->author_id == $player->user_id ) ? true : false,
                 ];
             } // foreach
         } // if
 
-       Log::debug(['RECORD EXISTING' => $output_array]);
+       //Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -574,28 +575,73 @@ class RecordRepository implements RecordRepositoryInterface
             // SAVE USERS
             if( key_exists('user_ids', $data) ) {
                 // si es el author
-                $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
-                if( count($data['user_ids']) > 0 ) {                
-                    $insert_array = [];
+                if( count($data['user_ids']) > 0 ) {  
+                    // Usuarios actuales
+                    $plucked = DB::table('document_record_users')->where('record_id', $record->record_id)->pluck('user_id');
+                    $current_array = $plucked->all();
+                    $existing_array = [];
                     foreach($data['user_ids'] as $uid) {
-                        $jobs_array = [];
-                        $liable = UserModel::find($uid);
-                        $jobs = $liable->jobs;
-                        foreach($jobs as $job) {
-                            $jobs_array[] = $job->name;
+                        if( !in_array($uid, $current_array) ) {
+                            // No se encuentra
+                            $jobs_array = [];
+                            $liable = UserModel::find($uid);
+                            $jobs = $liable->jobs;
+                            foreach($jobs as $job) {
+                                $jobs_array[] = $job->name;
+                            }
+                            $jobName = implode(', ', $jobs_array);
+                            // Insertar nuevo usuario
+                            $result = DB::table('document_record_users')->insert([
+                                'user_id' => $uid,
+                                'record_id' => $record->record_id,
+                                'name' => $liable->name,
+                                'job' => $jobName,
+                            ]);                        
+                            if($result) {
+                                $existing_array[] = $uid;
+                                Log::debug(['INSERTED' => $uid]);
+                                // Enviar mensaje
+                                $result = $this->sendEmail($record, $liable);
+                            }                                                     
+                        } else {
+                            // existente
+                            Log::debug(['KEEP' => $uid]);
+                            $existing_array[] = $uid;
                         }
-                        $jobName = implode(', ', $jobs_array);                        
-                        $insert_array[] = [
-                            'user_id' => $uid,
-                            'record_id' => $record->record_id,
-                            'name' => $liable->name,
-                            'job' => $jobName,
-                        ];
                     } // foreach
-                    if(count($insert_array) > 0) {
-                        DB::table('document_record_users')->insert($insert_array);
-                    } // if                  
+
+                    foreach($current_array as $uid) {
+                        if( !in_array($uid, $existing_array) ) {
+                            Log::debug(['DELETED' => $uid]);
+                            $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $uid)->delete();
+                        } // if
+                    } // foreach
+
                 } // if
+
+
+                // $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
+                // if( count($data['user_ids']) > 0 ) {                
+                //     $insert_array = [];
+                //     foreach($data['user_ids'] as $uid) {
+                //         $jobs_array = [];
+                //         $liable = UserModel::find($uid);
+                //         $jobs = $liable->jobs;
+                //         foreach($jobs as $job) {
+                //             $jobs_array[] = $job->name;
+                //         }
+                //         $jobName = implode(', ', $jobs_array);                        
+                //         $insert_array[] = [
+                //             'user_id' => $uid,
+                //             'record_id' => $record->record_id,
+                //             'name' => $liable->name,
+                //             'job' => $jobName,
+                //         ];
+                //     } // foreach
+                //     if(count($insert_array) > 0) {
+                //         DB::table('document_record_users')->insert($insert_array);
+                //     } // if                  
+                // } // if
             } //if
 
             // SAVE USER STATUS
@@ -915,6 +961,18 @@ class RecordRepository implements RecordRepositoryInterface
         return $document;
     }
 
+    private function sendEmail($record, $user)
+    {
+        if($record) {
+            $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($record->record_id)]);
+            $record->sign = $user->name;
+            Log::debug(['NOTICE NEW RECORD TO USER' => $user->email]);
+            Event::dispatch(new RecordSent($record, $user, $this->set));
+            return true;  
+        }
+        return false;
+    } // sendEmail
+
     /**
      * Envía mensajes de correo al notificar a los participantes del registro
      * @param  string $hash Hash del identificador del registro
@@ -954,7 +1012,8 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  array $input Datos del mensaje
      * @return array Resultado del evento
      */     
-    public function setChat(array $data) {
+    public function setChat(array $data)
+    {
         Log::debug(['SET CHAT DATA' => $data]);                   
         try {
             $user = Auth::user();
@@ -980,7 +1039,8 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  integer $id Idenficador del mensaje
      * @return array Resultado del evento
      */     
-    public function delChat($id) {
+    public function delChat($id)
+    {
         try { 
             $deleted = DB::table('document_record_messages')->where('id', $id)->delete();
         } catch (Exception $e) {
