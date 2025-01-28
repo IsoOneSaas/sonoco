@@ -431,6 +431,7 @@ class RecordRepository implements RecordRepositoryInterface
                 $output_array['users'][] = [
                     'id' => $user->user_id,
                     'name' => $user->name,
+                    'status' => ( $user->status == 1 ) ? ' [CONFIRMADO]' : '',
                 ];
                 if( $user->user_id == $player->user_id ) {
                     $output_array['auth'] = true;

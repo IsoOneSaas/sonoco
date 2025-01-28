@@ -13,7 +13,11 @@
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <button id="btn-save" type="button" form="record-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
+                            @if( $DATA['author'] )
                             <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" onClick="setStatus(1)" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
+                            @else
+                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" title="Sin autorización" disabled > <i data-lucide="archive" class="w-5 h-5"></i> </button>
+                            @endif
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}" alt="Regresar a la tabla"><i data-lucide="menu" class="w-5 h-5"></i></a>    
                         </div>
                     </div>
@@ -90,7 +94,7 @@
                                                 @endif                                                
                                                 @if( isset($DATA) && ($DATA['file'] != '') )                                                
                                                 <div class="input-group mt-5">
-                                                    <a href="javascript:;" class="btn btn-primary" onClick="showFile('{!! $DATA['file'] !!}'); return false;" title="Abrir archivo soporte"><i data-lucide="file" class="w-12 h-12"></i></a>                                                    
+                                                    <a href="javascript:;" class="btn btn-primary input-status" onClick="showFile('{!! $DATA['file'] !!}'); return false;" title="Abrir archivo soporte"><i data-lucide="file" class="w-12 h-12"></i></a>                                                    
                                                     <span>&nbsp;&nbsp;Archivo existente</span>
                                                 </div>
                                                 @endif                                                                                                
@@ -141,7 +145,7 @@
                                                         @endif
                                                     </select>                                                    
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.group.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                                    <button id="btn-group" type="button" class='btn btn-primary ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                    <button id="btn-group" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
                                                 @foreach($DATA['tags'] as $group => $tag)
                                                     @foreach( $tag['labels'] as $n => $val )
@@ -188,7 +192,7 @@
                                                         <div class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.feedback.icon') }}" class="w-3 h-3 mr-1"></i>{{ $message['date'] }}</div>
                                                         <textarea class="form-control" rows="2" readonly>{{ $message['author'] }}:  {{ $message['message'] }}</textarea>
                                                         @if( $message['auth'] )
-                                                        <button class="btn btn-primary shadow-md btn-feedback-delete" type="button" data-id="{{ $message['id'] }}" data-te-ripple-init><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                                        <button class="btn btn-primary shadow-md input-status btn-feedback-delete" type="button" data-id="{{ $message['id'] }}" data-te-ripple-init><i data-lucide="trash" class="w-4 h-4"></i></button>
                                                         <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip2') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                         @endif
                                                     </div>
@@ -197,7 +201,7 @@
                                                 <div class="input-group mt-5">
                                                     <div class="input-group-text flex w-fit"><i data-lucide="{{ trans('document/record.form.feedback.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/record.form.feedback.title') }}</div>
                                                     <textarea id="feedback" class="form-control input-status" rows="2"></textarea>
-                                                    <button id="btn-feedback-save" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="send" class="w-4 h-4"></i></button>
+                                                    <button id="btn-feedback-save" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="send" class="w-4 h-4"></i></button>
                                                     <div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.feedback.tooltip1') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
                                                 @else
@@ -213,10 +217,10 @@
                                                     <select multiple id="user-ids" name="user_ids[]" class="form-control ml-2" size="10" required>
                                                         <option value=''>{{ trans('document/record.form.user.placeholder') }}</option>
                                                         @foreach($DATA['users'] as $user)
-                                                        <option value={{ $user['id'] }} selected>{{ $user['name'] }}</option>
+                                                        <option value={{ $user['id'] }} selected> {{ $user['name'] }} {{ $user['status'] }}</option>
                                                         @endforeach
                                                     </select>
-                                                    <button id="btn-modal-user" class="btn btn-primary shadow-md" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>                                    
+                                                    <button id="btn-modal-user" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="share2" class="w-4 h-4"></i></button>                                    
                                                     <div id="input-group-10" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.user.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
                                             </div>
@@ -236,8 +240,8 @@
                                                         <input type="text" name="attachsize[]" value="{{ $file->size }}" class="form-control w-full input-status" readonly>
                                                         <input type="text" name="attachmime[]" value="{{ $file->type }}" class="form-control w-full input-status" readonly>
                                                         <input type="hidden" name="attachfile[]" value="{{ $file->link }}" class="form-control w-full">
-                                                        <button type="button" class="btn btn-primary ml-5" onClick="showFile('{{ $file->link }}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                                        <button type="button" class="btn btn-danger ml-5" onClick="deleteFile({{ $file->link_id }})"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                                                        <button type="button" class="btn btn-primary input-status ml-5" onClick="showFile('{{ $file->link }}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                                        <button type="button" class="btn btn-danger input-status ml-5" onClick="deleteFile({{ $file->link_id }})"><i data-lucide="minus" class="w-4 h-4"></i></button>
                                                     </div>    
                                                     @endforeach
                                                 </div>
@@ -519,9 +523,11 @@
         // ESTADO DEL DOCUMENTO
         if( status == 1 ) {
             // Bloquear inputs y botones
-            $("#btn-save, #btn-store").attr('disabled', true);
+            $("#btn-save, #btn-store, #editor, .input-status").attr('disabled', true);
             $(".input-status").attr('readonly', true);
         } // if
+
+
 
         // EDITOR
         try{
