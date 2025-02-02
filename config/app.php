@@ -178,6 +178,7 @@ return [
 		Yajra\DataTables\DataTablesServiceProvider::class,			// https://yajrabox.com/docs/laravel-datatables/10.0
 		Spatie\Permission\PermissionServiceProvider::class,         // https://spatie.be/docs/laravel-permission/v5/installation-laravel
         
+        
 		
     ])->toArray(),
 

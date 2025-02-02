@@ -289,7 +289,7 @@
             aoColumns: columnsDef,
             retrieve: true,
             pageLength: parseInt(initRecords),
-            order: initOrder[0],
+            order: initOrder[0],    // FIXME: Genera error cuando se accede por primera vez
             orderClasses: false,
             responsive: true,
             orderCellsTop: true,

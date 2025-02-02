@@ -5,8 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Intervention\Image\ImageManager;
-//use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Laravel\Facades\Image;
 use File;
 use Log;
 
@@ -112,11 +111,7 @@ class ProfileController extends Controller
     } // upload Method
 
     public function image(Request $request)
-    {
-        $manager = new ImageManager(
-            new \Intervention\Image\Drivers\Gd\Driver()
-            // https://image.intervention.io/v3/modifying/resizing#fitted-image-resizing
-        );       
+    {      
         $response = ['success' => false, 'message' => trans('profile.image.no-success')];
         $input = $request->all();
         Log::debug(['UPLOAD IMAGE ' => $input]);
@@ -130,7 +125,8 @@ class ProfileController extends Controller
                 if ($file->move($this->imagePath, $fileName)) {
                     $path = $this->imagePath . $fileName;
                     if( File::exists($path) ) {
-                        $image = $manager->read($path);
+                        Log::info('Archivo de imagen encontrado: '.$path);
+                        $image = Image::read($path);
                         $height = $image->height();
                         $width = $image->width();
                         if( $width >= $height ) {
