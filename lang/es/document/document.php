@@ -197,7 +197,13 @@ return [
                             'title'         => 'Categoría',
                             'placeholder'   => 'Digite o seleccione una categoría existente',
                             'tooltip'       => 'Escriba una nueva categoría o seleccione una existente de la lista que aparece al pulsar sobre el cajón.  La Categoría es una única palabra.',
-        ],                         
+        ],       
+        'switch'  =>  [
+                            'icon'          => 'user-pen',
+                            'title'         => 'Perfíl del administrador',
+                            'placeholder'   => 'Seleccione el perfil',
+                            'tooltip'       => 'Seleccione el perfil requerido para el administrador al validar el documento.',
+        ],                        
         'tags'  =>  [
                             'icon'          => 'tag',
                             'title'         => 'Etiquetas',

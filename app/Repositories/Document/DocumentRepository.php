@@ -159,12 +159,12 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function store(array $data) 
     {
-      //Log::debug(['STORE DOCUMENT DATA' => $data]);
+        //Log::debug(['STORE DOCUMENT DATA' => $data]);
        $result = false;
        $auth = true;    // Autorización para reemplazar responsables
-       $idExisting= isset($data['document_id']) ? $data['document_id'] : false;
-
+       $idExisting = isset($data['document_id']) ? $data['document_id'] : false;
        $existsDocument = $this->validateExistingCode($idExisting, $data['code'], $data['version']);
+       $data['switch'] = isset($data['switch']) ? 1 : 0;
 
        if(!$existsDocument) {
 
@@ -453,7 +453,7 @@ class DocumentRepository implements DocumentRepositoryInterface
      */    
     public function update($id, array $data) 
     {
-        //Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
+        Log::debug(['UPDATE TYPE ID' => $id, 'DATA' => $data]);
         try {
             DB::beginTransaction();
             $document = DocumentModel::find($id);

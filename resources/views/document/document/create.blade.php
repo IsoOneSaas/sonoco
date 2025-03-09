@@ -166,6 +166,14 @@
                                 <div id="flow-approve" class="alert alert-dismissible show box bg-danger text-white flex items-center mb-6" role="alert" style="display:none">
                                     Ya el responsable ha aprobado el documento. 
                                     <button type="button" class="btn-close text-white" data-tw-dismiss="alert" aria-label="Close"> <i data-lucide="x" class="w-3 h-3"></i> </button>
+                                </div>
+                                
+                                <div class="input-group mt-3">
+                                    <div id="switch" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.switch.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.switch.title') }}</div>
+                                    <div class="form-switch mt-2 ml-4 mr-2  w-fit">
+                                        Administrador&nbsp;&nbsp;<input type="checkbox" class="form-check-input" name="switch" @if( old('switch', $document->switch) ) checked @endif >&nbsp;&nbsp;Usuario
+                                    </div>                                             
+                                    <div id="input-group-27" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.switch.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                               
                                 </div>                                 
                                                                                         
                                 <div class="input-group mt-3">
@@ -473,7 +481,7 @@
             var pid = $('select[name=process_id]').val();
             var tid = $('select[name=type_id]').val();
             var lid = $('select[name=location_id]').val();
-
+            console.log('onChange::Parameters: sid='+sid+' lid='+lid+' pid='+pid+' tid='+tid);
             if( sid != '' && sid !== null && pid != '' && pid !== null && tid != '' && tid !== null && lid != '' && lid !== null ) {
                 //console.log('GET CODE!');
                 setCode(sid, lid, pid, tid);    // FIXME: esta recalculado al editar la configuración
@@ -672,6 +680,7 @@
     } // setProcessSelect 
     
     function setCode(sid, lid, pid, tid) {
+        //console.log('SetCode::Parameters: sid='+sid+' lid='+lid+' pid='+pid+' tid='+tid);
         $.ajax({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             url: '/documentos/control/documento/codigo',
@@ -680,8 +689,8 @@
             data: {'sid':sid,'pid':pid,'tid':tid,'lid':lid},
             async: false,
             success: function(data) {
-                //console.log('=== AJAX CODE');
-                //console.dir(data);
+                console.log('=== AJAX CODE');
+                console.dir(data);
                 if( data.success ) {
                     $("input[name='code']").val(data.code);
                     $("input[name='serial']").val(data.serial);

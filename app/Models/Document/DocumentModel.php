@@ -16,7 +16,7 @@ class DocumentModel extends Model
     use HasFactory;
     protected $table = 'documents';
     protected $primaryKey = 'document_id';
-    protected $fillable = ['code','name','version', 'serial', 'system_id', 'location_id', 'department_id', 'process_id', 'type_id','job_edit_id','job_review_id','job_approve_id','status','flow','pattern'];
+    protected $fillable = ['code','name','version', 'serial', 'system_id', 'location_id', 'department_id', 'process_id', 'type_id','job_edit_id','job_review_id','job_approve_id','status','flow','pattern','switch'];
 
     protected $casts = [
         'job_edit_id' => 'array',
