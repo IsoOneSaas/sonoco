@@ -199,7 +199,7 @@ return [
                             'tooltip'       => 'Escriba una nueva categoría o seleccione una existente de la lista que aparece al pulsar sobre el cajón.  La Categoría es una única palabra.',
         ],       
         'switch'  =>  [
-                            'icon'          => 'user-pen',
+                            'icon'          => 'shield-check',
                             'title'         => 'Perfíl del administrador',
                             'placeholder'   => 'Seleccione el perfil',
                             'tooltip'       => 'Seleccione el perfil requerido para el administrador al validar el documento.',

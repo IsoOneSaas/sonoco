@@ -2,12 +2,13 @@
 
 use App\Models\Document\DocumentModel;
 use App\Models\Document\ForwardModel;
+use Illuminate\Support\Facades\Log;
 
 trait ControlDocumentsTrait {
 
     protected $colorDefault = 2;
 
-    public function confirmCheckIn2($hash)
+    public function confirmCheckIn2($hash)  // to eliminate
     {
         $id = $this->tool->getIdHash($hash);
         $user = auth()->user();
@@ -50,14 +51,18 @@ trait ControlDocumentsTrait {
             $checked = ForwardModel::where('document_id', $id)->where('action', $current->action)->where('checked', 1)->count();
 
             if( $user->hasRole('MASTER') ) {
+                Log::info('>Pass '. $id .' as master '. $user->user_id);
                 return true;
             } elseif( $user->hasRole('ADMIN')  ) {
                 if( $profile ) {
+                    Log::info('>Pass '. $id .' as admin-user '. $user->user_id);
                     return ( $checked == $total ) ? true : false;
                 } else {
+                    Log::info('>Pass '. $id .' as admin-admin '. $user->user_id);
                     return ( $checked > 0 ) ? true : false;
                 }
             } else {
+                Log::info('>Pass '. $id .' as user '. $user->user_id);
                 return ( $checked == $total ) ? true : false;
             }
         } else {

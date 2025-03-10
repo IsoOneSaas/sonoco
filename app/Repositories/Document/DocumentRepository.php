@@ -756,7 +756,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         $document->job_approve_id = $result['jobs'];
         $document->user_approve_id = $result['users'];
         $document->check_approve_id = $result['check'];
-        $document->link_approve = json_encode($result['link']);               
+        $document->link_approve = json_encode($result['link']);
 
         // OBTENER ETIQUETAS     
         $plucked = $document->tags()->pluck('tag');

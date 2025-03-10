@@ -61,7 +61,7 @@
                                 </div>                                
 
                                 <div class="input-group mt-3">
-                                    <div id="system" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.system.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.system.title') }}</div>
+                                    <div id="system" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.system.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.system.title') }}</div>
                                     <select name="system_id" id="system-id" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.system.placeholder') }}</option>
                                         @foreach($systems as $system)   
@@ -71,7 +71,7 @@
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.system.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>
                                 <div class="input-group mt-3">
-                                    <div id="location" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.location.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.location.title') }}</div>
+                                    <div id="location" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.location.title') }}</div>
                                     <select id="select-location" name="location_id" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.location.placeholder') }}</option>
                                         @foreach($locations as $location)   
@@ -81,12 +81,12 @@
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.location.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                 </div>
                                 <div class="input-group mt-3">
-                                    <div id="department" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.department.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.department.title') }}</div>
+                                    <div id="department" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.department.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.department.title') }}</div>
                                     <select id="select-department"  name="department_id" class="form-control col-span-6" required>
                                         <option value=''>{{ trans('document/document.form.department.placeholder') }}</option>
                                     </select>
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div> 
-                                    <div id="process" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.process.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.process.title') }}</div>
+                                    <div id="process" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.process.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.process.title') }}</div>
                                     <select name="process_id" class="form-control col-span-6" readonly>
                                         <option value=''>{{ trans('document/document.form.process.placeholder') }}</option>
                                     </select>                                   
@@ -94,7 +94,7 @@
 
                                 </div>                                                                                             
                                 <div class="input-group mt-3">
-                                    <div id="type" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.type.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.type.title') }}</div>
+                                    <div id="type" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.type.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.type.title') }}</div>
                                     <select  name="type_id" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.type.placeholder') }}</option>
                                         @foreach($types as $type)   
@@ -103,7 +103,7 @@
                                     </select>                                    
                                     <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.type.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
-                                    <div id="pattern" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.pattern.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.pattern.title') }}</div>
+                                    <div id="pattern" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.pattern.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.pattern.title') }}</div>
                                     <select  name="pattern" class="form-control w-full" required>
                                         @foreach($patterns as $key => $value)   
                                         <option value="{{ $key }}"  {{ old('pattern', isset($document) ? $document->pattern : 0 ) == $key ? 'selected ' : '' }}>{{ $value }}</option>
@@ -115,7 +115,7 @@
 
                                 <!-- Edit select -->                              
                                 <div class="input-group mt-3">
-                                    <div id="job-edit" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_edit.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_edit.title') }}</div>
+                                    <div id="job-edit" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_edit.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.job_edit.title') }}</div>
                                     <select multiple id="select-job-edit" name="job_edit_id[]" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.job_edit.placeholder') }}</option>
                                     </select>
@@ -133,7 +133,7 @@
                                 </div>                                                                    
                                 <!-- Review select -->                                  
                                 <div class="input-group mt-3">
-                                    <div id="job-review" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_review.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_review.title') }}</div>
+                                    <div id="job-review" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_review.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.job_review.title') }}</div>
                                     <select multiple id="select-job-review" name="job_review_id[]" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.job_review.placeholder') }}</option>
                                     </select>
@@ -151,7 +151,7 @@
                                 </div>                                                                
                                 <!-- Approve select -->                                
                                 <div class="input-group mt-3">
-                                    <div id="job-approve" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_approve.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.job_approve.title') }}</div>
+                                    <div id="job-approve" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/document.form.job_approve.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.job_approve.title') }}</div>
                                     <select multiple id="select-job-approve" name="job_approve_id[]" class="form-control w-full" required>
                                         <option value=''>{{ trans('document/document.form.job_approve.placeholder') }}</option>
                                     </select>
@@ -169,7 +169,7 @@
                                 </div>
                                 
                                 <div class="input-group mt-3">
-                                    <div id="switch" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.switch.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.switch.title') }}</div>
+                                    <div id="switch" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.switch.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.switch.title') }}</div>
                                     <div class="form-switch mt-2 ml-4 mr-2  w-fit">
                                         Administrador&nbsp;&nbsp;<input type="checkbox" class="form-check-input" name="switch" @if( old('switch', $document->switch) ) checked @endif >&nbsp;&nbsp;Usuario
                                     </div>                                             
@@ -177,7 +177,7 @@
                                 </div>                                 
                                                                                         
                                 <div class="input-group mt-3">
-                                    <div id="class" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.class.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.class.title') }}</div>
+                                    <div id="class" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.class.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.class.title') }}</div>
                                     <input id="select-classes" type="text" name="class" value="{{ old('class', isset($document) ? $document->class : '') }}" class="form-control col-span-6" placeholder="{{ trans('document/document.form.class.placeholder') }}" aria-label="Categoria" list="tag-classes" autocomplete="off">
                                     <datalist id="tag-classes">
                                         @foreach($classes as $topic)
@@ -187,7 +187,7 @@
                                     <div id="input-group-102" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$('#select-classes').val('')"></i></a> </div>                                    
                                     <div id="input-group-104" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.class.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
-                                    <div id="tags" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.tags.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/document.form.tags.title') }}</div>
+                                    <div id="tags" class="input-group-text flex ml-2"><i data-lucide="{{ trans('document/document.form.tags.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.tags.title') }}</div>
                                     <select multiple id="select-tags" name="tags[]" class="form-control col-span-6"></select>
                                     <div id="input-group-114" class="input-group-text"><a href="javascript:;" title="Limpiar" tabindex="-1"><i data-lucide="delete" class="w-4 h-4" onClick="$selectize.clear()"></i></a> </div>
                                     <div id="input-group-116" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.tags.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
