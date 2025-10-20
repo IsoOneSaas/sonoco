@@ -1,5 +1,6 @@
 <?php   namespace App\Repositories\Document;
 
+use App\Classes\PdfClass;
 use App\Classes\ToolsClass;
 use App\Events\RecordSent;
 use App\Events\RecordTracing;
@@ -16,8 +17,9 @@ use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
-use DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -28,11 +30,13 @@ class RecordRepository implements RecordRepositoryInterface
 {
     private $tool;
     protected $set;
+    protected $recordUrl;
 
     public function __construct(ToolsClass $Tools)
     {
         $this->tool = $Tools;
         $this->set = $this->tool->setSettings('document');
+        $this->recordUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_RECORD');
     }
 
     /**
@@ -467,7 +471,7 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        Log::debug(['UPDATE DATA' => $data]);        
+        //Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
@@ -652,8 +656,10 @@ class RecordRepository implements RecordRepositoryInterface
                 $result = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $user->user_id)->update(['status' => 0]);
             }
 
+            
 
-            // SAVE TRACING
+
+            // SAVE TRACING  TODO: trazabilidad inmutable
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
             $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';  
             $record->user_uid = $user->user_uid;
@@ -668,6 +674,35 @@ class RecordRepository implements RecordRepositoryInterface
         $hash = $this->tool->setIdHash($record->record_id);
         // Mensaje de feedback
         if( $data['status_id'] == 1 ) {
+
+            // TODO: Crear PDF IF $data['status_id'] == 1 // si falla -> vuelve al estado anterior
+            // CREATE & UPLOAD PDF
+            $rec = $this->setRecord($hash);
+            if($rec) {
+                // Generar HTML
+                //Log::debug(['DATA' => $rec]);  
+                $doc = $this->getDocument($data['document_id'], $this->set['date_format']);
+                $setup = $this->tool->getPaperSetup($doc->settings);
+                $print = new PdfClass('document.record.render');
+                $html = $print->renderRecord($rec, $doc, $setup);
+                $fileName = uniqid('PDF') .'.pdf';
+                // Salvar el archivo PDF
+                Log::info('To Save PDF...'); 
+                Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->recordUrl . $fileName);
+                // Verificar existencia de archivo
+                if( file_exists($this->recordUrl . $fileName) ) {
+                    // Actualizar la base de datos
+                    Log::debug('==> Archivo PDF Salvado: '. $this->recordUrl . $fileName);                
+
+                } else {
+                    Log::error('recordRepository::update @ (1) File not found: '. $this->recordUrl . $fileName);
+                    //$response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
+                }                
+            }
+            
+
+
+
             // STORE AS FILE
             $store = $this->store($record);
             if( !$store ) Log::error('Registro '. $record->record_id .' con código de documento ya existente no fue almacenado');
@@ -677,7 +712,7 @@ class RecordRepository implements RecordRepositoryInterface
         }
         
         return ['status' => 'success', 'hash' => $hash, 'tab' => $data['tab_active'], 'message' => $msg];
-    } // store Repository
+    } // update Repository
 
     /**
      * Almacenar el registro en el archivo

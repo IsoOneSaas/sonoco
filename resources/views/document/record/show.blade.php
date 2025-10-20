@@ -40,26 +40,26 @@
                     <!-- BEGIN: Editor -->
                     <div class="intro-y box p-5 mt-5 bg-slate-200 flex justify-center">
                    
-                            <div class="iso-body iso-{{ $size ?? 'emtpy' }}">
-                                                                   
-                                <div class="iso-page">                      
-                                    <div class="w-full p-2">
-                                        @include('document/document/head_default')
-                                        <div class="overflow-x-auto my-4">
-     
-                                            <div id="html-pattern">    
-                                            @if( $DATA['txt'] != '' )
-                                                {!! $DATA['txt'] !!}
-                                            @else
-                                                &nbsp;
-                                            @endif
-                                            </div>
+                        <div class="iso-body iso-{{ $size ?? 'emtpy' }}">
+                                                                
+                            <div class="iso-page">                      
+                                <div class="w-full p-2">
+                                    @include('document/document/head_default')
+                                    <div class="overflow-x-auto my-4">
+    
+                                        <div id="html-pattern">    
+                                        @if( $DATA['txt'] != '' )
+                                            {!! $DATA['txt'] !!}
+                                        @else
+                                            &nbsp;
+                                        @endif
                                         </div>
-
-
                                     </div>
+
+
                                 </div>
                             </div>
+                        </div>
 
                     </div>                
                     <!-- END: Editor -->                                                     

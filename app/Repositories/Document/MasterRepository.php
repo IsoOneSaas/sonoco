@@ -86,12 +86,17 @@ class MasterRepository implements MasterRepositoryInterface
             
 
             if($date) {
+
+                // Obtener propietario Nuevo solictado por Sonoco 19.10.2025
+                $owner = '';
+                $owner = $this->getDocumentOwner($document->document_id);
                                 
                 $data[$i]['document_id'] = $document->document_id;
 
                 $data[$i]['DT_RowIndex'] = $i+1;
                 $data[$i]['code'] = $document->code;
                 $data[$i]['name'] = $document->name;
+                $data[$i]['owner'] = $owner;
                 $data[$i]['version'] = $document->version;
                 $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
                 $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
@@ -853,6 +858,23 @@ class MasterRepository implements MasterRepositoryInterface
             return $dt->diffForHumans();
         }    
    } // seStatusDate
+
+       /**
+     * Recupera el propietario del documento para el listado maestro
+     * @param  integer $id Identificador del documento
+     * @return string    Cargo(s) de propietario(s)
+     */ 
+   private function getDocumentOwner($id)
+   {
+        $owners_array = [];
+        $lines = ForwardModel::where('document_id', $id)->where('action', config('settings.document_status.approve'))->where('checked', 1)->get(['job']);
+        if($lines) {
+            foreach($lines as $line) {
+                $owners_array[] = $line->job;
+            } // foreach
+        } // if
+        return implode("<br>",  $owners_array);
+   } // getDocumentOwner
 
    //=== ELIMINAR ?
 

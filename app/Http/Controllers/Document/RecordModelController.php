@@ -161,7 +161,7 @@ class RecordModelController extends Controller
         $response = ['status' => 'success', 'message' => 'Testing...'];
         $msgs = '';
         $input = $request->input();
-        Log::debug(['STORE DATA' => $request->all()]);
+        //Log::debug(['STORE DATA' => $request->all()]);
                 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [

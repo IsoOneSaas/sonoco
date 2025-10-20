@@ -237,8 +237,11 @@
         var startTime = Date.now();                       
         var sCol = isoGetStorage('iso_recordReturnCol');
         var sDir = isoGetStorage('iso_recordReturnDir');
-        var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage'); 
-        var initOrder = ( sCol === null ) ? [[ col, 'asc']] : [[ sCol, sDir]]; // sCol
+        var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage');
+        // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
+        var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
+        // console.log('iNITORDER:');
+        // console.dir(initOrder);        
         var initRecords = ( isoGetStorage('iso_recordReturnRows') === null ) ? 10 : isoGetStorage('iso_recordReturnRows');
 
         // Sistema
@@ -270,7 +273,6 @@
 
         console.dir(param);
         //console.dir(columnsDef);
-        //console.dir(initOrder);
         console.log('Datatables init starts now: ', Date.now() - startTime);
          
         $myTable = $('#records-table')
@@ -289,7 +291,7 @@
             aoColumns: columnsDef,
             retrieve: true,
             pageLength: parseInt(initRecords),
-            order: initOrder[0],    // FIXME: Genera error cuando se accede por primera vez
+            order: initOrder[0],
             orderClasses: false,
             responsive: true,
             orderCellsTop: true,

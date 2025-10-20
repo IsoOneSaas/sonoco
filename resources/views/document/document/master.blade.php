@@ -123,10 +123,11 @@
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>Id</th>
                                                 <th>Código</th>
-                                                <th>Nombre</th>
-                                                <th>Versión</th>
+                                                <th>Título</th>
+                                                <th>Propietario</th>
+                                                <th>Versión<br>(# Revisión)</th>
                                                 <th>Tipo Documento</th>
-                                                <th>Publicado</th>
+                                                <th>Fecha Emisión</th>
                                                 <th>Vigencia</th>
                                                 <th>H</th>
                                                 <th>A</th>
@@ -137,10 +138,11 @@
                                                 <th>#</th>
                                                 <th class="th-filter">Id</th>
                                                 <th class="th-filter">Código</th>
-                                                <th class="th-filter">Nombre</th>
-                                                <th class="th-filter">Versión</th>
+                                                <th class="th-filter">Título</th>
+                                                <th class="th-filter">Propietario</th>
+                                                <th class="th-filter">Versión<br>(# Revisión)</th>
                                                 <th class="th-filter">Tipo Documento</th>
-                                                <th class="th-filter">Publicado</th>
+                                                <th class="th-filter">Fecha Emisión</th>
                                                 <th class="th-filter">Vigencia</th>
                                                 <th class="th-filter">H</th>
                                                 <th class="th-filter">A</th>
@@ -153,10 +155,11 @@
                                                 <th>#</th>
                                                 <th>Id</th>
                                                 <th>Código</th>
-                                                <th>Nombre</th>
-                                                <th>Versión</th>
+                                                <th>Título</th>
+                                                <th>Propietario</th>
+                                                <th>Versión<br>(# Revisión)</th>
                                                 <th>Tipo Documento</th>
-                                                <th>Publicado</th>
+                                                <th>Fecha Emisión</th>
                                                 <th>Vigencia</th>
                                                 <th>H</th>
                                                 <th>A</th>
@@ -306,10 +309,10 @@
     let $dateInDefault;
     let $dateOutDefault;
     let $myTable;
-    var $columnType = 5;
-    var $columnPublished = 6;
-    var $columnAlert = 9;
-    var $columnSort = 10;
+    var $columnType = 6;
+    var $columnPublished = 7;
+    var $columnAlert = 10;
+    var $columnSort = 11;
     var $lang = {!! $gridLanguage !!};
     var $route = "{{ route('documents.master.index.render', ':slug') }}";
 
@@ -587,11 +590,14 @@
             } else {
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected'); 
-                if( data.record == 1 ) {
-                    $('#btn-record').removeClass('iso-disabled');
-                }  else {
-                    $('#btn-record').addClass('iso-disabled');
-                }             
+                //console.dir(data);
+                if(typeof data !== 'undefined') {
+                    if( data.record == 1 ) {
+                        $('#btn-record').removeClass('iso-disabled');
+                    }  else {
+                        $('#btn-record').addClass('iso-disabled');
+                    }  
+                }           
             } // if selected
         }); // row selects
 
@@ -607,8 +613,8 @@
             var params = {sids: sidsValue, pids: pidsArray, lids: lidsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault, txt: text, tag: tag};
             var url =  $route.replace(':slug', JSON.stringify(params));
 
-            console.log('Searching...');
-            console.dir(JSON.stringify(params));
+            //console.log('Searching...');
+            //console.dir(JSON.stringify(params));
             
             if( (sidsValue.length > 0) && (pidsArray.length > 0) && (lidsArray.length > 0) && (tidsArray.length > 0) ) {
                 // Ajustes a cambio
