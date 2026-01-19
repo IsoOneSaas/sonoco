@@ -229,7 +229,11 @@ class MasterController extends Controller
 
     public function test2() {  // ACTUAL
         return $this->documentRepo->test2();
-    }     
+    } 
+    
+    public function test3() {
+        $this->documentRepo->listWithoutOwner();
+    }
 
     /**
      * Se definite la estructura de la tabla a generar con DataTables

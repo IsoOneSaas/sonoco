@@ -45,6 +45,8 @@ interface MasterRepositoryInterface
 
     public function test2();
 
+    public function listWithoutOwner(); // test3
+
     public function render($slug);   // New render grid
 
 }

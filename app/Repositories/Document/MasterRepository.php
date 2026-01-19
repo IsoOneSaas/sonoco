@@ -87,8 +87,7 @@ class MasterRepository implements MasterRepositoryInterface
 
             if($date) {
 
-                // Obtener propietario Nuevo solictado por Sonoco 19.10.2025
-                $owner = '';
+                // Obtener propietario Nuevo solictado por Sonoco 19.10.2025';
                 $owner = $this->getDocumentOwner($document->document_id);
                                 
                 $data[$i]['document_id'] = $document->document_id;
@@ -96,7 +95,7 @@ class MasterRepository implements MasterRepositoryInterface
                 $data[$i]['DT_RowIndex'] = $i+1;
                 $data[$i]['code'] = $document->code;
                 $data[$i]['name'] = $document->name;
-                $data[$i]['owner'] = $owner;
+                $data[$i]['owner'] =  empty($owner) ? 'Documento Migrado' : $owner;       // Solución temporal propuesta por Sonoco (dato vacío por tema de migración DB Colombia)
                 $data[$i]['version'] = $document->version;
                 $data[$i]['processName'] = ($document->process) ? $document->process->name : 'N/A';
                 $data[$i]['typeName']  = ($document->type) ? $document->type->name : 'N/A';
@@ -126,7 +125,27 @@ class MasterRepository implements MasterRepositoryInterface
         ];
         return json_encode($results);          
 
-    } // render    
+    } // render  
+    
+    public function listWithoutOwner()      // TEST 3
+    {       
+        $n = 0;
+        $list_array = [];
+        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
+        foreach($documents as $document) {
+            $owner = $this->getDocumentOwner($document->document_id);
+            if( empty($owner) ) {
+                $list_array[] = [
+                    'code' => $document->code,
+                    'name' => $document->name,
+                    'version' => $document->version,
+                    'owner' => $document->job_approve_id,
+                ];
+                $n++;
+            }            
+        }
+        Log::debug(['N' => $n, 'LIST' => $list_array]);
+    }
 
 
     // VALIDO ?

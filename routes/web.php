@@ -185,6 +185,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::get('test', [\App\Http\Controllers\Document\MasterController::class, 'test'])->name('test');
             Route::get('test2', [\App\Http\Controllers\Document\MasterController::class, 'test2'])->name('test2');
+            Route::get('test3', [\App\Http\Controllers\Document\MasterController::class, 'test3'])->name('test3');
         });
         
         // REGISTROS
