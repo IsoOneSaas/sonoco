@@ -1,10 +1,12 @@
 <?php namespace App\Models\Set;
 
-//use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Models\Document\FileTopicModel;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
 
 class DepartmentModel extends Model
 {
@@ -16,7 +18,7 @@ class DepartmentModel extends Model
     /**
     * Obtiene el registro de localizaciones asociadas con el departamento.
     */
-    public function locations()
+    public function locations() : BelongsToMany
     {
         return $this->belongsToMany(LocationModel::class, 'set_location_department', 'department_id', 'location_id')->orderBy('name');
     }
@@ -35,11 +37,22 @@ class DepartmentModel extends Model
     public function process() : HasOne
     {
         return $this->hasOne(ProcessModel::class, 'set_department_process', 'department_id', 'process_id');
-    } 
-
-    public function processesCount()
+    }
+    
+    /**
+    * Obtiene el registro de procesos asociadas con el departamento.
+    */    
+    public function processesCount() : BelongsToMany
     {
         return $this->belongsToMany(ProcessModel::class, 'set_department_process', 'department_id', 'process_id')->count();
-    }     
+    } 
+    
+    /**
+    * Obtiene el registro de temas asociadas con el departamento.
+    */
+    public function topics() : HasMany 
+    {
+        return $this->hasMany(FileTopicModel::class, 'department_id','department_id');
+    }        
 
 }

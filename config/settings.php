@@ -235,6 +235,8 @@ return [
         'record_storage_default' => 'iso-one',
         'record_extention_allowed_default' => 'ALL',
         'record_size_allowed_default' => '16000', // kb 
+        // FILES
+        'file_code_format' => 'L.D.T.S',
     ],
 
     'document_validity_texts' => [

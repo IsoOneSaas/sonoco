@@ -1,0 +1,307 @@
+<?php namespace App\Classes;
+
+use App\Classes\ToolsClass;
+use App\Models\Document\FileModel as File;
+use App\Models\Document\FileTopicModel as Topic;
+use App\Models\Document\FileSubtopicModel as Subtopic;
+use App\Models\Document\RecordModel as Record;
+use App\Models\Set\DepartmentModel as Department;
+use App\Models\Set\LocationModel as Location;
+use DB;
+use Illuminate\Support\Facades\Log;
+
+class FileClass
+{
+
+    private $nuiPattern; 
+    private $nuiStrPad;
+    private $codeStrPad;
+    private $tool;
+    protected $set;
+
+    public function __construct(ToolsClass $Tools)
+    {
+        $this->nuiPattern = "%s.%s-%s";
+        $this->nuiStrPad = 3;
+        $this->codeStrPad = 2;
+        $this->tool = $Tools;
+        $this->set = $this->tool->setSettings('document');
+    }
+    
+    /**
+     * Obtiene el listado de temas para el departamento indicado
+     * @param  integer $id identificador del departamento
+     * @return Array  Resultado del método
+     */    
+    public function getTopicsList($id)
+    {
+        $topics = new Topic;
+        $department = Department::find($id);
+        if($department) {
+            $topics = $department->topics()->orderby('code')->get();
+        }
+        return ['success' => true, 'message' => '', 'data' => $topics];  //FIXME: cmabiar a retornar collection      
+    } // getTopicsList Method
+    
+    /**
+     * Obtiene el listado de subtemas para el tema indicado
+     * @param  integer $id identificador del tema
+     * @return Array  Resultado del método
+     */    
+    public function getSubTopicsList($id)
+    {
+        $subtopics = new Subtopic;
+        $topic = Topic::find($id);
+        if($topic) {
+            $subtopics = $topic->subtopics()->orderby('code')->get();
+        }
+        return ['success' => true, 'message' => '', 'data' => $subtopics];  //FIXME: cmabiar a retornar collection  
+    } // getSubTopicsList Method 
+    
+    public function getDeparmentIds()   // FIXME: Temporal
+    {
+           // ToolsClass::setDepartmentsFilter() -> $dids
+           // return $dids;
+    } // getDeparmentsIds Method    
+
+    /**
+     * Obtiene los elementos para generar el select de DEPARTAMENTOS seleccionados
+     * @param  array $dids arreglo unidimensional de identificadores de departamento
+     * @return Collection  Opciones de DEPARTAMENTO
+     */     
+    public function getDeparmentsSelect($dids)
+    {
+        $departments = Department::findMany($dids);
+        foreach($departments as $department) {
+            $department->code = str_pad($department->department_id, $this->codeStrPad, "0", STR_PAD_LEFT);
+        } // foreach        
+        return $departments;
+    } // getDeparmentsSelect Method
+
+    /**
+     * Obtiene los elementos para generar el select de TEMAS seleccionados
+     * @param  array $dids arreglo unidimensional de identificadores de departamento
+     * @return Collection  Opciones de TEMA
+     */     
+    public function getTopicsSelect($dids)
+    {                     
+        $topics = Topic::join('departments', function ($join) use ($dids) {
+                $join->on('document_file_topics.department_id', '=', 'departments.department_id');
+                $join->whereIn('departments.department_id',  $dids);
+            })
+            ->orderBy('departments.name')
+            ->orderBy('document_file_topics.code')
+            ->get(['departments.department_id', 'departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);        
+        return $topics;     
+    } // getTopicsSelect
+    
+    /**
+     * Obtiene los elementos para generar el select de SUBTEMAS seleccionados
+     * @param  integer $id identificador del tema
+     * @return Collection  Opciones de SUBTEMA
+     */        
+    public function getSubtopicsSelect($id)
+    {
+        return Subtopic::where('topic_id', $id)->orderBy('code')->get(['subtopic_id', 'code', 'name']);
+    } // getSubtopicsSelect 
+    
+    /**
+     * Crea nuevo Archivo en la DB para el nuevo registro salvado
+     * @param  array $data datos base para la creación del registro (datos mínimos)
+     * @param  string $code código archivistico
+     * @param  integer $sid identificador del sistema de gestión
+     * @param  integer $pid identificador del proceso
+     * @return Array  Resultado del método
+     */     
+    public function setFile($data, $code, $sid, $pid)   // TODO: $sid y $pid también podría pasar como parámetros de $data
+    {
+        try {
+            DB::beginTransaction();
+            $file = New File;
+            $file->system_id = $sid;
+            $file->location_id = $data['lid'];
+            $file->department_id = $data['did'];
+            $file->process_id = $pid;
+            $file->topic_id = $data['tid'];
+            $file->subtopic_id = $data['sid'];
+            $file->code = $code;
+            $file->save();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('FileClass::setFile Exception: '. $e->getMessage());            
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+        return ['success' => true, 'message' => trans('document/file.create.success')];            
+
+    } // setFile Method 
+    
+    /**
+     * Obtiene el número consecutivo para generar el NUI
+     * @param  string $code código archivistico
+     * @param  string $year año
+     * @return integer  número consecutivo
+     */      
+    public function getSerial($code, $year)        // FIXME: antes getNui()
+    {        
+        $found = Record::where('code', $code)->where('year', $year)->latest()->first();
+        if($found) {
+            return $found->serial + 1;
+        } 
+        return 1;
+    } // getSerial Method
+
+    /**
+     * Forma el código NUI
+     * @param  string $code código archivistico de acuerdo al formato dado
+     * @param  string $year año
+     * @param  integer $order número consecutivo
+     * @return string  código NUI
+     */      
+    public function setNui($code, $year, $order)
+    {        
+        $serial = str_pad($order, $this->nuiStrPad, "0", STR_PAD_LEFT);
+        return sprintf($this->nuiPattern, $code, $year, $serial);
+    }  // setNui  
+
+    /**
+     * Genera código archivistico
+     * @param array $data valores del formulario
+     * @return Array  Resultado del método
+     */       
+    public function getCode(array $data)
+    {
+        Log::debug(['GETCODE' => $data]);
+
+        // pattern 
+        $arreglo =  ['@','#','&','%'];
+        $replace1 = ['L' => '@', 'D' => '#', 'T' => '%', 'S' => '&']; // 'P' => '$',
+
+        // Precode
+        $this->set = $this->tool->setSettings('document');
+        $precode = $this->set['file_code_format'];
+        Log::debug('PRECODE1: '. $precode);
+        foreach( config('settings.file_format_code') AS $key) {
+            if( str_contains($precode, $key) ) {
+                $precode = str_replace($key, $replace1[$key], $precode);
+            } // if
+        } // foreach
+        Log::debug('PRECODE2: '. $precode);
+
+        // Localización
+        $location = Location::find($data['lid']);
+        $lCode = ( is_integer($location->code) ) ?  str_pad($location->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $location->code;
+        // Departamento
+        $department = Department::find($data['did']);
+        $dCode = ( is_integer($department->department_id) ) ?  str_pad($department->department_id, $this->codeStrPad, '0', STR_PAD_LEFT) : $department->department_id;
+        // Tema
+        $topic = Topic::find($data['tid']);
+        $tCode = ( is_integer($topic->code) ) ?  str_pad($topic->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $topic->code;
+        // SubTema
+        $subtopic = SubTopic::find($data['sid']);
+        $sCode = ( is_integer($subtopic->code) ) ?  str_pad($subtopic->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $subtopic->code;
+
+        $replace2 = ['@' => $lCode, '&' => $sCode, '%' => $tCode, '#' => $dCode];
+        $pattern = $precode;
+        foreach($arreglo AS $key) {
+            if( str_contains($pattern, $key) ) {
+                $pattern = str_replace($key, $replace2[$key], $pattern);
+            }
+        }
+        return $pattern; 
+    } // getCode Method
+
+    /**
+     * Obtiene el nombre del TEMA
+     * @param integer $id identificador del TEMA
+     * @return string  texto del nombre
+     */      
+    public function getTopic($id)
+    {
+        $topic = Topic::find($id);
+        return ($topic) ? $topic->name : 'N/A';
+    } // getTopic Method
+
+    /**
+     * Obtiene el nombre del SUBTEMA
+     * @param integer $id identificador del SUBTEMA
+     * @return string  texto del nombre
+     */       
+    public function getSubtopic($id)
+    {
+        $topic = Subtopic::find($id);
+        return ($topic) ? $topic->name : 'N/A';
+    } // getSubTopic Method
+    
+    /**
+     * Valida si existe un código de TEMA
+     * @param integer $did identificador del DEPARTAMENTO
+     * @param  string $code código del TEMA
+     * @return boolean  resultado
+     */       
+    public function existsTopicCode($did, $code)
+    {
+        $topic = Topic::where('department_id', $did)->where('code', $code)->first();
+        if( $topic ) return true;
+        return false;
+    } // existsTopicCode Method
+
+    /**
+     * Valida si existe un nombre de TEMA
+     * @param integer $did identificador del DEPARTAMENTO
+     * @param  string $name nombre del TEMA
+     * @return boolean  resultado
+     */     
+    public function existsTopicName($did, $name)
+    {
+        $topic = Topic::where('department_id', $did)->where('name', $name)->first();
+        if( $topic ) return true;
+        return false;
+    } // existsTopicName Method
+    
+    /**
+     * Valida si existe un código de SUBTEMA
+     * @param integer $tid identificador del TEMA
+     * @param  string $code código del SUBTEMA
+     * @return boolean  resultado
+     */     
+    public function existsSubtopicCode($tid, $code)
+    {
+        $subtopic = Subtopic::where('topic_id', $tid)->where('code', $code)->first();
+        if( $subtopic ) return true;
+        return false;
+    } // existsSubtopicCode Method
+
+    /**
+     * Valida si existe un nombre de SUBTEMA
+     * @param integer $tid identificador del TEMA
+     * @param  string $name nombre del SUBTEMA
+     * @return boolean  resultado
+     */      
+    public function existsSubtopicName($tid, $name)
+    {
+        $subtopic = Subtopic::where('topic_id', $tid)->where('name', $name)->first();
+        if( $subtopic ) return true;
+        return false;
+    }  // existsSubtopicNam Method   
+    
+    /**
+     * Valida si existe un código de ARCHIVO
+     * @param integer $id identificador del ARCHIVO actual
+     * @param  string $code código del ARCHIVO actual
+     * @return boolean  resultado
+     */       
+    public function existsCode($id, $code)
+    {
+        $file = File::where('code', $code)->first();
+        if( $file ) {
+            if( $file->file_id != $id ) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    } // existsCode Method    
+
+
+} // FileClass
