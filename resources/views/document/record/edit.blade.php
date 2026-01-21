@@ -59,6 +59,7 @@
                                     <input type="hidden" name="status_id" value={{ $DATA['status_id'] }} id="status-id">
                                     <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                     <input type="hidden" id="json-users" value="">
+                                    <input type="hidden" id="count" value="{{ $count }}">
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -106,26 +107,34 @@
                                             <div class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
                                                 <div class="input-group mt-5">
-                                                    <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.topic.title') }}</div>
-                                                    <input type="text" name="topic" value="{{ old('topic', isset($DATA) ? $DATA['topic'] : '') }}" class="form-control w-full input-status" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="255" required>
-                                                    <select id="topic-select" class="form-control w-full input-status ml-2">
+                                                    <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.topic.title') }}</div>                                                    
+                                                    <select id="topic-select" name="topic_id" class="form-control w-full input-status">
                                                         <option value="">{{ trans('document/record.form.topic.default') }}</option>
-                                                        @if( $topics !== true )
-                                                        @foreach($topics as $item)
-                                                        <option value="{{ $item->topic }}">{{ $item->topic }}</option>
+                                                        @php($previous = '')
+                                                        @foreach($topics as $topic)
+                                                            @if( $topic->department != $previous )
+                                                                @if( $previous != '' )
+                                                                    </optgroup>
+                                                                @endif
+                                                                <optgroup id="dpt{{ $topic->department_id }}" label="{{ $topic->department }}">
+                                                                @php($previous = $topic->department)
+                                                            @endif
+                                                            <option value="{{ $topic->topic_id }}" @if( in_array('topic', $DATA) && ($DATA["topic"] == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
                                                         @endforeach
-                                                        @endif
-                                                    </select>
+                                                        </optgroup>
+                                                    </select>                                                    
+                                                    <input type="text" id="topic-name" name="topic" value="{{ old('topic', isset($DATA) ? $DATA['topic'] : '') }}" class="form-control w-full input-status  ml-2" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="48">
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.topic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                                    <button id="btn-modal-topic" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                    <button id="btn-new-topic" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
                                                 <div class="input-group mt-3">                                                
-                                                    <div id="subject" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.subject.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.subject.title') }}</div>
-                                                    <input type="text" name="subject" value="{{ old('subject', isset($DATA) ? $DATA['subject'] : '') }}" class="form-control w-full input-status" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="255" required>
-                                                    <select id="subject-select" class="form-control w-full input-status ml-2">
+                                                    <div id="subject" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.subject.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.subject.title') }}</div>                                                    
+                                                    <select id="subject-select" name="subject_id" class="form-control w-full input-status">
                                                         <option value="">{{ trans('document/record.form.subject.default') }}</option>
-                                                    </select>                                                    
-                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                                                    
+                                                    </select>
+                                                    <input type="text" name="subject" value="{{ old('subject', isset($DATA) ? $DATA['subject'] : '') }}" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
+                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                    <button id="btn-new-subject" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
                                             </div>
                                             <!-- END: Topic -->                                            
@@ -470,8 +479,44 @@
                         </div>
                     </div>
                     <!-- END: Modal Signing --> 
+
+                    <!-- BEGIN: Modal Topic TODO: Delete -->
+                    <div id="modal-department" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-s">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-department-title" class="font-medium text-base mr-auto">Seleccionar departamento</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <div id="modal-attachments-message"></div>
+                                        <div class="input-group mt-3">
+                                        @if( $count == 0 )
+                                            @foreach($departments as $department)
+                                            <input type="radio" name="department_id" value="{{ $department->department_id }}" class="mr+1"><span class="ml-1">{{ $department->name }}</span>
+                                            @endforeach
+                                        @else
+                                            <input type="radio" name="department_id" value="{{ $departments->department_id }}" class="mr+1"><span class="ml-1">{{ $departments->name }}</span>
+                                        @endif
+                                        </div>                                        
+                                                           
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-department-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-department-ok" type="button" class="btn btn-primary w-20">Guardar</button>
+                                    <a id="modal-department-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-department" class="">.</a>                                    
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Topic -->                    
                      
-                    <!-- BEGIN: Modal Topic -->
+                    <!-- BEGIN: Modal Topic TODO: Delete -->
                     <div id="modal-topic" class="modal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-s">
                             <div class="modal-content">
@@ -499,7 +544,7 @@
                                         </div>                                        
                                         <div class="input-group mt-3">
                                             <div class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic_name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic_name.title') }}</div>
-                                            <input type="text" id="topic-name" name="name" class="form-control w-full" aria-describedby="topic_name" placeholder="{{ trans('document/file.form.topic_name.placeholder') }}" minlength="2" maxlength="48" required>
+                                            <input type="text" id="topic-name2" name="name" class="form-control w-full" aria-describedby="topic_name" placeholder="{{ trans('document/file.form.topic_name.placeholder') }}" minlength="2" maxlength="48" required>
                                             <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic_name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                         </div>
                                         <div class="input-group mt-3">
@@ -623,6 +668,8 @@
         $("input[name='subject']").on("change", function() {
             $("#subject-select").val("");
         });
+
+
         
         // Selección del grupo
         $("#btn-group").on("click", function() {
@@ -939,12 +986,35 @@
         }); 
 
         // MODAL PARA TEMAS
-        $('body').on('click', '#btn-modal-topic', function (e) {
+        $('body').on('click', '#btn-new-topic', function (e) {
             e.preventDefault();            
-            
-            $("#modal-topic-open")[0].click();
+            var txt = $("#topic-name").val();
+            var no = $("#count").val();
+            console.log('# departamento: '+no+' txt: '+txt);            
 
-        });
+            if( txt != '' ) {
+                no = 0;   // FIXME: depuración
+                if( no == '0' ) {  
+                    $("#modal-department-open")[0].click();
+                } else {
+                    setTopicAjax(no, txt);
+                }
+            } else {
+                setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.topic.empty') }}");
+            }            
+        }); // 
+
+        $('body').on('click', '#btn-department-ok', function (e) {
+            var no = $('input[name="department_id"]:checked').val();
+            var txt = $("#topic-name").val();
+            console.log('# departamento: '+no+' txt: '+txt);
+            if( no > 0 ) {
+                $("#btn-department-ko").click();
+                setTopicAjax(no, txt);
+            } else {
+                setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.department.empty') }}");
+            }
+        }); // btn-department-ok
     
       
     }); // document
@@ -1166,6 +1236,34 @@
     function renderSigning() {
         $("#modal-signing-open")[0].click();         
     } // renderSigning 
+
+    function setTopicAjax(no, txt) {        
+        var route = "{{ route('files.save.topic') }}";
+        console.log('Running setTopicAjax with route: '+route);
+        console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
+        //$n = $n + 1;
+        //var output = '<tr id="tr-'+$n+'"><td><input name="group[]" value="'+param+'" class="form-control set" readonly></td>';
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'department_id': no, 'topic': txt},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                console.dir(data);                                                                
+                // var options  = '<option value="">{{ trans("document/record.form.tag.default") }}</option>';                                
+                // $.each(data, function(i, value) {
+                //     options += '<option value="'+value.tag+'">'+value.tag+'</option>';
+                // });
+                // output += '<input id="tag-input-'+n+'" type="text" name="tags[]" value="" class="form-control w-full input-status" aria-describedby="tag" placeholder="'+'{{ trans("document/record.form.tag.placeholder") }}'+'">';
+                // output += '<select class="form-control w-full input-status ml-2" onChange="selectTag('+n+',this.value)">'+options+'</select>';
+                // output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4">O</i></a></div>';
+                // output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+n+')"><i data-lucide="minus" class="w-4 h-4">-</i></button>';
+                // output += '</div>';
+                // $("#div-tags").append(output);
+            } // success
+        }); // ajax         
+    } // setTopicAjax Fx
      
 
 </script>

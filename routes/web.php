@@ -207,6 +207,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('chat/salvar', [\App\Http\Controllers\Document\RecordModelController::class, 'storeChat'])->name('chat.store');
             Route::get('chat/eliminar/{id}', [\App\Http\Controllers\Document\RecordModelController::class, 'deleteChat'])->name('chat.delete');
         });
+
+        // FILES
+        Route::group(['prefix' => 'archivo', 'as' => 'files.'], function () {
+            Route::resource('', \App\Http\Controllers\Document\FileModelController::class);
+            Route::post('salvar/tema', [\App\Http\Controllers\Document\FileModelController::class, 'setTopic'])->name('save.topic'); 
+
+        });                    
     });  
 });
 

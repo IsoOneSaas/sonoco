@@ -1,6 +1,7 @@
 <?php   namespace App\Repositories\Document;
 
 use App\Classes\PdfClass;
+use App\Classes\FileClass;
 use App\Classes\ToolsClass;
 use App\Events\RecordSent;
 use App\Events\RecordTracing;
@@ -15,6 +16,7 @@ use App\Models\Document\RecordModel;
 use App\Models\Document\TypeModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
+use App\Models\Set\DepartmentModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -29,12 +31,14 @@ use App\Models\Document\ForwardModel; // Eliminar
 class RecordRepository implements RecordRepositoryInterface 
 {
     private $tool;
+    private $file;
     protected $set;
     protected $recordUrl;
 
-    public function __construct(ToolsClass $Tools)
+    public function __construct(ToolsClass $Tools, FileClass $Files)
     {
         $this->tool = $Tools;
+        $this->file = $Files;
         $this->set = $this->tool->setSettings('document');
         $this->recordUrl = public_path() .'/tenants/sonoco'.  config('settings.PATH_DOC_RECORD');
     }
@@ -795,6 +799,15 @@ class RecordRepository implements RecordRepositoryInterface
         return $processes;
     } // processes
 
+    public function getDepartmentsList($dids)
+    {
+        if(count($dids) == 1) {
+            return DepartmentModel::find($dids[0]);
+        } else {
+            return DepartmentModel::whereIn('department_id', $dids)->orderBy('name')->get();
+        }        
+    } // getDepartmentsList
+
     /**
      * Recupera el listado de usuarios para el modal de selección
      * @param  array $data registros seleccionados
@@ -928,12 +941,18 @@ class RecordRepository implements RecordRepositoryInterface
     * Genera listado de temas
     * @return json    listado
     */        
-    public function getTopics()
+    public function getTopics($dids)
     {
-        // TODO: Crear Modelo?
-        $topics = DB::table('document_record_topics')->select('topic')->orderBy('topic')->groupBy('topic')->get();
-        if( $topics ) return $topics;
-        else return true;
+                
+        Log::debug(['DIDS:' => $dids]);
+        // Determinar los temas
+        $topics = $this->file->getTopicsSelect($dids);
+        // Adecuación 
+        foreach($topics as $topic) {
+            $topic->newCode = str_pad($topic->code, $this->set['file_code_pad'], "0", STR_PAD_LEFT);
+        }
+        Log::debug(['GETTOPICS:' => $topics->toArray()]);
+        return $topics;
     } // getTopics Method 
 
     /**

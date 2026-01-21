@@ -63,25 +63,27 @@ return [
     ],    
 
     'request' => [
-                'name'         =>  [
-                                    'required'      => 'Escriba el nombre completo del registro',
-                                    'min'           => 'Se require nombre completo del registro',
-                                    'unique'        => 'Nombre de registro existente',
+                'department_id'         =>  [
+                                    'required'      => 'Departamento no identificado',
+                ],         
+                'topic'         =>  [
+                                    'required'      => 'Escriba el nombre del tema',
+                                    'min'           => 'Se require nombre completo del tema',
+                                    'max'           => 'El nombre de tema no puede ser mayor a 48 caracteres',
+                                    'unique'        => 'Nombre de tema existente',
                 ],
-                'code'         =>  [
-                    'required'      => 'Escriba el código del registro',
-                    'min'           => 'Se require código completo del registro',
-                    'unique'        => 'Código de registro existente',
-                ], 
-                'storage'         =>  [
-                    'required'      => 'Escriba el almacenamiento del registro',
-                ],  
-                'classification'         =>  [
-                    'required'      => 'Escriba la clasificación del registro',
-                ], 
-                'date'          => [
-                    'date_format'   => 'Formato de fecha erróneo',
-                ],                                              
+                // 'code'         =>  [
+                //     'required'      => 'Escriba el código del registro',
+                //     'min'           => 'Se require código completo del registro',
+                //     'unique'        => 'Código de registro existente',
+                // ], 
+                // 'storage'         =>  [
+                //     'required'      => 'Escriba el almacenamiento del registro',
+                // ],  
+
+                // 'date'          => [
+                //     'date_format'   => 'Formato de fecha erróneo',
+                // ],                                              
     ],
 
     'tooltip' => [
@@ -121,6 +123,15 @@ return [
             'alert' =>  [
                 'columns'   => 'Seleccione las columnas a visualizar a su conveniencia <a id="btn-columns" href="#" class="btn" title="Administrar columnas"><i class="icon-gear"></i></a>',
             ],
+    ],
+    
+    'error' => [
+            'topic' =>  [
+                'empty'   => 'Digite un nuevo nombre de tema',
+            ],
+            'department' =>  [
+                'empty'   => 'Seleccione un departamento de la lista',
+            ],            
     ],    
 
 ];

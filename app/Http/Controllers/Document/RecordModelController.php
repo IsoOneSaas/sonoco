@@ -79,10 +79,15 @@ class RecordModelController extends Controller
        Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
 
         // Obtener Firma del usuario
-        $path = $this->getSignature();       
+        $path = $this->getSignature();
+        
+        // obtener Departamentos
+        $dids = $this->tool->setDepartmentsFilter();
+        $departments = $this->recordRepo->getDepartmentsList($dids);
+        $count = ( count($dids) == 1 ) ? $departments->department_id : 0;
 
         // obtener temas
-        $topics = $this->recordRepo->getTopics();
+        $topics = $this->recordRepo->getTopics($dids);
 
         // Obtener grupos de etiquetas
         $groups = $this->recordRepo->getGroups();
@@ -97,6 +102,8 @@ class RecordModelController extends Controller
         return view('document.record.edit', [
             'initTab'   => 'btn-1-tab',
             'DATA'      => $data,
+            'count'     => $count,
+            'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => $slug1,

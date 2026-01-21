@@ -21,7 +21,9 @@ interface RecordRepositoryInterface
 
     //public function getTypesList();
 
-    public function getTopics();
+    public function getDepartmentsList(array $dids);
+
+    public function getTopics(array $dids);
 
     public function getGroups();
 

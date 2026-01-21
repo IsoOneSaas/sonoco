@@ -12,20 +12,18 @@ use Illuminate\Support\Facades\Log;
 
 class FileClass
 {
-
-    private $nuiPattern; 
     private $nuiStrPad;
     private $codeStrPad;
     private $tool;
     protected $set;
 
     public function __construct(ToolsClass $Tools)
-    {
-        $this->nuiPattern = "%s.%s-%s";
-        $this->nuiStrPad = 3;
-        $this->codeStrPad = 2;
+    {      
         $this->tool = $Tools;
         $this->set = $this->tool->setSettings('document');
+        //Log::debug(['SETTINGS' => $this->set]);
+        $this->codeStrPad = $this->set['file_code_pad'];
+        $this->nuiStrPad = $this->set['record_nui_pad'];
     }
     
     /**
@@ -83,15 +81,15 @@ class FileClass
      * @param  array $dids arreglo unidimensional de identificadores de departamento
      * @return Collection  Opciones de TEMA
      */     
-    public function getTopicsSelect($dids)
+    public function getTopicsSelect($dids)  // *
     {                     
-        $topics = Topic::join('departments', function ($join) use ($dids) {
-                $join->on('document_file_topics.department_id', '=', 'departments.department_id');
-                $join->whereIn('departments.department_id',  $dids);
+        $topics = Topic::join('set_departments', function ($join) use ($dids) {
+                $join->on('document_file_topics.department_id', '=', 'set_departments.department_id');
+                $join->whereIn('set_departments.department_id',  $dids);
             })
-            ->orderBy('departments.name')
+            ->orderBy('set_departments.name')
             ->orderBy('document_file_topics.code')
-            ->get(['departments.department_id', 'departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);        
+            ->get(['set_departments.department_id', 'set_departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);        
         return $topics;     
     } // getTopicsSelect
     
@@ -161,7 +159,7 @@ class FileClass
     public function setNui($code, $year, $order)
     {        
         $serial = str_pad($order, $this->nuiStrPad, "0", STR_PAD_LEFT);
-        return sprintf($this->nuiPattern, $code, $year, $serial);
+        return sprintf($this->set['record_nui_format'], $code, $year, $serial);
     }  // setNui  
 
     /**
@@ -178,7 +176,6 @@ class FileClass
         $replace1 = ['L' => '@', 'D' => '#', 'T' => '%', 'S' => '&']; // 'P' => '$',
 
         // Precode
-        $this->set = $this->tool->setSettings('document');
         $precode = $this->set['file_code_format'];
         Log::debug('PRECODE1: '. $precode);
         foreach( config('settings.file_format_code') AS $key) {
@@ -239,7 +236,7 @@ class FileClass
      * @param  string $code código del TEMA
      * @return boolean  resultado
      */       
-    public function existsTopicCode($did, $code)
+    public function existsTopicCode($did, $code)    // TODO: sigue?
     {
         $topic = Topic::where('department_id', $did)->where('code', $code)->first();
         if( $topic ) return true;
@@ -265,7 +262,7 @@ class FileClass
      * @param  string $code código del SUBTEMA
      * @return boolean  resultado
      */     
-    public function existsSubtopicCode($tid, $code)
+    public function existsSubtopicCode($tid, $code) // TODO: Sigue?
     {
         $subtopic = Subtopic::where('topic_id', $tid)->where('code', $code)->first();
         if( $subtopic ) return true;

@@ -237,6 +237,9 @@ return [
         'record_size_allowed_default' => '16000', // kb 
         // FILES
         'file_code_format' => 'L.D.T.S',
+        'record_nui_format' => '%s.%s-%s',
+        'file_code_pad' => 2,
+        'record_nui_pad' => 3,
     ],
 
     'document_validity_texts' => [
