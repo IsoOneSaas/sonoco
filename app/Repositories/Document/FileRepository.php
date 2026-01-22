@@ -49,22 +49,44 @@ class FileRepository implements FileRepositoryInterface
      */     
     public function storeTopicName($id, $txt)
     {
-       
-        try {
-            
-            // Determinar código
-            
-            // Salvar
-            DB::beginTransaction();
-
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('FileRepository::storeTopicNamee Exception: '. $e->getMessage());
-            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.error.topic.no-success')];
+        $dids = $this->tool->setDepartmentsFilter();
+        return  $this->file->setTopic($id, $txt, $dids);     
+    } // storeTopicName Service 
+    
+    /**
+     * Valida si existe el nombre de subtema para el respectivo tema
+     * @param  integer $id Identificador del tema
+     * @param  string $txt Nombre del subtema
+     * @return boolean   Resultado de la validación
+     */     
+    public function existsSubtopicName($id, $txt)
+    {
+        if( $this->file->existsSubtopicName($id, $txt) ) {
+            return true;
         }
-        return ['status' => 'success', 'message' => ''];        
-    } // storeTopicName Service    
+        return false;
+    } // existsSubtopicName Service 
+    
+    /**
+     * Inserta neuvo registro de subtema
+     * @param  integer $id Identificador del tema
+     * @param  string $txt Nombre del subtema
+     * @return array   Resultado de la inserción
+     */     
+    public function storeSubtopicName($id, $txt)
+    {
+        return  $this->file->setSubtopic($id, $txt);     
+    } // storeSubtopicName Service 
+    
+    /**
+     * Obtiene listado de subtemas para el tema dado
+     * @param  integer $id Identificador del tema
+     * @return json Listado
+     */       
+    public function getSubtopicsList($id)
+    {
+        return $this->file->getSubTopicsSelect($id);  
+    } // getSubtopicsList Service     
  
 
 } // class

@@ -11,11 +11,19 @@ return [
     |
     */
 
-    'create' => [
-                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'success'       => 'Archivo salvado correctamente',
+    'topic' => [
+                'create' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Tema salvado correctamente',                    
+                ],
     ],
 
+    'subtopic' => [
+                'create' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Subtema salvado correctamente',                                                
+                ],
+    ],    
 
     'form' => [
                 'topic_department'    => [
@@ -43,9 +51,50 @@ return [
                                     'tooltip' => 'Opcional.  Texto alfanumérico con máximo 255 caracteres.',
                 ],                                 
     ],
+    
+    'request' => [
+                'department_id'         =>  [
+                                    'required'      => 'Departamento no identificado',
+                ],
+                'topic_id'         =>  [
+                                    'required'      => 'Tema no seleccionado',
+                ],                          
+                'topic'         =>  [
+                                    'required'      => 'Escriba el nombre del tema',
+                                    'min'           => 'Se require nombre completo del tema',
+                                    'max'           => 'El nombre de tema no puede ser mayor a 48 caracteres',
+                                    'unique'        => 'Nombre de tema existente',
+                ],
+                'subtopic'         =>  [
+                                    'required'      => 'Escriba el nombre del subtema',
+                                    'min'           => 'Se require nombre completo del subtema',
+                                    'max'           => 'El nombre de subtema no puede ser mayor a 48 caracteres',
+                                    'unique'        => 'Nombre de subtema existente',
+                ],                       
+    ],
 
+    'error' => [
+            'topic' =>  [
+                'empty'   => 'Digite un nuevo nombre de tema',
+                'no-exist'  => 'No hay temas creados. Crea uno nuevo!'
+            ],
+            'subtopic' =>  [
+                'empty'     => 'Digite un nuevo nombre de subtema',
+                'no-topic'  => 'Seleccione un tema para el subtema',
+                'no-exist'  => 'No hay subtemas para el tema seleccionado. Crea uno nuevo!'
+            ],            
+            'department' =>  [
+                'empty'   => 'Seleccione un departamento de la lista',
+            ],            
+    ],      
 
+    
     /* actualizado */
+    'create' => [
+                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                'success'       => 'Archivo salvado correctamente',
+    ],
+
 
     'update' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
@@ -62,16 +111,7 @@ return [
                 'existing'      => 'Opción ya existente',
     ],    
 
-    'request' => [
-                'department_id'         =>  [
-                                    'required'      => 'Departamento no identificado',
-                ],         
-                'topic'         =>  [
-                                    'required'      => 'Escriba el nombre del tema',
-                                    'min'           => 'Se require nombre completo del tema',
-                                    'max'           => 'El nombre de tema no puede ser mayor a 48 caracteres',
-                                    'unique'        => 'Nombre de tema existente',
-                ],
+
                 // 'code'         =>  [
                 //     'required'      => 'Escriba el código del registro',
                 //     'min'           => 'Se require código completo del registro',
@@ -84,7 +124,7 @@ return [
                 // 'date'          => [
                 //     'date_format'   => 'Formato de fecha erróneo',
                 // ],                                              
-    ],
+    //],
 
     'tooltip' => [
                 'system'        => 'Seleccione el sistema de gestión del registro',
@@ -125,13 +165,6 @@ return [
             ],
     ],
     
-    'error' => [
-            'topic' =>  [
-                'empty'   => 'Digite un nuevo nombre de tema',
-            ],
-            'department' =>  [
-                'empty'   => 'Seleccione un departamento de la lista',
-            ],            
-    ],    
+  
 
 ];

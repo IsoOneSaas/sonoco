@@ -534,14 +534,13 @@ class RecordRepository implements RecordRepositoryInterface
                 $document->save();
             }
 
-
             // SAVE TOPIC/SUBJECT
-            if( key_exists('topic', $data) ) {
+            if( key_exists('topic_id', $data) ) {
                 DB::table('document_record_topics')->updateOrInsert([
                     'record_id' => $record->record_id
                 ],[ 
-                    'topic' => $data['topic'], 
-                    'subject' => $data['subject']
+                    'topic' => $data['topic_id'], 
+                    'subject' => $data['subject_id']
                 ]);
             } // if           
 
@@ -661,7 +660,9 @@ class RecordRepository implements RecordRepositoryInterface
             }
 
             
+            // TODO: CREAR ARCHIVO
 
+            
 
             // SAVE TRACING  TODO: trazabilidad inmutable
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                

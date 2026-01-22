@@ -132,7 +132,7 @@
                                                     <select id="subject-select" name="subject_id" class="form-control w-full input-status">
                                                         <option value="">{{ trans('document/record.form.subject.default') }}</option>
                                                     </select>
-                                                    <input type="text" name="subject" value="{{ old('subject', isset($DATA) ? $DATA['subject'] : '') }}" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
+                                                    <input type="text" id="subject-name" name="subject" value="{{ old('subject', isset($DATA) ? $DATA['subject'] : '') }}" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                     <button id="btn-new-subject" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
@@ -480,7 +480,7 @@
                     </div>
                     <!-- END: Modal Signing --> 
 
-                    <!-- BEGIN: Modal Topic TODO: Delete -->
+                    <!-- BEGIN: Modal Department -->
                     <div id="modal-department" class="modal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-s">
                             <div class="modal-content">
@@ -491,17 +491,23 @@
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->
                                 <div class="modal-body intro-y box p-5 mt-5">
-                                    <div id="modal-attachments-message"></div>
-                                        <div class="input-group mt-3">
-                                        @if( $count == 0 )
-                                            @foreach($departments as $department)
-                                            <input type="radio" name="department_id" value="{{ $department->department_id }}" class="mr+1"><span class="ml-1">{{ $department->name }}</span>
-                                            @endforeach
-                                        @else
-                                            <input type="radio" name="department_id" value="{{ $departments->department_id }}" class="mr+1"><span class="ml-1">{{ $departments->name }}</span>
-                                        @endif
-                                        </div>                                        
-                                                           
+                                    <div id="modal-department-message"></div>
+                                    <div class="form-group row">
+                                        <div class="col-sm-10">
+                                            @if( $count == 0 )
+                                                @foreach($departments as $department)                                                
+                                                <div class="radio mb-2">
+                                                    <label>
+                                                        <input type="radio" name="department_id" value="{{ $department->department_id }}">
+                                                        <code>{{ $department->name }}</code>
+                                                    </label>
+                                                </div>
+                                                @endforeach
+                                            @else
+                                                <div class="radio"><label><input type="radio" name="department_id" value="{{ $departments->department_id }}" class="mr+1"><code>{{ $departments->name }}</code></label></div>
+                                            @endif                                                    
+                                        </div>
+                                    </div>                                                                                                 
                                 </div>
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
@@ -646,29 +652,13 @@
 
         // Selección del tema
         $("#topic-select").on("change", function() {
-            var topic = this.value;
-            if( topic != '' ) {
-                $("input[name='topic']").val(topic);
-                topicAjax(topic);
-            } // if                
-        }); // topic
-
-        $("input[name='topic']").on("change", function() {
-            $("#topic-select").val("");
-        });
-        
-        // Selección del subtema
-        $("#subject-select").on("change", function() {
-            var subject = this.value;
-            if( subject != '' ) {
-                $("input[name='subject']").val(subject);            
-            }
-        });
-
-        $("input[name='subject']").on("change", function() {
-            $("#subject-select").val("");
-        });
-
+            var tid = this.value;
+            if(tid != '') {
+               topicAjax(tid);
+            } else {
+                generateSubtopicsSelect(0, null);
+            }               
+        }); // topic-select
 
         
         // Selección del grupo
@@ -993,7 +983,7 @@
             console.log('# departamento: '+no+' txt: '+txt);            
 
             if( txt != '' ) {
-                no = 0;   // FIXME: depuración
+                //no = 0;   // FIXME: se activa para depuración (un sólo departamento)
                 if( no == '0' ) {  
                     $("#modal-department-open")[0].click();
                 } else {
@@ -1015,6 +1005,23 @@
                 setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.department.empty') }}");
             }
         }); // btn-department-ok
+
+        $('body').on('click', '#btn-new-subject', function (e) {
+            e.preventDefault();            
+            var txt = $("#subject-name").val();
+            var no = $("#topic-select").val();
+            console.log('# tema: '+no+' txt: '+txt);
+            
+            if(txt == '') {
+                setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.subtopic.empty') }}");
+            } else {
+                if(no == '') {                
+                    setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.subtopic.no-topic') }}");
+                } else {
+                    setSubjectAjax(no, txt);
+                }  
+            }          
+        }); //         
     
       
     }); // document
@@ -1053,22 +1060,24 @@
         }                
     } // set Status Fx
 
-    function topicAjax(param) {        
-        var route = "{{ route('records.edit.subject') }}";
+    function topicAjax(id) {        
+        var route = '/documentos/archivo/listar/subtemas/'+id;
         console.log('Running topicAjax with route: '+route);
         $.ajax({
             url: route,
-            type: 'POST',
-            data: {'txt':param},
+            type: 'GET',
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
             success: function(data) {
-                //console.dir(data);
-                var output = '<option value="">{{ trans("document/record.form.subject.default") }}</option>';
-                $.each(data, function(i, value) {
-                    output += '<option value="'+value.subject+'">'+value.subject+'</option>';
-                });
-                $("#subject-select").html(output);
+                console.dir(data);
+                if( data.success ) {
+                    generateSubtopicsSelect(data.tid, data.subtopics);
+                    $("#subject-select").focus();
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message);
+                    generateSubtopicsSelect(0, null);
+                    $("#subject-name").focus();
+                }                
             } // success
         }); // ajax  
     } // topicAjax Fx
@@ -1241,8 +1250,6 @@
         var route = "{{ route('files.save.topic') }}";
         console.log('Running setTopicAjax with route: '+route);
         console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
-        //$n = $n + 1;
-        //var output = '<tr id="tr-'+$n+'"><td><input name="group[]" value="'+param+'" class="form-control set" readonly></td>';
         $.ajax({
             url: route,
             type: 'POST',
@@ -1250,20 +1257,85 @@
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
             success: function(data) {
-                console.dir(data);                                                                
-                // var options  = '<option value="">{{ trans("document/record.form.tag.default") }}</option>';                                
-                // $.each(data, function(i, value) {
-                //     options += '<option value="'+value.tag+'">'+value.tag+'</option>';
-                // });
-                // output += '<input id="tag-input-'+n+'" type="text" name="tags[]" value="" class="form-control w-full input-status" aria-describedby="tag" placeholder="'+'{{ trans("document/record.form.tag.placeholder") }}'+'">';
-                // output += '<select class="form-control w-full input-status ml-2" onChange="selectTag('+n+',this.value)">'+options+'</select>';
-                // output += '<div class="input-group-text"><a href="javascript:;" class="tooltip" title="'+'{{ trans("document/record.form.tag.tooltip") }}'+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4">O</i></a></div>';
-                // output += '<button type="button" class="btn btn-danger ml-5" onClick="deleteTag('+n+')"><i data-lucide="minus" class="w-4 h-4">-</i></button>';
-                // output += '</div>';
-                // $("#div-tags").append(output);
+                console.dir(data);
+                if( data.success ) {
+                    setSuccessNotification('success', '', data.message);
+                    // Limpia
+                    $("#topic-name").val('');
+                    $("#subject-name").val('');
+                    // Generar nuevo select de temas                
+                    generateTopicsSelect(data.tid, data.topics);
+                    // Generar nuevo select de subtemas
+                    generateSubtopicsSelect(0, null);
+                    $("#subject-name").focus();
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message); 
+                }
             } // success
         }); // ajax         
     } // setTopicAjax Fx
+
+    function generateTopicsSelect(id, topics) {
+        var previous = '';
+        var output = '<option value="">{{ trans("document/record.form.topic.default") }}</option>';
+        if( topics.length == 0 ) {
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/error.topic.no-exist") }}'); 
+            $("#topic-name").focus();
+        } else {
+            $.each(topics, function(i, topic) {
+                if( topic.department != previous ) {
+                    if(previous != '') {
+                        output += '</optgroup>';
+                    } // if
+                    output += '<optgroup id="dpt'+topic.department_id+'" label="'+topic.department+'">';
+                    previous = topic.department;
+                } // if
+                output += '<option value="'+topic.topic_id+'"';
+                output += ( topic.topic_id == id ) ? ' selected' : '';
+                output += '>['+topic.newCode+'] '+topic.name+'</option>';            
+            });
+        }
+        $("#topic-select").html(output);
+    } // generateTopicsSelect
+
+    function setSubjectAjax(no, txt) {        
+        var route = "{{ route('files.save.subject') }}";
+        console.log('Running setSubjectAjax with route: '+route);
+        console.log('Voy a crear SUBtema con nombre '+txt+' para el tema '+no);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'topic_id': no, 'subject': txt},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                console.dir(data);
+                if( data.success ) {
+                    setSuccessNotification('success', '', data.message);
+                    // Limpia
+                    $("#topic-name").val('');
+                    $("#subject-name").val('');
+                    // Generar nuevo select de subtemas
+                    generateSubtopicsSelect(data.sid, data.subtopics);
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message); 
+                }
+            } // success
+        }); // ajax         
+    } // setTopicAjax Fx
+
+
+    function generateSubtopicsSelect(id, subtopics) {
+        var output = '<option value="">{{ trans("document/record.form.subject.default") }}</option>';
+        if(id > 0) {
+            $.each(subtopics, function(i, subtopic) {
+                output += '<option value="'+subtopic.subtopic_id+'"';
+                output += ( subtopic.subtopic_id == id ) ? ' selected' : '';
+                output += '>['+subtopic.newCode+'] '+subtopic.name+'</option>';
+            });
+        }
+        $("#subject-select").html(output);
+    } // generateSubtopicsSelect    
      
 
 </script>

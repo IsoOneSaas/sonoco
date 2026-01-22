@@ -46,14 +46,15 @@ class FileClass
      * @param  integer $id identificador del tema
      * @return Array  Resultado del método
      */    
-    public function getSubTopicsList($id)
+    public function getSubTopicsList($id) // TODO: quitar?
     {
         $subtopics = new Subtopic;
         $topic = Topic::find($id);
         if($topic) {
-            $subtopics = $topic->subtopics()->orderby('code')->get();
+            $subtopics = $topic->subtopics()->orderby('code')->get();          
         }
-        return ['success' => true, 'message' => '', 'data' => $subtopics];  //FIXME: cmabiar a retornar collection  
+        //return ['success' => true, 'message' => $id, 'data' => $subtopics];  //FIXME: cmabiar a retornar collection  
+        return $subtopics;
     } // getSubTopicsList Method 
     
     public function getDeparmentIds()   // FIXME: Temporal
@@ -74,7 +75,7 @@ class FileClass
             $department->code = str_pad($department->department_id, $this->codeStrPad, "0", STR_PAD_LEFT);
         } // foreach        
         return $departments;
-    } // getDeparmentsSelect Method
+    } // getDeparmentsSelect Method *
 
     /**
      * Obtiene los elementos para generar el select de TEMAS seleccionados
@@ -89,9 +90,12 @@ class FileClass
             })
             ->orderBy('set_departments.name')
             ->orderBy('document_file_topics.code')
-            ->get(['set_departments.department_id', 'set_departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);        
+            ->get(['set_departments.department_id', 'set_departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);
+        foreach($topics as $topic) {
+            $topic->newCode = str_pad($topic->code, $this->codeStrPad, "0", STR_PAD_LEFT);
+        }
         return $topics;     
-    } // getTopicsSelect
+    } // getTopicsSelect Method *
     
     /**
      * Obtiene los elementos para generar el select de SUBTEMAS seleccionados
@@ -100,8 +104,12 @@ class FileClass
      */        
     public function getSubtopicsSelect($id)
     {
-        return Subtopic::where('topic_id', $id)->orderBy('code')->get(['subtopic_id', 'code', 'name']);
-    } // getSubtopicsSelect 
+        $subtopics = Subtopic::where('topic_id', $id)->orderBy('code')->get(['subtopic_id', 'code', 'name']);
+        foreach($subtopics as $subtopic) {
+            $subtopic->newCode = str_pad($subtopic->code, $this->codeStrPad, "0", STR_PAD_LEFT);
+        }
+        return $subtopics;
+    } // getSubtopicsSelect *
     
     /**
      * Crea nuevo Archivo en la DB para el nuevo registro salvado
@@ -132,7 +140,79 @@ class FileClass
         }
         return ['success' => true, 'message' => trans('document/file.create.success')];            
 
-    } // setFile Method 
+    } // setFile Method
+
+    /**
+     * Inserta neuvo registro de tema
+     * @param  integer $id Identificador del departamento
+     * @param  string $txt Nombre del tema
+     * @param  array $dids Listado de departamentos del usuario
+     * @return array   Resultado de la inserción
+     */      
+    public function setTopic($id, $txt, $dids)
+    {
+        try {
+            // Obtener el código
+            $existing = Topic::where('department_id', $id)->latest()->first();
+            if($existing) {
+                $code = $existing->code + 1;
+            } else {
+                $code = 1;
+            }
+            // Salvar
+            DB::beginTransaction();
+            $topic = New Topic;
+            $topic->department_id = $id;
+            $topic->code = $code;
+            $topic->name = $txt;
+            $topic->description = '';
+            $topic->save();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('FileClass::setTopic Exception: '. $e->getMessage());
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.topic.create.no-success')];
+        }   
+        // Obtiene el nuevo select de temas     
+        $topics = $this->getTopicsSelect($dids);
+        return ['success' => true, 'tid' => $topic->topic_id, 'topics' => $topics, 'message' => trans('document/file.topic.create.success')];            
+    } // setTopic Method*
+    
+    /**
+     * Inserta neuvo registro de subtema
+     * @param  integer $id Identificador del tema
+     * @param  string $txt Nombre del subtema
+     * @return array   Resultado de la inserción
+     */      
+    public function setSubtopic($id, $txt)
+    {
+        try {
+            // Obtener el código
+            $existing = Subtopic::where('topic_id', $id)->latest()->first();
+            if($existing) {
+                $code = $existing->code + 1;
+            } else {
+                $code = 1;
+            }
+            // Salvar
+            DB::beginTransaction();
+            $subtopic = New Subtopic;
+            $subtopic->topic_id = $id;
+            $subtopic->code = $code;
+            $subtopic->name = $txt;
+            $subtopic->description = '';
+            $subtopic->save();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('FileClass::setSubtopic Exception: '. $e->getMessage());
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.subtopic.create.no-success')];
+        }   
+        // Obtiene el nuevo select de subtemas     
+        $subtopics = $this->getSubtopicsSelect($id);
+        return ['success' => true, 'sid' => $subtopic->subtopic_id, 'subtopics' => $subtopics, 'message' => trans('document/file.subtopic.create.success')];            
+    } // setSubTopic Method*    
+
     
     /**
      * Obtiene el número consecutivo para generar el NUI
@@ -254,7 +334,7 @@ class FileClass
         $topic = Topic::where('department_id', $did)->where('name', $name)->first();
         if( $topic ) return true;
         return false;
-    } // existsTopicName Method
+    } // existsTopicName Method*
     
     /**
      * Valida si existe un código de SUBTEMA
@@ -280,7 +360,7 @@ class FileClass
         $subtopic = Subtopic::where('topic_id', $tid)->where('name', $name)->first();
         if( $subtopic ) return true;
         return false;
-    }  // existsSubtopicNam Method   
+    }  // existsSubtopicNam Method *
     
     /**
      * Valida si existe un código de ARCHIVO

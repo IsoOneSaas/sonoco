@@ -84,7 +84,7 @@ class FileModelController extends Controller
      * @param  json Request $request Datos validados del formulario
      * @return json Resultado de la actualización
      */
-    public function setTopic(Request $request) : RedirectResponse 
+    public function setTopic(Request $request)
     {
         $input = $request->input();
         Log::debug(['SET TOPIC' => $request->all()]);
@@ -106,14 +106,66 @@ class FileModelController extends Controller
             foreach($messages as $message) {
                 $msgs = $message[0]; 
             }            
-            return redirect()->back()->withInput($input)->with('error', $msgs);
+            $response = ['success' => false, 'message' => $msgs]; 
         } elseif( $this->fileRepo->existsTopicName($input['department_id'], $input['topic']) ) {
-            return redirect()->back()->withInput($input)->with('error', trans('document/file.request.topic.unique'));
-        } // if        
-        $response = $this->fileRepo->storeTopicName($input['department_id'], $input['topic']);
-        return redirect()->back()->withInput($input)->with('success', 'Testing...');        
+            $response = ['success' => false, 'message' => trans('document/file.request.topic.unique')]; 
+        } else {
+            $response = $this->fileRepo->storeTopicName($input['department_id'], $input['topic']); 
+        }         
+        return response()->json($response);       
     } // setTopic Method
     
+    /**
+     * Salvar nuevo sbutema en la base de datos
+     * @param  json Request $request Datos validados del formulario
+     * @return json Resultado de la actualización
+     */
+    public function setSubtopic(Request $request)
+    {
+        $input = $request->input();
+        Log::debug(['SET SUBTOPIC' => $request->all()]);
 
+        // VALIDAR FORMULARIO
+        $validator = Validator::make($request->all(), [
+            'topic_id'     => 'required|integer',
+            'subject'      => 'required|min:2|max:48'
+        ], [
+            'topic_id.required'             => trans('document/file.request.topic_id.required'),
+            'topic_id.integer'              => trans('document/file.request.topic_id.required'),
+            'subject.required'            => trans('document/file.request.subtopic.required'),
+            'subject.min'                 => trans('document/file.request.subtopic.min'),
+            'subject.max'                 => trans('document/file.request.subtopic.max'),             
+        ]);
+
+        if ($validator->fails()) {
+            $messages = json_decode($validator->messages(), true);
+            foreach($messages as $message) {
+                $msgs = $message[0]; 
+            }            
+            $response = ['success' => false, 'message' => $msgs]; 
+        } elseif( $this->fileRepo->existsSubtopicName($input['topic_id'], $input['subject']) ) {
+            $response = ['success' => false, 'message' => trans('document/file.request.topic.unique')]; 
+        } else {
+            $response = $this->fileRepo->storeSubtopicName($input['topic_id'], $input['subject']); 
+        }         
+        return response()->json($response);      
+    } // setTopic Method
+
+    /**
+     * Obtiene listado de subtemas para el tema dado
+     * @param  integer $id Identificador del tema
+     * @return json Listado
+     */    
+    public function getSubtopics($id)
+    {
+        $subtopics = $this->fileRepo->getSubtopicsList($id);
+        if( $subtopics->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.subtopic.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'tid' => $id, 'subtopics' => $subtopics, 'message' => ''];  
+        }
+                 
+        return response()->json($response); 
+    } //getSubtopics Method
 
 } // class
