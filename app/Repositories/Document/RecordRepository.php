@@ -660,9 +660,39 @@ class RecordRepository implements RecordRepositoryInterface
             }
 
             
-            // TODO: CREAR ARCHIVO
+            // CREAR ARCHIVO
 
-            
+            // Obtiene información del documento fuente
+            $document = DocumentModel::find($data['document_id']);
+            // Generar input->Código archivistico
+            $input = [
+                'lid' => $document->location_id,   // FIXME: De dónde viene la localización => seleccionar?
+                'did' =>  $data['department_id'],
+                'tid' =>  $data['topic_id'],   
+                'sid' => $data['subject_id']
+            ];            
+            $code = $this->file->getCode($input);
+
+            // Validar si nuevo archivo no existe
+            if( !$this->file->existsCode(0, $code) ) {
+                // Se crea nuevo archivo
+                $result = $this->file->setFile($input, $code, $document->system_id, $document->process_id); // FIXME: De dónde viene proceso => departamento
+                if( !$result['success'] ) {
+                    Log::error($result['message']);
+                } // if                
+            } // if
+
+            // GENERAR NUI
+
+            $currentYear = Carbon::today()->format('Y');
+            $serial = $this->file->getSerial($code, $currentYear);
+            // Salvar NUI
+            $record->fill([
+                'code'          => $code,
+                'year'          => $currentYear,
+                'serial'        => $serial
+            ])->save(); 
+
 
             // SAVE TRACING  TODO: trazabilidad inmutable
             $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
@@ -760,6 +790,16 @@ class RecordRepository implements RecordRepositoryInterface
         return SystemModel::get(['system_id', 'name']);
 
     } // etSystemsList Method
+
+    public function getLocationsList()
+    {
+        $user = Auth::user();
+        if( $user->hasAnyRole('MASTER','SUPER') ) {
+            return LocationModel::all();
+        } else {
+            return $user->locations;
+        }        
+    } // getLocationsList
 
     public function getProcessesList()
     {

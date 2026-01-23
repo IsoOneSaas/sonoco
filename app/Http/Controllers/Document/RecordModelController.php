@@ -80,6 +80,10 @@ class RecordModelController extends Controller
 
         // Obtener Firma del usuario
         $path = $this->getSignature();
+
+        // Obtener Localizaciones
+        $locations = $this->recordRepo->getLocationsList();
+        Log::debug(['LOCATIONS' => $locations->toArray()]);
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
@@ -171,20 +175,22 @@ class RecordModelController extends Controller
         //Log::debug(['STORE DATA' => $request->all()]);
                 
         // VALIDAR FORMULARIO
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [     // FIXME: No falta más validaciones?
             'name'      => 'required|min:8|regex:'. config('settings.document_name_pattern'),
-            'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
-            'subject'   => 'required|min:2|regex:'. config('settings.document_name_pattern'),
+            'topic_id'     => 'required|min:1',
+            'subject_id'   => 'required|min:1',         
+            // 'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
+            // 'subject'   => 'required|min:2|regex:'. config('settings.document_name_pattern'),
         ], [
             'name.required'         => trans('document/record.request.name.required'),
             'name.min'              => trans('document/record.request.name.format'),
             'name.regex'           => trans('document/record.request.name.regex'),
-            'topic.required'         => trans('document/record.request.topic.required'),
-            'topic.min'              => trans('document/record.request.topic.format'),
-            'topic.regex'           => trans('document/record.request.topic.regex'),             
-            'subject.required'         => trans('document/record.request.subject.required'),
-            'subject.min'              => trans('document/record.request.subject.format'),
-            'subject.regex'           => trans('document/record.request.subject.regex'),  
+            'topic_id.required'         => trans('document/record.request.topic.required'),
+            'topic_id.min'              => trans('document/record.request.topic.format'),
+            'topic_id.regex'           => trans('document/record.request.topic.regex'),             
+            'subject_id.required'         => trans('document/record.request.subject.required'),
+            'subject_id.min'              => trans('document/record.request.subject.format'),
+            'subject_id.regex'           => trans('document/record.request.subject.regex'),  
         ]);
 
         if ($validator->fails()) {

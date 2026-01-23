@@ -140,7 +140,7 @@ class FileClass
         }
         return ['success' => true, 'message' => trans('document/file.create.success')];            
 
-    } // setFile Method
+    } // setFile Method *
 
     /**
      * Inserta neuvo registro de tema
@@ -176,7 +176,7 @@ class FileClass
         // Obtiene el nuevo select de temas     
         $topics = $this->getTopicsSelect($dids);
         return ['success' => true, 'tid' => $topic->topic_id, 'topics' => $topics, 'message' => trans('document/file.topic.create.success')];            
-    } // setTopic Method*
+    } // setTopic Method *
     
     /**
      * Inserta neuvo registro de subtema
@@ -211,7 +211,7 @@ class FileClass
         // Obtiene el nuevo select de subtemas     
         $subtopics = $this->getSubtopicsSelect($id);
         return ['success' => true, 'sid' => $subtopic->subtopic_id, 'subtopics' => $subtopics, 'message' => trans('document/file.subtopic.create.success')];            
-    } // setSubTopic Method*    
+    } // setSubTopic Method *    
 
     
     /**
@@ -227,7 +227,7 @@ class FileClass
             return $found->serial + 1;
         } 
         return 1;
-    } // getSerial Method
+    } // getSerial Method *
 
     /**
      * Forma el código NUI
@@ -286,7 +286,7 @@ class FileClass
             }
         }
         return $pattern; 
-    } // getCode Method
+    } // getCode Method *
 
     /**
      * Obtiene el nombre del TEMA
@@ -378,7 +378,7 @@ class FileClass
             return false;
         }
         return false;
-    } // existsCode Method    
+    } // existsCode Method *   
 
 
 } // FileClass

@@ -17,7 +17,7 @@ interface RecordRepositoryInterface
     public function getGroupsList();
 
 
-    //public function getLocationsList();
+   public function getLocationsList();
 
     //public function getTypesList();
 

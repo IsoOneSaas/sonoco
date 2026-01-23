@@ -60,6 +60,7 @@
                                     <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                     <input type="hidden" id="json-users" value="">
                                     <input type="hidden" id="count" value="{{ $count }}">
+                                    <input type="hidden" name="department_id" value=0 >
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -659,7 +660,6 @@
                 generateSubtopicsSelect(0, null);
             }               
         }); // topic-select
-
         
         // Selección del grupo
         $("#btn-group").on("click", function() {
@@ -987,6 +987,7 @@
                 if( no == '0' ) {  
                     $("#modal-department-open")[0].click();
                 } else {
+                    $("input[name='department_id']").val(no);
                     setTopicAjax(no, txt);
                 }
             } else {
@@ -1000,6 +1001,7 @@
             console.log('# departamento: '+no+' txt: '+txt);
             if( no > 0 ) {
                 $("#btn-department-ko").click();
+                $("input[name='department_id']").val(no);
                 setTopicAjax(no, txt);
             } else {
                 setSuccessNotification('error', 'Oops!', "{{ trans('document/file.error.department.empty') }}");
@@ -1030,9 +1032,9 @@
         console.log('Saving...');
         if ($('#record-form input[name="name"]').val() == "") {                
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.name.required') }}");
-        } else if($('#record-form input[name="topic"]').val() == "") {
+        } else if($('#record-form input[name="topic_id"]').val() == "") {
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.topic.required') }}");
-        } else if($('#record-form input[name="subject"]').val() == "") {
+        } else if($('#record-form input[name="subject_id"]').val() == "") {
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.subject.required') }}");
         } else {
 

@@ -171,6 +171,14 @@ return [
             'L',    // Código de localización
             'N',    // Código personlizado
     ],
+
+    'file_format_code' =>   [       // Caracteres que idendifica el código
+                                'L',    // Codigo de localización       
+                                'D',    // Codigo de departamento
+                                //'P',    // Código de proceso
+                                'T',    // Código de tema
+                                'S',    // Código subteman
+    ],     
     
     'document_status' => [              // NO CAMBIAR ORDER Important!
         'create'    =>  'CREATED',      // Documento creado en blanco

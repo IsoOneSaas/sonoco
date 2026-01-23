@@ -11,6 +11,13 @@ return [
     |
     */
 
+    'file' => [
+                'create' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Archivo salvado correctamente',                    
+                ],
+    ],    
+
     'topic' => [
                 'create' => [
                             'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
