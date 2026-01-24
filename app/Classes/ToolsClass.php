@@ -476,7 +476,6 @@ class ToolsClass
             $plucked = $locations->pluck('location_id');
             return $plucked->all();
         }
-
     } // getOwnLocationsByUser
 
     /** ACTUAL ================================================================

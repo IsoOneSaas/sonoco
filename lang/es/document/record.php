@@ -139,7 +139,14 @@ return [
                             'title'         => 'Nuevo mensaje',
                             'tooltip1'       => 'Digite un mensaje y pulse el botón para enviar',
                             'tooltip2'       => 'Pulse el botón para eliminar su mensaje de la base de datos',
-        ],              
+        ],
+        'location'    => [
+                            'icon' => 'map-pin',
+                            'title' => 'Localización',
+                            'default' => 'Seleccione una localización',
+                            'placeholder' => 'Seleccione la localización para el archivo del registro',
+                            'tooltip' => 'Requerido. Seleccionar una localización de la lista.',
+        ],                       
         
     ],    
 

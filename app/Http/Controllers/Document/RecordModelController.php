@@ -81,7 +81,10 @@ class RecordModelController extends Controller
         // Obtener Firma del usuario
         $path = $this->getSignature();
 
-        // Obtener Localizaciones
+        
+
+
+        // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
         Log::debug(['LOCATIONS' => $locations->toArray()]);
         
@@ -89,6 +92,7 @@ class RecordModelController extends Controller
         $dids = $this->tool->setDepartmentsFilter();
         $departments = $this->recordRepo->getDepartmentsList($dids);
         $count = ( count($dids) == 1 ) ? $departments->department_id : 0;
+        Log::debug(['DEPARTMENTS' => $departments->toArray()]);
 
         // obtener temas
         $topics = $this->recordRepo->getTopics($dids);
@@ -106,6 +110,8 @@ class RecordModelController extends Controller
         return view('document.record.edit', [
             'initTab'   => 'btn-1-tab',
             'DATA'      => $data,
+            'locations'    => $locations,
+            'departments' => $departments,
             'count'     => $count,
             'departments' => $departments,
             'topics'    => $topics,

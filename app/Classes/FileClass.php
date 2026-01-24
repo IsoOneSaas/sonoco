@@ -61,7 +61,41 @@ class FileClass
     {
            // ToolsClass::setDepartmentsFilter() -> $dids
            // return $dids;
-    } // getDeparmentsIds Method    
+    } // getDeparmentsIds Method
+    
+    public function getLocationsSelect($user)
+    {
+        return $this->tool->getOwnLocationsByUser($user);
+    }
+
+
+
+
+    public function getLocationsList($user)
+    {        
+        if( $user->hasAnyRole('MASTER','SUPER') ) {
+            $locations = Location::all();
+        } else {
+            $locations = $user->locations;
+        }
+        if( $locations->count() == 1 ) {
+            return $locations->first();
+        } else {
+            foreach($locations as $location) {
+                $location->newCode = ( is_int($location->code) ) ? str_pad($location->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $location->code;
+            }
+            return $locations;
+        }
+    } // getLocationList *    
+
+    public function getDepartmentsList($dids)
+    {
+        if(count($dids) == 1) {
+            return Department::find($dids[0]);
+        } else {
+            return Department::whereIn('department_id', $dids)->orderBy('name')->get();
+        }        
+    } // getDepartmentsList *   
 
     /**
      * Obtiene los elementos para generar el select de DEPARTAMENTOS seleccionados
@@ -82,7 +116,7 @@ class FileClass
      * @param  array $dids arreglo unidimensional de identificadores de departamento
      * @return Collection  Opciones de TEMA
      */     
-    public function getTopicsSelect($dids)  // *
+    public function getTopicsSelect($dids)  
     {                     
         $topics = Topic::join('set_departments', function ($join) use ($dids) {
                 $join->on('document_file_topics.department_id', '=', 'set_departments.department_id');

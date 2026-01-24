@@ -198,6 +198,7 @@ class RecordRepository implements RecordRepositoryInterface
             'subject' => '',
             'tags' => [],
             'document' => $document->name,
+            'sid'   => $document->system_id,
             'status_id' => 0,
             'records' => [],
             'hash' => $hash,
@@ -794,11 +795,7 @@ class RecordRepository implements RecordRepositoryInterface
     public function getLocationsList()
     {
         $user = Auth::user();
-        if( $user->hasAnyRole('MASTER','SUPER') ) {
-            return LocationModel::all();
-        } else {
-            return $user->locations;
-        }        
+        return $this->file->getLocationsList($user);   
     } // getLocationsList
 
     public function getProcessesList()
@@ -842,12 +839,8 @@ class RecordRepository implements RecordRepositoryInterface
 
     public function getDepartmentsList($dids)
     {
-        if(count($dids) == 1) {
-            return DepartmentModel::find($dids[0]);
-        } else {
-            return DepartmentModel::whereIn('department_id', $dids)->orderBy('name')->get();
-        }        
-    } // getDepartmentsList
+        return $this->file->getDepartmentsList($dids);       
+    } // getDepartmentsList    
 
     /**
      * Recupera el listado de usuarios para el modal de selección

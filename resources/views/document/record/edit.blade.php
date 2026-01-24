@@ -61,6 +61,7 @@
                                     <input type="hidden" id="json-users" value="">
                                     <input type="hidden" id="count" value="{{ $count }}">
                                     <input type="hidden" name="department_id" value=0 >
+                                    <input type="hidden" name="system_id" value= @if( in_array('sid', $DATA) ) $sid @else 0 @endif>
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -103,7 +104,25 @@
                                             </div>
                                             <!-- END: Support -->
                                         </div>
-                                        <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">                                            
+                                        <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">
+                                            <!-- BEGIN: Location -->
+                                             @if( $locations->count() > 1 )
+                                            <div class="intro-y box p-5 mt-5">
+                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro en una localización de la lista desplegable.</p>                                                              
+                                                <div class="input-group mt-5">
+                                                    <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.location.title') }}</div>                                                    
+                                                    <select id="location-select" name="location_id" class="form-control w-full input-status">
+                                                        <option value="">{{ trans('document/record.form.location.default') }}</option>
+                                                        @foreach($locations as $location)  
+                                                        <option value="{{ $location->location_id }}"  >[{{ $location->newCode }}] {{ $location->name }}</option>
+                                                        @endforeach                                                        
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            @else
+                                                <input type="hidden" name="location_id" value="{{ $locations->location_id }}">
+                                             @endif
+                                             <!-- END: Location -->  
                                             <!-- BEGIN: Topic -->
                                             <div class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
@@ -521,58 +540,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- END: Modal Topic -->                    
-                     
-                    <!-- BEGIN: Modal Topic TODO: Delete -->
-                    <div id="modal-topic" class="modal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-s">
-                            <div class="modal-content">
-                                <!-- BEGIN: Modal Header -->
-                                <div class="modal-header">
-                                    <h2 id="modal-topic-title" class="font-medium text-base mr-auto">Editar nuevo tema</h2>
-                                </div>
-                                <!-- END: Modal Header -->
-                                <!-- BEGIN: Modal Body -->
-                                <div class="modal-body intro-y box p-5 mt-5">
-                                    <div id="modal-attachments-message"></div>
-                                    <form id="topic-form" method="post" action="{{ route('records.edit.store') }}">
-                                        @csrf
-                                        <div class="input-group mt-3">
-                                            <div class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic_department.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic_department.title') }}</div>
-                                            <select  id="topic-department" name="department_id" class="form-control w-full" aria-describedby="topic_department" required>
-                                                <option value=0>{{ trans('document/file.form.topic_department.placeholder') }}</option>
-                                            </select>
-                                            <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic_department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>                                        
-                                        <div class="input-group mt-3">
-                                            <div class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic_code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic_code.title') }}</div>
-                                            <input type="text" id="topic-code" name="code" class="form-control w-full" aria-describedby="topic_code" placeholder="{{ trans('document/file.form.topic_code.placeholder') }}" minlength="2" maxlength="16" required>
-                                            <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic_code.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>                                        
-                                        <div class="input-group mt-3">
-                                            <div class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic_name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic_name.title') }}</div>
-                                            <input type="text" id="topic-name2" name="name" class="form-control w-full" aria-describedby="topic_name" placeholder="{{ trans('document/file.form.topic_name.placeholder') }}" minlength="2" maxlength="48" required>
-                                            <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic_name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>
-                                        <div class="input-group mt-3">
-                                            <div class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic_description.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic_description.title') }}</div>
-                                            <input type="text" id="topic-description" name="description" class="form-control w-full" aria-describedby="topic_description" placeholder="{{ trans('document/file.form.topic_description.placeholder') }}"  maxlength="255">
-                                            <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic_description.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                        </div>                                         
-                                    </form>                                                           
-                                </div>
-                                <!-- END: Modal Body -->
-                                <!-- BEGIN: Modal Footer -->
-                                <div class="modal-footer">
-                                    <button id="btn-topic-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
-                                    <button id="btn-topic-ok" type="button" class="btn btn-primary w-20">Guardar</button>
-                                    <a id="modal-topic-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-topic" class="">.</a>                                    
-                                </div>
-                                <!-- END: Modal Footer -->
-                            </div>
-                        </div>
-                    </div>
-                    <!-- END: Modal Topic -->                    
+                    <!-- END: Modal Topic -->                                                           
 
                 </div>
                 <!-- END: Content -->
