@@ -10,5 +10,9 @@ class RecordModel extends Model
     protected $primaryKey = 'record_id';
     protected $fillable = [
         'document_id', 'name', 'content', 'author_id', 'author_name', 'author_position', 'filename', 'status', 'code', 'year', 'serial'
-    ];    
+    ];
+    
+ 
+
+
 } // Class

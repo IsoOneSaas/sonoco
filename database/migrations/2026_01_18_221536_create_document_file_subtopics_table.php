@@ -17,7 +17,7 @@ return new class extends Migration
             $table->increments('subtopic_id');
             $table->unsignedInteger('topic_id');
             $table->foreign('topic_id')->references('topic_id')->on('document_file_topics')->onDelete('cascade');
-            $table->string('code',16);
+            $table->unsignedInteger('code_id');
             $table->string('name',48); 
             $table->string('description',255)->nullable();
             $table->timestamp('created_at')->useCurrent();

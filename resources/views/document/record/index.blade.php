@@ -109,6 +109,7 @@
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>Id</th>
+                                                <th>NUI</th>
                                                 <th>Nombre</th>
                                                 <th>Elaborado por</th>
                                                 <th>Tema</th>
@@ -120,6 +121,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th class="th-filter">Id</th>
+                                                <th class="th-filter">NUI</th>
                                                 <th class="th-filter">Nombre</th>
                                                 <th class="th-filter">Elaborado por</th>
                                                 <th class="th-filter">Tema</th>
@@ -133,6 +135,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Id</th>
+                                                <th>NUI</th>
                                                 <th>Nombre</th>
                                                 <th>Elaborado por</th>
                                                 <th>Tema</th>

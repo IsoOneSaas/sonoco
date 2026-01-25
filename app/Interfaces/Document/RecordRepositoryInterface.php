@@ -16,6 +16,8 @@ interface RecordRepositoryInterface
 
     public function getGroupsList();
 
+    public function getFileData($code);
+
 
    public function getLocationsList();
 

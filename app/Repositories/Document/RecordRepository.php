@@ -14,6 +14,7 @@ use App\Models\Document\LinkModel;
 use App\Models\Document\RecordModel;
 //use App\Models\Document\SettingModel;
 use App\Models\Document\TypeModel;
+use App\Models\Document\FileTopicModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\DepartmentModel;
@@ -126,6 +127,9 @@ class RecordRepository implements RecordRepositoryInterface
                 'document_records.name AS recordName', 
                 'document_records.author_name AS authorName', 
                 'document_records.status',
+                'document_records.code',
+                'document_records.year',
+                'document_records.serial',
                 'document_records.created_at as date',
                 'T1.name as documentName',
                 'T4.topic',
@@ -147,11 +151,12 @@ class RecordRepository implements RecordRepositoryInterface
             if($result) {
                 $dt = Carbon::createFromTimeStamp(strtotime($record->date));
                 $data[$i]['DT_RowIndex'] = $i+1;
-                $data[$i]['record_id'] = $record->record_id;            
+                $data[$i]['record_id'] = $record->record_id;
+                $data[$i]['nui'] =  $this->file->setNui($record->code, $record->year, $record->serial);
                 $data[$i]['name'] = $record->recordName;
                 $data[$i]['author'] = $record->authorName;
-                $data[$i]['topic'] = $record->topic;
-                $data[$i]['subject']  = $record->subject;
+                $data[$i]['topic'] = $this->file->getTopic($record->topic);
+                $data[$i]['subject']  = $this->file->getSubtopic($record->subject);
                 $data[$i]['date']  = $dt->diffForHumans();
                 $data[$i]['document'] = ($record->documentName === NULL) ? '' : $record->documentName;
                 $data[$i]['status'] = $record->status;
@@ -346,6 +351,7 @@ class RecordRepository implements RecordRepositoryInterface
             'name' => $record->name,
             'txt' => ($record->content != null && $record->content != '') ? $record->content : false,  
             'file' => ($record->filename != null) ? $record->filename : false,
+            'code' => $record->code,
             'link_name' => '',
             'link_file' => false,
             'document' => '',
@@ -476,7 +482,7 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        //Log::debug(['UPDATE DATA' => $data]);        
+        Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
@@ -663,21 +669,28 @@ class RecordRepository implements RecordRepositoryInterface
             
             // CREAR ARCHIVO
 
-            // Obtiene información del documento fuente
-            $document = DocumentModel::find($data['document_id']);
+            // Determinar proceso
+            $did = $data['department_id'];
+            $process = ProcessModel::join('set_department_process AS T1', function($join) use($did) {
+                    $join->on('T1.process_id', '=', 'set_processes.process_id');
+                    $join->where('T1.department_id', $did);
+                })->first();
+            $pid = ($process) ? $process->process_id : 0;
+            Log::debug(['PROCESS' => $process->toArray()]);
+
             // Generar input->Código archivistico
             $input = [
-                'lid' => $document->location_id,   // FIXME: De dónde viene la localización => seleccionar?
-                'did' =>  $data['department_id'],
+                'lid' =>  $data['location_id'],   
+                'did' =>  $did,
                 'tid' =>  $data['topic_id'],   
-                'sid' => $data['subject_id']
+                'sid' =>  $data['subject_id']
             ];            
             $code = $this->file->getCode($input);
 
             // Validar si nuevo archivo no existe
             if( !$this->file->existsCode(0, $code) ) {
                 // Se crea nuevo archivo
-                $result = $this->file->setFile($input, $code, $document->system_id, $document->process_id); // FIXME: De dónde viene proceso => departamento
+                $result = $this->file->setFile($input, $code, $data['system_id'], $pid);
                 if( !$result['success'] ) {
                     Log::error($result['message']);
                 } // if                
@@ -707,6 +720,7 @@ class RecordRepository implements RecordRepositoryInterface
             Log::error('RecordRepository::store Exception: '. $e->getMessage());
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/record.store.no-success')];
         }
+
         $hash = $this->tool->setIdHash($record->record_id);
         // Mensaje de feedback
         if( $data['status_id'] == 1 ) {
@@ -735,13 +749,6 @@ class RecordRepository implements RecordRepositoryInterface
                     //$response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
                 }                
             }
-            
-
-
-
-            // STORE AS FILE
-            $store = $this->store($record);
-            if( !$store ) Log::error('Registro '. $record->record_id .' con código de documento ya existente no fue almacenado');
             $msg = trans('document/record.store.success');
         } else {
             $msg =  ( $data['record_id'] > 0 ) ? trans('document/record.edit.success') : trans('document/record.create.success');
@@ -755,7 +762,7 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  object $record colección de datos del registro
      * @return boolean    Resultado del método
      */      
-    public function store($record)
+    public function store($record) // FIXME:Se elimina
     {
         $result = false;
         // Obtener documento y proceso fuente
@@ -917,7 +924,12 @@ class RecordRepository implements RecordRepositoryInterface
     {
         return DB::table('document_record_tags')->select('group')->orderBy('group')->groupBy('group')->get(); 
 
-    } // getGroupsList Method   
+    } // getGroupsList Method
+    
+    public function getFileData($code)
+    {
+        return $this->file->getFileDataByCode($code); 
+    }
       
 
     /**

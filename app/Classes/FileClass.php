@@ -274,7 +274,7 @@ class FileClass
     {        
         $serial = str_pad($order, $this->nuiStrPad, "0", STR_PAD_LEFT);
         return sprintf($this->set['record_nui_format'], $code, $year, $serial);
-    }  // setNui  
+    }  // setNui  *
 
     /**
      * Genera código archivistico
@@ -283,42 +283,43 @@ class FileClass
      */       
     public function getCode(array $data)
     {
-        Log::debug(['GETCODE' => $data]);
+        //Log::debug(['GETCODE' => $data]);
 
         // pattern 
-        $arreglo =  ['@','#','&','%'];
+        $arreglo =  ['@','#','%','&'];
         $replace1 = ['L' => '@', 'D' => '#', 'T' => '%', 'S' => '&']; // 'P' => '$',
 
         // Precode
         $precode = $this->set['file_code_format'];
-        Log::debug('PRECODE1: '. $precode);
+        //Log::debug('PRECODE1: '. $precode);
         foreach( config('settings.file_format_code') AS $key) {
             if( str_contains($precode, $key) ) {
                 $precode = str_replace($key, $replace1[$key], $precode);
             } // if
         } // foreach
-        Log::debug('PRECODE2: '. $precode);
+        //Log::debug('PRECODE2: '. $precode);
 
         // Localización
         $location = Location::find($data['lid']);
         $lCode = ( is_integer($location->code) ) ?  str_pad($location->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $location->code;
         // Departamento
         $department = Department::find($data['did']);
-        $dCode = ( is_integer($department->department_id) ) ?  str_pad($department->department_id, $this->codeStrPad, '0', STR_PAD_LEFT) : $department->department_id;
+        $dCode = ( is_integer($department->code) ) ?  str_pad($department->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $department->code;
         // Tema
         $topic = Topic::find($data['tid']);
-        $tCode = ( is_integer($topic->code) ) ?  str_pad($topic->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $topic->code;
+        $tCode = str_pad($topic->code, $this->codeStrPad, '0', STR_PAD_LEFT);
         // SubTema
         $subtopic = SubTopic::find($data['sid']);
-        $sCode = ( is_integer($subtopic->code) ) ?  str_pad($subtopic->code, $this->codeStrPad, '0', STR_PAD_LEFT) : $subtopic->code;
+        $sCode = str_pad($subtopic->code, $this->codeStrPad, '0', STR_PAD_LEFT);
 
-        $replace2 = ['@' => $lCode, '&' => $sCode, '%' => $tCode, '#' => $dCode];
+        $replace2 = ['@' => $lCode, '#' => $dCode, '%' => $tCode, '&' => $sCode];
         $pattern = $precode;
         foreach($arreglo AS $key) {
             if( str_contains($pattern, $key) ) {
                 $pattern = str_replace($key, $replace2[$key], $pattern);
             }
         }
+        //Log::debug('CODE: '. $pattern);
         return $pattern; 
     } // getCode Method *
 
@@ -331,7 +332,7 @@ class FileClass
     {
         $topic = Topic::find($id);
         return ($topic) ? $topic->name : 'N/A';
-    } // getTopic Method
+    } // getTopic Method *
 
     /**
      * Obtiene el nombre del SUBTEMA
@@ -342,7 +343,13 @@ class FileClass
     {
         $topic = Subtopic::find($id);
         return ($topic) ? $topic->name : 'N/A';
-    } // getSubTopic Method
+    } // getSubTopic Method *
+
+    public function getFileDataByCode($code)
+    {
+        return File::where('code', $code)->first(['system_id', 'location_id', 'department_id', 'process_id', 'topic_id', 'subtopic_id']);
+    } // getFileDataByCode *
+
     
     /**
      * Valida si existe un código de TEMA

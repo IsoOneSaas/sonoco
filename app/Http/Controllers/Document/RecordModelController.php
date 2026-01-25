@@ -81,9 +81,6 @@ class RecordModelController extends Controller
         // Obtener Firma del usuario
         $path = $this->getSignature();
 
-        
-
-
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
         Log::debug(['LOCATIONS' => $locations->toArray()]);
@@ -103,7 +100,7 @@ class RecordModelController extends Controller
         // Obtener datos del documento original
         $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
 
-        //Log::debug(['SETTINGS' => $this->set]);
+        //
         //Log::debug(['SETTINGS' => $this->set]);
         
         // View
@@ -136,19 +133,39 @@ class RecordModelController extends Controller
         // Obtener Firma del usuario
         $path = $this->getSignature();
 
+        // Obtener Localizaciones        
+        $locations = $this->recordRepo->getLocationsList();
+        Log::debug(['LOCATIONS' => $locations->toArray()]);
+        
+        // obtener Departamentos
+        $dids = $this->tool->setDepartmentsFilter();
+        $departments = $this->recordRepo->getDepartmentsList($dids);
+        $count = ( count($dids) == 1 ) ? $departments->department_id : 0;
+        Log::debug(['DEPARTMENTS' => $departments->toArray()]);
+
         // obtener temas
-        $topics = $this->recordRepo->getTopics();
+        $topics = $this->recordRepo->getTopics($dids);
 
         // Obtener grupos de etiquetas
         $groups = $this->recordRepo->getGroups();
 
         // Obtener datos del documento original
         $data = $this->recordRepo->setRecord($hash);
+        Log::debug(['DATA' => $data]);
+
+        // Obtener datos de archivo
+        $file = $this->recordRepo->getFileData($data['code']);
+        Log::debug(['FILE' => $file->toArray()]);
 
         // View
         return view('document.record.edit', [
             'initTab'   => $slug,
             'DATA'      => $data,
+            'FILE'      => $file,
+            'locations'    => $locations,
+            'departments' => $departments,
+            'count'     => $count,
+            'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => 'records',
@@ -182,9 +199,12 @@ class RecordModelController extends Controller
                 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [     // FIXME: No falta más validaciones?
-            'name'      => 'required|min:8|regex:'. config('settings.document_name_pattern'),
-            'topic_id'     => 'required|min:1',
-            'subject_id'   => 'required|min:1',         
+            'name'          => 'required|min:8|regex:'. config('settings.document_name_pattern'),
+            'topic_id'      => 'required|min:1',
+            'subject_id'    => 'required|min:1',
+            'department_id' => 'required|min:1',
+            'system_id'     => 'required|min:1',
+            'location_id'   => 'required|min:1', 
             // 'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
             // 'subject'   => 'required|min:2|regex:'. config('settings.document_name_pattern'),
         ], [
@@ -192,11 +212,15 @@ class RecordModelController extends Controller
             'name.min'              => trans('document/record.request.name.format'),
             'name.regex'           => trans('document/record.request.name.regex'),
             'topic_id.required'         => trans('document/record.request.topic.required'),
-            'topic_id.min'              => trans('document/record.request.topic.format'),
-            'topic_id.regex'           => trans('document/record.request.topic.regex'),             
+            'topic_id.min'              => trans('document/record.request.topic.format'),           
             'subject_id.required'         => trans('document/record.request.subject.required'),
             'subject_id.min'              => trans('document/record.request.subject.format'),
-            'subject_id.regex'           => trans('document/record.request.subject.regex'),  
+            'department_id.required'         => trans('document/record.request.department_id.required'),
+            'department_id.min'              => trans('document/record.request.department_id.format'),
+            'system_id.required'         => trans('document/record.request.system_id.required'),
+            'system_id.min'              => trans('document/record.request.system_id.format'), 
+            'location_id.required'         => trans('document/record.request.location_id.required'),
+            'location_id.min'              => trans('document/record.request.location_id.format'),                        
         ]);
 
         if ($validator->fails()) {
@@ -395,20 +419,21 @@ class RecordModelController extends Controller
     private function dataTableDefinition()
     {
         // **** AGREGAR COLUMNA AFECTA INDICE DE LAS COLUMNAS QUE SON UTILIZADAS PARA BUSQUEDA GLOBAL
-        $columnOrder = 2;   
-        $columnExport = [2,3,4,5,6,7];
+        $columnOrder = 3;   
+        $columnExport = [2,3,4,5,6,7,8];
         $columns_basic = [
             ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"],                      
             ["data" => "record_id", "title" => "ID", "visible" => false, "orderable" => false],   // 1         
         ];
 
         $columns_array = [
-            ["data" => "name", "title" => "Nombre", "searchable" => true, 'filterable' => false], // 2 , "className" => "dt-nowrap"
-            ["data" => "author", "title" => "Elaborado por", "searchable" => true, 'filterable' => true], // 3
+            ["data" => "nui", "title" => "NUI", "searchable" => true, 'filterable' => false, "className" => "dt-nowrap"],
+            ["data" => "name", "title" => "Nombre", "searchable" => true, 'filterable' => false], // 3 
+            ["data" => "author", "title" => "Elaborado por", "searchable" => true, 'filterable' => true], // 4
             ["data" => "topic", "title" => "Tema", "searchable" => true, 'filterable' => true], // , "className" => "dt-center"
             ["data" => "subject", "title" => "Subtema", "searchable" => true, 'filterable' => true],
-            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => false], //6
-            ["data" => "document", "title" => "Origen", "searchable" => true, 'filterable' => false], //7
+            ["data" => "date", "title" => "Publicado", "searchable" => true, 'filterable' => false], //7
+            ["data" => "document", "title" => "Origen", "searchable" => true, 'filterable' => false], //8
         ];
 
         $columns_extra = [

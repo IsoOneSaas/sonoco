@@ -19,6 +19,8 @@ return new class extends Migration
             $table->dropColumn('record_id');
             $table->unsignedInteger('topic_id')->after('process_id');
             $table->unsignedInteger('subtopic_id')->after('topic_id');
+            $table->unsignedInteger('job_id')->nullable(true)->change();
+            $table->string('name', 255)->nullable(true)->change();
             $table->string('code', 255)->nullable(false)->unique()->change();
             $table->dropColumn('serial');
             $table->dropColumn('settings');
@@ -38,8 +40,10 @@ return new class extends Migration
             $table->foreign('record_id')->references('record_id')->on('document_records')->onDelete('cascade');  
             $table->dropColumn('topic_id');
             $table->dropColumn('subtopic_id');
+            $table->unsignedInteger('job_id')->nullable(false)->change();
             $table->dropColumn('code');
             $table->string('code',24)->nullable(); 
+            $table->string('name', 255)->nullable(false)->change();
             $table->integer('serial')->default(0);
             $table->text('settings')->nullable();
         });

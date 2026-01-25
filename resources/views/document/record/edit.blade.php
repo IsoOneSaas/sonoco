@@ -61,7 +61,7 @@
                                     <input type="hidden" id="json-users" value="">
                                     <input type="hidden" id="count" value="{{ $count }}">
                                     <input type="hidden" name="department_id" value=0 >
-                                    <input type="hidden" name="system_id" value= @if( in_array('sid', $DATA) ) $sid @else 0 @endif>
+                                    <input type="hidden" name="system_id" value=0 >
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -139,11 +139,11 @@
                                                                 <optgroup id="dpt{{ $topic->department_id }}" label="{{ $topic->department }}">
                                                                 @php($previous = $topic->department)
                                                             @endif
-                                                            <option value="{{ $topic->topic_id }}" @if( in_array('topic', $DATA) && ($DATA["topic"] == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
+                                                            <option value="{{ $topic->topic_id }}" @if( property_exists($FILE, 'topic_id') && ($FILE->topic_id == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
                                                         @endforeach
                                                         </optgroup>
                                                     </select>                                                    
-                                                    <input type="text" id="topic-name" name="topic" value="{{ old('topic', isset($DATA) ? $DATA['topic'] : '') }}" class="form-control w-full input-status  ml-2" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="48">
+                                                    <input type="text" id="topic-name" name="topic" value="" class="form-control w-full input-status  ml-2" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="48">
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.topic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                     <button id="btn-new-topic" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
@@ -152,7 +152,7 @@
                                                     <select id="subject-select" name="subject_id" class="form-control w-full input-status">
                                                         <option value="">{{ trans('document/record.form.subject.default') }}</option>
                                                     </select>
-                                                    <input type="text" id="subject-name" name="subject" value="{{ old('subject', isset($DATA) ? $DATA['subject'] : '') }}" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
+                                                    <input type="text" id="subject-name" name="subject" value="" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                     <button id="btn-new-subject" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
                                                 </div>
@@ -623,7 +623,12 @@
         $("#topic-select").on("change", function() {
             var tid = this.value;
             if(tid != '') {
-               topicAjax(tid);
+                var selectedOption = $('option:selected', this);
+                var optgroupId = selectedOption.closest('optgroup').attr('id');
+                var did = optgroupId.substring(4);
+                $("input[name='department_id']").val(did);
+                console.log('Selected department id:'+did+' and topic id: '+tid);          
+                topicAjax(tid);
             } else {
                 generateSubtopicsSelect(0, null);
             }               

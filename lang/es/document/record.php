@@ -168,7 +168,19 @@ return [
         ], 
         'content'         =>  [
                     'no-exist'      => 'Digite el texto del contenido o seleccione un archivo soporte para el regsitro',
-        ],                               
+        ],
+        'system_id'         =>  [
+                    'required'      => 'No se ha seleccionado un sistema de gestión',
+                    'format'        => 'No se ha seleccionado un sistema de gestión'
+        ],         
+        'location_id'         =>  [
+                    'required'      => 'No se ha seleccionado una localización',
+                    'format'        => 'No se ha seleccionado una localización'
+        ],
+        'department_id'         =>  [
+                    'required'      => 'No se ha seleccionado un departamento',
+                    'format'        => 'No se ha seleccionado un departamento'
+        ],                                                 
     ],
 
     'message' => [

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->increments('topic_id');
             $table->unsignedInteger('department_id');
             $table->foreign('department_id')->references('department_id')->on('set_departments')->onDelete('cascade');
-            $table->string('code',16);
+            $table->unsignedInteger('code_id');
             $table->string('name',48); 
             $table->string('description',255)->nullable();
             $table->timestamp('created_at')->useCurrent();
