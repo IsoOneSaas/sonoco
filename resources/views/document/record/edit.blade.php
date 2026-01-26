@@ -60,8 +60,9 @@
                                     <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                     <input type="hidden" id="json-users" value="">
                                     <input type="hidden" id="count" value="{{ $count }}">
-                                    <input type="hidden" name="department_id" value=0 >
-                                    <input type="hidden" name="system_id" value=0 >
+                                    <input type="hidden" name="system_id" value= @if( isset($FILE->system_id) ) {{ $FILE->system_id }} @else 0 @endif >
+                                    <input type="hidden" name="department_id" value= @if( isset($FILE->department_id) ) {{ $FILE->department_id }} @else 0 @endif >
+                                    <input type="hidden" id="subject-id" value= @if( isset($FILE->subtopic_id) ) {{ $FILE->subtopic_id }} @else 0 @endif >
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -114,7 +115,7 @@
                                                     <select id="location-select" name="location_id" class="form-control w-full input-status">
                                                         <option value="">{{ trans('document/record.form.location.default') }}</option>
                                                         @foreach($locations as $location)  
-                                                        <option value="{{ $location->location_id }}"  >[{{ $location->newCode }}] {{ $location->name }}</option>
+                                                        <option value="{{ $location->location_id }}" @if( isset($FILE->location_id) && ($FILE->location_id == $location->location_id) ) selected @endif >[{{ $location->newCode }}] {{ $location->name }}</option>
                                                         @endforeach                                                        
                                                     </select>
                                                 </div>
@@ -139,7 +140,7 @@
                                                                 <optgroup id="dpt{{ $topic->department_id }}" label="{{ $topic->department }}">
                                                                 @php($previous = $topic->department)
                                                             @endif
-                                                            <option value="{{ $topic->topic_id }}" @if( property_exists($FILE, 'topic_id') && ($FILE->topic_id == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
+                                                            <option value="{{ $topic->topic_id }}" @if( isset($FILE->topic_id) && ($FILE->topic_id == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
                                                         @endforeach
                                                         </optgroup>
                                                     </select>                                                    
@@ -518,13 +519,13 @@
                                                 @foreach($departments as $department)                                                
                                                 <div class="radio mb-2">
                                                     <label>
-                                                        <input type="radio" name="department_id" value="{{ $department->department_id }}">
-                                                        <code>{{ $department->name }}</code>
+                                                        <input type="radio" name="department_id" value="{{ $department->department_id }}" @if( isset($FILE->department_id) && ($FILE->department_id == $department->department_id) ) checked @endif >
+                                                        <code>{{ $department->name }}  {{ $FILE->department_id }} | {{ $department->department_id }}</code>
                                                     </label>
                                                 </div>
                                                 @endforeach
                                             @else
-                                                <div class="radio"><label><input type="radio" name="department_id" value="{{ $departments->department_id }}" class="mr+1"><code>{{ $departments->name }}</code></label></div>
+                                                <div class="radio"><label><input type="radio" name="department_id" value="{{ $departments->department_id }}" class="mr+1" @if( isset($FILE->department_id) && ($FILE->department_id == $departments->department_id) ) checked @endif ><code>{{ $departments->name }}</code></label></div>
                                             @endif                                                    
                                         </div>
                                     </div>                                                                                                 
@@ -596,7 +597,7 @@
         if( status == 1 ) {
             // Bloquear inputs y botones
             $("#btn-save, #btn-store, #editor, .input-status").attr('disabled', true);
-            $(".input-status").attr('readonly', true);
+            $(".input-status").attr('readonly', true);            
         } // if
 
 
@@ -622,6 +623,7 @@
         // Selección del tema
         $("#topic-select").on("change", function() {
             var tid = this.value;
+            console.log(':: tid='+tid);
             if(tid != '') {
                 var selectedOption = $('option:selected', this);
                 var optgroupId = selectedOption.closest('optgroup').attr('id');
@@ -997,17 +999,26 @@
                 }  
             }          
         }); //         
-    
-      
+          
     }); // document
+
+    $(document).ready(function() {
+        // CARGAR SUBTEMAS si es edición
+        var rid = $("#record-form input[name='record_id']").val();
+        var tid = $("#record-form select[name='topic_id']").val();
+        if(rid > 0) {
+            console.log('Trigger topic-select with rid='+rid+' tid='+tid);
+            $("#topic-select").val(tid).trigger('change');
+        }
+    });
 
     function setStatus(status) {
         console.log('Saving...');
         if ($('#record-form input[name="name"]').val() == "") {                
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.name.required') }}");
-        } else if($('#record-form input[name="topic_id"]').val() == "") {
+        } else if($('#record-form select[name="topic_id"]').val() == "") {
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.topic.required') }}");
-        } else if($('#record-form input[name="subject_id"]').val() == "") {
+        } else if($('#record-form select[name="subject_id"]').val() == "") {
             setSuccessNotification('error', 'Oops!', "{{ trans('document/record.request.subject.required') }}");
         } else {
 
@@ -1046,7 +1057,8 @@
             success: function(data) {
                 console.dir(data);
                 if( data.success ) {
-                    generateSubtopicsSelect(data.tid, data.subtopics);
+                    var sid = $("#subject-id").val();
+                    generateSubtopicsSelect(sid, data.subtopics);
                     $("#subject-select").focus();
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message);
