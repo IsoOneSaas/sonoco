@@ -153,8 +153,9 @@ class FileClass
      * @param  integer $pid identificador del proceso
      * @return Array  Resultado del método
      */     
-    public function setFile($data, $code, $sid, $pid)   // TODO: $sid y $pid también podría pasar como parámetros de $data
+    public function setFile($data, $code, $sid, $pid)   
     {
+        Log::debug(['DATA' => $data, 'CODE' => $code, 'SID' => $sid, 'PID' => $pid]);
         try {
             DB::beginTransaction();
             $file = New File;

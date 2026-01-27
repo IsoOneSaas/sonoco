@@ -520,7 +520,7 @@
                                                 <div class="radio mb-2">
                                                     <label>
                                                         <input type="radio" name="department_id" value="{{ $department->department_id }}" @if( isset($FILE->department_id) && ($FILE->department_id == $department->department_id) ) checked @endif >
-                                                        <code>{{ $department->name }}  {{ $FILE->department_id }} | {{ $department->department_id }}</code>
+                                                        <code>{{ $department->name }}</code>
                                                     </label>
                                                 </div>
                                                 @endforeach
@@ -632,7 +632,7 @@
                 console.log('Selected department id:'+did+' and topic id: '+tid);          
                 topicAjax(tid);
             } else {
-                generateSubtopicsSelect(0, null);
+                generateSubtopicsSelect(0, 0, null);
             }               
         }); // topic-select
         
@@ -1058,11 +1058,11 @@
                 console.dir(data);
                 if( data.success ) {
                     var sid = $("#subject-id").val();
-                    generateSubtopicsSelect(sid, data.subtopics);
+                    generateSubtopicsSelect(id, sid, data.subtopics);
                     $("#subject-select").focus();
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message);
-                    generateSubtopicsSelect(0, null);
+                    generateSubtopicsSelect(0, 0, null);
                     $("#subject-name").focus();
                 }                
             } // success
@@ -1253,7 +1253,7 @@
                     // Generar nuevo select de temas                
                     generateTopicsSelect(data.tid, data.topics);
                     // Generar nuevo select de subtemas
-                    generateSubtopicsSelect(0, null);
+                    generateSubtopicsSelect(0, 0, null);
                     $("#subject-name").focus();
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message); 
@@ -1303,7 +1303,7 @@
                     $("#topic-name").val('');
                     $("#subject-name").val('');
                     // Generar nuevo select de subtemas
-                    generateSubtopicsSelect(data.sid, data.subtopics);
+                    generateSubtopicsSelect(no, data.sid, data.subtopics);
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message); 
                 }
@@ -1312,12 +1312,14 @@
     } // setTopicAjax Fx
 
 
-    function generateSubtopicsSelect(id, subtopics) {
+    function generateSubtopicsSelect(tid, sid, subtopics) {
         var output = '<option value="">{{ trans("document/record.form.subject.default") }}</option>';
-        if(id > 0) {
+        console.log('Subtopic existing: '+sid);
+        console.table(subtopics);
+        if(tid > 0) {
             $.each(subtopics, function(i, subtopic) {
                 output += '<option value="'+subtopic.subtopic_id+'"';
-                output += ( subtopic.subtopic_id == id ) ? ' selected' : '';
+                output += ( subtopic.subtopic_id == sid ) ? ' selected' : '';
                 output += '>['+subtopic.newCode+'] '+subtopic.name+'</option>';
             });
         }
