@@ -203,7 +203,7 @@ class RecordRepository implements RecordRepositoryInterface
             'subject' => '',
             'tags' => [],
             'document' => $document->name,
-            'sid'   => $document->system_id,
+            //'sid'   => $document->system_id,
             'status_id' => 0,
             'records' => [],
             'hash' => $hash,
@@ -526,6 +526,7 @@ class RecordRepository implements RecordRepositoryInterface
             // SAVE SETTINGS
             $document = DocumentModel::find($data['document_id']);
             if($document) {
+                $sid = $document->system_id;
                 $json_array = $document->settings;         
                 if( is_array($json_array) ) {
                     $json_array['print_format']['size'] = $data['size'];  
@@ -539,6 +540,8 @@ class RecordRepository implements RecordRepositoryInterface
                     $document->settings = $new_array;
                 } // if/else
                 $document->save();
+            } else {
+                $sid = 0;
             }
 
             // SAVE TOPIC/SUBJECT
@@ -690,7 +693,7 @@ class RecordRepository implements RecordRepositoryInterface
             // Validar si nuevo archivo no existe
             if( !$this->file->existsCode(0, $code) ) {
                 // Se crea nuevo archivo
-                $result = $this->file->setFile($input, $code, $data['system_id'], $pid);
+                $result = $this->file->setFile($input, $code, $sid, $pid);
                 if( !$result['success'] ) {
                     Log::error($result['message']);
                 } // if                

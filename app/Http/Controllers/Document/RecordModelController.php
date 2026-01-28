@@ -83,12 +83,16 @@ class RecordModelController extends Controller
 
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
-        Log::debug(['LOCATIONS' => $locations->toArray()]);
+        $countLocations = 0;
+        foreach($locations as $location) {
+            $countLocations++;
+        }
+        Log::debug(['LOCATIONS' => $locations->toArray(), 'NO' => $countLocations]); // FIXME: No funciona
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
         $departments = $this->recordRepo->getDepartmentsList($dids);
-        $count = ( count($dids) == 1 ) ? $departments->department_id : 0;
+        $countDepartments = ( count($dids) == 1 ) ? $departments->department_id : 0;
         Log::debug(['DEPARTMENTS' => $departments->toArray()]);
 
         // obtener temas
@@ -99,7 +103,7 @@ class RecordModelController extends Controller
         
         // Obtener datos del documento original
         $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
-
+        Log::debug(['DATA' => $data]);
         //
         //Log::debug(['SETTINGS' => $this->set]);
         
@@ -109,7 +113,8 @@ class RecordModelController extends Controller
             'DATA'      => $data,
             'locations'    => $locations,
             'departments' => $departments,
-            'count'     => $count,
+            'countDepartments'     => $countDepartments,
+            'countLocations'     => $countLocations,
             'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -203,10 +208,7 @@ class RecordModelController extends Controller
             'topic_id'      => 'required|min:1',
             'subject_id'    => 'required|min:1',
             'department_id' => 'required|min:1',
-            'system_id'     => 'required|min:1',
             'location_id'   => 'required|min:1', 
-            // 'topic'     => 'required|min:2|regex:'. config('settings.document_name_pattern'),
-            // 'subject'   => 'required|min:2|regex:'. config('settings.document_name_pattern'),
         ], [
             'name.required'         => trans('document/record.request.name.required'),
             'name.min'              => trans('document/record.request.name.format'),
@@ -217,8 +219,6 @@ class RecordModelController extends Controller
             'subject_id.min'              => trans('document/record.request.subject.format'),
             'department_id.required'         => trans('document/record.request.department_id.required'),
             'department_id.min'              => trans('document/record.request.department_id.format'),
-            'system_id.required'         => trans('document/record.request.system_id.required'),
-            'system_id.min'              => trans('document/record.request.system_id.format'), 
             'location_id.required'         => trans('document/record.request.location_id.required'),
             'location_id.min'              => trans('document/record.request.location_id.format'),                        
         ]);

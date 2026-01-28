@@ -338,8 +338,10 @@
         var pidsArray = setStorageArray("process-selected", pidsStoraged);                 
         
         // Localizaciones               
-        var lidsStoraged = isoGetStorage('iso_masterLocations');
-        var lidsArray = setStorageArray("location-selected", lidsStoraged);  
+        var lidsStoraged = isoGetStorage('iso_masterLocations');  // TODO: Decidir qué hacer aqui
+        //var lidsStoraged = '';
+        var lidsArray = setStorageArray("location-selected", lidsStoraged); 
+        //console.dir(lidsArray); 
 
         // Tipos
         var tidsStoraged = isoGetStorage('iso_masterTypes');

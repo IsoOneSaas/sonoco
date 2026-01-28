@@ -59,10 +59,11 @@
                                     <input type="hidden" name="status_id" value={{ $DATA['status_id'] }} id="status-id">
                                     <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                     <input type="hidden" id="json-users" value="">
-                                    <input type="hidden" id="count" value="{{ $count }}">
-                                    <input type="hidden" name="system_id" value= @if( isset($FILE->system_id) ) {{ $FILE->system_id }} @else 0 @endif >
+                                    <input type="hidden" id="countDepartments" value="{{ $countDepartments }}">
+                                    <input type="hidden" id="countLocations" value="{{ $countLocations }}">
                                     <input type="hidden" name="department_id" value= @if( isset($FILE->department_id) ) {{ $FILE->department_id }} @else 0 @endif >
                                     <input type="hidden" id="subject-id" value= @if( isset($FILE->subtopic_id) ) {{ $FILE->subtopic_id }} @else 0 @endif >
+                                    
                                     <div class="tab-content mt-5">
                                         <div id="record-tab-1" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-1-tab">
                                             <!-- BEGIN: Basic -->
@@ -107,7 +108,7 @@
                                         </div>
                                         <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">
                                             <!-- BEGIN: Location -->
-                                             @if( $locations->count() > 1 )
+                                             @if( $countLocations > 1 )
                                             <div class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro en una localización de la lista desplegable.</p>                                                              
                                                 <div class="input-group mt-5">
@@ -116,7 +117,7 @@
                                                         <option value="">{{ trans('document/record.form.location.default') }}</option>
                                                         @foreach($locations as $location)  
                                                         <option value="{{ $location->location_id }}" @if( isset($FILE->location_id) && ($FILE->location_id == $location->location_id) ) selected @endif >[{{ $location->newCode }}] {{ $location->name }}</option>
-                                                        @endforeach                                                        
+                                                        @endforeach                                                      
                                                     </select>
                                                 </div>
                                             </div>
@@ -515,7 +516,7 @@
                                     <div id="modal-department-message"></div>
                                     <div class="form-group row">
                                         <div class="col-sm-10">
-                                            @if( $count == 0 )
+                                            @if( $countDepartments == 0 )
                                                 @foreach($departments as $department)                                                
                                                 <div class="radio mb-2">
                                                     <label>
@@ -627,7 +628,8 @@
             if(tid != '') {
                 var selectedOption = $('option:selected', this);
                 var optgroupId = selectedOption.closest('optgroup').attr('id');
-                var did = optgroupId.substring(4);
+                console.log(optgroupId);
+                var did = optgroupId.substring(3);
                 $("input[name='department_id']").val(did);
                 console.log('Selected department id:'+did+' and topic id: '+tid);          
                 topicAjax(tid);
@@ -954,7 +956,7 @@
         $('body').on('click', '#btn-new-topic', function (e) {
             e.preventDefault();            
             var txt = $("#topic-name").val();
-            var no = $("#count").val();
+            var no = $("#countDepartments").val();
             console.log('# departamento: '+no+' txt: '+txt);            
 
             if( txt != '' ) {

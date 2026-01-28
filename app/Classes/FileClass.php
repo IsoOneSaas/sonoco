@@ -79,7 +79,9 @@ class FileClass
             $locations = $user->locations;
         }
         if( $locations->count() == 1 ) {
-            return $locations->first();
+            $result = $locations->first();
+            $result->newCode = ( is_int($result->code) ) ? str_pad($result->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $result->code;
+            return $result;
         } else {
             foreach($locations as $location) {
                 $location->newCode = ( is_int($location->code) ) ? str_pad($location->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $location->code;

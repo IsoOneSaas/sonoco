@@ -525,15 +525,18 @@ class MasterRepository implements MasterRepositoryInterface
             // Concatenar
             $location_array = array_unique(array_merge($lids1, $lids2));  
             //$location_array = $lids1;
-            $locations = LocationModel::findMany($location_array);
+            $locations = LocationModel::whereIn('location_id', $location_array)->orderBy('name')->get();
         }
 
-        // Obtener el listado para el filtro
-        //Log::debug(['LOCATIONS' => $locations]);
+        // Obtener el listado para el filtro        
         foreach($locations as $location) {
-            $location->selected = true;
+            if( in_array($location->location_id, $lids1) ) {
+                $location->selected = true;
+            } else {
+                $location->selected = false;
+            }            
         } // foreach
-
+        //Log::debug(['LOCATIONS' => $locations->toArray()]);
         return $locations;
     } // locations 
     
