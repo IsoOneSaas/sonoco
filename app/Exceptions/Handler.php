@@ -99,7 +99,7 @@ class Handler extends ExceptionHandler
                 }); 
             }           
         } catch (Throwable $e) {
-            Log::error('Handler::sendExceptionEmail Exception: '. $e);
+            Log::error('Handler::sendExceptionEmail Exception: '. $e->getMessage());
         }
     } // sendExceptionEmail   
 

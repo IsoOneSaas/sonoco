@@ -20,6 +20,7 @@ class RecordNotification
      */
     public function handle(RecordSent $event): void
     {
+        //Log::debug(['user' => $event->user, ]);
         Mail::to($event->user->email)->queue(
             new NewRecordNotice($event->user, $event->record, $event->settings)
         );

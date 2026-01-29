@@ -74,7 +74,7 @@
                                                             <label for="process-selected" class="form-label sm:w-20 text-right">Procesos:</label>
                                                             <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
                                                                 @foreach($processes as $process)
-                                                                <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }}</option>
+                                                                <option value={{ $process->process_id }} @if($process->selected) selected @endif>{{ $process->name }} | {{ $process->process_id }}</option>
                                                                 @endforeach
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>
@@ -203,6 +203,10 @@
             width: 100%
         }
 
+        .small-font {
+            font-size: 0.8em;
+        }
+
     </style>     
 @endpush
 
@@ -252,7 +256,8 @@
         var sidsArray = setStorageInteger("system-selected", sidsStoraged);   
 
         // Procesos       
-        var pidsStoraged = isoGetStorage('iso_recordProcesses');        
+        //var pidsStoraged = isoGetStorage('iso_recordProcesses');        
+        var pidsStoraged = '';
         var pidsArray = setStorageInteger("process-selected", pidsStoraged);                 
         
         // Grupos

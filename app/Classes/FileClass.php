@@ -70,7 +70,11 @@ class FileClass
 
 
 
-
+    /**
+     * Obtiene el listado de localizaciones permitidas para el usaurio
+     * @param  collection $user datos de usuario
+     * @return Array  Localizaciones y número
+     */  
     public function getLocationsList($user)
     {        
         if( $user->hasAnyRole('MASTER','SUPER') ) {
@@ -80,13 +84,19 @@ class FileClass
         }
         if( $locations->count() == 1 ) {
             $result = $locations->first();
-            $result->newCode = ( is_int($result->code) ) ? str_pad($result->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $result->code;
-            return $result;
+            //$result->newCode = ( is_int($result->code) ) ? str_pad($result->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $result->code;
+            return [
+                'n' => 1,
+                'data' => $result
+            ];
         } else {
             foreach($locations as $location) {
                 $location->newCode = ( is_int($location->code) ) ? str_pad($location->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $location->code;
             }
-            return $locations;
+            return [
+                'n' => $locations->count(),
+                'data' => $locations
+            ];
         }
     } // getLocationList *    
 

@@ -885,7 +885,7 @@ class ToolsClass
         $target = config('settings.document_status.publish');
         $pids_array = [];
         $lids_array = [];
-        Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
+        //Log::debug(['UID' => $uid, 'ROLE' => $role, 'AUTH' => $auth, 'PARAMS' => $params]);
 
         if( $role == 'admin' ) {
             $dptos = $this->setDepartmentsFilter($uid);
@@ -959,7 +959,7 @@ class ToolsClass
                     $pids = $pids_array;
                 } else {
                                       
-                    Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
+                    //Log::debug(['PIDS ARRAY' => $pids_array, 'SELECTED' => $params['pids']]);
 
                     foreach($params['pids'] as $pid) {
                         if( in_array($pid, $pids_array) ) {
@@ -1004,7 +1004,7 @@ class ToolsClass
             // Obsoletos
             $obsoletes =  DocumentModel::where('status', '=', config('settings.document_status.obsolete'))->pluck('code'); 
             
-            Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
+            //Log::debug(['TARGET' => $target, 'SIDS' => $sids, 'LIDS' => $lids, 'PIDS' => $pids, 'TIDS' => $tids, 'DIDS' => $dptos, 'SEARCH' => $search, 'TAG' => $params['tag'], 'DIDS' => $dids, 'RANGE' => $rangeIn .'|'. $rangeOut]);            
             $documents =  DocumentModel::where('status', $target)
                 ->whereIn('system_id', $sids)
                 ->whereIn('process_id', $pids)

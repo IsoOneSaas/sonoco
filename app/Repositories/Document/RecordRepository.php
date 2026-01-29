@@ -48,14 +48,141 @@ class RecordRepository implements RecordRepositoryInterface
      * Renderiza la tabla de LISTADO MAESTRO DE REGISTROS (document.record.index.blade.php)
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de registros de la tabla
-     */ 
+     */
     public function render($slug, $systems, $processes, $groups, $setting)
+    {    
+        $data = [];
+        $i = 0;
+        $params = json_decode($slug, true);
+
+        //Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray(), 'PROCESSES' => $processes->toArray(), 'GROUPS' => $groups->toArray()]);    
+
+        // Range Date
+        $range = explode('T', $params['din']);
+        $rangeIn = $range[0] .' 00:00:00';
+        $range = explode('T', $params['dout']);
+        $rangeOut = $range[0] .' 23:59:59';
+        
+        // Requisitos
+        $sids = $this->setIds('sids', $params);
+        if( !$sids ) {
+            $plucked = $systems->pluck('system_id');
+            $sids = $plucked->all();
+        }
+
+        // Procesos
+        $pids = $this->setIds('pids', $params);
+        if( !$pids ) {
+            $plucked = $processes->pluck('process_id');
+            $pids = $plucked->all();
+        }
+
+        // Archivos para estos procesos
+        // $plucked = FileModel::whereIn('process_id', $pids)->pluck('code');
+        // $codes = $plucked->all();
+
+        // Grupo
+        $groupArray = [];
+        if( $params['gid'] == '' ) {
+            foreach($groups as $j => $obj) {
+                $groupArray[] = $obj->group;
+            }
+        } else {
+            $groupArray  = [$params['gid']];
+        }        
+
+        // Etiqueta
+        $tagArray = [];
+        if( $params['tid'] == '' ) {
+            $tagsCollection  = DB::table('document_record_tags')->select('tag')->whereIn('group', $groupArray)->orderBy('tag')->groupBy('tag')->get(); 
+            foreach($tagsCollection as $j => $obj) {
+                $tagArray[] = $obj->tag;
+            }
+        } else {
+            $tagArray  = [$params['tid']];
+        }        
+        
+
+        // Obtener Registros Filtrados
+        $records = RecordModel:: //whereIn('document_records.code', $codes_array)
+            join('document_files AS T1', function($join) use($pids) {
+                $join->on('T1.code', '=', 'document_records.code');
+                $join->whereIn('T1.process_id', $pids);
+            })             
+            ->join('documents AS T2', function($join){
+                $join->on('T2.document_id', '=', 'document_records.document_id');
+            })
+            ->join('set_systems AS T3', function($join) use($sids) {
+                $join->on('T3.system_id', '=', 'T1.system_id');
+                $join->whereIn('T3.system_id', $sids);
+            })
+            ->join('document_record_topics AS T4', function($join) {
+                $join->on('T4.record_id', '=', 'document_records.record_id');
+            })                 
+            ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])                                
+            ->get([
+                'document_records.record_id', 
+                'document_records.name AS recordName', 
+                'document_records.author_name AS authorName', 
+                'document_records.status',
+                'document_records.code',
+                'document_records.year',
+                'document_records.serial',
+                'document_records.created_at as date',
+                'T2.name as documentName',
+                'T4.topic',
+                'T4.subject',            
+            ]);
+
+        Log::debug('Número de registros filtrados 1: '. $records->count()); 
+
+        // Generar grid
+        foreach($records as $record) {
+            // Filtro de Etiqueta
+            if( $params['gid'] == '' ) {
+                $result = true;
+                //$tagArray = 'ALL';
+            } else {
+                $result =  DB::table('document_record_tags')->where('record_id', $record->record_id)->whereIn('tag', $tagArray)->first();
+            }            
+            //Log::debug(['RID' => $record->record_id, 'TAGS' => $tagArray]);
+            if($result) {
+                $dt = Carbon::createFromTimeStamp(strtotime($record->date));
+                $data[$i]['DT_RowIndex'] = $i+1;
+                $data[$i]['record_id'] = $record->record_id;
+                $data[$i]['nui'] =  $this->file->setNui($record->code, $record->year, $record->serial);
+                $data[$i]['name'] = $record->recordName;
+                $data[$i]['author'] = $record->authorName;
+                $data[$i]['topic'] = $this->file->getTopic($record->topic);
+                $data[$i]['subject'] = $this->file->getSubtopic($record->subject);
+                $data[$i]['date']  = $dt->diffForHumans();
+                $data[$i]['document'] = ($record->documentName === NULL) ? '' : $record->documentName;
+                $data[$i]['status'] = $record->status;
+                $i++;  
+            }                          
+        } // foreach
+            
+        Log::debug('Número de registros filtrados 2: '. count($data));
+            
+
+        
+        $results = [
+            "sEcho" => 1,
+            "iTotalRecords" => count($data),
+            "iTotalDisplayRecords" => count($data),
+            "aaData" => $data
+        ];
+        Log::debug(['DATA*' => $data]);
+        return json_encode($results);          
+    } // render Repository
+
+    public function render2($slug, $systems, $processes, $groups, $setting)
     {
         $data = [];
         $i = 0;
         $params = json_decode($slug, true);
 
-        //Log::debug(['PARAMS' => $params]); //, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()
+        Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()]); //
 
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
@@ -103,7 +230,7 @@ class RecordRepository implements RecordRepositoryInterface
         }
         
         
-        //Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
+        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
 
         // OBTENER LOS REGISTROS FILTRADOS
         $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
@@ -147,7 +274,7 @@ class RecordRepository implements RecordRepositoryInterface
             } else {
                 $result =  DB::table('document_record_tags')->where('record_id', $record->record_id)->whereIn('tag', $tagArray)->first();
             }            
-            //Log::debug(['RID' => $record->record_id, 'TAGS' => $tagArray]);
+            Log::debug(['RID' => $record->record_id, 'TAGS' => $tagArray]);
             if($result) {
                 $dt = Carbon::createFromTimeStamp(strtotime($record->date));
                 $data[$i]['DT_RowIndex'] = $i+1;
@@ -172,7 +299,7 @@ class RecordRepository implements RecordRepositoryInterface
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
-        //Log::debug(['DATA*' => $results]);
+        Log::debug(['DATA*' => $data]);
         return json_encode($results);          
 
     } // render
@@ -710,12 +837,15 @@ class RecordRepository implements RecordRepositoryInterface
                 'serial'        => $serial
             ])->save(); 
 
-
+            
             // SAVE TRACING  TODO: trazabilidad inmutable
-            $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
-            $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';  
-            $record->user_uid = $user->user_uid;
-            Event::dispatch(new RecordTracing($record));
+            if( isset($user->user_uid) ) {
+                $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
+                $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';  
+                $record->user_uid = $user->user_uid;
+                Log::debug(['RECORD' => $record->toArray()]);
+                Event::dispatch(new RecordTracing($record));
+            }
 
             DB::commit();
         } catch (Exception $e) {
@@ -808,7 +938,36 @@ class RecordRepository implements RecordRepositoryInterface
         return $this->file->getLocationsList($user);   
     } // getLocationsList
 
+
     public function getProcessesList()
+    {
+        $process_array = [];
+        // Obtener documentos autorizados para el usuario
+        $dids = $this->tool->setDepartmentsFilter();
+        // Obtener los procesos relacinado a estos departamentos        
+        $plucked = \App\Models\Set\ProcessModel::join('set_department_process', function($join) use($dids) {
+            $join->on('set_processes.process_id', '=', 'set_department_process.process_id');
+            $join->whereIn('set_department_process.department_id', $dids); 
+        })->pluck('set_processes.process_id');
+        $pids1 = $plucked->all();
+        Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
+
+        // TODO: Agregar los procesos de los registros compartido
+
+        // Concatenar
+        $process_array = array_unique($pids1);
+        //$process_array = array_unique(array_merge($pids1, $pids2, $pids3));           
+
+        // Obtener el listado para el filtro
+        $processes = ProcessModel::whereIn('process_id', $process_array)->orderBy('name')->get(['process_id', 'name']);
+        foreach($processes as $process) {
+            $process->selected = ( in_array($process->process_id, $pids1) ) ? true : false;
+        } // foreach
+
+        return $processes;        
+    } // getProcessesList Repository
+
+    public function getProcessesList2()
     {
         $process_array = [];
         $user = Auth::user();
@@ -819,10 +978,10 @@ class RecordRepository implements RecordRepositoryInterface
         } else {        
             // Obtener procesos pertenecientes
             $pids1 = $this->tool->getOwnProcessesByJob($user);
-            //Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
+            Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
             // Procesos de la tabla de relaciones con cargos                  
             $pids2 = $this->tool->setProcessesFromJobs($user);
-            //Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
+            Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
 
             // Procesos de autorizados
             $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
@@ -831,11 +990,11 @@ class RecordRepository implements RecordRepositoryInterface
                 })            
                 ->pluck('documents.process_id');
             $pids3 = $plucked->all();
-            //Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
+            Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
 
             // Concatenar
             $process_array = array_unique(array_merge($pids1, $pids2, $pids3));      
-            //Log::debug(['PIDS' =>  $process_array]);      
+            Log::debug(['PIDS' =>  $process_array]);      
         }
 
         // Obtener el listado para el filtro

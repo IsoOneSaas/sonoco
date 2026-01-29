@@ -83,11 +83,7 @@ class RecordModelController extends Controller
 
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
-        $countLocations = 0;
-        foreach($locations as $location) {
-            $countLocations++;
-        }
-        Log::debug(['LOCATIONS' => $locations->toArray(), 'NO' => $countLocations]); // FIXME: No funciona
+        Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
@@ -111,10 +107,10 @@ class RecordModelController extends Controller
         return view('document.record.edit', [
             'initTab'   => 'btn-1-tab',
             'DATA'      => $data,
-            'locations'    => $locations,
+            'locations'    => $locations['data'],
             'departments' => $departments,
             'countDepartments'     => $countDepartments,
-            'countLocations'     => $countLocations,
+            'countLocations'     => $locations['n'],
             'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -137,15 +133,15 @@ class RecordModelController extends Controller
     {
         // Obtener Firma del usuario
         $path = $this->getSignature();
-
+        
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
-        Log::debug(['LOCATIONS' => $locations->toArray()]);
+        Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
         $departments = $this->recordRepo->getDepartmentsList($dids);
-        $count = ( count($dids) == 1 ) ? $departments->department_id : 0;
+        $countDepartments = ( count($dids) == 1 ) ? $departments->department_id : 0;
         Log::debug(['DEPARTMENTS' => $departments->toArray()]);
 
         // obtener temas
@@ -167,9 +163,10 @@ class RecordModelController extends Controller
             'initTab'   => $slug,
             'DATA'      => $data,
             'FILE'      => $file,
-            'locations'    => $locations,
+            'locations'    => $locations['data'],
             'departments' => $departments,
-            'count'     => $count,
+            'countDepartments'     => $countDepartments,
+            'countLocations'     => $locations['n'],
             'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
@@ -427,7 +424,7 @@ class RecordModelController extends Controller
         ];
 
         $columns_array = [
-            ["data" => "nui", "title" => "NUI", "searchable" => true, 'filterable' => false, "className" => "dt-nowrap"],
+            ["data" => "nui", "title" => "NUI", "searchable" => true, 'filterable' => false, "className" => "dt-nowrap small-font"],
             ["data" => "name", "title" => "Nombre", "searchable" => true, 'filterable' => false], // 3 
             ["data" => "author", "title" => "Elaborado por", "searchable" => true, 'filterable' => true], // 4
             ["data" => "topic", "title" => "Tema", "searchable" => true, 'filterable' => true], // , "className" => "dt-center"

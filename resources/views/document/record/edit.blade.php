@@ -601,8 +601,6 @@
             $(".input-status").attr('readonly', true);            
         } // if
 
-
-
         // EDITOR
         try{
             var editor = CKEDITOR.replace('editor', {
