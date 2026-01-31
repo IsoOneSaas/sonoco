@@ -719,6 +719,7 @@ class RecordRepository implements RecordRepositoryInterface
             // SAVE USERS
             if( key_exists('user_ids', $data) ) {
                 // si es el author
+                $n = 1;
                 if( count($data['user_ids']) > 0 ) {  
                     // Usuarios actuales
                     $plucked = DB::table('document_record_users')->where('record_id', $record->record_id)->pluck('user_id');
@@ -745,7 +746,9 @@ class RecordRepository implements RecordRepositoryInterface
                                 $existing_array[] = $uid;
                                 Log::debug(['INSERTED' => $uid]);
                                 // Enviar mensaje
-                                $result = $this->sendEmail($record, $liable);
+                                if ( $this->onLocal() && ($n == 5) ) break;
+                                // = $this->sendEmail($user, $record, $liable); // FIXME: Inhabilitado para debugging en local
+                                $n++;
                             }                                                     
                         } else {
                             // existente
@@ -1263,13 +1266,19 @@ class RecordRepository implements RecordRepositoryInterface
         return $document;
     }
 
-    private function sendEmail($record, $user)
+    private function sendEmail($author, $record, $user)
     {
         if($record) {
             $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($record->record_id)]);
-            $record->sign = $user->name;
-            Log::debug(['NOTICE NEW RECORD TO USER' => $user->email]);
-            Event::dispatch(new RecordSent($record, $user, $this->set));      // FIXME: Funciona?
+            $record->sign = $author->name;
+            $record->from = $author->email;
+            Log::debug(['NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);            
+            if( $this->onLocal() ) {
+                Event::dispatch(new RecordSent($record, $user, $this->set));
+                sleep(3);
+            } else {
+                Event::dispatch(new RecordSent($record, $user, $this->set));
+            }                    
             return true;  
         }
         return false;
@@ -1290,18 +1299,21 @@ class RecordRepository implements RecordRepositoryInterface
         $record = RecordModel::find($id);
         $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($id)]);        
         $record->sign = $author->name;
+        $record->from = $author->email;
         // Encontrar participantes
         $plucked = DB::table('document_record_users')->where('record_id', $id)->pluck('user_id');
         //Log::debug(['ID' => $id, 'AUTHOR' => $author->name, 'RECORD' => $record, 'USERS' => $plucked->all()]);
         foreach($plucked->all() as $uid) {
             $user = UserModel::where('user_id', $uid)->first();            
             if($user) {
-                Log::debug(['NOTICE NEW RECORD TO USER' => $user->email]);
+                Log::debug(['*NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);
                 Event::dispatch(new RecordSent($record, $user, $this->set));
-                //TODO: ** temporal para modo desarrollo x limitación de MailTrap */
-                if( (env('APP_URL') == 'http://127.0.0.1:8000') && ($n == 5) ) { // FIXME:
-                    break;
-                }                
+                //TODO: ** temporal para modo desarrollo x limitación de MailTrap  */
+                if( $this->onLocal() ) {
+                    Log::info('On Development... 3 seconds delay, '. $n .' deliveries');
+                    sleep(3);
+                    if($n == 5) break;
+                }  // if            
                 $n++;
             } // if
         } // foreach
@@ -1364,6 +1376,11 @@ class RecordRepository implements RecordRepositoryInterface
         }
         if( count($output) > 0 ) return $output; 
         return false;
+    }
+
+    private function onLocal()
+    {
+        return ( env('APP_URL') == "http://127.0.0.1:8000" ) ? true : false;
     }
 
 } // class

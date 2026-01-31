@@ -28,6 +28,8 @@ class NewRecordNotice extends Mailable
         $this->recordLink = $record->link;
         $this->recordSign = $record->sign;
         $this->set = $set;
+        $this->set['from_email_notice'] = $record->from;
+        $this->set['from_name_notice'] = $record->sign;
 
         // Verificar si agrega copia oculta
         if (!empty($this->set['bcc_edit'])) {
@@ -74,7 +76,7 @@ class NewRecordNotice extends Mailable
     public function build()
     {
         return $this->markdown('emails.notice_record')
-            ->from( $this->set['from_email_edit'], $this->set['from_name_edit'])
+            ->from( $this->set['from_email_notice'], $this->set['from_name_notice'])
             ->subject($this->set['subject_edit']);
     }
 
