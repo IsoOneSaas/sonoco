@@ -609,7 +609,7 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        Log::debug(['UPDATE DATA' => $data]);        
+        //Log::debug(['UPDATE DATA' => $data]);        
 
         try { 
             // USER PARAMETERS
@@ -826,17 +826,15 @@ class RecordRepository implements RecordRepositoryInterface
                 } // if                
             } // if
 
-            // GENERAR NUI
-
+            // GENERAR NUI Y SALVARLA
             $currentYear = Carbon::today()->format('Y');
             $serial = $this->file->getSerial($code, $currentYear);
             // Salvar NUI
-            $record->fill([
-                'code'          => $code,
-                'year'          => $currentYear,
-                'serial'        => $serial
-            ])->save(); 
-
+            RecordModel::where('record_id', $record->record_id)->update([
+                'code'      => $code,
+                'year'      => $currentYear,
+                'serial'    => $serial
+            ]);
             
             // SAVE TRACING  TODO: trazabilidad inmutable
             if( isset($user->user_uid) ) {
@@ -938,10 +936,23 @@ class RecordRepository implements RecordRepositoryInterface
         return $this->file->getLocationsList($user);   
     } // getLocationsList
 
+    public function getRecords()
+    {
+        $user = Auth::user();
+        // AGREGAR PROCESOS DE REGISTROS COMPARTIDOS
+        // Registros Compartidos
+        $plucked = $user->records->pluck('record_id');
+        $rids = $plucked->all();
+        Log::debug(['UID' => $user->user_id, 'RIDS' => $rids]); 
+        return $rids;        
 
-    public function getProcessesList()
+    }
+
+
+    public function getProcessesList(array $rids)
     {
         $process_array = [];
+        
         // Obtener documentos autorizados para el usuario
         $dids = $this->tool->setDepartmentsFilter();
         // Obtener los procesos relacinado a estos departamentos        
@@ -952,11 +963,21 @@ class RecordRepository implements RecordRepositoryInterface
         $pids1 = $plucked->all();
         Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
 
-        // TODO: Agregar los procesos de los registros compartido
+
+        // Códigos de proceso
+        if( count($rids) > 0 ) {
+            $plucked = FileModel::join('document_records', function($join) use($rids) {
+                $join->on('document_records.code', '=', 'document_files.code');
+                $join->whereIn('document_records.record_id', $rids); 
+            })->pluck('document_files.process_id');
+            $pids2 = $plucked->all();
+        } else {
+            $pids2 = [];
+        }
+        Log::debug(['SHARE PROCESSES IDS' =>  array_unique($pids2)]); 
 
         // Concatenar
-        $process_array = array_unique($pids1);
-        //$process_array = array_unique(array_merge($pids1, $pids2, $pids3));           
+        $process_array = array_unique(array_merge($pids1, $pids2));           
 
         // Obtener el listado para el filtro
         $processes = ProcessModel::whereIn('process_id', $process_array)->orderBy('name')->get(['process_id', 'name']);
@@ -967,7 +988,7 @@ class RecordRepository implements RecordRepositoryInterface
         return $processes;        
     } // getProcessesList Repository
 
-    public function getProcessesList2()
+    public function getProcessesList2() // TODO: Eliminar
     {
         $process_array = [];
         $user = Auth::user();
@@ -1150,16 +1171,15 @@ class RecordRepository implements RecordRepositoryInterface
     * @return json    listado
     */        
     public function getTopics($dids)
-    {
-                
-        Log::debug(['DIDS:' => $dids]);
+    {                
+        //Log::debug(['DIDS:' => $dids]);
         // Determinar los temas
         $topics = $this->file->getTopicsSelect($dids);
         // Adecuación 
         foreach($topics as $topic) {
             $topic->newCode = str_pad($topic->code, $this->set['file_code_pad'], "0", STR_PAD_LEFT);
         }
-        Log::debug(['GETTOPICS:' => $topics->toArray()]);
+        //Log::debug(['GETTOPICS:' => $topics->toArray()]);
         return $topics;
     } // getTopics Method 
 
@@ -1230,7 +1250,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($record->record_id)]);
             $record->sign = $user->name;
             Log::debug(['NOTICE NEW RECORD TO USER' => $user->email]);
-            Event::dispatch(new RecordSent($record, $user, $this->set));
+            Event::dispatch(new RecordSent($record, $user, $this->set));      // FIXME: Funciona?
             return true;  
         }
         return false;

@@ -12,11 +12,13 @@ interface RecordRepositoryInterface
 
     public function getSystemsList();
 
-    public function getProcessesList();
+    public function getProcessesList(array $rids);
 
     public function getGroupsList();
 
     public function getFileData($code);
+
+    public function getRecords();
 
 
    public function getLocationsList();

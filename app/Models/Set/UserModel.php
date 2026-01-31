@@ -1,6 +1,7 @@
 <?php namespace App\Models\Set;
 
 use App\Models\Document\AuthorizationModel;
+use App\Models\Document\RecordModel;
 use Emadadly\LaravelUuid\Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -119,6 +120,14 @@ class UserModel extends Authenticatable
     public function authorizations(): BelongsToMany
     {
         return $this->belongsToMany(AuthorizationModel::class, 'user_id', 'user_id');
-    }      
+    } 
+    
+    /**
+    * Obtiene los registros compartidos para gestionar
+    */    
+    public function records()
+    {
+        return $this->belongsToMany(RecordModel::class, 'document_record_users', 'user_id', 'record_id');
+    }    
 
 } // class

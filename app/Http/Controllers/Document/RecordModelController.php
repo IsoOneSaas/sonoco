@@ -38,9 +38,10 @@ class RecordModelController extends Controller
     public function index() : View
     {
         $columnDefinition = $this->dataTableDefinition();
+        $records = $this->recordRepo->getRecords();
         $systems = $this->recordRepo->getSystemsList();
         $groups = $this->recordRepo->getGroupsList();
-        $processes = $this->recordRepo->getProcessesList();
+        $processes = $this->recordRepo->getProcessesList($records);
         //$types = $this->recordRepo->getTypesList();
         return view('document.record.index', [
             'urlContent'  => $this->recordUrl,
@@ -59,8 +60,9 @@ class RecordModelController extends Controller
      */    
     public function render($param)
     {
+        $records = $this->recordRepo->getRecords();
         $systems = $this->recordRepo->getSystemsList();
-        $processes = $this->recordRepo->getProcessesList();
+        $processes = $this->recordRepo->getProcessesList($records);
         $groups =  $this->recordRepo->getGroupsList();
         return $this->recordRepo->render($param, $systems, $processes, $groups, $this->set);
     }  // show
