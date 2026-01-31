@@ -38,7 +38,8 @@ class RecordModelController extends Controller
     public function index() : View
     {
         $columnDefinition = $this->dataTableDefinition();
-        $records = $this->recordRepo->getRecords();
+        $user = $this->recordRepo->getUserId();
+        $records = $this->recordRepo->getRecordsByShare($user);
         $systems = $this->recordRepo->getSystemsList();
         $groups = $this->recordRepo->getGroupsList();
         $processes = $this->recordRepo->getProcessesList($records);
@@ -60,11 +61,12 @@ class RecordModelController extends Controller
      */    
     public function render($param)
     {
-        $records = $this->recordRepo->getRecords();
+        $user = $this->recordRepo->getUserId();
+        $ridsShared = $this->recordRepo->getRecordsByShare($user);
         $systems = $this->recordRepo->getSystemsList();
-        $processes = $this->recordRepo->getProcessesList($records);
+        $processes = $this->recordRepo->getProcessesList($ridsShared);
         $groups =  $this->recordRepo->getGroupsList();
-        return $this->recordRepo->render($param, $systems, $processes, $groups, $this->set);
+        return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
     }  // show
     
 

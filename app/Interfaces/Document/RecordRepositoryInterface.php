@@ -2,7 +2,7 @@
 
 interface RecordRepositoryInterface 
 {
-    public function render($slug, $systems, $processes, $groups, $settings);
+    public function render($slug, $systems, $processes, $groups, $rids2, $user, $settings);
 
     public function update(array $data);
 
@@ -18,7 +18,9 @@ interface RecordRepositoryInterface
 
     public function getFileData($code);
 
-    public function getRecords();
+    public function getRecordsByShare($user);
+
+    public function getUserId();
 
 
    public function getLocationsList();

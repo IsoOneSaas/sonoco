@@ -49,13 +49,14 @@ class RecordRepository implements RecordRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de registros de la tabla
      */
-    public function render($slug, $systems, $processes, $groups, $setting)
+    public function render($slug, $systems, $processes, $groups, $rids2, $user, $setting)
     {    
         $data = [];
         $i = 0;
         $params = json_decode($slug, true);
 
         //Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray(), 'PROCESSES' => $processes->toArray(), 'GROUPS' => $groups->toArray()]);    
+        //Log::debug(['PARAMS' => $params]);
 
         // Range Date
         $range = explode('T', $params['din']);
@@ -76,10 +77,7 @@ class RecordRepository implements RecordRepositoryInterface
             $plucked = $processes->pluck('process_id');
             $pids = $plucked->all();
         }
-
-        // Archivos para estos procesos
-        // $plucked = FileModel::whereIn('process_id', $pids)->pluck('code');
-        // $codes = $plucked->all();
+        //Log::debug(['PIDS FILTRADOS' => $pids]);
 
         // Grupo
         $groupArray = [];
@@ -100,25 +98,29 @@ class RecordRepository implements RecordRepositoryInterface
             }
         } else {
             $tagArray  = [$params['tid']];
-        }        
+        }  
         
+        // OBTENER REGISTROS PROPIOS
+        $rids1 = $this->getRecordsByOwn($user);
 
-        // Obtener Registros Filtrados
-        $records = RecordModel:: //whereIn('document_records.code', $codes_array)
-            join('document_files AS T1', function($join) use($pids) {
+        // CONCATENAR ARREGLOS DE REGISTROS
+        $records_array = array_unique(array_merge($rids1, $rids2)); 
+
+        Log::debug('Número de registros filtrados 1: '. count($records_array));        
+
+        // OBTENER REGISTROS FILTRADOS
+        $records = RecordModel::whereIn('document_records.record_id', $records_array)
+            ->join('document_files AS T1', function($join) use($pids, $sids) {
                 $join->on('T1.code', '=', 'document_records.code');
                 $join->whereIn('T1.process_id', $pids);
-            })             
+                $join->whereIn('T1.system_id', $sids);
+            })
             ->join('documents AS T2', function($join){
                 $join->on('T2.document_id', '=', 'document_records.document_id');
             })
-            ->join('set_systems AS T3', function($join) use($sids) {
-                $join->on('T3.system_id', '=', 'T1.system_id');
-                $join->whereIn('T3.system_id', $sids);
-            })
-            ->join('document_record_topics AS T4', function($join) {
-                $join->on('T4.record_id', '=', 'document_records.record_id');
-            })                 
+            ->join('document_record_topics AS T3', function($join) {
+                $join->on('T3.record_id', '=', 'document_records.record_id');
+            })                         
             ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])                                
             ->get([
                 'document_records.record_id', 
@@ -130,13 +132,12 @@ class RecordRepository implements RecordRepositoryInterface
                 'document_records.serial',
                 'document_records.created_at as date',
                 'T2.name as documentName',
-                'T4.topic',
-                'T4.subject',            
-            ]);
+                'T3.topic',
+                'T3.subject',            
+            ]);                       
+        Log::debug('Número de registros filtrados 2: '. $records->count()); 
 
-        Log::debug('Número de registros filtrados 1: '. $records->count()); 
-
-        // Generar grid
+        // GENERAR GRID
         foreach($records as $record) {
             // Filtro de Etiqueta
             if( $params['gid'] == '' ) {
@@ -162,17 +163,15 @@ class RecordRepository implements RecordRepositoryInterface
             }                          
         } // foreach
             
-        Log::debug('Número de registros filtrados 2: '. count($data));
-            
-
-        
+        Log::debug('Número de registros filtrados 3: '. count($data));
+                    
         $results = [
             "sEcho" => 1,
             "iTotalRecords" => count($data),
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
-        Log::debug(['DATA*' => $data]);
+        //Log::debug(['DATA*' => $data]);
         return json_encode($results);          
     } // render Repository
 
@@ -936,17 +935,37 @@ class RecordRepository implements RecordRepositoryInterface
         return $this->file->getLocationsList($user);   
     } // getLocationsList
 
-    public function getRecords()
+    public function getUserId()
     {
         $user = Auth::user();
-        // AGREGAR PROCESOS DE REGISTROS COMPARTIDOS
-        // Registros Compartidos
+        if($user) return $user;
+        return new UserModel;
+    }
+
+    /**
+     * Obtener los identificadores de registros que son creados por el usuario
+     * @return array    arreglo unidimensinal de identificadores de registro
+     */     
+    private function getRecordsByOwn($user)
+    {
+        $plucked = RecordModel::where('author_id', $user->user_id)->pluck('record_id');
+        $rids = $plucked->all();
+        Log::debug(['OWNER :: UID' => $user->user_id, 'RIDS' => $rids]); 
+        return $rids;        
+    } // getRecordsByoWN Respository    
+
+    /**
+     * Obtener los identificadores de registros que son compartidos por otros usuarios
+     * @param  collection $user Usuario actual
+     * @return array    arreglo unidimensinal de identificadores de registro
+     */     
+    public function getRecordsByShare($user)
+    {
         $plucked = $user->records->pluck('record_id');
         $rids = $plucked->all();
-        Log::debug(['UID' => $user->user_id, 'RIDS' => $rids]); 
+        Log::debug(['SHARED :: UID' => $user->user_id, 'RIDS' => $rids]); 
         return $rids;        
-
-    }
+    } // getRecordsByShare Respository
 
 
     public function getProcessesList(array $rids)
