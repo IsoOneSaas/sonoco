@@ -32,12 +32,15 @@
                                     <li id="record-2-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-2-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-2" type="button" role="tab" aria-controls="record-tab-2" aria-selected="false" > Soporte </button>
                                     </li>
+                                    @if( $DATA['author'] )  
                                     <li id="record-3-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-3-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-3" type="button" role="tab" aria-controls="record-tab-3" aria-selected="false" > Clasificación </button>
                                     </li>
+                                    @endif
                                     <li id="record-4-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-4-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-4" type="button" role="tab" aria-controls="record-tab-4" aria-selected="false" > Etiquetas </button>
                                     </li>
+                                    
                                     <li id="record-5-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#record-tab-5" type="button" role="tab" aria-controls="record-tab-5" aria-selected="false" > Participantes </button>
                                     </li>
@@ -79,7 +82,7 @@
                                             </div>
                                             <!-- END: Basic -->
                                         </div>
-                                        <div id="record-tab-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-2-tab">
+                                        <div id="record-tab-2" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-2-tab">                                            
                                             <!-- BEGIN: Support -->
                                             <div class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline">
@@ -107,61 +110,68 @@
                                             <!-- END: Support -->
                                         </div>
                                         <div id="record-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-3-tab">
-                                            <!-- BEGIN: Location -->
-                                             @if( $countLocations > 1 )
-                                            <div class="intro-y box p-5 mt-5">
-                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro en una localización de la lista desplegable.</p>                                                              
-                                                <div class="input-group mt-5">
-                                                    <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.location.title') }}</div>                                                    
-                                                    <select id="location-select" name="location_id" class="form-control w-full input-status">
-                                                        <option value="">{{ trans('document/record.form.location.default') }}</option>
-                                                        @foreach($locations as $location)  
-                                                        <option value="{{ $location->location_id }}" @if( isset($FILE->location_id) && ($FILE->location_id == $location->location_id) ) selected @endif >[{{ $location->newCode }}] {{ $location->name }}</option>
-                                                        @endforeach                                                      
-                                                    </select>
+                                            @if( $DATA['author'] )
+                                                <!-- BEGIN: Location -->
+                                                @if( $countLocations > 1 )
+                                                <div class="intro-y box p-5 mt-5">
+                                                    <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro en una localización de la lista desplegable.</p>                                                              
+                                                    <div class="input-group mt-5">
+                                                        <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.location.title') }}</div>                                                    
+                                                        <select id="location-select" name="location_id" class="form-control w-full input-status">
+                                                            <option value="">{{ trans('document/record.form.location.default') }}</option>
+                                                            @foreach($locations as $location)  
+                                                            <option value="{{ $location->location_id }}" @if( isset($FILE->location_id) && ($FILE->location_id == $location->location_id) ) selected @endif >[{{ $location->newCode }}] {{ $location->name }}</option>
+                                                            @endforeach                                                      
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            @else
-                                                <input type="hidden" name="location_id" value="{{ $locations->location_id }}">
-                                             @endif
-                                             <!-- END: Location -->  
-                                            <!-- BEGIN: Topic -->
-                                            <div class="intro-y box p-5 mt-5">
-                                                <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
-                                                <div class="input-group mt-5">
-                                                    <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.topic.title') }}</div>                                                    
-                                                    <select id="topic-select" name="topic_id" class="form-control w-full input-status">
-                                                        <option value="">{{ trans('document/record.form.topic.default') }}</option>
-                                                        @php($previous = '')
-                                                        @foreach($topics as $topic)
-                                                            @if( $topic->department != $previous )
-                                                                @if( $previous != '' )
-                                                                    </optgroup>
+                                                @else
+                                                    <input type="hidden" name="location_id" value="{{ $locations->location_id }}">
+                                                @endif
+                                                <!-- END: Location -->  
+                                                <!-- BEGIN: Topic -->
+                                                <div class="intro-y box p-5 mt-5">
+                                                    <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Clasifique el registro con un tema y subtema nuevo, o seleccione uno existente de la lista desplegable.</p>                                                              
+                                                    <div class="input-group mt-5">
+                                                        <div id="topic" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.topic.title') }}</div>                                                    
+                                                        <select id="topic-select" name="topic_id" class="form-control w-full input-status">
+                                                            <option value="">{{ trans('document/record.form.topic.default') }}</option>
+                                                            @php($previous = '')
+                                                            @foreach($topics as $topic)
+                                                                @if( $topic->department != $previous )
+                                                                    @if( $previous != '' )
+                                                                        </optgroup>
+                                                                    @endif
+                                                                    <optgroup id="dpt{{ $topic->department_id }}" label="{{ $topic->department }}">
+                                                                    @php($previous = $topic->department)
                                                                 @endif
-                                                                <optgroup id="dpt{{ $topic->department_id }}" label="{{ $topic->department }}">
-                                                                @php($previous = $topic->department)
-                                                            @endif
-                                                            <option value="{{ $topic->topic_id }}" @if( isset($FILE->topic_id) && ($FILE->topic_id == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
-                                                        @endforeach
-                                                        </optgroup>
-                                                    </select>                                                    
-                                                    <input type="text" id="topic-name" name="topic" value="" class="form-control w-full input-status  ml-2" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="48">
-                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.topic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                                    <button id="btn-new-topic" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                                <option value="{{ $topic->topic_id }}" @if( isset($FILE->topic_id) && ($FILE->topic_id == $topic->topic_id) ) selected @endif >[{{ $topic->newCode }}] {{ $topic->name }}</option>
+                                                            @endforeach
+                                                            </optgroup>
+                                                        </select>                                                    
+                                                        <input type="text" id="topic-name" name="topic" value="" class="form-control w-full input-status  ml-2" aria-describedby="topic" placeholder="{{ trans('document/record.form.topic.placeholder') }}" minlength="2" maxlength="48">
+                                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.topic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                        <button id="btn-new-topic" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                    </div>
+                                                    <div class="input-group mt-3">                                                
+                                                        <div id="subject" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.subject.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.subject.title') }}</div>                                                    
+                                                        <select id="subject-select" name="subject_id" class="form-control w-full input-status">
+                                                            <option value="">{{ trans('document/record.form.subject.default') }}</option>
+                                                        </select>
+                                                        <input type="text" id="subject-name" name="subject" value="" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
+                                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                        <button id="btn-new-subject" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                                    </div>
                                                 </div>
-                                                <div class="input-group mt-3">                                                
-                                                    <div id="subject" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.subject.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.subject.title') }}</div>                                                    
-                                                    <select id="subject-select" name="subject_id" class="form-control w-full input-status">
-                                                        <option value="">{{ trans('document/record.form.subject.default') }}</option>
-                                                    </select>
-                                                    <input type="text" id="subject-name" name="subject" value="" class="form-control w-full input-status ml-2" aria-describedby="subject" placeholder="{{ trans('document/record.form.subject.placeholder') }}" minlength="2" maxlength="48">
-                                                    <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.subject.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                                    <button id="btn-new-subject" type="button" class='btn btn-primary input-status ml-5'><i data-lucide="plus" class="w-4 h-4"></i></button>
-                                                </div>
-                                            </div>
-                                            <!-- END: Topic -->                                            
+                                                <!-- END: Topic -->
+                                            @else
+                                                <input type="hidden" name="location_id" value="{{ $FILE->location_id }}">
+                                                <input type="hidden" name="topic_id" value="{{ $FILE->topic_id }}">
+                                                <input type="hidden" name="subject_id" value="{{ $FILE->subtopic_id }}">
+                                            @endif
                                         </div>
                                         <div id="record-tab-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-4-tab">
+                                           
                                             <!-- BEGIN: Tags -->
                                             <div id="div-tags" class="intro-y box p-5 mt-5">
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Crea o seleccione de la lista desplegable un nuevo grupo y luego crea o seleccione todas las etiquetas adecuadas para el registro.</p>                                                              
@@ -198,7 +208,8 @@
                                                     @endforeach
                                                 @endforeach                                                    
                                             </div>
-                                            <!-- END: Tags -->  
+                                            <!-- END: Tags -->
+
                                         </div>
                                         <div id="record-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="record-5-tab">
                                             <!-- BEGIN: Users -->

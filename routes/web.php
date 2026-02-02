@@ -211,6 +211,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // FILES
         Route::group(['prefix' => 'archivo', 'as' => 'files.'], function () {
             Route::resource('', \App\Http\Controllers\Document\FileModelController::class);
+            Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('index.render');
+
+
             Route::post('salvar/tema', [\App\Http\Controllers\Document\FileModelController::class, 'setTopic'])->name('save.topic'); 
             Route::post('salvar/subtema', [\App\Http\Controllers\Document\FileModelController::class, 'setSubtopic'])->name('save.subject'); 
             Route::get('listar/subtemas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getSubtopics']); 

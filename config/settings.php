@@ -75,6 +75,27 @@ return [
                 'orientation' => 'landscape',                     
             ],                              
         ],
+    ],
+    
+    // background Color
+    'color_pallete_1' => [
+        'yellow' => '#fffd7c',
+        'red'   => '#ff7560',
+        'green' => '#dbff8c',
+        'gray'  => '#f5f5f5',
+        'orange'  => '#ffcc00',
+        'purple' => '#fab8f7',
+        'white' => '#ffffff',
+        'blue' => '#bbe2f9',
+    ],
+
+    // text Color
+    'color_pallete_2' => [
+        'yellow' => '#ffff33',
+        'red'    => '#ff3300',
+        'green'  => '#339900',
+        'gray'   => '#999999',
+        'orange' => '#ff9900',
     ],     
 
     /*
@@ -275,7 +296,10 @@ return [
         3 => 'Electrónico y Papel',
         4 => 'Electrónico Iso-One',
     ],
-    'record_storage_default' => 'iso-one',    
+    'record_storage_default' => 'iso-one', 
+    
+    // FILES
+    'file_frequency_select' => ['Meses', 'Años'],
 
 
 ]; // end    

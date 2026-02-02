@@ -94,10 +94,28 @@ return [
             'department' =>  [
                 'empty'   => 'Seleccione un departamento de la lista',
             ],            
-    ],      
-
+    ], 
+         
+    'datatable_master' => [
+        'lengthMenu' => 'Mostrar _MENU_ archivos por página',
+        'zeroRecords' => '<h4>No hay archivos encontrados para la selección actual</h4>',
+        'info' => 'Mostrando página _PAGE_ de _PAGES_',
+        'infoEmpty' => '*',
+        'infoFiltered' => '(_TOTAL_ filtrados de _MAX_ archivos totales)',
+        'loadingRecords' => 'Cargando...',
+        'search' => 'Etiqueta: ',
+        'paginate' => [
+            'next' => '>>',
+            'previous' => '<<'
+        ],
+        'decimal' => '.',
+        'thousands' => "'"
+    ], 
     
+
     /* actualizado */
+
+
     'create' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'success'       => 'Archivo salvado correctamente',

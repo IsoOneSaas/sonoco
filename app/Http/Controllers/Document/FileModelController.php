@@ -33,13 +33,28 @@ class FileModelController extends Controller
     {
         
         $columnDefinition = $this->dataTableDefinition();
-        return view('document.record.index', [
+        return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
-            'gridLanguage' => json_encode(trans('document/record.datatable_master')),
+            'gridLanguage' => json_encode(trans('document/file.datatable_master')),
         ]);        
     } // index Method
+
+    /**
+     * Display de Grid to Record Master
+     */    
+    public function render($param)
+    {
+        // $user = $this->recordRepo->getUserId();
+        // $ridsShared = $this->recordRepo->getRecordsByShare($user);
+        // $systems = $this->recordRepo->getSystemsList();
+        // $processes = $this->recordRepo->getProcessesList($ridsShared);
+        // $groups =  $this->recordRepo->getGroupsList();
+        // return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
+        return $this->fileRepo->render($param);
+        return true;
+    }  // show    
 
     /**
      * Show the form for creating a new resource.
@@ -181,7 +196,9 @@ class FileModelController extends Controller
     private function dataTableDefinition()
     {
         $columnOrder = 13;
+        $columnExport = [9,10,11,12,13,14,15,16,17,18,19,20,21];
         $columns_basic = [
+             ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"],
             ["data" => "file_id", "title" => "ID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "system_id", "title" => "XID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "process_id", "title" => "PID", "visible" => false, "searchable" => false, "orderable" => false],
@@ -190,11 +207,11 @@ class FileModelController extends Controller
             ["data" => "job_id", "title" => "JID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "topic_id", "title" => "TID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "subtopic_id", "title" => "SID", "visible" => false, "searchable" => false, "orderable" => false],
-            ["data" => "DT_RowIndex", "title" => "No", "orderable" => false, "searchable" => false, "filterable" => false],
+            //["data" => "DT_RowIndex", "title" => "No", "orderable" => false, "searchable" => false, "filterable" => false],
         ];
 
         $columns_array = [
-            ["data" => "process", "title" => "Proceso"],
+            ["data" => "process", "title" => "Proceso"],    //9
             ["data" => "code", "title" => "Código", "filterable" => false],
             ["data" => "topic", "title" => "Tema", "filterable" => true],
             ["data" => "subtopic", "title" => "Subtema", "filterable" => true],
@@ -206,7 +223,7 @@ class FileModelController extends Controller
             ["data" => "storage", "title" => "Almacenamiento"],
             ["data" => "classification", "title" => "Clasificación"],
             ["data" => "txtindex", "title" => "Indexación"],
-            ['data' => 'txtdisposal', 'title' => 'Disposición Final'],                                                                                                             
+            ['data' => 'txtdisposal', 'title' => 'Disposición Final'],  // 21                                                                                                           
         ];
 
         $columns_extra = [
@@ -215,12 +232,13 @@ class FileModelController extends Controller
             ["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
         ]; 
         
-        return [
-            'column_order'  => $columnOrder,
-            'columns_basic' => $columns_basic,
-            'columns_array' => $columns_array,
-            'columns_extra' => $columns_extra,
-        ];
+        // return [
+        //     'column_order'  => $columnOrder,
+        //     'columns_basic' => $columns_basic,
+        //     'columns_array' => $columns_array,
+        //     'columns_extra' => $columns_extra,
+        // ];
+        return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);        
     } // dataTableDefinition    
 
 } // class

@@ -2,6 +2,7 @@
 
 interface FileRepositoryInterface 
 {
+    public function render($slug);
     
     public function existsTopicName($id, $txt);
     public function storeTopicName($id, $txt);
