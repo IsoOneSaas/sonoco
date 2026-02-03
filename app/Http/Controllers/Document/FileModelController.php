@@ -83,8 +83,19 @@ class FileModelController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($hash)
+    public function edit($hash) : View
     {
+
+        // Obtener datos del archivo
+        $data = $this->fileRepo->setFile($hash);
+        Log::debug(['DATA' => $data]);    
+
+        // View
+        return view('document.file.edit', [
+
+            'DATA'      => $data,
+
+        ]); 
 
     }
 
@@ -207,37 +218,31 @@ class FileModelController extends Controller
             ["data" => "job_id", "title" => "JID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "topic_id", "title" => "TID", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "subtopic_id", "title" => "SID", "visible" => false, "searchable" => false, "orderable" => false],
-            //["data" => "DT_RowIndex", "title" => "No", "orderable" => false, "searchable" => false, "filterable" => false],
         ];
 
         $columns_array = [
-            ["data" => "process", "title" => "Proceso"],    //9
-            ["data" => "code", "title" => "Código", "filterable" => false],
-            ["data" => "topic", "title" => "Tema", "filterable" => true],
-            ["data" => "subtopic", "title" => "Subtema", "filterable" => true],
-            ["data" => "name", "title" => "Nombre", "filterable" => false],        // Order => 13
-            ["data" => "responsable", "title" => "Responsable"],
-            ["data" => "datewell", "title" => "Frecuencia de Retención"],
-            ['data' => 'datemin', 'title' => 'Tiempo Mínimo Retención'],
-            ["data" => "datedead", "title" => "Tiempo Archivo Muerto"],
-            ["data" => "storage", "title" => "Almacenamiento"],
-            ["data" => "classification", "title" => "Clasificación"],
-            ["data" => "txtindex", "title" => "Indexación"],
-            ['data' => 'txtdisposal', 'title' => 'Disposición Final'],  // 21                                                                                                           
+            ["data" => "process", "title" => "Proceso", "searchable" => true, 'filterable' => true],    //9
+            ["data" => "code", "title" => "Código", "filterable" => false, "searchable" => true, "className" => "dt-nowrap small-font"],
+            ["data" => "topic", "title" => "Tema", "filterable" => true, "searchable" => true],
+            ["data" => "subtopic", "title" => "Subtema", "filterable" => true, "searchable" => true],
+            ["data" => "name", "title" => "Nombre", "filterable" => false, "searchable" => true],        // Order => 13
+            ["data" => "responsable", "title" => "Responsable", "filterable" => true, "searchable" => false],
+            ["data" => "datewell", "title" => "Frecuencia de Retención", "filterable" => false, "searchable" => true],
+            ['data' => 'datemin', 'title' => 'Tiempo Mínimo Retención', "filterable" => false, "searchable" => true],
+            ["data" => "datedead", "title" => "Tiempo Archivo Muerto", "filterable" => false, "searchable" => true],
+            ["data" => "storage", "title" => "Almacenamiento", "filterable" => true, "searchable" => true],
+            ["data" => "classification", "title" => "Clasificación", "filterable" => true, "searchable" => true],
+            ["data" => "txtindex", "title" => "Indexación", "filterable" => true, "searchable" => true],
+            ['data' => 'txtdisposal', 'title' => 'Disposición Final', "filterable" => true, "searchable" => true],  // 21 
         ];
 
         $columns_extra = [
+            ["data" => "hash", "title" => "HASH", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
             ["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
         ]; 
         
-        // return [
-        //     'column_order'  => $columnOrder,
-        //     'columns_basic' => $columns_basic,
-        //     'columns_array' => $columns_array,
-        //     'columns_extra' => $columns_extra,
-        // ];
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);        
     } // dataTableDefinition    
 

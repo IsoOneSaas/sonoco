@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FileModel extends Model
 {
@@ -16,6 +17,6 @@ class FileModel extends Model
         'dwell_date', 'dwell_value', 'dwell_frequency',
         'dead_date', 'dead_value', 'dead_frequency',    
         'hold_value', 'hold_frequency',
-    ];   
-   
+    ];
+       
 } // class

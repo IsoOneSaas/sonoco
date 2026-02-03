@@ -18,7 +18,7 @@
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-new" title="Nuevo archivo"><i data-lucide="pencil" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-new" title="Nuevo archivo"><i data-lucide="pencil" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el archivo"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el archivo"><i data-lucide="eye" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
@@ -185,7 +185,7 @@
     let $dateInDefault;
     let $dateOutDefault;
     let $myTable;
-    let $route = "{{ route('files.index.render', ':slug') }}";
+    let $route = "{{ route('files.render', ':slug') }}";
 
     $(function () {
         let columnsDef = {!! $gridColDef !!};
@@ -310,6 +310,83 @@
             },
             language: lang                                   
         }); // datatables
+
+        // Filtros : generación
+        $('#files-table thead tr:eq(1) th').each( function (i) {
+            var tag;
+            var item = columnsDef[i+8];
+            if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                $(this).html('');
+            } else {
+                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                    $(this).html(tag);
+                } else {
+                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    } else {
+                        $(this).html('');
+                    }
+                }
+            }          
+        });
+        
+        // UTILIDADES        
+        $("#btn-download").on("click", function() {
+            $myTable.button('.buttons-excel').trigger();
+        });
+        
+        $("#btn-print").on("click", function() {
+            $myTable.button('.buttons-pdf').trigger();
+        });
+
+        $("#btn-colvis").on("click", function() {
+            $myTable.button('.buttons-colvis').trigger();
+        });
+        
+        $('input.deletable').wrap('<span class="deleteicon"></span>').after($('<span>x</span>').click(function() {
+            $(this).prev('input').val('').trigger('change').focus();
+        }));        
+        
+        // Seleccionar fila
+        $('#files-table').on('click', 'tr', function () {
+            data = $myTable.row(this).data();
+            if ( $(this).hasClass('selected') ) {
+                // Deseleccionado
+                $(this).removeClass('selected');
+                $('#btn-edit').addClass('iso-disabled');
+                $('#btn-view').addClass('iso-disabled');
+            } else {
+                // Seleccionado
+                $myTable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');                
+                if( data.status == 1 ) {
+                    // Bloqueado
+                    $('#btn-edit').addClass('iso-disabled');  
+                    $('#btn-view').removeClass('iso-disabled');
+                } else {
+                    $('#btn-edit').removeClass('iso-disabled');
+                    $('#btn-view').addClass('iso-disabled'); 
+                }               
+            } // if selected
+        }); // row selects  
+        
+        // BOTONES
+
+        // Editar el archivo existente
+        $('#btn-edit').on("click", function()  {
+            var rowdata = $myTable.rows('.selected').data()[0];
+            var url = "{{ route('files.admin.edit', ':id') }}";
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/file.grid.row_edit') }}");
+            } else {
+                //console.log('ID: '+rowdata.user_id);
+                                
+                url = url.replace(':id', rowdata.hash);
+                //alert(url);
+                location.href = url;                
+            }
+        }); // btn-edit        
 
                         
     }); // document

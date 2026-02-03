@@ -33,6 +33,18 @@ return [
     ],    
 
     'form' => [
+                'name'         =>  [
+                                    'icon'          => 'bookmark',
+                                    'title'         => 'Nombre',
+                                    'placeholder'   => 'Digite un nuevo nombre del archivo',
+                                    'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
+                ],
+                'code'         =>  [
+                                    'icon'          => 'code',
+                                    'title'         => 'Código',
+                                    'placeholder'   => 'Código archivístico',
+                                    'tooltip'       => 'Autogenerado, no editable.',
+                ],                         
         
                 'topic_department'    => [
                                     'icon' => 'at-sign',
@@ -93,7 +105,10 @@ return [
             ],            
             'department' =>  [
                 'empty'   => 'Seleccione un departamento de la lista',
-            ],            
+            ],
+            'grid' => [
+                'row_edit'  => 'No ha seleccionado un archivo para editar',
+            ],          
     ], 
          
     'datatable_master' => [

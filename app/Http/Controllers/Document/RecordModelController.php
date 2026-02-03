@@ -140,13 +140,13 @@ class RecordModelController extends Controller
         
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
-        Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
+        //Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
         $departments = $this->recordRepo->getDepartmentsList($dids);
         $countDepartments = ( count($dids) == 1 ) ? $departments->department_id : 0;
-        Log::debug(['DEPARTMENTS' => $departments->toArray()]);
+        //Log::debug(['DEPARTMENTS' => $departments->toArray()]);
 
         // obtener temas
         $topics = $this->recordRepo->getTopics($dids);
@@ -156,11 +156,11 @@ class RecordModelController extends Controller
 
         // Obtener datos del documento original
         $data = $this->recordRepo->setRecord($hash);
-        Log::debug(['DATA' => $data]);
+        //Log::debug(['DATA' => $data]);
 
         // Obtener datos de archivo
         $file = $this->recordRepo->getFileData($data['code']);
-        Log::debug(['FILE' => $file->toArray()]);
+        //Log::debug(['FILE' => $file->toArray()]);
 
         // View
         return view('document.record.edit', [

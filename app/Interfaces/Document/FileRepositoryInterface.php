@@ -3,6 +3,8 @@
 interface FileRepositoryInterface 
 {
     public function render($slug);
+
+    public function setFile($hash);
     
     public function existsTopicName($id, $txt);
     public function storeTopicName($id, $txt);

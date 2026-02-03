@@ -210,8 +210,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // FILES
         Route::group(['prefix' => 'archivo', 'as' => 'files.'], function () {
-            Route::resource('', \App\Http\Controllers\Document\FileModelController::class);
-            Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('index.render');
+            Route::resource('admin', \App\Http\Controllers\Document\FileModelController::class);
+            Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('render'); // index.render
 
 
             Route::post('salvar/tema', [\App\Http\Controllers\Document\FileModelController::class, 'setTopic'])->name('save.topic'); 

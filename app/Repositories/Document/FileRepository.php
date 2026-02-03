@@ -5,6 +5,10 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Document\FileRepositoryInterface;
 
 use App\Models\Document\FileModel;
+use App\Models\Document\FileDisposalModel;
+use App\Models\Document\FileIndexModel;
+use App\Models\Document\FileSubTopicModel;
+use App\Models\Document\FileTopicModel;
 //use App\Models\Document\SettingModel;
 
 
@@ -37,14 +41,24 @@ class FileRepository implements FileRepositoryInterface
     public function render($slug)
     {    
         $data = [];
+        $emtpy_array = [];
         $i = 0;
+        $supports_array = config("settings.record_support");
         $dto = Carbon::now();
         $params = json_decode($slug, true);   
         Log::debug(['PARAMS' => $params]);
 
         $pids = [];
+
+        // ARREGLO DE INDICES
+        $indexes = FileIndexModel::all();
+        $indexes_array = ($indexes) ?  $indexes : $emtpy_array;
         
+        // ARREGLO DE DISPOSICIONES
+        $disposals = FileDisposalModel::all();
+        $disposals_array = ($disposals) ?  $disposals : $emtpy_array;        
         
+        // FILTRADO DE ARHIVOS
         $files = FileModel::join('set_processes AS T1', function ($join) use ($pids) {
             $join->on('T1.process_id', '=', 'document_files.process_id');
             //$join->whereIn('T2.process_id', $pids);
@@ -64,20 +78,36 @@ class FileRepository implements FileRepositoryInterface
                 'T1.name as process',
                 'T2.name as responsable',
             ]);
-
-        // Obtener arreglo de disposiciones
-        //$by_disposals = \iso\Models\Document\DisposalModel::all()->keyBy('document-disposal_id');
-        //$disposals_array = ($by_disposals) ? $by_disposals->all() : $array_empty;             
-            
+                     
         // GENERAR GRID
         foreach($files as $file) {          
             //Log::debug(['RID' => $file->file_id, 'TAGS' => $tagArray]);
 
+            // Tema
+            $topic = FileTopicModel::find($file->topic_id);
+            $topicName = ($topic) ? $topic->name : ''; 
+
+            // Subtema
+            $subtopic = FileSubTopicModel::find($file->subtopic_id);
+            $subtopicName = ($subtopic) ? $subtopic->name : '';           
+
+            // Soporte
+            $txtSupport = ($file->support == 0) ? '' : $supports_array[$file->support];
+
+            // Indexacion  
+            if ($file->index_id != 0) {
+                if (array_key_exists($file->index_id, $indexes_array)) {
+                    $txtIndex = $indexes_array[$file->index_id]['name'];
+                } else {
+                    $txtIndex = '';
+                }
+            } else {
+                $txtIndex = '';
+            }            
+
             // Frecuencia de Retención
             $color1 = '';
-            //$file->datewell = $file->dwell_value . ' ' . $file->dwell_frequency;
-            if($file->dwell_date && $file->dwell_value) {
-                
+            if($file->dwell_date && $file->dwell_value) {                
                 $dti = Carbon::createFromFormat('Y-m-d', $file->dwell_date, config('app.timezone'));
                 if( $file->dwell_frequency == config('settings.file_frequency_select')[0] ) {
                     // Meses
@@ -98,11 +128,20 @@ class FileRepository implements FileRepositoryInterface
                 }
             } // if
 
+            // Disposición 
+            if ($file->disposal_id != 0) {
+                if (array_key_exists($file->disposal_id, $disposals_array)) {
+                    $txtDisposal = $disposals_array[$file->disposal_id]['name'];
+                } else {
+                    $txtDisposal = '';
+                }
+            } else {
+                $txtDisposal = '';
+            }            
+
             // Tiempo de Disposición
             $color2 = '';
-            //$file->->datedead = $file->->dead_value . ' ' . $file->->dead_frequency;  
-            if($file->dead_date && $file->dead_value) {
-                
+            if($file->dead_date && $file->dead_value) {                
                 $dti = Carbon::createFromFormat('Y-m-d', $file->dead_date, config('app.timezone'));
                 if( $file->dead_frequency == config('settings.file_frequency_select')[0] ) {
                     // Meses
@@ -122,49 +161,38 @@ class FileRepository implements FileRepositoryInterface
                     $color2 = config('settings.color_pallete_2')['orange'];
                 }
             } //if
+            
+            //$dt = Carbon::createFromTimeStamp(strtotime($file->date));
+            $data[$i]['DT_RowIndex'] = $i+1;
+            $data[$i]['file_id'] = $file->file_id;
+            $data[$i]['system_id'] = $file->system_id;
+            $data[$i]['process_id'] = $file->file_id;
+            $data[$i]['location_id'] = $file->file_id;
+            $data[$i]['department_id'] = $file->file_id;
+            $data[$i]['job_id'] = $file->job_id;
+            $data[$i]['topic_id'] = $topicName;
+            $data[$i]['subtopic_id'] = $subtopicName;
 
-            // Disposición 
-            // if ($file->disposal_id != 0) {
-            //     if (array_key_exists($file->disposal_id, $disposals_array)) {
-            //         $file->txtdisposal = $disposals_array[$file->disposal_id]['name'];
-            //     } else {
-            //         $file->txtdisposal = '';
-            //     }
-            // } else {
-            //     $file->txtdisposal = '';
-            // }            
+            $data[$i]['process'] = $file->process;
+            $data[$i]['code'] = $file->code;
+            $data[$i]['topic'] = $topicName;
+            $data[$i]['subtopic'] = $subtopicName;
+            $data[$i]['name'] = $file->name;
+            $data[$i]['responsable'] = $file->responsable;
+            $data[$i]['datewell'] = $file->dwell_value . ' ' . $file->dwell_frequency;
+            $data[$i]['datemin'] = $file->hold_value . ' ' . $file->hold_frequency; 
+            $data[$i]['datedead'] = $file->dead_value . ' ' . $file->dead_frequency;
+            $data[$i]['storage'] = $file->storage;
+            $data[$i]['classification'] = $file->classification;
+            $data[$i]['txtindex'] = $txtIndex;
+            $data[$i]['txtdisposal'] = $txtDisposal;
 
-                $dt = Carbon::createFromTimeStamp(strtotime($file->date));
-                $data[$i]['DT_RowIndex'] = $i+1;
-                $data[$i]['file_id'] = $file->file_id;
-                $data[$i]['system_id'] = $file->system_id;
-                $data[$i]['process_id'] = $file->file_id;
-                $data[$i]['location_id'] = $file->file_id;
-                $data[$i]['department_id'] = $file->file_id;
-                $data[$i]['job_id'] = $file->job_id;
-                $data[$i]['topic_id'] = $file->topic_id;
-                $data[$i]['subtopic_id'] = $file->subtopic_id;
+            $data[$i]['hash'] = $this->tool->setIdHash($file->file_id);
+            $data[$i]['txtsupport'] = $txtSupport;
+            $data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
+            $data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
 
-                $data[$i]['process'] = $file->process;
-                $data[$i]['code'] = $file->code;
-                $data[$i]['topic'] = '';
-                $data[$i]['subtopic'] = '';
-                $data[$i]['name'] = $file->name;
-                $data[$i]['responsable'] = $file->responsable;
-                $data[$i]['datewell'] = $file->dwell_value . ' ' . $file->dwell_frequency;
-                $data[$i]['datemin'] = $file->hold_value . ' ' . $file->hold_frequency; 
-                $data[$i]['datedead'] = $file->dead_value . ' ' . $file->dead_frequency;
-                $data[$i]['storage'] = $file->storage;
-                $data[$i]['classification'] = $file->storage;
-                $data[$i]['txtindex'] = $file->storage;
-                $data[$i]['txtdisposal'] = $file->storage;
-
-                $data[$i]['txtsupport'] = '';
-                $data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
-                $data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
-
-
-                $i++;                          
+            $i++;                          
         } // foreach   
         
         Log::debug('Número de registros filtrados 3: '. count($data));
@@ -179,6 +207,19 @@ class FileRepository implements FileRepositoryInterface
         return json_encode($results);         
         
     } // render Repository
+
+   /**
+     * Establece los datos del archivo existente para editar
+     * @param  string $hash Hash del Id del Archivo
+     * @return Object   Objeto de datos del archivo
+     */ 
+    public function setFile($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        $file = FileModel::find($id);
+    
+        return $file; 
+    } // setFile Repository
 
     /**
      * Valida si existe el nombre de tema para el respectivo departamento

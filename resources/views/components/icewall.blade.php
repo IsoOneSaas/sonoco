@@ -492,7 +492,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('files.index') }}" class="side-menu @if( request()->route()->getName() == 'files') side-menu--active @endif ">
+                                    <a href="{{ route('files.admin.index') }}" class="side-menu @if( request()->route()->getName() == 'files') side-menu--active @endif ">
                                         
                                         <div class="side-menu__icon"> <i data-lucide="archive"></i> </div>
                                         <div class="side-menu__title"> Archivo </div>
