@@ -33,6 +33,36 @@ return [
     ],    
 
     'form' => [
+                'system'         =>  [
+                                    'icon'          => 'flag',
+                                    'title'         => 'Sistema de Gestión',
+                                    'placeholder'   => 'Seleccione un Sistema de Gestión',
+                                    'tooltip'       => 'Requerido. Seleccionar un sistema de la lista desplegable',
+                ],
+                'location'         =>  [
+                                    'icon'          => 'map-pin',
+                                    'title'         => 'Localización',
+                                    'placeholder'   => 'Seleccione una localización de su archivo',
+                                    'tooltip'       => 'Requerido. Seleccionar una localización de la lista desplegable',
+                ],
+                'department'         =>  [
+                                    'icon'          => 'at-sign',
+                                    'title'         => 'Departamento',
+                                    'placeholder'   => 'Seleccione un departamento para su archivo',
+                                    'tooltip'       => 'Requerido. Seleccionar un departamento de la lista desplegable',
+                ],
+                'topic'         =>  [
+                                    'icon'          => 'box',
+                                    'title'         => 'Tema',
+                                    'placeholder'   => 'Seleccione un tema para su archivo',
+                                    'tooltip'       => 'Requerido. Seleccionar un tema de la lista desplegable',
+                ],
+                'subtopic'         =>  [
+                                    'icon'          => 'target',
+                                    'title'         => 'Subtema',
+                                    'placeholder'   => 'Seleccione un subtema para su archivo',
+                                    'tooltip'       => 'Requerido. Seleccionar un subtema de la lista desplegable',
+                ],                                                                               
                 'name'         =>  [
                                     'icon'          => 'bookmark',
                                     'title'         => 'Nombre',
@@ -44,7 +74,14 @@ return [
                                     'title'         => 'Código',
                                     'placeholder'   => 'Código archivístico',
                                     'tooltip'       => 'Autogenerado, no editable.',
-                ],                         
+                ],
+                'job'         =>  [
+                                    'icon'          => 'share2',
+                                    'title'         => 'Responsable',
+                                    'placeholder'   => 'Seleccione el responsable del control',
+                                    'tooltip'       => 'Requerido. Seleccionar un cargo de la lista desplegable',
+                ],                
+                
         
                 'topic_department'    => [
                                     'icon' => 'at-sign',
@@ -102,7 +139,10 @@ return [
                 'empty'     => 'Digite un nuevo nombre de subtema',
                 'no-topic'  => 'Seleccione un tema para el subtema',
                 'no-exist'  => 'No hay subtemas para el tema seleccionado. Crea uno nuevo!'
-            ],            
+            ],
+            'job' =>  [
+                'no-exist'  => 'No hay cargos para el departamento seleccionado'
+            ],                         
             'department' =>  [
                 'empty'   => 'Seleccione un departamento de la lista',
             ],

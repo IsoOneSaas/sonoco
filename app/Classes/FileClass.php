@@ -137,6 +137,7 @@ class FileClass
             ->orderBy('set_departments.name')
             ->orderBy('document_file_topics.code')
             ->get(['set_departments.department_id', 'set_departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);
+
         foreach($topics as $topic) {
             $topic->newCode = str_pad($topic->code, $this->codeStrPad, "0", STR_PAD_LEFT);
         }

@@ -80,20 +80,20 @@ class RecordModelController extends Controller
      */    
     public function set($hash, $slug1 = null, $id = 0, $slug2 = null) : View
     {
-       Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
+       //Log::debug('SET : Hash:'.$hash.' Slug1:'.$slug1.' Id:'.$id.' Slug2:'.$slug2);
 
         // Obtener Firma del usuario
         $path = $this->getSignature();
 
         // Obtener Localizaciones        
         $locations = $this->recordRepo->getLocationsList();
-        Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
+        //Log::debug(['LOCATIONS' => $locations['data']->toArray(), 'NO' =>$locations['n']]);
         
         // obtener Departamentos
         $dids = $this->tool->setDepartmentsFilter();
         $departments = $this->recordRepo->getDepartmentsList($dids);
         $countDepartments = ( count($dids) == 1 ) ? $departments->department_id : 0;
-        Log::debug(['DEPARTMENTS' => $departments->toArray()]);
+        //Log::debug(['DEPARTMENTS' => $departments->toArray()]);
 
         // obtener temas
         $topics = $this->recordRepo->getTopics($dids);
@@ -103,7 +103,7 @@ class RecordModelController extends Controller
         
         // Obtener datos del documento original
         $data = $this->recordRepo->setDocument($hash, $slug1, $id, $slug2);
-        Log::debug(['DATA' => $data]);
+        //Log::debug(['DATA' => $data]);
         //
         //Log::debug(['SETTINGS' => $this->set]);
         

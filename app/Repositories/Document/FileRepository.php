@@ -10,8 +10,9 @@ use App\Models\Document\FileIndexModel;
 use App\Models\Document\FileSubTopicModel;
 use App\Models\Document\FileTopicModel;
 //use App\Models\Document\SettingModel;
-
-
+use App\Models\Set\SystemModel;
+use App\Models\Set\DepartmentModel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -221,6 +222,27 @@ class FileRepository implements FileRepositoryInterface
         return $file; 
     } // setFile Repository
 
+    public function getSystemsList()
+    {
+        return SystemModel::get(['system_id', 'name']);
+    } // getSystemsList Repository
+
+    public function getLocationsList()
+    {
+        $user = Auth::user();
+        return $this->file->getLocationsList($user); 
+    } // getLocationsList Repository
+
+    public function getDepartmentsList()
+    {
+        $dids = $this->tool->setDepartmentsFilter();
+        $departments = $this->file->getDepartmentsList($dids);
+        return [
+            'n' => count($dids),
+            'data' => $departments
+        ];               
+    } // getDepartmentsList Repository
+
     /**
      * Valida si existe el nombre de tema para el respectivo departamento
      * @param  integer $id Identificador del departamento
@@ -271,6 +293,16 @@ class FileRepository implements FileRepositoryInterface
     {
         return  $this->file->setSubtopic($id, $txt);     
     } // storeSubtopicName Service 
+
+    /**
+     * Obtiene listado de temas para el departamento dado
+     * @param  integer $id Identificador del departamento
+     * @return json Listado
+     */       
+    public function getTopicsList($id)
+    {
+        return $this->file->getTopicsSelect([$id]);  
+    } // getTopicsList Service      
     
     /**
      * Obtiene listado de subtemas para el tema dado
@@ -280,7 +312,18 @@ class FileRepository implements FileRepositoryInterface
     public function getSubtopicsList($id)
     {
         return $this->file->getSubTopicsSelect($id);  
-    } // getSubtopicsList Service     
+    } // getSubtopicsList Service    
+    
+    /**
+     * Obtiene listado de subtemas para el tema dado
+     * @param  integer $id Identificador del tema
+     * @return json Listado
+     */       
+    public function getJobsList($id)
+    {
+        $department = DepartmentModel::find($id);        
+        return $department->jobs()->orderBy('set_jobs.name')->get();
+    } // getJobsList Service      
  
 
 } // class

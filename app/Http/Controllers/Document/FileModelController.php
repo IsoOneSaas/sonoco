@@ -85,19 +85,22 @@ class FileModelController extends Controller
      */
     public function edit($hash) : View
     {
+        // Obtener sistema de gestión
+        $systems = $this->fileRepo->getSystemsList();
+        // Obtener localiciones
+        $locations = $this->fileRepo->getLocationsList();
+        Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
+
+        $departments = $this->fileRepo->getDepartmentsList();
+        Log::debug(['DEPARTMENTS' => $departments['data']->toArray(), 'N' => $departments['n']]);
 
         // Obtener datos del archivo
-        $data = $this->fileRepo->setFile($hash);
-        Log::debug(['DATA' => $data]);    
+        $DATA = $this->fileRepo->setFile($hash);
+        Log::debug(['DATA' => $DATA->toArray()]);    
 
         // View
-        return view('document.file.edit', [
-
-            'DATA'      => $data,
-
-        ]); 
-
-    }
+        return view('document.file.edit', compact('DATA', 'systems', 'locations', 'departments'));
+    } // edit Method
 
     /**
      * Remove the specified resource from storage.
@@ -107,8 +110,39 @@ class FileModelController extends Controller
        //
     } // destroy
 
-   
+    /**
+     * Obtiene listado de temas para el departamento dado
+     * @param  integer $id Identificador del departamento
+     * @return json Listado
+     */      
+    public function getTopics($id)
+    {
+        $topics = $this->fileRepo->getTopicsList($id);
+        Log::debug(['TOPICS' => $topics->toArray()]);
+        if( $topics->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.topic.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'topics' => $topics, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // getTopics Method
 
+    /**
+     * Obtiene listado de cargos para el departamento dado
+     * @param  integer $id Identificador del departamento
+     * @return json Listado
+     */      
+    public function getJobs($id)
+    {
+        $jobs = $this->fileRepo->getJobsList($id);
+        Log::debug(['JOBS' => $jobs->toArray()]);
+        if( $jobs->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.job.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'jobs' => $jobs, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // getJobs Method    
    
 
     /**

@@ -213,10 +213,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('admin', \App\Http\Controllers\Document\FileModelController::class);
             Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('render'); // index.render
 
+            Route::get('listar/temas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getTopics'])->name('list.topics'); 
+            Route::get('listar/subtemas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getSubtopics'])->name('list.subtopics'); 
+            Route::get('listar/cargos/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getJobs'])->name('list.jobs'); 
 
             Route::post('salvar/tema', [\App\Http\Controllers\Document\FileModelController::class, 'setTopic'])->name('save.topic'); 
             Route::post('salvar/subtema', [\App\Http\Controllers\Document\FileModelController::class, 'setSubtopic'])->name('save.subject'); 
-            Route::get('listar/subtemas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getSubtopics']); 
+             
 
         });                    
     });  
