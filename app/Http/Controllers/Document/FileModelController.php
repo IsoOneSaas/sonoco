@@ -87,19 +87,34 @@ class FileModelController extends Controller
     {
         // Obtener sistema de gestión
         $systems = $this->fileRepo->getSystemsList();
+
         // Obtener localiciones
         $locations = $this->fileRepo->getLocationsList();
         Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
 
+        // Obtener Departamentos
         $departments = $this->fileRepo->getDepartmentsList();
         Log::debug(['DEPARTMENTS' => $departments['data']->toArray(), 'N' => $departments['n']]);
 
+        // Obtener medios de soporte
+        $supports = config('settings.record_support');
+
+        // Obtener índices
+        $indexes = $this->fileRepo->getIndexesList();
+
+        // Obtener disposiciones
+        $disposals = $this->fileRepo->getDisposalsList();
+
         // Obtener datos del archivo
         $DATA = $this->fileRepo->setFile($hash);
-        Log::debug(['DATA' => $DATA->toArray()]);    
+        $DATA->dateFormat = 'YYYY/MM/DD';           // TODO: traer de la configuración
+        Log::debug(['DATA' => $DATA->toArray()]); 
+        
+        // Obtener frecuencias
+        $frequencies = config('settings.file_frequency_select');
 
         // View
-        return view('document.file.edit', compact('DATA', 'systems', 'locations', 'departments'));
+        return view('document.file.edit', compact('DATA', 'systems', 'locations', 'departments',  'supports', 'indexes', 'disposals', 'frequencies'));
     } // edit Method
 
     /**
@@ -153,7 +168,7 @@ class FileModelController extends Controller
     public function setTopic(Request $request)
     {
         $input = $request->input();
-        Log::debug(['SET TOPIC' => $request->all()]);
+        //Log::debug(['SET TOPIC' => $request->all()]);
 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
@@ -189,7 +204,7 @@ class FileModelController extends Controller
     public function setSubtopic(Request $request)
     {
         $input = $request->input();
-        Log::debug(['SET SUBTOPIC' => $request->all()]);
+        //Log::debug(['SET SUBTOPIC' => $request->all()]);
 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
@@ -216,6 +231,28 @@ class FileModelController extends Controller
         }         
         return response()->json($response);      
     } // setTopic Method
+
+    /**
+     * Salvar nuevo índice en la base de datos
+     * @param  json Request $request parámetros
+     * @return json Resultado de la actualización
+     */
+    public function setIndex(Request $request) {
+        $input = $request->input();
+        $response = $this->fileRepo->storeIndexName($input['txt']);
+        return response()->json($response); 
+    } // setIndex Method
+
+    /**
+     * Salvar nueva disposición en la base de datos
+     * @param  json Request $request parámetros
+     * @return json Resultado de la actualización
+     */
+    public function setDisposal(Request $request) {
+        $input = $request->input();
+        $response = $this->fileRepo->storeDisposalName($input['txt']);
+        return response()->json($response); 
+    } // setDisposal Method    
 
     /**
      * Obtiene listado de subtemas para el tema dado

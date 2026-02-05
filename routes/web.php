@@ -219,6 +219,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::post('salvar/tema', [\App\Http\Controllers\Document\FileModelController::class, 'setTopic'])->name('save.topic'); 
             Route::post('salvar/subtema', [\App\Http\Controllers\Document\FileModelController::class, 'setSubtopic'])->name('save.subject'); 
+            Route::post('salvar/indice', [\App\Http\Controllers\Document\FileModelController::class, 'setIndex'])->name('save.index'); 
+            Route::post('salvar/disposicion', [\App\Http\Controllers\Document\FileModelController::class, 'setDisposal'])->name('save.disposal'); 
              
 
         });                    

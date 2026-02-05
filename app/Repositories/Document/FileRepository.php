@@ -323,7 +323,69 @@ class FileRepository implements FileRepositoryInterface
     {
         $department = DepartmentModel::find($id);        
         return $department->jobs()->orderBy('set_jobs.name')->get();
-    } // getJobsList Service      
+    } // getJobsList Service 
+    
+    /**
+     * Obtiene listado de indices
+     * @return json Listado
+     */       
+    public function getIndexesList()
+    {       
+        return FileIndexModel::orderBy('name')->get(['index_id', 'name']); 
+    } // getIndexesList Service
+
+    /**
+     * Obtiene listado de disposiciones
+     * @return json Listado
+     */       
+    public function getDisposalsList()
+    {       
+        return FileDisposalModel::orderBy('name')->get(['disposal_id', 'name']); 
+    } // getDisposalList Service
+    
+    /**
+     * Inserta nuevo índice
+     * @param string $text Nuevo nombre para ser insertado
+     * @return array Resultado del proceso
+     */       
+    public function storeIndexName($text)
+    {
+        // Validar que no repite
+        $result = FileIndexModel::whereName($text)->first();
+        if($result) {
+             return ['success' => false, 'message' => trans("document/file.error.index.exist")]; 
+        } else {
+            $result = FileIndexModel::insert(['name' => $text]);
+            if($result) {
+                $data = $this->getIndexesList();
+                return ['success' => true, 'data' => $data, 'message' => trans("document/file.index.create.success")];
+            } else {
+                return ['success' => false, 'message' => trans("document/file.index.create.no-success")];
+            }
+        } // if
+    } // storeIndexNam Service
+
+    /**
+     * Inserta nueva disposición
+     * @param string $text Nuevo nombre para ser insertado
+     * @return array Resultado del proceso
+     */       
+    public function storeDisposalName($text)
+    {
+        // Validar que no repite
+        $result = FileDisposalModel::whereName($text)->first();
+        if($result) {
+             return ['success' => false, 'message' => trans("document/file.error.disposal.exist")]; 
+        } else {
+            $result = FileDisposalModel::insert(['name' => $text]);
+            if($result) {
+                $data = $this->getDisposalsList();
+                return ['success' => true, 'data' => $data, 'message' => trans("document/file.disposal.create.success")];
+            } else {
+                return ['success' => false, 'message' => trans("document/file.disposal.create.no-success")];
+            }
+        } // if
+    } // storeDisposalNam Service    
  
 
 } // class

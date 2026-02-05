@@ -30,7 +30,21 @@ return [
                             'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                             'success'       => 'Subtema salvado correctamente',                                                
                 ],
-    ],    
+    ],
+    
+    'index' => [
+                'create' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Índice agregado correctamente',                                                
+                ],
+    ],  
+    
+    'disposal' => [
+                'create' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Disposición final agregada correctamente', 
+                ],
+    ],     
 
     'form' => [
                 'system'         =>  [
@@ -80,7 +94,62 @@ return [
                                     'title'         => 'Responsable',
                                     'placeholder'   => 'Seleccione el responsable del control',
                                     'tooltip'       => 'Requerido. Seleccionar un cargo de la lista desplegable',
-                ],                
+                ], 
+                'support'         =>  [
+                                    'icon'          => 'cpu',
+                                    'title'         => 'Medio Soporte',
+                                    'placeholder'   => 'Seleccione el medio de soporte para el archivo',
+                                    'tooltip'       => 'Opcional. Seleccionar un medio de soporte de la lista desplegable',
+                ],
+                'storage'         =>  [
+                                    'icon'          => 'database',
+                                    'title'         => 'Almacenamiento',
+                                    'placeholder'   => 'Digite la forma de almacenamiento del archivo',
+                                    'tooltip'       => 'Opcional. Texto alfanumérico con máximo 255 caracteres',
+                ],
+                'classification'         =>  [
+                                    'icon'          => 'library',
+                                    'title'         => 'Clasificación',
+                                    'placeholder'   => 'Digite la forma de clasificación del archivo',
+                                    'tooltip'       => 'Opcional. Texto alfanumérico con máximo 255 caracteres',
+                ],
+                'index'         =>  [
+                                    'icon'          => 'list',
+                                    'title'         => 'Indexación',
+                                    'placeholder1'   => 'Seleccione la forma de indexación para el archivo',
+                                    'placeholder2'   => 'Nueva opción',
+                                    'tooltip'       => 'Opcional. Seleccionar una forma de indexación de la lista desplegable o cree una nueva opción.',
+                ],
+                'disposal'         =>  [
+                                    'icon'          => 'trash',
+                                    'title'         => 'Disposición Final',
+                                    'placeholder1'   => 'Seleccione la forma de disposición final para el archivo',
+                                    'placeholder2'   => 'Nueva opción',
+                                    'tooltip'       => 'Opcional. Seleccionar una forma de disposición final de la lista desplegable o cree una nueva opción.',
+                ],
+                'dwell'         =>  [
+                                    'icon'          => 'calendar',
+                                    'title'         => 'Frecuencia Retención',
+                                    'placeholder1'   => 'Fecha inicio',
+                                    'placeholder2'   => 'Valor',
+                                    'placeholder3'   => 'Seleccione la frecuencia',
+                                    'tooltip'       => 'Opcional. Busque una fecha de inicio, digite un valor numérico y seleccione una frecuencia para la frecuencia de retención.',
+                ],
+                'dead'         =>  [
+                                    'icon'          => 'calendar',
+                                    'title'         => 'Tiempo Archivo Muerto',
+                                    'placeholder1'   => 'Fecha inicio',
+                                    'placeholder2'   => 'Valor',
+                                    'placeholder3'   => 'Seleccione la frecuencia',
+                                    'tooltip'       => 'Opcional. Busque una fecha de inicio, digite un valor numérico y seleccione una frecuencia para el tiempo de archivo muerto.',
+                ], 
+                'hold'         =>  [
+                                    'icon'          => 'calendar',
+                                    'title'         => 'Tiempo Mínimo de Retención',
+                                    'placeholder1'   => 'Valor',
+                                    'placeholder2'   => 'Seleccione la frecuencia',
+                                    'tooltip'       => 'Opcional. Digite un valor numérico y seleccione una frecuencia para el tiempo mínimo de retención.',
+                ],                                                                                                                                                       
                 
         
                 'topic_department'    => [
@@ -146,6 +215,14 @@ return [
             'department' =>  [
                 'empty'   => 'Seleccione un departamento de la lista',
             ],
+            'index'     => [
+                'empty'     => 'Digite una nueva opción',
+                'exist'     => 'Índice con este nombre ya existe',
+            ],
+            'disposal'     => [
+                'empty'     => 'Digite una nueva opción',
+                'exist'     => 'Disposición final con este nombre ya existe',
+            ],            
             'grid' => [
                 'row_edit'  => 'No ha seleccionado un archivo para editar',
             ],          

@@ -13,6 +13,10 @@ interface FileRepositoryInterface
     public function getDepartmentsList();
 
     public function getJobsList($id);
+
+    public function getIndexesList();
+
+    public function getDisposalsList();
     
     public function existsTopicName($id, $txt);
     public function storeTopicName($id, $txt);
@@ -22,5 +26,9 @@ interface FileRepositoryInterface
 
     public function getTopicsList($id);
     public function getSubtopicsList($id);
+
+    public function storeIndexName($text);
+
+    public function storeDisposalName($text);
 
 }

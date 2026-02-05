@@ -96,7 +96,89 @@
                                             <option value=0>{{ trans('document/file.form.job.placeholder') }}</option>                                    
                                         </select>                                    
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                    </div>                                     
+                                    </div>
+                                    <div class="input-group mt-3">
+                                        <div id="support" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/file.form.support.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.support.title') }}</div>
+                                        <select name="support" class="form-control w-full">
+                                            <option value=0>{{ trans('document/file.form.support.placeholder') }}</option>
+                                            @foreach($supports as $key => $support)   
+                                            <option value={{ $key }} @if( $key == $DATA->support ) selected @endif >{{ $support }}</option>
+                                            @endforeach                                            
+                                        </select>                                    
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.support.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+                                    <div class="input-group mt-3">
+                                        <div id="storage" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.storage.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.storage.title') }}</div>
+                                        <input type="text" name="storage" value="{{ $DATA->storage }}" class="form-control  w-full" aria-describedby="storage" placeholder="{{ trans('document/file.form.storage.placeholder') }}"  maxlength="255">
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.storage.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+                                    <div class="input-group mt-3">
+                                        <div id="classification" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.classification.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.classification.title') }}</div>
+                                        <input type="text" name="classification" value="{{ $DATA->classification }}" class="form-control  w-full" aria-describedby="classification" placeholder="{{ trans('document/file.form.classification.placeholder') }}"  maxlength="255">
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.classification.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+
+                                    <div class="input-group mt-3">
+                                        <div id="index-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.index.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.index.title') }}</div>
+                                        <select name="index_id" class="form-control mr-2">
+                                            <option value=0>{{ trans('document/file.form.index.placeholder1') }}</option>
+                                            @foreach($indexes as $index)   
+                                            <option value={{ $index->index_id }} @if( $index->index_id == $DATA->index_id ) selected @endif >{{ $index->name }}</option>
+                                            @endforeach                                            
+                                        </select>
+                                        <input type="text" id="input-new-index" class="form-control mr-2"  placeholder="{{ trans('document/file.form.index.placeholder2') }}"  maxlength="255">
+                                        <button id="btn-new-index" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.index.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+
+                                    <div class="input-group mt-3">
+                                        <div id="disposal-id" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/file.form.disposal.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.disposal.title') }}</div>
+                                        <select name="disposal_id" class="form-control mr-2">
+                                            <option value=0>{{ trans('document/file.form.disposal.placeholder1') }}</option>
+                                            @foreach($disposals as $disposal)   
+                                            <option value={{ $disposal->disposal_id }} @if( $disposal->disposal_id == $DATA->disposal_id ) selected @endif >{{ $disposal->name }}</option>
+                                            @endforeach                                            
+                                        </select>
+                                        <input type="text" id="input-new-disposal" class="form-control mr-2"  placeholder="{{ trans('document/file.form.disposal.placeholder2') }}"  maxlength="255">
+                                        <button id="btn-new-disposal" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.disposal.tooltip') }}" tabdisposal="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+
+                                    <div class="input-group mt-3">
+                                        <div id="dwell" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/file.form.dwell.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.dwell.title') }}</div>
+                                        <input type="text" name="dwell_date" value="{{ $DATA->dwell_date }}" class="form-control mr-2" aria-describedby="dwell_date" placeholder="{{ trans('document/file.form.dwell.placeholder1') }}">
+                                        <input type="number" name="dwell_value" value="{{ $DATA->dwell_value }}" class="form-control mr-2" aria-describedby="dwell_value" placeholder="{{ trans('document/file.form.dwell.placeholder2') }}" min="0">
+                                        <select name="dwell_frequency" class="form-control">
+                                            <option value=''>{{ trans('document/file.form.dwell.placeholder3') }}</option>
+                                            @foreach($frequencies as $frequency)   
+                                            <option value="{{ $frequency }}" @if( $frequency == $DATA->dwell_frequency ) selected @endif >{{ $frequency }}</option>
+                                            @endforeach                                            
+                                        </select>                                    
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.dwell.tooltip') }}" tabdwell="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+                                    <div class="input-group mt-3">
+                                        <div id="dead" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/file.form.dead.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.dead.title') }}</div>
+                                        <input type="text" name="dead_date" value="{{ $DATA->dead_date }}" class="form-control mr-2" aria-describedby="dead_date" placeholder="{{ trans('document/file.form.dead.placeholder1') }}">
+                                        <input type="number" name="dead_value" value="{{ $DATA->dead_value }}" class="form-control mr-2" aria-describedby="dead_value" placeholder="{{ trans('document/file.form.dead.placeholder2') }}" min="0">
+                                        <select name="dead_frequency" class="form-control">
+                                            <option value=''>{{ trans('document/file.form.dead.placeholder3') }}</option>
+                                            @foreach($frequencies as $frequency)   
+                                            <option value="{{ $frequency }}" @if( $frequency == $DATA->dead_frequency ) selected @endif >{{ $frequency }}</option>
+                                            @endforeach                                            
+                                        </select>                                    
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.dead.tooltip') }}" tabdead="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>
+                                    <div class="input-group mt-3">
+                                        <div id="hold" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/file.form.hold.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.hold.title') }}</div>                                        
+                                        <input type="number" name="hold_value" value="{{ $DATA->hold_value }}" class="form-control w-xs mr-2" aria-describedby="hold_value" placeholder="{{ trans('document/file.form.hold.placeholder1') }}" min="0">
+                                        <select name="hold_frequency" class="form-control">
+                                            <option value=''>{{ trans('document/file.form.hold.placeholder2') }}</option>
+                                            @foreach($frequencies as $frequency)   
+                                            <option value="{{ $frequency }}" @if( $frequency == $DATA->hold_frequency ) selected @endif >{{ $frequency }}</option>
+                                            @endforeach                                            
+                                        </select>                                    
+                                        <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.hold.tooltip') }}" tabhold="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                    </div>                                                                                                                                                                                                                                                                                                                                         
                                 </form>
                                 <!-- END: Form -->
                             </div> 
@@ -111,14 +193,18 @@
 @endpush
 
 @push('styles')
+    <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
 @endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/sweetalert/2.1.2/sweetalert.min.js') }}"></script>
+<script src="{{ url('assets/js/daterangepicker-master/moment.min.js') }}"></script>
+<script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
 <script document="text/javascript">
     $(function () {
 
+        // *** SELECTS
         $('body').on('change', '#department-select', function (e)  {
             e.preventDefault();
             var did = this.value;
@@ -137,7 +223,59 @@
                 setSubtopicsAjax(tid);                
             }            
         }); // change #topic-select Event
-     
+
+        // *** BOTONES
+        $('body').on('click', '#btn-new-index', function (e)  {
+            e.preventDefault();
+            var txt = $("#input-new-index").val();
+            if( txt.length == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.index.empty") }}');
+                $("#input-new-index").focus(); 
+            } else {
+                setIndexAjax(txt);
+            }
+        }); // click #btn-new-index Event 
+        
+        $('body').on('click', '#btn-new-disposal', function (e)  {
+            e.preventDefault();
+            var txt = $("#input-new-disposal").val();
+            if( txt.length == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.disposal.empty") }}');
+                $("#input-new-disposal").focus(); 
+            } else {
+                setDisposalAjax(txt);
+            }
+        }); // click #btn-new-disposal Event         
+
+        // *** DATE PICKER
+        $('input[name="dwell_date"]').daterangepicker({
+            locale: {
+                format: '{{ $DATA->dateFormat }}',
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar",
+                customRangeLabel: "-"
+            },            
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: parseInt(moment().subtract(10, 'years').format('YYYY'),10),
+            maxYear: parseInt(moment().add(10, 'years').format('YYYY'),10)
+        });
+        $('input[name="dead_date"]').daterangepicker({
+            locale: {
+                format: '{{ $DATA->dateFormat }}',
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar",
+                customRangeLabel: "-"
+            },            
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: parseInt(moment().subtract(10, 'years').format('YYYY'),10),
+            maxYear: parseInt(moment().add(10, 'years').format('YYYY'),10)
+        });                         
 
     }); // document
     
@@ -259,6 +397,69 @@
         $("#job-select").html(output);
     } // generateJobsSelect        
 
+    function setIndexAjax(txt) {
+        var route = "{{ route('files.save.index') }}";
+        var str = $.trim(txt);
+        //console.log('Running setIndexAjax with route: '+route);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'txt': str},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(json) {
+                //console.dir(json);
+                if( json.success ) {
+                    // Mensaje
+                    setSuccessNotification('success', '', json.message);
+                    // Limpiar input
+                    $("#input-new-index").val('');
+                    // Generar Select
+                    var output  = '<option value=0>{{ trans("document/file.form.index.placeholder1") }}</option>';  
+                    $.each(json.data, function(i, option) {
+                        output += '<option value='+option.index_id;
+                        output += ( option.name == str ) ? ' selected' : '';
+                        output += '>'+option.name+'</option>';
+                    });
+                    $("select[name='index_id']").html(output);
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }                
+            } // success
+        }); // ajax 
+    } // setIndexAjax Fx
+
+    function setDisposalAjax(txt) {
+        var route = "{{ route('files.save.disposal') }}";
+        var str = $.trim(txt);
+        //console.log('Running setDisposalAjax with route: '+route);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'txt': str},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(json) {
+                console.dir(json);
+                if( json.success ) {
+                    // Mensaje
+                    setSuccessNotification('success', '', json.message);
+                    // Limpiar input
+                    $("#input-new-disposal").val('');
+                    // Generar Select
+                    var output  = '<option value=0>{{ trans("document/file.form.disposal.placeholder1") }}</option>';  
+                    $.each(json.data, function(i, option) {
+                        output += '<option value='+option.disposal_id;
+                        output += ( option.name == str ) ? ' selected' : '';
+                        output += '>'+option.name+'</option>';
+                    });
+                    $("select[name='disposal_id']").html(output);
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }                
+            } // success
+        }); // ajax 
+    } // setDisposalAjax Fx    
 
 </script>
                
