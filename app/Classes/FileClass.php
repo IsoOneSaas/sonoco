@@ -135,7 +135,7 @@ class FileClass
                 $join->whereIn('set_departments.department_id',  $dids);
             })
             ->orderBy('set_departments.name')
-            ->orderBy('document_file_topics.code')
+            ->orderBy('document_file_topics.name')
             ->get(['set_departments.department_id', 'set_departments.name as department', 'document_file_topics.topic_id', 'document_file_topics.code', 'document_file_topics.name']);
 
         foreach($topics as $topic) {
@@ -151,7 +151,7 @@ class FileClass
      */        
     public function getSubtopicsSelect($id)
     {
-        $subtopics = Subtopic::where('topic_id', $id)->orderBy('code')->get(['subtopic_id', 'code', 'name']);
+        $subtopics = Subtopic::where('topic_id', $id)->orderBy('name')->get(['subtopic_id', 'code', 'name']);
         foreach($subtopics as $subtopic) {
             $subtopic->newCode = str_pad($subtopic->code, $this->codeStrPad, "0", STR_PAD_LEFT);
         }
@@ -216,6 +216,7 @@ class FileClass
             $topic->description = '';
             $topic->save();
             DB::commit();
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('FileClass::setTopic Exception: '. $e->getMessage());
@@ -293,11 +294,11 @@ class FileClass
     /**
      * Genera código archivistico
      * @param array $data valores del formulario
-     * @return Array  Resultado del método
+     * @return string  código
      */       
     public function getCode(array $data)
     {
-        //Log::debug(['GETCODE' => $data]);
+        Log::debug(['GETCODE' => $data]);
 
         // pattern 
         $arreglo =  ['@','#','%','&'];

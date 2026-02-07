@@ -191,7 +191,8 @@ class FileModelController extends Controller
         } elseif( $this->fileRepo->existsTopicName($input['department_id'], $input['topic']) ) {
             $response = ['success' => false, 'message' => trans('document/file.request.topic.unique')]; 
         } else {
-            $response = $this->fileRepo->storeTopicName($input['department_id'], $input['topic']); 
+            $filter = key_exists('filter', $input) ? true : false;
+            $response = $this->fileRepo->storeTopicName($input['department_id'], $input['topic'], $filter); 
         }         
         return response()->json($response);       
     } // setTopic Method
@@ -270,6 +271,18 @@ class FileModelController extends Controller
                  
         return response()->json($response); 
     } //getSubtopics Method
+
+    /**
+     * Genera código conforme los parámetros seleccionados
+     * @param  json Request $request parámetros
+     * @return json Resultado de la actualización
+     */
+    public function setCode(Request $request) {
+        $input = $request->input();
+        $code= $this->fileRepo->getCode($input);
+        $response = ['succes' => true, 'code' => $code];
+        return response()->json($response); 
+    } // setCode Method      
 
     /**
      * Genera la definición de la tabla para archivos

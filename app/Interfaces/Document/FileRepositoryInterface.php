@@ -19,7 +19,7 @@ interface FileRepositoryInterface
     public function getDisposalsList();
     
     public function existsTopicName($id, $txt);
-    public function storeTopicName($id, $txt);
+    public function storeTopicName($id, $txt, $filter);
 
     public function existsSubtopicName($id, $txt);
     public function storeSubtopicName($id, $txt);
@@ -30,5 +30,7 @@ interface FileRepositoryInterface
     public function storeIndexName($text);
 
     public function storeDisposalName($text);
+
+    public function getCode(array $data);
 
 }

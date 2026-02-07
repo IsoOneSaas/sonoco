@@ -40,7 +40,7 @@
                                     </div>
                                     <div class="input-group mt-3">
                                         <div id="location-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.location.title') }}</div>
-                                        <select name="location_id" class="form-control w-full">
+                                        <select id="location-select" name="location_id" class="form-control w-full">
                                         @if( $locations['n'] == 1 )
                                             <option value={{ $locations['data']->location_id }} selected>{{ $locations['data']->name }}</option>
                                         @else
@@ -66,20 +66,28 @@
                                         </select>                                    
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.department.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>
+
                                     <div class="input-group mt-3">
                                         <div id="topic-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic.title') }}</div>
-                                        <select id="topic-select" name="topic_id" class="form-control w-full">
-                                            <option value=0>{{ trans('document/file.form.topic.placeholder') }}</option>                                          
-                                        </select>                                    
+                                        <select id="topic-select" name="topic_id" class="form-control w-full mr-2">
+                                            <option value=0>{{ trans('document/file.form.topic.placeholder1') }}</option>                                          
+                                        </select>
+                                        <input type="text" id="input-new-topic" class="form-control mr-2"  placeholder="{{ trans('document/file.form.topic.placeholder2') }}"  maxlength="255">
+                                        <button id="btn-new-topic" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.topic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>
+
                                     <div class="input-group mt-3">
                                         <div id="subtopic-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.subtopic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.subtopic.title') }}</div>
                                         <select id="subtopic-select" name="subtopic_id" class="form-control w-full">
-                                            <option value=0>{{ trans('document/file.form.subtopic.placeholder') }}</option>                                          
-                                        </select>                                    
+                                            <option value=0>{{ trans('document/file.form.subtopic.placeholder1') }}</option>                                          
+                                        </select>
+                                        <input type="text" id="input-new-subtopic" class="form-control mr-2"  placeholder="{{ trans('document/file.form.subtopic.placeholder2') }}"  maxlength="255">
+                                        <button id="btn-new-subtopic" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>                                                                            
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.subtopic.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
-                                    </div>                                                                                                                                                                                   
+                                    </div> 
+                                    
+                                    
                                     <div class="input-group mt-3">
                                         <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.code.title') }}</div>
                                         <input type="text" name="code" value="{{ $DATA->code }}" class="form-control  w-full" aria-describedby="code" placeholder="{{ trans('document/file.form.code.placeholder') }}"  maxlength="255" readonly required>
@@ -209,6 +217,8 @@
             e.preventDefault();
             var did = this.value;
             console.log('DID: '+did);
+            $('#topic-select').val(0).change();
+            $('#subtopic-select').val(0).change();
             if( did > 0 ) {
                 setTopicsAjax(did);
                 setJobsAjax(did);
@@ -219,10 +229,15 @@
             e.preventDefault();
             var tid = this.value;
             console.log('TID: '+tid);
+            $('#subtopic-select').val(0).change();
             if( tid > 0 ) {
                 setSubtopicsAjax(tid);                
-            }            
+            }           
         }); // change #topic-select Event
+
+        $('body').on('change', '#location-select, #department-select, #topic-select, #subtopic-select', function (e) {
+            setCode();
+        }) // change to generate code
 
         // *** BOTONES
         $('body').on('click', '#btn-new-index', function (e)  {
@@ -245,7 +260,39 @@
             } else {
                 setDisposalAjax(txt);
             }
-        }); // click #btn-new-disposal Event         
+        }); // click #btn-new-disposal Event
+
+        $('body').on('click', '#btn-new-topic', function (e)  {
+            e.preventDefault();
+            var txt = $("#input-new-topic").val();
+            var did = $("#department-select option:selected").val();
+            console.log('TXT: '+txt+' DID: '+did);
+            if( did == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-department") }}');
+                $("#department-select").focus(); 
+            } else if( txt.length == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.empty") }}');
+                $("#input-new-topic").focus(); 
+            } else {
+                setTopicAjax(did, txt);
+            }
+        }); // click #btn-new-topic Event        
+        
+        $('body').on('click', '#btn-new-subtopic', function (e)  {
+            e.preventDefault();
+            var txt = $("#input-new-subtopic").val();
+            var tid = $("#topic-select option:selected").val();
+            console.log('TXT: '+txt+' TID: '+tid);
+            if( tid == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.no-topic") }}');
+                $("#topic-select").focus(); 
+            } else if( txt.length == 0 ) {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.empty") }}');
+                $("#input-new-subtopic").focus(); 
+            } else {
+                setSubtopicAjax(tid, txt);
+            }
+        }); // click #btn-new-subtopic Event            
 
         // *** DATE PICKER
         $('input[name="dwell_date"]').daterangepicker({
@@ -309,7 +356,7 @@
     } // setTopicsAjax
 
     function generateTopicsSelect(id, topics) {
-        var output = '<option value=0>{{ trans("document/file.form.topic.placeholder") }}</option>';
+        var output = '<option value=0>{{ trans("document/file.form.topic.placeholder1") }}</option>';
         if( topics.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-exist") }}'); 
         } else {
@@ -347,7 +394,7 @@
     } // setSubtopicsAjax
 
     function generateSubtopicsSelect(id, subtopics) {
-        var output = '<option value=0>{{ trans("document/file.form.subtopic.placeholder") }}</option>';
+        var output = '<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>';
         if( subtopics.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.no-exist") }}'); 
         } else {
@@ -460,6 +507,93 @@
             } // success
         }); // ajax 
     } // setDisposalAjax Fx    
+
+    function setTopicAjax(id, txt) {
+        var route = "{{ route('files.save.topic') }}";
+        var str = $.trim(txt);
+        //console.log('Running setTopicAjax with route: '+route);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'department_id': id, 'topic': str, 'filter': true},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(json) {
+                //console.dir(json);
+                if( json.success ) {
+                    // Mensaje
+                    setSuccessNotification('success', '', json.message);
+                    // Limpiar input
+                    $("#input-new-topic").val('');
+                    // Generar select de temas
+                    generateTopicsSelect(json.tid, json.topics);
+                    // Resetea select de subtemas
+                    generateSubtopicsSelect(0, []);
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }                
+            } // success
+        }); // ajax 
+    } // setTopiclAjax Fx
+    
+    function setSubtopicAjax(id, txt) {
+        var route = "{{ route('files.save.subject') }}";
+        var str = $.trim(txt);
+        console.log('Running setSubtopicAjax with route: '+route);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'topic_id': id, 'subject': str},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(json) {
+                console.dir(json);
+                if( json.success ) {
+                    // Mensaje
+                    setSuccessNotification('success', '', json.message);
+                    // Limpiar input
+                    $("#input-new-subtopic").val('');
+                    // Generar select de subtemas
+                    generateSubtopicsSelect(json.sid, json.subtopics);
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }                
+            } // success
+        }); // ajax 
+    } // setSubtopiclAjax Fx 
+    
+    function setCode() {
+        var route = "{{ route('files.get.code') }}";
+        var lid = $('#location-select option:selected').val();
+        var did = $('#department-select option:selected').val();
+        var tid = $('#topic-select option:selected').val();
+        var sid = $('#subtopic-select option:selected').val();
+
+        console.log('SET CODE :: lid:'+lid+' did:'+did+' tid:'+tid+' sid:'+sid);
+
+        if( lid > 0 && did > 0 && tid > 0 && sid > 0 )  {
+            $.ajax({
+                url: route,
+                type: 'POST',
+                data: {'lid':lid,'did':did,'tid':tid,'sid':sid},
+                dataType: 'json',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+                success: function(json) {
+                    console.dir(json);
+                    if( json.success ) {
+                        // Mensaje
+                        //setSuccessNotification('success', '', json.message);
+                        // Establecer código
+                        $('input[name=code]').val(json.code);
+                    } else {
+                        setSuccessNotification('error', 'Oops!', json.message);
+                    }                
+                } // success
+            }); // ajax 
+        } else {
+            $('input[name=code]').val('');
+        }        
+    } // setCode
 
 </script>
                

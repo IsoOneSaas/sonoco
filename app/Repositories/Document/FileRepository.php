@@ -261,11 +261,16 @@ class FileRepository implements FileRepositoryInterface
      * Inserta neuvo registro de tema
      * @param  integer $id Identificador del departamento
      * @param  string $txt Nombre del tema
+     * @param  boolean $filter si true: filtra por el identificador de departamento; si false: encuentra los temas para todos los departamenteos
      * @return array   Resultado de la adicción
      */     
-    public function storeTopicName($id, $txt)
+    public function storeTopicName($id, $txt, $filter)
     {
-        $dids = $this->tool->setDepartmentsFilter();
+        if($filter) {
+            $dids = [$id];
+        } else {
+            $dids = $this->tool->setDepartmentsFilter();
+        }       
         return  $this->file->setTopic($id, $txt, $dids);     
     } // storeTopicName Service 
     
@@ -385,7 +390,17 @@ class FileRepository implements FileRepositoryInterface
                 return ['success' => false, 'message' => trans("document/file.disposal.create.no-success")];
             }
         } // if
-    } // storeDisposalNam Service    
+    } // storeDisposalNam Service 
+    
+    /**
+     * Forma un nuevo código archivístico
+     * @param array $data Parámetros para generar el código
+     * @return array Resultado del proceso
+     */     
+    public function getCode(array $data)
+    {
+        return $this->file->getCode($data);
+    } // getCode Respository
  
 
 } // class

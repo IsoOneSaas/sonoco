@@ -68,14 +68,16 @@ return [
                 'topic'         =>  [
                                     'icon'          => 'box',
                                     'title'         => 'Tema',
-                                    'placeholder'   => 'Seleccione un tema para su archivo',
-                                    'tooltip'       => 'Requerido. Seleccionar un tema de la lista desplegable',
+                                    'placeholder1'   => 'Seleccione un tema para su archivo',
+                                    'placeholder2'  => 'Otro Tema',
+                                    'tooltip'       => 'Requerido. Seleccionar un tema de la lista desplegable o cree uno nuevo con texto alfanumérico con mínimo dos y máximo 48 caracteres.',
                 ],
                 'subtopic'         =>  [
                                     'icon'          => 'target',
                                     'title'         => 'Subtema',
-                                    'placeholder'   => 'Seleccione un subtema para su archivo',
-                                    'tooltip'       => 'Requerido. Seleccionar un subtema de la lista desplegable',
+                                    'placeholder1'   => 'Seleccione un subtema para su archivo',
+                                    'placeholder2'  => 'Otro Tema',
+                                    'tooltip'       => 'Requerido. Seleccionar un subtema de la lista desplegable o cree uno nuevo con texto alfanumérico con mínimo dos y máximo 48 caracteres.',
                 ],                                                                               
                 'name'         =>  [
                                     'icon'          => 'bookmark',
@@ -202,7 +204,8 @@ return [
     'error' => [
             'topic' =>  [
                 'empty'   => 'Digite un nuevo nombre de tema',
-                'no-exist'  => 'No hay temas creados. Crea uno nuevo!'
+                'no-exist'  => 'No hay temas creados. Crea uno nuevo!',
+                'no-department'  => 'No se ha seleccionado el departamento para el tema!'
             ],
             'subtopic' =>  [
                 'empty'     => 'Digite un nuevo nombre de subtema',
