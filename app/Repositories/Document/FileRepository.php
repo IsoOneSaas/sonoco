@@ -233,12 +233,30 @@ class FileRepository implements FileRepositoryInterface
         return $this->file->getLocationsList($user); 
     } // getLocationsList Repository
 
-    public function getDepartmentsList()
+    public function getDepartmentsList($id = null)
     {
+        $array_output = [];
         $dids = $this->tool->setDepartmentsFilter();
-        $departments = $this->file->getDepartmentsList($dids);
+        if( $id > 0 ) {
+            $plucked = DepartmentModel::
+                join('set_location_department', function($query) use($id) {
+                    $query->on('set_location_department.department_id', '=', 'set_departments.department_id');
+                    $query->where('set_location_department.location_id', '=', $id);
+                })
+                ->pluck('set_departments.department_id');
+            $dids_array = $plucked->all(); 
+            foreach( $dids as $did ) {
+                if( in_array($did, $dids_array) ) {
+                    $array_output[] = $did;
+                } // if
+            } // foreach
+        } else {
+            $array_output = $dids;
+        }
+        
+        $departments = $this->file->getDepartmentsList($array_output);
         return [
-            'n' => count($dids),
+            'n' => count($array_output),
             'data' => $departments
         ];               
     } // getDepartmentsList Repository

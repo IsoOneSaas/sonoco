@@ -126,6 +126,23 @@ class FileModelController extends Controller
     } // destroy
 
     /**
+     * Obtiene listado de departamentos para la localización dado
+     * @param  integer $id Identificador del localización
+     * @return json Listado
+     */      
+    public function getDepartments($id)
+    {
+        $departments = $this->fileRepo->getDepartmentsList($id);
+        Log::debug(['LID' => $id, 'DEPARTMENTS' => $departments]);
+        if( $departments['n'] == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.department.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'n' => $departments['n'], 'departments' => $departments['data'], 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // getDepartments Method    
+
+    /**
      * Obtiene listado de temas para el departamento dado
      * @param  integer $id Identificador del departamento
      * @return json Listado
@@ -280,7 +297,7 @@ class FileModelController extends Controller
     public function setCode(Request $request) {
         $input = $request->input();
         $code= $this->fileRepo->getCode($input);
-        $response = ['succes' => true, 'code' => $code];
+        $response = ['success' => true, 'code' => $code];
         return response()->json($response); 
     } // setCode Method      
 

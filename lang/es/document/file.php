@@ -201,7 +201,11 @@ return [
                 ],                       
     ],
 
-    'error' => [
+    'error' => [ 
+            'department' =>  [
+                'empty'   => 'Seleccione un departamento de la lista',
+                'no-exist'  => 'No hay departamentos para la localización seleccionada!',
+            ],              
             'topic' =>  [
                 'empty'   => 'Digite un nuevo nombre de tema',
                 'no-exist'  => 'No hay temas creados. Crea uno nuevo!',
@@ -215,9 +219,6 @@ return [
             'job' =>  [
                 'no-exist'  => 'No hay cargos para el departamento seleccionado'
             ],                         
-            'department' =>  [
-                'empty'   => 'Seleccione un departamento de la lista',
-            ],
             'index'     => [
                 'empty'     => 'Digite una nueva opción',
                 'exist'     => 'Índice con este nombre ya existe',

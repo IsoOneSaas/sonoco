@@ -213,27 +213,43 @@
     $(function () {
 
         // *** SELECTS
+        $('body').on('change', '#location-select', function (e) {
+            var lid = $(this).val();
+            console.log('LID: '+lid);
+            if( lid > 0 ) {
+                setDepartmentsAjax(lid);
+            } else {
+                $("#department-select").html('<option value=0>{{ trans("document/file.form.department.placeholder") }}</option>');
+            }
+        }); // change #location-select Event
+
         $('body').on('change', '#department-select', function (e)  {
             e.preventDefault();
             var did = this.value;
             console.log('DID: '+did);
-            $('#topic-select').val(0).change();
-            $('#subtopic-select').val(0).change();
             if( did > 0 ) {
                 setTopicsAjax(did);
-                setJobsAjax(did);
+                setJobsAjax(did);          
+            } else {
+                $("#topic-select").html('<option value=0>{{ trans("document/file.form.topic.placeholder1") }}</option>');
             }            
         }); // change #department-select Event
 
         $('body').on('change', '#topic-select', function (e)  {
             e.preventDefault();
             var tid = this.value;
-            console.log('TID: '+tid);
-            $('#subtopic-select').val(0).change();
+            console.log('TID: '+tid);            
             if( tid > 0 ) {
-                setSubtopicsAjax(tid);                
+                setSubtopicsAjax(tid);                            
+            } else {
+                $("#subtopic-select").html('<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
             }           
         }); // change #topic-select Event
+
+        // $('body').on('change', '#job-select', function (e) {
+        //     var did = $("#department-select option:selected").val();
+        //     setJobsAjax(did);
+        // });
 
         $('body').on('change', '#location-select, #department-select, #topic-select, #subtopic-select', function (e) {
             setCode();
@@ -327,8 +343,49 @@
     }); // document
     
     $(document).ready(function() {
-        $("#department-select").trigger('change');         
+        $("#location-select").trigger('change'); 
+        //setCode();        
     });
+
+    function setDepartmentsAjax(id) {
+        var url = "{{ route('files.list.departments', ':id') }}";
+        console.log(url.replace(':id', id));
+        $.ajax({
+            url: url.replace(':id', id),
+            type: 'GET',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },                                             
+            success: function(json) {  
+                console.dir(json);
+                if( json.success ) {
+                    generateDepartmentsSelect(0, json.n, json.departments);
+                    $("#topic-select").trigger('change');
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }
+            } // success
+        }); // ajax         
+    } // setDepartmentsAjax   
+    
+    function generateDepartmentsSelect(id, n, departments) {
+        var output = '<option value=0>{{ trans("document/file.form.department.placeholder") }}</option>';
+        if( n == 0 ) {
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.department.no-exist") }}'); 
+        } else if( n == 1 ) {
+           //$.each(departments, function(i, department) {
+                output = '<option value='+departments.department_id+' selected>'+departments.name+'</option>';
+            //});            
+        } else {
+            $.each(departments, function(i, department) {
+                output += '<option value='+department.department_id;
+                output += ( department.department_id == id ) ? ' selected' : '';
+                output += '>'+department.name+'</option>';
+            });
+        }
+        $("#department-select").html(output);
+    } // generateDepartmentsSelect     
 
     function setTopicsAjax(id) {
         var url = "{{ route('files.list.topics', ':id') }}";

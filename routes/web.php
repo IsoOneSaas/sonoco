@@ -213,6 +213,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('admin', \App\Http\Controllers\Document\FileModelController::class);
             Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('render'); // index.render
 
+            Route::get('listar/departamentos/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getDepartments'])->name('list.departments'); 
             Route::get('listar/temas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getTopics'])->name('list.topics'); 
             Route::get('listar/subtemas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getSubtopics'])->name('list.subtopics'); 
             Route::get('listar/cargos/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getJobs'])->name('list.jobs'); 

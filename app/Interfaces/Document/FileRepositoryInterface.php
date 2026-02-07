@@ -10,7 +10,7 @@ interface FileRepositoryInterface
 
     public function getLocationsList();
 
-    public function getDepartmentsList();
+    public function getDepartmentsList($id = null);
 
     public function getJobsList($id);
 
