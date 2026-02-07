@@ -28,6 +28,7 @@
                                     <input type="hidden" id="topic-is" value={{ isset($DATA->topic_id) ? $DATA->topic_id : 0 }}>
                                     <input type="hidden" id="subtopic-is" value={{ isset($DATA->subtopic_id) ? $DATA->subtopic_id : 0 }}>
                                     <input type="hidden" id="job-is" value={{ isset($DATA->job_id) ? $DATA->job_id : 0 }}>
+                                    <input type="hidden" id="code-is" value="{{ isset($DATA->code) ? $DATA->code : '' }}">
                                     <div class="input-group">
                                         <div id="system-id" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/file.form.system.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.system.title') }}</div>
                                         <select name="system_id" class="form-control w-full">
@@ -91,6 +92,7 @@
                                     <div class="input-group mt-3">
                                         <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.code.title') }}</div>
                                         <input type="text" name="code" value="{{ $DATA->code }}" class="form-control  w-full" aria-describedby="code" placeholder="{{ trans('document/file.form.code.placeholder') }}"  maxlength="255" readonly required>
+                                        <img id="loading-image" alt="Cargando..." class="h-auto max-w-xs mx-auto" width="30" height="30" src="{{ url('/assets/images/loading_small.gif') }}">
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.code.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>                                   
                                     <div class="input-group mt-3">
@@ -212,6 +214,8 @@
 <script document="text/javascript">
     $(function () {
 
+        
+
         // *** SELECTS
         $('body').on('change', '#location-select', function (e) {
             var lid = $(this).val();
@@ -232,6 +236,9 @@
                 setJobsAjax(did);          
             } else {
                 $("#topic-select").html('<option value=0>{{ trans("document/file.form.topic.placeholder1") }}</option>');
+                $("#subtopic-select").html('<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
+                $("#job-select").html('<option value=0>{{ trans("document/file.form.job.placeholder") }}</option>');
+                $('input[name=code]').val('');
             }            
         }); // change #department-select Event
 
@@ -245,11 +252,6 @@
                 $("#subtopic-select").html('<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
             }           
         }); // change #topic-select Event
-
-        // $('body').on('change', '#job-select', function (e) {
-        //     var did = $("#department-select option:selected").val();
-        //     setJobsAjax(did);
-        // });
 
         $('body').on('change', '#location-select, #department-select, #topic-select, #subtopic-select', function (e) {
             setCode();
@@ -343,13 +345,12 @@
     }); // document
     
     $(document).ready(function() {
-        $("#location-select").trigger('change'); 
-        //setCode();        
+        $("#department-select").trigger('change');        
     });
 
     function setDepartmentsAjax(id) {
         var url = "{{ route('files.list.departments', ':id') }}";
-        console.log(url.replace(':id', id));
+        //console.log(url.replace(':id', id));
         $.ajax({
             url: url.replace(':id', id),
             type: 'GET',
@@ -358,7 +359,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },                                             
             success: function(json) {  
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     generateDepartmentsSelect(0, json.n, json.departments);
                     $("#topic-select").trigger('change');
@@ -389,7 +390,7 @@
 
     function setTopicsAjax(id) {
         var url = "{{ route('files.list.topics', ':id') }}";
-        console.log(url.replace(':id', id));
+        //console.log(url.replace(':id', id));
         $.ajax({
             url: url.replace(':id', id),
             type: 'GET',
@@ -398,13 +399,14 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },                                             
             success: function(json) {  
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     //setSuccessNotification('success', '', json.message);
                     var tid = $("#topic-is").val();
                     console.log('TID*: '+tid);
                     generateTopicsSelect(tid, json.topics);
                     $("#topic-select").trigger('change');
+                     $("#topic-is").val(0);
                 } else {
                     setSuccessNotification('error', 'Oops!', json.message);
                 }
@@ -429,7 +431,7 @@
     
     function setSubtopicsAjax(id) {
         var url = "{{ route('files.list.subtopics', ':id') }}";
-        console.log(url.replace(':id', id));
+        //console.log(url.replace(':id', id));
         $.ajax({
             url: url.replace(':id', id),
             type: 'GET',
@@ -438,11 +440,12 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },                                             
             success: function(json) {  
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     var sid = $("#subtopic-is").val();
-                    console.log('SIP: '+sid);
+                    console.log('SIP*: '+sid);
                     generateSubtopicsSelect(sid, json.subtopics);
+                    $("#subtopic-is").val(0);
                 } else {
                     setSuccessNotification('error', 'Oops!', json.message);
                 }
@@ -462,11 +465,15 @@
             });
         }
         $("#subtopic-select").html(output);
+        // Código
+        //console.log('CODE1: '+$("#code-is").val());
+        //$('input[name=code]').val($("#code-is").val());
+        $("#loading-image").hide(); 
     } // generateSubtopicsSelect
 
     function setJobsAjax(id) {
         var url = "{{ route('files.list.jobs', ':id') }}";
-        console.log(url.replace(':id', id));
+        //console.log(url.replace(':id', id));
         $.ajax({
             url: url.replace(':id', id),
             type: 'GET',
@@ -475,7 +482,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },                                             
             success: function(json) {  
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     var jid = $("#job-is").val();
                     console.log('JIP: '+jid);
@@ -544,7 +551,7 @@
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
             success: function(json) {
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     // Mensaje
                     setSuccessNotification('success', '', json.message);
@@ -596,7 +603,7 @@
     function setSubtopicAjax(id, txt) {
         var route = "{{ route('files.save.subject') }}";
         var str = $.trim(txt);
-        console.log('Running setSubtopicAjax with route: '+route);
+        //console.log('Running setSubtopicAjax with route: '+route);
         $.ajax({
             url: route,
             type: 'POST',
@@ -604,7 +611,7 @@
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
             success: function(json) {
-                console.dir(json);
+                //console.dir(json);
                 if( json.success ) {
                     // Mensaje
                     setSuccessNotification('success', '', json.message);
@@ -619,16 +626,18 @@
         }); // ajax 
     } // setSubtopiclAjax Fx 
     
-    function setCode() {
+    function setCode() {        
         var route = "{{ route('files.get.code') }}";
         var lid = $('#location-select option:selected').val();
         var did = $('#department-select option:selected').val();
         var tid = $('#topic-select option:selected').val();
         var sid = $('#subtopic-select option:selected').val();
-
         console.log('SET CODE :: lid:'+lid+' did:'+did+' tid:'+tid+' sid:'+sid);
 
         if( lid > 0 && did > 0 && tid > 0 && sid > 0 )  {
+            console.log(':: Searching by code...');
+            $("#loading-image").show();
+            $('input[name=code]').val('');
             $.ajax({
                 url: route,
                 type: 'POST',
@@ -636,19 +645,22 @@
                 dataType: 'json',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
                 success: function(json) {
-                    console.dir(json);
+                    //console.dir(json);
                     if( json.success ) {
-                        // Mensaje
-                        //setSuccessNotification('success', '', json.message);
                         // Establecer código
                         $('input[name=code]').val(json.code);
+                        //$("#code-is").val(json.code);
+                        $("#loading-image").hide();
                     } else {
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                
                 } // success
             }); // ajax 
         } else {
-            $('input[name=code]').val('');
+            var existingCode = $("#code-is").val('');
+            if( existingCode == '' ) {
+                $('input[name=code]').val('');
+            }
         }        
     } // setCode
 
