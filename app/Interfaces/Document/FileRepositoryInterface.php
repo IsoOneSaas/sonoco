@@ -4,6 +4,8 @@ interface FileRepositoryInterface
 {
     public function render($slug);
 
+    public function update(array $data);
+
     public function setFile($hash);
 
     public function getSystemsList();
@@ -32,5 +34,6 @@ interface FileRepositoryInterface
     public function storeDisposalName($text);
 
     public function getCode(array $data);
+    public function existsCode($id, $code);
 
 }

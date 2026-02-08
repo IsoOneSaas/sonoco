@@ -10,8 +10,9 @@ use App\Models\Document\FileIndexModel;
 use App\Models\Document\FileSubTopicModel;
 use App\Models\Document\FileTopicModel;
 //use App\Models\Document\SettingModel;
-use App\Models\Set\SystemModel;
 use App\Models\Set\DepartmentModel;
+use App\Models\Set\ProcessModel;
+use App\Models\Set\SystemModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -222,6 +223,63 @@ class FileRepository implements FileRepositoryInterface
         return $file; 
     } // setFile Repository
 
+    /**
+     * Guarda los datos del formulario en la base de datos del archivo
+     * @param  array $data datos del formulario
+     * @return json    Resultado del método
+     */      
+    public function update(array $data)
+    {
+        Log::debug(['UPDATE DATA' => $data]);
+        $hash = '';
+        $msg = trans('document/file.file');
+
+        try {
+            DB::beginTransaction();
+
+            // FIRST OR NEW FILE
+            $file = FileModel::firstOrNew([
+                'file_id' => $data['file_id']                
+            ],[
+                'system_id' => $data['system_id'],
+                'location_id' => $data['location_id'],
+                'department_id' => $data['department_id'],
+                'process_id' => $this->getProcessId($data['department_id']),    // Proceso Determinado
+                'topic_id' => $data['topic_id'],
+                'subtopic_id' => $data['subtopic_id'],
+                'job_id' => $data['job_id'],
+                'code' => $data['code'],
+                'name' => $data['name'],
+                'support' => $data['support'],
+                'storage' => $data['storage'],
+                'classification' => $data['classification'],                
+                'index_id' => $data['index_id'],
+                'disposal_id' => $data['disposal_id'],
+                //'dwell_date' => (!empty($data['dwell_value'])) ? Carbon::createFromFormat($data['pattern'], $data['dwell_date'])->format('Y-m-d') : null,
+                'dwell_date' => (!empty($data['dwell_value'])) ? $data['dwell_date'] : null, // TODO: Ajustar formato de fecha Formato de fecha
+                'dwell_value' => $data['dwell_value'],
+                'dwell_frequency' => $data['dwell_frequency'],
+                //'dead_date' => (!empty($data['dead_value'])) ? Carbon::createFromFormat($data['pattern'], $data['dead_date'])->format('Y-m-d') : null,
+                'dead_date' => (!empty($data['dead_value'])) ? $data['dead_date'] : null,
+                'dead_value' => $data['dead_value'],
+                'dead_frequency' => $data['dead_frequency'],
+                'hold_value' => $data['hold_value'],
+                'hold_frequency' => $data['hold_frequency'],                
+            ]);        
+
+            $file->save();
+            $hash = $this->tool->setIdHash($file->file_id);
+            $action = ( $file->file_id == $data['file_id'] ) ? 'update' : 'create';
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('FileRepository::store Exception: '. $e->getMessage());
+            $output = isset($action) ? $msg[$action]['no-success'] : $e->getMessage();
+            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => $output ];
+        }
+        return ['status' => 'success', 'hash' => $hash, 'message' => $msg[$action]['success']];
+    } // update Repository                
+
     public function getSystemsList()
     {
         return SystemModel::get(['system_id', 'name']);
@@ -418,11 +476,26 @@ class FileRepository implements FileRepositoryInterface
     public function getCode(array $data)
     {
         $code = $this->file->getCode($data);
-        if( $this->file->existsCode($data['fid'], $code) ) {
+        if( $this->existsCode($data['fid'], $code) ) {
             return ['success' => false, 'code' => $code, 'message' =>  trans("document/file.error.code.exist")];
         }
         return ['success' => true, 'code' => $code, 'message' => ''];
     } // getCode Respository
+
+    public function existsCode($id, $code)
+    {
+        return $this->file->existsCode($id, $code);
+    } //  existsCode Service
+
+    private function getProcessId($did)
+    {
+        $process = ProcessModel::join('set_department_process', function($query) use($did) {
+                $query->on('set_department_process.process_id', '=', 'set_department_process.process_id');
+                $query->where('set_department_process.department_id', '=', $did);
+            })
+            ->first();        
+        return ($process) ? $process->process_id : 0;
+    }
  
 
 } // class

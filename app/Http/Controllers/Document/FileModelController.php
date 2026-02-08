@@ -71,7 +71,7 @@ class FileModelController extends Controller
         $response = ['status' => 'success', 'hash' => '', 'message' => 'Testing...'];
         $msgs = '';
         $input = $request->input();
-        Log::debug(['STORE DATA' => $request->all()]);
+        //Log::debug(['STORE DATA' => $request->all()]);
 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [
@@ -102,10 +102,6 @@ class FileModelController extends Controller
             'job_id.not_in'              => trans('document/file.request.job_id.format'),                                
         ]);
         
-        // Validar si código existe
-        // TODO: crear método de validación ya que se utiliza en dos lugares, aquí y getCode(array $data)
-
-
         if ($validator->fails()) {
             $messages = json_decode($validator->messages(), true);
             foreach($messages as $message) {
@@ -115,10 +111,16 @@ class FileModelController extends Controller
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         } // if
 
+        // Validar si código existe
+        if( $this->fileRepo->existsCode($input['file_id'], $input['code']) ) {
+            $response = ['status' => 'error', 'message' => trans("document/file.error.code.exist")];
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        } // if code exists        
+
         // SALVAR
         unset($input['_token']);
-        //$response = $this->recordRepo->update($input);
-        $response['hash'] = 'eyJpdiI6IkoxQlZBZkNjUTkzd0RsYk1kQ01NYkE9PSIsInZhbHVlIjoiYjg3NDFaRHlKZnN0ZHdJZHl1dlFLZz09IiwibWFjIjoiNjNjZWZiYWQ2NWExNmEwYWQ2ZDk3ZjEyM2Q0MDMyMjUwYjcwMzMyZDE5OGE5MDQwYjM4YWYxNWMxNmYzYWExYyIsInRhZyI6IiJ9';
+        $response = $this->fileRepo->update($input);
+        //$response['hash'] = 'eyJpdiI6IkoxQlZBZkNjUTkzd0RsYk1kQ01NYkE9PSIsInZhbHVlIjoiYjg3NDFaRHlKZnN0ZHdJZHl1dlFLZz09IiwibWFjIjoiNjNjZWZiYWQ2NWExNmEwYWQ2ZDk3ZjEyM2Q0MDMyMjUwYjcwMzMyZDE5OGE5MDQwYjM4YWYxNWMxNmYzYWExYyIsInRhZyI6IiJ9';
         if($response['status'] == 'success') {
             return redirect()->route('files.admin.edit', [$response['hash']])->with($response['status'], $response['message']); ;
         } else {

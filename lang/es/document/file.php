@@ -13,9 +13,17 @@ return [
 
     'file' => [
                 'create' => [
-                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'no-success'    => 'Se ha presentado un error al crear el archivo. ¡inténtelo más tarde!',
                             'success'       => 'Archivo salvado correctamente',                    
                 ],
+                'update' => [
+                            'no-success'    => 'Se ha presentado un error al actualizar el archivo. ¡inténtelo más tarde!',
+                            'success'       => 'Archivo actualizado correctamente',                    
+                ],
+                'delete' => [
+                            'no-success'    => 'Se ha presentado un error al eliminar el archivo. ¡inténtelo más tarde!',
+                            'success'       => 'Archivo eliminado correctamente',                    
+                ],                  
     ],    
 
     'topic' => [
