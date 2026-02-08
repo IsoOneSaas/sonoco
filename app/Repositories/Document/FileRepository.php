@@ -417,7 +417,11 @@ class FileRepository implements FileRepositoryInterface
      */     
     public function getCode(array $data)
     {
-        return $this->file->getCode($data);
+        $code = $this->file->getCode($data);
+        if( $this->file->existsCode($data['fid'], $code) ) {
+            return ['success' => false, 'code' => $code, 'message' =>  trans("document/file.error.code.exist")];
+        }
+        return ['success' => true, 'code' => $code, 'message' => ''];
     } // getCode Respository
  
 

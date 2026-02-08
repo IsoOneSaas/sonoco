@@ -254,7 +254,10 @@ return [
             'disposal'     => [
                 'empty'     => 'Digite una nueva opción',
                 'exist'     => 'Disposición final con este nombre ya existe',
-            ],            
+            ],
+            'code' =>  [
+                'exist'  => 'Ya existe un archivo con este mismo código'
+            ],                         
             'grid' => [
                 'row_edit'  => 'No ha seleccionado un archivo para editar',
             ],          

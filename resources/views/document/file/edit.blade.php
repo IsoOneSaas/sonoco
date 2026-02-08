@@ -28,11 +28,10 @@
                                     <input type="hidden" id="topic-is" value={{ isset($DATA->topic_id) ? $DATA->topic_id : 0 }}>
                                     <input type="hidden" id="subtopic-is" value={{ isset($DATA->subtopic_id) ? $DATA->subtopic_id : 0 }}>
                                     <input type="hidden" id="job-is" value={{ isset($DATA->job_id) ? $DATA->job_id : 0 }}>
-                                    <input type="hidden" id="code-is" value="{{ isset($DATA->code) ? $DATA->code : '' }}">
                                     <div class="input-group">
                                         <div id="system-id" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/file.form.system.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.system.title') }}</div>
                                         <select name="system_id" class="form-control w-full" required>
-                                            <option value=0>{{ trans('document/file.form.system.placeholder') }}</option>
+                                            <option value=''>{{ trans('document/file.form.system.placeholder') }}</option>
                                             @foreach($systems as $system)   
                                             <option value={{ $system->system_id }} @if( $system->system_id == $DATA->system_id ) selected @endif >{{ $system->name }}</option>
                                             @endforeach
@@ -41,11 +40,11 @@
                                     </div>
                                     <div class="input-group mt-3">
                                         <div id="location-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.location.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.location.title') }}</div>
-                                        <select id="location-select" name="location_id" class="form-control w-full">
+                                        <select id="location-select" name="location_id" class="form-control w-full" required>
                                         @if( $locations['n'] == 1 )
                                             <option value={{ $locations['data']->location_id }} selected>{{ $locations['data']->name }}</option>
                                         @else
-                                            <option value=0>{{ trans('document/file.form.location.placeholder') }}</option>
+                                            <option value=''>{{ trans('document/file.form.location.placeholder') }}</option>
                                             @foreach($locations['data'] as $location)   
                                             <option value={{ $location->location_id }} @if( $location->location_id == $DATA->location_id ) selected @endif >{{ $location->name }}</option>
                                             @endforeach
@@ -55,11 +54,11 @@
                                     </div>
                                     <div class="input-group mt-3">
                                         <div id="department-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.department.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.department.title') }}</div>
-                                        <select id="department-select" name="department_id" class="form-control w-full">
+                                        <select id="department-select" name="department_id" class="form-control w-full" required>
                                         @if( $departments['n'] == 1 )
                                             <option value={{ $departments['data']->department_id }} selected>{{ $departments['data']->name }}</option>
                                         @else
-                                            <option value=0>{{ trans('document/file.form.department.placeholder') }}</option>
+                                            <option value=''>{{ trans('document/file.form.department.placeholder') }}</option>
                                             @foreach($departments['data'] as $department)   
                                             <option value={{ $department->department_id }} @if( $department->department_id == $DATA->department_id ) selected @endif >{{ $department->name }}</option>
                                             @endforeach
@@ -70,8 +69,8 @@
 
                                     <div class="input-group mt-3">
                                         <div id="topic-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.topic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.topic.title') }}</div>
-                                        <select id="topic-select" name="topic_id" class="form-control w-full mr-2">
-                                            <option value=0>{{ trans('document/file.form.topic.placeholder1') }}</option>                                          
+                                        <select id="topic-select" name="topic_id" class="form-control w-full mr-2" required>
+                                            <option value=''>{{ trans('document/file.form.topic.placeholder1') }}</option>                                          
                                         </select>
                                         <input type="text" id="input-new-topic" class="form-control mr-2"  placeholder="{{ trans('document/file.form.topic.placeholder2') }}"  maxlength="255">
                                         <button id="btn-new-topic" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>
@@ -80,8 +79,8 @@
 
                                     <div class="input-group mt-3">
                                         <div id="subtopic-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.subtopic.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.subtopic.title') }}</div>
-                                        <select id="subtopic-select" name="subtopic_id" class="form-control w-full">
-                                            <option value=0>{{ trans('document/file.form.subtopic.placeholder1') }}</option>                                          
+                                        <select id="subtopic-select" name="subtopic_id" class="form-control w-full" required>
+                                            <option value=''>{{ trans('document/file.form.subtopic.placeholder1') }}</option>                                          
                                         </select>
                                         <input type="text" id="input-new-subtopic" class="form-control mr-2"  placeholder="{{ trans('document/file.form.subtopic.placeholder2') }}"  maxlength="255">
                                         <button id="btn-new-subtopic" class="btn btn-primary shadow-md input-status" type="button" data-te-ripple-init><i data-lucide="plus" class="w-4 h-4"></i></button>                                                                            
@@ -102,8 +101,8 @@
                                     </div>
                                     <div class="input-group mt-3">
                                         <div id="job-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.job.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.job.title') }}</div>
-                                        <select id="job-select"  name="job_id" class="form-control w-full">
-                                            <option value=0>{{ trans('document/file.form.job.placeholder') }}</option>                                    
+                                        <select id="job-select"  name="job_id" class="form-control w-full" required>
+                                            <option value=''>{{ trans('document/file.form.job.placeholder') }}</option>                                    
                                         </select>                                    
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.job.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>
@@ -131,7 +130,7 @@
                                     <div class="input-group mt-3">
                                         <div id="index-id" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.index.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.index.title') }}</div>
                                         <select name="index_id" class="form-control mr-2">
-                                            <option value=0>{{ trans('document/file.form.index.placeholder1') }}</option>
+                                            <option value=''>{{ trans('document/file.form.index.placeholder1') }}</option>
                                             @foreach($indexes as $index)   
                                             <option value={{ $index->index_id }} @if( $index->index_id == $DATA->index_id ) selected @endif >{{ $index->name }}</option>
                                             @endforeach                                            
@@ -144,7 +143,7 @@
                                     <div class="input-group mt-3">
                                         <div id="disposal-id" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/file.form.disposal.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.disposal.title') }}</div>
                                         <select name="disposal_id" class="form-control mr-2">
-                                            <option value=0>{{ trans('document/file.form.disposal.placeholder1') }}</option>
+                                            <option value=''>{{ trans('document/file.form.disposal.placeholder1') }}</option>
                                             @foreach($disposals as $disposal)   
                                             <option value={{ $disposal->disposal_id }} @if( $disposal->disposal_id == $DATA->disposal_id ) selected @endif >{{ $disposal->name }}</option>
                                             @endforeach                                            
@@ -220,10 +219,14 @@
         $('body').on('change', '#location-select', function (e) {
             var lid = $(this).val();
             console.log('LID: '+lid);
-            if( lid > 0 ) {
+            if( lid != '' ) {
                 setDepartmentsAjax(lid);
             } else {
-                $("#department-select").html('<option value=0>{{ trans("document/file.form.department.placeholder") }}</option>');
+                $("#department-select").html('<option value="">{{ trans("document/file.form.department.placeholder") }}</option>');
+                $("#topic-select").html('<option value="">{{ trans("document/file.form.topic.placeholder1") }}</option>');
+                $("#subtopic-select").html('<option value="">{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
+                $("#job-select").html('<option value="">{{ trans("document/file.form.job.placeholder") }}</option>');
+                $('input[name=code]').val('');                
             }
         }); // change #location-select Event
 
@@ -231,14 +234,14 @@
             e.preventDefault();
             var did = this.value;
             console.log('DID: '+did);
-            if( did > 0 ) {
+            if( did != '' ) {
                 setTopicsAjax(did);
                 setJobsAjax(did);          
             } else {
-                $("#topic-select").html('<option value=0>{{ trans("document/file.form.topic.placeholder1") }}</option>');
-                $("#subtopic-select").html('<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
-                $("#job-select").html('<option value=0>{{ trans("document/file.form.job.placeholder") }}</option>');
+                $("#topic-select").html('<option value="">{{ trans("document/file.form.topic.placeholder1") }}</option>');
+                $("#subtopic-select").html('<option value="">{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
                 $('input[name=code]').val('');
+                $("#job-select").html('<option value="">{{ trans("document/file.form.job.placeholder") }}</option>');                
             }            
         }); // change #department-select Event
 
@@ -246,12 +249,17 @@
             e.preventDefault();
             var tid = this.value;
             console.log('TID: '+tid);            
-            if( tid > 0 ) {
+            if( tid != '' ) {
                 setSubtopicsAjax(tid);                            
             } else {
-                $("#subtopic-select").html('<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
+                $("#subtopic-select").html('<option value="">{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
+                $('input[name=code]').val('');
             }           
         }); // change #topic-select Event
+
+        $('body').on('change', '#subtopic-select', function (e)  {
+            $('input[name=code]').val('');
+        }); // change #subtopic-select Event
 
         $('body').on('change', '#location-select, #department-select, #topic-select, #subtopic-select', function (e) {
             setCode();
@@ -285,13 +293,14 @@
             var txt = $("#input-new-topic").val();
             var did = $("#department-select option:selected").val();
             console.log('TXT: '+txt+' DID: '+did);
-            if( did == 0 ) {
+            if( did == '' ) {
                 setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-department") }}');
                 $("#department-select").focus(); 
             } else if( txt.length == 0 ) {
                 setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.empty") }}');
                 $("#input-new-topic").focus(); 
             } else {
+                 $('input[name=code]').val('');
                 setTopicAjax(did, txt);
             }
         }); // click #btn-new-topic Event        
@@ -301,13 +310,14 @@
             var txt = $("#input-new-subtopic").val();
             var tid = $("#topic-select option:selected").val();
             console.log('TXT: '+txt+' TID: '+tid);
-            if( tid == 0 ) {
+            if( tid == '' ) {
                 setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.no-topic") }}');
                 $("#topic-select").focus(); 
             } else if( txt.length == 0 ) {
                 setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.empty") }}');
                 $("#input-new-subtopic").focus(); 
             } else {
+                 $('input[name=code]').val('');
                 setSubtopicAjax(tid, txt);
             }
         }); // click #btn-new-subtopic Event            
@@ -371,7 +381,7 @@
     } // setDepartmentsAjax   
     
     function generateDepartmentsSelect(id, n, departments) {
-        var output = '<option value=0>{{ trans("document/file.form.department.placeholder") }}</option>';
+        var output = '<option value="">{{ trans("document/file.form.department.placeholder") }}</option>';
         if( n == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.department.no-exist") }}'); 
         } else if( n == 1 ) {
@@ -415,7 +425,7 @@
     } // setTopicsAjax
 
     function generateTopicsSelect(id, topics) {
-        var output = '<option value=0>{{ trans("document/file.form.topic.placeholder1") }}</option>';
+        var output = '<option value="">{{ trans("document/file.form.topic.placeholder1") }}</option>';
         if( topics.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-exist") }}'); 
         } else {
@@ -448,13 +458,15 @@
                     $("#subtopic-is").val(0);
                 } else {
                     setSuccessNotification('error', 'Oops!', json.message);
+                    $("#subtopic-select").html('<option value="">{{ trans("document/file.form.subtopic.placeholder1") }}</option>');
+                    $('input[name=code]').val('');                    
                 }
             } // success
         }); // ajax         
     } // setSubtopicsAjax
 
     function generateSubtopicsSelect(id, subtopics) {
-        var output = '<option value=0>{{ trans("document/file.form.subtopic.placeholder1") }}</option>';
+        var output = '<option value="">{{ trans("document/file.form.subtopic.placeholder1") }}</option>';
         if( subtopics.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.no-exist") }}'); 
         } else {
@@ -465,9 +477,6 @@
             });
         }
         $("#subtopic-select").html(output);
-        // Código
-        //console.log('CODE1: '+$("#code-is").val());
-        //$('input[name=code]').val($("#code-is").val());
         $("#loading-image").hide(); 
     } // generateSubtopicsSelect
 
@@ -495,7 +504,7 @@
     } // setJobsAjax
 
     function generateJobsSelect(id, jobs) {
-        var output = '<option value=0>{{ trans("document/file.form.job.placeholder") }}</option>';
+        var output = '<option value="">{{ trans("document/file.form.job.placeholder") }}</option>';
         if( jobs.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.job.no-exist") }}'); 
         } else {
@@ -526,7 +535,7 @@
                     // Limpiar input
                     $("#input-new-index").val('');
                     // Generar Select
-                    var output  = '<option value=0>{{ trans("document/file.form.index.placeholder1") }}</option>';  
+                    var output  = '<option value="">{{ trans("document/file.form.index.placeholder1") }}</option>';  
                     $.each(json.data, function(i, option) {
                         output += '<option value='+option.index_id;
                         output += ( option.name == str ) ? ' selected' : '';
@@ -558,7 +567,7 @@
                     // Limpiar input
                     $("#input-new-disposal").val('');
                     // Generar Select
-                    var output  = '<option value=0>{{ trans("document/file.form.disposal.placeholder1") }}</option>';  
+                    var output  = '<option value="">{{ trans("document/file.form.disposal.placeholder1") }}</option>';  
                     $.each(json.data, function(i, option) {
                         output += '<option value='+option.disposal_id;
                         output += ( option.name == str ) ? ' selected' : '';
@@ -619,6 +628,8 @@
                     $("#input-new-subtopic").val('');
                     // Generar select de subtemas
                     generateSubtopicsSelect(json.sid, json.subtopics);
+                    // Generar código
+                    setCode(); 
                 } else {
                     setSuccessNotification('error', 'Oops!', json.message);
                 }                
@@ -632,7 +643,8 @@
         var did = $('#department-select option:selected').val();
         var tid = $('#topic-select option:selected').val();
         var sid = $('#subtopic-select option:selected').val();
-        console.log('SET CODE :: lid:'+lid+' did:'+did+' tid:'+tid+' sid:'+sid);
+        var fid = $('input[name="file_id"]').val();
+        console.log('SET CODE :: fid:'+fid+' lid:'+lid+' did:'+did+' tid:'+tid+' sid:'+sid);
 
         if( lid > 0 && did > 0 && tid > 0 && sid > 0 )  {
             console.log(':: Searching by code...');
@@ -641,17 +653,17 @@
             $.ajax({
                 url: route,
                 type: 'POST',
-                data: {'lid':lid,'did':did,'tid':tid,'sid':sid},
+                data: {'fid':fid,'lid':lid,'did':did,'tid':tid,'sid':sid},
                 dataType: 'json',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
                 success: function(json) {
                     //console.dir(json);
+                    $("#loading-image").hide();
                     if( json.success ) {
                         // Establecer código
-                        $('input[name=code]').val(json.code);
-                        //$("#code-is").val(json.code);
-                        $("#loading-image").hide();
+                        $('input[name=code]').val(json.code);                        
                     } else {
+                        $('input[name=code]').val(json.code).css('color', 'red').focus();
                         setSuccessNotification('error', 'Oops!', json.message);
                     }                
                 } // success

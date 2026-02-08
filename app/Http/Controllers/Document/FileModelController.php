@@ -103,6 +103,7 @@ class FileModelController extends Controller
         ]);
         
         // Validar si código existe
+        // TODO: crear método de validación ya que se utiliza en dos lugares, aquí y getCode(array $data)
 
 
         if ($validator->fails()) {
@@ -349,8 +350,7 @@ class FileModelController extends Controller
      */
     public function setCode(Request $request) {
         $input = $request->input();
-        $code= $this->fileRepo->getCode($input);
-        $response = ['success' => true, 'code' => $code];
+        $response = $this->fileRepo->getCode($input);
         return response()->json($response); 
     } // setCode Method      
 
