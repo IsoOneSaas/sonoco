@@ -12,7 +12,7 @@
                             Editar Archivo
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            <button id="btn-save" type="button" form="file-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
+                            <button id="btn-save" type="submit" form="file-form" class="btn btn-primary shadow-md mr-2"> <i data-lucide="save" class="w-5 h-5"></i> </button>
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('files.admin.index') }}" alt="Regresar a la tabla"><i data-lucide="menu" class="w-5 h-5"></i></a>    
                         </div>
                     </div>
@@ -23,7 +23,7 @@
                                 <!-- BEGIN: Form -->
                                 <form id="file-form" action="{{ route('files.admin.store', $DATA->file_id) }}" method="POST">
                                     @csrf
-                                    @method('PUT')
+
                                     <input type="hidden" name="file_id"  id="file-id" value={{ $DATA->file_id }}>
                                     <input type="hidden" id="topic-is" value={{ isset($DATA->topic_id) ? $DATA->topic_id : 0 }}>
                                     <input type="hidden" id="subtopic-is" value={{ isset($DATA->subtopic_id) ? $DATA->subtopic_id : 0 }}>
@@ -31,7 +31,7 @@
                                     <input type="hidden" id="code-is" value="{{ isset($DATA->code) ? $DATA->code : '' }}">
                                     <div class="input-group">
                                         <div id="system-id" class="input-group-text flex w-56"><i data-lucide="{{ trans('document/file.form.system.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.system.title') }}</div>
-                                        <select name="system_id" class="form-control w-full">
+                                        <select name="system_id" class="form-control w-full" required>
                                             <option value=0>{{ trans('document/file.form.system.placeholder') }}</option>
                                             @foreach($systems as $system)   
                                             <option value={{ $system->system_id }} @if( $system->system_id == $DATA->system_id ) selected @endif >{{ $system->name }}</option>
@@ -91,13 +91,13 @@
                                     
                                     <div class="input-group mt-3">
                                         <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.code.title') }}</div>
-                                        <input type="text" name="code" value="{{ $DATA->code }}" class="form-control  w-full" aria-describedby="code" placeholder="{{ trans('document/file.form.code.placeholder') }}"  maxlength="255" readonly required>
+                                        <input type="text" name="code" value="{{ old('code', isset($DATA) ? $DATA->code : '') }}" class="form-control  w-full" aria-describedby="code" placeholder="{{ trans('document/file.form.code.placeholder') }}"  maxlength="255" readonly required>
                                         <img id="loading-image" alt="Cargando..." class="h-auto max-w-xs mx-auto" width="30" height="30" src="{{ url('/assets/images/loading_small.gif') }}">
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.code.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>                                   
                                     <div class="input-group mt-3">
                                         <div id="name" class="input-group-text flex"><i data-lucide="{{ trans('document/file.form.name.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/file.form.name.title') }}</div>
-                                        <input type="text" name="name" value="{{ $DATA->name }}" class="form-control  w-full" aria-describedby="name" placeholder="{{ trans('document/file.form.name.placeholder') }}"  maxlength="255" minlength="2" required>
+                                        <input type="text" name="name" value="{{ old('name', isset($DATA) ? $DATA->name : '') }}" class="form-control  w-full" aria-describedby="name" placeholder="{{ trans('document/file.form.name.placeholder') }}"  maxlength="255" minlength="2" required>
                                         <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/file.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                     </div>
                                     <div class="input-group mt-3">

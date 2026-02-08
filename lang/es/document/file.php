@@ -181,12 +181,40 @@ return [
     ],
     
     'request' => [
+                'system_id'         =>  [
+                                    'required'      => 'Sistema de gestión no identificado',
+                                    'format'      => 'Sistema de gestión no identificado',
+                ],
+                'location_id'         =>  [
+                                    'required'      => 'Localización no identificada',
+                                    'format'      => 'Localización no identificada',
+                ],                         
                 'department_id'         =>  [
                                     'required'      => 'Departamento no identificado',
+                                    'format'      => 'Departamento no identificado',
                 ],
                 'topic_id'         =>  [
                                     'required'      => 'Tema no seleccionado',
-                ],                          
+                                    'format'      => 'Tema no seleccionado',
+                ], 
+                'subtopic_id'         =>  [
+                                    'required'      => 'Subtema no seleccionado',
+                                    'format'      => 'Subtema no seleccionado',
+                ],
+                'name'         =>  [
+                                    'required'      => 'Escriba el nombre del archivo',
+                                    'min'           => 'Se require al menos dos caracteres',
+                                    'max'           => 'El nombre no puede ser mayor a 255 caracteres',
+                ],
+                'code'         =>  [
+                                    'required'      => 'Código no identificado',
+                                    'unique'        => 'Ya existe archivo con este mismo código',
+                ],                                                    
+                'job_id'         =>  [
+                                    'required'      => 'Responsable no seleccionado',
+                                    'format'      => 'Responsable no seleccionado',
+                ],                
+                
                 'topic'         =>  [
                                     'required'      => 'Escriba el nombre del tema',
                                     'min'           => 'Se require nombre completo del tema',

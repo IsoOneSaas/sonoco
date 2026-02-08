@@ -53,7 +53,6 @@ class FileModelController extends Controller
         // $groups =  $this->recordRepo->getGroupsList();
         // return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
         return $this->fileRepo->render($param);
-        return true;
     }  // show    
 
     /**
@@ -67,9 +66,63 @@ class FileModelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) //: RedirectResponse     // StoreDocumentModel
+    public function store(Request $request) : RedirectResponse     // StoreDocumentModel
     {
+        $response = ['status' => 'success', 'hash' => '', 'message' => 'Testing...'];
+        $msgs = '';
+        $input = $request->input();
+        Log::debug(['STORE DATA' => $request->all()]);
 
+        // VALIDAR FORMULARIO
+        $validator = Validator::make($request->all(), [
+            'system_id'   => 'required|not_in:0',
+            'location_id'   => 'required|not_in:0',
+            'department_id' => 'required|not_in:0',
+            'topic_id'      => 'required|not_in:0',
+            'subtopic_id'    => 'required|not_in:0',            
+            'name'          => 'required|min:2|max:255',
+            'code'          => 'required|min:1',                
+            'job_id'    => 'required|not_in:0',                     
+        ], [
+            'system_id.required'         => trans('document/file.request.system_id.required'),
+            'system_id.not_in'              => trans('document/file.request.system_id.format'),            
+            'location_id.required'         => trans('document/file.request.location_id.required'),
+            'location_id.not_in'              => trans('document/file.request.location_id.format'),
+            'department_id.required'         => trans('document/file.request.department_id.required'),
+            'department_id.not_in'              => trans('document/file.request.department_id.format'),                           
+            'topic_id.required'         => trans('document/file.request.topic.required'),
+            'topic_id.not_in'              => trans('document/file.request.topic.format'),           
+            'subtopic_id.required'         => trans('document/file.request.subtopic.required'),
+            'subtopic_id.not_in'              => trans('document/file.request.subtopic.format'),
+            'name.required'         => trans('document/file.request.name.required'),
+            'name.min'              => trans('document/file.request.name.min'),
+            'name.max'              => trans('document/file.request.name.max'),  
+            'code.required'         => trans('document/file.request.code.required'),
+            'job_id.required'         => trans('document/file.request.job_id.required'),
+            'job_id.not_in'              => trans('document/file.request.job_id.format'),                                
+        ]);
+        
+        // Validar si código existe
+
+
+        if ($validator->fails()) {
+            $messages = json_decode($validator->messages(), true);
+            foreach($messages as $message) {
+                $msgs .= $message[0] .' | '; 
+            }            
+            $response = ['status' => 'error', 'message' => $msgs];
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        } // if
+
+        // SALVAR
+        unset($input['_token']);
+        //$response = $this->recordRepo->update($input);
+        $response['hash'] = 'eyJpdiI6IkoxQlZBZkNjUTkzd0RsYk1kQ01NYkE9PSIsInZhbHVlIjoiYjg3NDFaRHlKZnN0ZHdJZHl1dlFLZz09IiwibWFjIjoiNjNjZWZiYWQ2NWExNmEwYWQ2ZDk3ZjEyM2Q0MDMyMjUwYjcwMzMyZDE5OGE5MDQwYjM4YWYxNWMxNmYzYWExYyIsInRhZyI6IiJ9';
+        if($response['status'] == 'success') {
+            return redirect()->route('files.admin.edit', [$response['hash']])->with($response['status'], $response['message']); ;
+        } else {
+            return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
+        }        
     } // store Method
 
     /**
@@ -90,11 +143,11 @@ class FileModelController extends Controller
 
         // Obtener localiciones
         $locations = $this->fileRepo->getLocationsList();
-        Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
+        //Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
 
         // Obtener Departamentos
         $departments = $this->fileRepo->getDepartmentsList();
-        Log::debug(['DEPARTMENTS' => $departments['data']->toArray(), 'N' => $departments['n']]);
+        //Log::debug(['DEPARTMENTS' => $departments['data']->toArray(), 'N' => $departments['n']]);
 
         // Obtener medios de soporte
         $supports = config('settings.record_support');
@@ -108,7 +161,7 @@ class FileModelController extends Controller
         // Obtener datos del archivo
         $DATA = $this->fileRepo->setFile($hash);
         $DATA->dateFormat = 'YYYY/MM/DD';           // TODO: traer de la configuración
-        Log::debug(['DATA' => $DATA->toArray()]); 
+        //Log::debug(['DATA' => $DATA->toArray()]); 
         
         // Obtener frecuencias
         $frequencies = config('settings.file_frequency_select');
@@ -133,7 +186,7 @@ class FileModelController extends Controller
     public function getDepartments($id)
     {
         $departments = $this->fileRepo->getDepartmentsList($id);
-        Log::debug(['LID' => $id, 'DEPARTMENTS' => $departments]);
+        //Log::debug(['LID' => $id, 'DEPARTMENTS' => $departments]);
         if( $departments['n'] == 0 ) {
             $response =  ['success' => false,  'message' => trans('document/file.error.department.no-exist')];  
         } else {
@@ -150,7 +203,7 @@ class FileModelController extends Controller
     public function getTopics($id)
     {
         $topics = $this->fileRepo->getTopicsList($id);
-        Log::debug(['TOPICS' => $topics->toArray()]);
+        //Log::debug(['TOPICS' => $topics->toArray()]);
         if( $topics->count() == 0 ) {
             $response =  ['success' => false,  'message' => trans('document/file.error.topic.no-exist')];  
         } else {
@@ -167,7 +220,7 @@ class FileModelController extends Controller
     public function getJobs($id)
     {
         $jobs = $this->fileRepo->getJobsList($id);
-        Log::debug(['JOBS' => $jobs->toArray()]);
+        //Log::debug(['JOBS' => $jobs->toArray()]);
         if( $jobs->count() == 0 ) {
             $response =  ['success' => false,  'message' => trans('document/file.error.job.no-exist')];  
         } else {
