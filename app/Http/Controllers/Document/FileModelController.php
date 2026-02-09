@@ -60,7 +60,31 @@ class FileModelController extends Controller
      */
     public function create() : View
     {
+        // Obtener sistema de gestión
+        $systems = $this->fileRepo->getSystemsList();
 
+        // Obtener localiciones
+        $locations = $this->fileRepo->getLocationsList();
+        //Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
+
+        // Obtener medios de soporte
+        $supports = config('settings.record_support');
+
+        // Obtener índices
+        $indexes = $this->fileRepo->getIndexesList();
+
+        // Obtener disposiciones
+        $disposals = $this->fileRepo->getDisposalsList(); 
+        
+        // Obtener frecuencias
+        $frequencies = config('settings.file_frequency_select');        
+
+        // Obtener datos del archivo
+        $DATA = $this->fileRepo->setFile();
+        $DATA->dateFormat = 'YYYY/MM/DD';           // TODO: traer de la configuración
+
+        // View
+        return view('document.file.create', compact('DATA', 'systems', 'locations', 'supports', 'indexes', 'disposals', 'frequencies'));
     } // create Method
 
     /**
@@ -162,15 +186,24 @@ class FileModelController extends Controller
         $disposals = $this->fileRepo->getDisposalsList();
 
         // Obtener datos del archivo
-        $DATA = $this->fileRepo->setFile($hash);
+        $DATA = $this->fileRepo->getFile($hash);
         $DATA->dateFormat = 'YYYY/MM/DD';           // TODO: traer de la configuración
-        //Log::debug(['DATA' => $DATA->toArray()]); 
+        //Log::debug(['DATA' => $DATA->toArray()]);
+        
+        // Obtener Temas
+        $topics = $this->fileRepo->getTopicsList($DATA->department_id);
+
+        // Obtener Subtemas
+        $subtopics = $this->fileRepo->getSubtopicsList($DATA->topic_id);
+        
+         // Obtener Responsables
+        $jobs = $this->fileRepo->getJobsList($DATA->department_id);
         
         // Obtener frecuencias
         $frequencies = config('settings.file_frequency_select');
 
         // View
-        return view('document.file.edit', compact('DATA', 'systems', 'locations', 'departments',  'supports', 'indexes', 'disposals', 'frequencies'));
+        return view('document.file.edit', compact('DATA', 'systems', 'locations', 'departments', 'topics', 'subtopics', 'jobs', 'supports', 'indexes', 'disposals', 'frequencies'));
     } // edit Method
 
     /**
@@ -178,7 +211,8 @@ class FileModelController extends Controller
      */
     public function destroy($hash)
     {
-       //
+       $response =  $this->fileRepo->delete($hash);
+       return response()->json($response); 
     } // destroy
 
     /**

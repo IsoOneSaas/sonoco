@@ -334,7 +334,7 @@ class FileClass
                 $pattern = str_replace($key, $replace2[$key], $pattern);
             }
         }
-        //Log::debug('CODE: '. $pattern);
+        Log::debug(':: CODE: '. $pattern);
         return $pattern; 
     } // getCode Method *
 
@@ -427,6 +427,7 @@ class FileClass
     public function existsCode($id, $code)
     {
         $file = File::where('code', $code)->first();
+        //$id = ( $id === null ) ? 0 : $id;
         if( $file ) {
             if( $file->file_id != $id ) {
                 return true;

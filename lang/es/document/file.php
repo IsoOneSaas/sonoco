@@ -14,7 +14,7 @@ return [
     'file' => [
                 'create' => [
                             'no-success'    => 'Se ha presentado un error al crear el archivo. ¡inténtelo más tarde!',
-                            'success'       => 'Archivo salvado correctamente',                    
+                            'success'       => 'Archivo creado correctamente',                    
                 ],
                 'update' => [
                             'no-success'    => 'Se ha presentado un error al actualizar el archivo. ¡inténtelo más tarde!',

@@ -6,7 +6,10 @@ interface FileRepositoryInterface
 
     public function update(array $data);
 
-    public function setFile($hash);
+    public function delete($hash);
+
+    public function getFile($hash);
+    public function setFile();
 
     public function getSystemsList();
 

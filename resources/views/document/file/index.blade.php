@@ -18,7 +18,7 @@
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-new" title="Nuevo archivo"><i data-lucide="pencil" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2" href="{{ route('files.admin.create') }}" id="btn-new" title="Nuevo archivo"><i data-lucide="plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el archivo"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el archivo"><i data-lucide="eye" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
@@ -379,11 +379,8 @@
             var url = "{{ route('files.admin.edit', ':id') }}";
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/file.grid.row_edit') }}");
-            } else {
-                //console.log('ID: '+rowdata.user_id);
-                                
+            } else {                                
                 url = url.replace(':id', rowdata.hash);
-                //alert(url);
                 location.href = url;                
             }
         }); // btn-edit        

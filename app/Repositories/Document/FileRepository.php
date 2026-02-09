@@ -53,12 +53,10 @@ class FileRepository implements FileRepositoryInterface
         $pids = [];
 
         // ARREGLO DE INDICES
-        $indexes = FileIndexModel::all();
-        $indexes_array = ($indexes) ?  $indexes : $emtpy_array;
+        $indexes_array = $this->getIndexArray();        
         
         // ARREGLO DE DISPOSICIONES
-        $disposals = FileDisposalModel::all();
-        $disposals_array = ($disposals) ?  $disposals : $emtpy_array;        
+        $disposals_array = $this->getDisposalArray();       
         
         // FILTRADO DE ARHIVOS
         $files = FileModel::join('set_processes AS T1', function ($join) use ($pids) {
@@ -99,7 +97,7 @@ class FileRepository implements FileRepositoryInterface
             // Indexacion  
             if ($file->index_id != 0) {
                 if (array_key_exists($file->index_id, $indexes_array)) {
-                    $txtIndex = $indexes_array[$file->index_id]['name'];
+                    $txtIndex = $indexes_array[$file->index_id];
                 } else {
                     $txtIndex = '';
                 }
@@ -133,7 +131,7 @@ class FileRepository implements FileRepositoryInterface
             // Disposición 
             if ($file->disposal_id != 0) {
                 if (array_key_exists($file->disposal_id, $disposals_array)) {
-                    $txtDisposal = $disposals_array[$file->disposal_id]['name'];
+                    $txtDisposal = $disposals_array[$file->disposal_id];
                 } else {
                     $txtDisposal = '';
                 }
@@ -205,23 +203,32 @@ class FileRepository implements FileRepositoryInterface
             "iTotalDisplayRecords" => count($data),
             "aaData" => $data
         ];
-        Log::debug([':: DATA' => $data]);
+        //Log::debug([':: DATA' => $data]);
         return json_encode($results);         
         
     } // render Repository
+
+   /**
+     * Establece los datos del archivo nuevo a crear
+     * @return Object   Objeto de datos del archivo
+     */ 
+    public function setFile()    
+    {
+        $file = new FileModel;
+        return $file; 
+    } // setFile Repository
 
    /**
      * Establece los datos del archivo existente para editar
      * @param  string $hash Hash del Id del Archivo
      * @return Object   Objeto de datos del archivo
      */ 
-    public function setFile($hash)
+    public function getFile($hash)
     {
         $id = $this->tool->getIdHash($hash);
-        $file = FileModel::find($id);
-    
+        $file = FileModel::find($id);    
         return $file; 
-    } // setFile Repository
+    } // getFile Repository
 
     /**
      * Guarda los datos del formulario en la base de datos del archivo
@@ -238,7 +245,7 @@ class FileRepository implements FileRepositoryInterface
             DB::beginTransaction();
 
             // FIRST OR NEW FILE
-            $file = FileModel::firstOrNew([
+            $file = FileModel::updateOrCreate([
                 'file_id' => $data['file_id']                
             ],[
                 'system_id' => $data['system_id'],
@@ -267,9 +274,9 @@ class FileRepository implements FileRepositoryInterface
                 'hold_frequency' => $data['hold_frequency'],                
             ]);        
 
-            $file->save();
             $hash = $this->tool->setIdHash($file->file_id);
-            $action = ( $file->file_id == $data['file_id'] ) ? 'update' : 'create';
+            //$action = ( $file->file_id == $data['file_id'] ) ? 'update' : 'create';
+            $action = ($file->wasRecentlyCreated) ? 'create' : 'update';
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
@@ -278,7 +285,26 @@ class FileRepository implements FileRepositoryInterface
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => $output ];
         }
         return ['status' => 'success', 'hash' => $hash, 'message' => $msg[$action]['success']];
-    } // update Repository                
+    } // update Repository
+    
+   /**
+     * Elimina archivo de la base de datos
+     * @param  string $hash Hash del Id del Archivo
+     * @return Array   Resultado de la eliminación
+     */     
+    public function delete($hash)
+    {
+        $id = $this->tool->getIdHash($hash);        
+        try {
+            // obtener código para afectar registros
+            FileModel::destroy($id);
+            // Afectar NUI de registros
+       } catch (Exception $e) {
+            Log::error('FileRepository::delete Exception: '. $e->getMessage());
+           return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.file.delete.no-success')];
+       }                
+       return ['status' => 'success', 'message' =>  trans('document/file.file.delete.success')];  
+    } // delete Repository
 
     public function getSystemsList()
     {
@@ -496,6 +522,26 @@ class FileRepository implements FileRepositoryInterface
             ->first();        
         return ($process) ? $process->process_id : 0;
     }
+    
+    private function getIndexArray()
+    {
+        $index_array = [];
+        $indexes = FileIndexModel::get(['index_id', 'name']);        
+        foreach($indexes as $index) {
+            $index_array[$index->index_id] = $index->name;
+        }
+        return $index_array;        
+    } // getIndexArray 
+
+    private function getDisposalArray()
+    {
+        $disposal_array = [];
+        $disposals = FileDisposalModel::get(['disposal_id', 'name']);        
+        foreach($disposals as $disposal) {
+            $disposal_array[$disposal->disposal_id] = $disposal->name;
+        }
+        return $disposal_array;        
+    } // getDisposalArray    
  
 
 } // class
