@@ -146,7 +146,7 @@ class FileModelController extends Controller
         $response = $this->fileRepo->update($input);
         //$response['hash'] = 'eyJpdiI6IkoxQlZBZkNjUTkzd0RsYk1kQ01NYkE9PSIsInZhbHVlIjoiYjg3NDFaRHlKZnN0ZHdJZHl1dlFLZz09IiwibWFjIjoiNjNjZWZiYWQ2NWExNmEwYWQ2ZDk3ZjEyM2Q0MDMyMjUwYjcwMzMyZDE5OGE5MDQwYjM4YWYxNWMxNmYzYWExYyIsInRhZyI6IiJ9';
         if($response['status'] == 'success') {
-            return redirect()->route('files.admin.edit', [$response['hash']])->with($response['status'], $response['message']); ;
+            return redirect()->route('files.admin.edit', [$response['hash']])->with($response['status'], $response['message']);
         } else {
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }        
@@ -212,7 +212,9 @@ class FileModelController extends Controller
     public function destroy($hash)
     {
        $response =  $this->fileRepo->delete($hash);
-       return response()->json($response); 
+       // TODO: Validar si no afecta
+       //return response()->json($response);
+       return redirect()->route('files.admin.index')->with($response['status'], $response['message']); 
     } // destroy
 
     /**
@@ -427,10 +429,11 @@ class FileModelController extends Controller
         ];
 
         $columns_extra = [
-            ["data" => "hash", "title" => "HASH", "visible" => false, "searchable" => false, "orderable" => false],
-            ["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
-            ["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
-            ["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
+            ["data" => "hash", "title" => "H", "visible" => false, "searchable" => false, "orderable" => false],
+            ["data" => "count", "title" => "N", "visible" => true, "searchable" => false, "orderable" => false],
+            //["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
+            //["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
+            //["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
         ]; 
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);        

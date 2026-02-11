@@ -22,7 +22,10 @@ return [
                 ],
                 'delete' => [
                             'no-success'    => 'Se ha presentado un error al eliminar el archivo. ¡inténtelo más tarde!',
-                            'success'       => 'Archivo eliminado correctamente',                    
+                            'success'       => 'Archivo eliminado correctamente',
+                            'title'         => 'Está seguro de eliminar el archivo con código ',
+                            'text1'          => 'Al aceptar, se eliminará completamente el archivo y cualquier relación con registros asociados por código archivistico.',
+                            'text2'          => 'EL ARCHIVO A ELIMINAR CUENTA CON :N REGISTROS ASOCIADOS!'
                 ],                  
     ],    
 
@@ -268,6 +271,7 @@ return [
             ],                         
             'grid' => [
                 'row_edit'  => 'No ha seleccionado un archivo para editar',
+                'row_delete'  => 'No ha seleccionado un archivo para eliminar',
             ],          
     ], 
          

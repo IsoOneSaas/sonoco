@@ -21,6 +21,11 @@
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('files.admin.create') }}" id="btn-new" title="Nuevo archivo"><i data-lucide="plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el archivo"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el archivo"><i data-lucide="eye" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-delete"><i data-lucide="trash" class="w-5 h-5"></i></a>
+                            <form method="POST" id="form-delete" action="">
+                                @method('DELETE')
+                                @csrf                                
+                            </form>                            
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -74,9 +79,11 @@
                                                 <th>Clasificación</th>
                                                 <th>Indexación</th>
                                                 <th>Disposición Final</th>
-                                                <th>Medio Soporte</th>
+                                                <th>H</th>
+                                                <th>N</th>
+<!--                                                 <th>Medio Soporte</th>
                                                 <th>C1</th>
-                                                <th>C2</th>
+                                                <th>C2</th> -->
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -101,9 +108,11 @@
                                                 <th class="th-filter">Clasificación</th>
                                                 <th class="th-filter">Indexación</th>
                                                 <th class="th-filter">Disposición Final</th>
-                                                <th class="th-filter">Medio Soporte</th>
+                                                <th class="th-filter">H</th>
+                                                <th class="th-filter">N</th>
+<!--                                                 <th class="th-filter">Medio Soporte</th>
                                                 <th class="th-filter">C1</th>
-                                                <th class="th-filter">C2</th>
+                                                <th class="th-filter">C2</th> -->
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -130,9 +139,11 @@
                                                 <th>Clasificación</th>
                                                 <th>Indexación</th>
                                                 <th>Disposición Final</th>
-                                                <th>Medio Soporte</th>
+                                                <th>H</th>
+                                                <th>N</th>                                                
+<!--                                                 <th>Medio Soporte</th>
                                                 <th>C1</th>
-                                                <th>C2</th>
+                                                <th>C2</th> -->
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -378,12 +389,51 @@
             var rowdata = $myTable.rows('.selected').data()[0];
             var url = "{{ route('files.admin.edit', ':id') }}";
             if (rowdata === undefined || rowdata === null) {
-                setSimpleNotification("{{ trans('document/file.grid.row_edit') }}");
+                setSimpleNotification("{{ trans('document/file.error.grid.row_edit') }}");
             } else {                                
                 url = url.replace(':id', rowdata.hash);
                 location.href = url;                
             }
-        }); // btn-edit        
+        }); // btn-edit 
+
+        $('#btn-delete').on("click", function()  {
+            var txt = '';
+            var rowdata = $myTable.rows('.selected').data()[0];
+            var form = $("#form-delete"); 
+            //var url = '/documentos/archivo/admin/'+rowdata.hash;
+            var url = "{{ route('files.admin.destroy', ':hash') }}";
+            var msg = "{{ trans('document/file.file.delete.text2', ['N' => ':no']) }} \n \n";
+            
+           if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/file.error.grid.row_delete') }}");
+            } else {            
+               if ( rowdata.count > 0 ) {
+                    txt = msg.replace(':no', rowdata.count);
+                    console.log(rowdata.count);
+                }
+                txt += "{{ trans('document/file.file.delete.text1') }}";
+                action = url.replace(':hash', rowdata.hash);
+                form.attr('action', action);
+                swal({
+                    title: "{{ trans('document/file.file.delete.title') }}"+rowdata.code+"?",
+                    text: txt,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        form.submit();
+                    }
+                });                 
+            } // if/else
+        }); // btn-delete          
+
+        $('#btn-refresh').on("click", function() {
+            $myTable.state.clear();
+            $myTable.search('').columns().search('').draw();
+            $(".col-filter").val('');
+        }); // btn-refresh               
 
                         
     }); // document

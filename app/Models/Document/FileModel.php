@@ -18,5 +18,13 @@ class FileModel extends Model
         'dead_date', 'dead_value', 'dead_frequency',    
         'hold_value', 'hold_frequency',
     ];
+
+    /**
+    * Obtiene el registro de registros asociados al archivo
+    */
+    public function records() : HasMany 
+    {
+        return $this->hasMany(RecordModel::class, 'code','code');
+    }     
        
 } // class

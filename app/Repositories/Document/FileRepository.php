@@ -9,6 +9,7 @@ use App\Models\Document\FileDisposalModel;
 use App\Models\Document\FileIndexModel;
 use App\Models\Document\FileSubTopicModel;
 use App\Models\Document\FileTopicModel;
+use App\Models\Document\RecordModel;
 //use App\Models\Document\SettingModel;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\ProcessModel;
@@ -161,6 +162,9 @@ class FileRepository implements FileRepositoryInterface
                     $color2 = config('settings.color_pallete_2')['orange'];
                 }
             } //if
+
+            // Contar registros del archivo
+            $count = RecordModel::where('code', $file->code)->count();
             
             //$dt = Carbon::createFromTimeStamp(strtotime($file->date));
             $data[$i]['DT_RowIndex'] = $i+1;
@@ -188,9 +192,10 @@ class FileRepository implements FileRepositoryInterface
             $data[$i]['txtdisposal'] = $txtDisposal;
 
             $data[$i]['hash'] = $this->tool->setIdHash($file->file_id);
-            $data[$i]['txtsupport'] = $txtSupport;
-            $data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
-            $data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
+            $data[$i]['count'] = $count;
+            //$data[$i]['txtsupport'] = $txtSupport;
+            //$data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
+            //$data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
 
             $i++;                          
         } // foreach   
@@ -296,8 +301,19 @@ class FileRepository implements FileRepositoryInterface
     {
         $id = $this->tool->getIdHash($hash);        
         try {
-            // obtener código para afectar registros
-            FileModel::destroy($id);
+            // Obtener listado de registros afectados
+            $records = FileModel::find($id)->records; 
+            $plucked = $records->pluck('record_id');
+            // Eliminar el archivo
+            //FileModel::destroy($id);
+            // Afectar registros del archivo eliminado
+            $rids = $plucked->all();
+            Log::debug(['RIDS' => $rids]);
+            if(count($rids) > 0) {
+                //RecordModel::whereIn('record_id', $rids)->update(['code' => null]);
+            }
+            
+            
             // Afectar NUI de registros
        } catch (Exception $e) {
             Log::error('FileRepository::delete Exception: '. $e->getMessage());
