@@ -41,7 +41,7 @@ class FileRepository implements FileRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de archivos
      */
-    public function render($slug)
+    public function render($slug, $systems)
     {    
         $data = [];
         $emtpy_array = [];
@@ -53,6 +53,19 @@ class FileRepository implements FileRepositoryInterface
 
         $pids = [];
 
+        // FILTRO POR FECHA
+        $range = explode('T', $params['din']);
+        $rangeIn = $range[0] .' 00:00:00';
+        $range = explode('T', $params['dout']);
+        $rangeOut = $range[0] .' 23:59:59';        
+
+        // FILTRO POR REQUISITOS
+        $sids = $this->setIds('sids', $params);
+        if( !$sids ) {
+            $plucked = $systems->pluck('system_id');
+            $sids = $plucked->all();
+        } // if        
+
         // ARREGLO DE INDICES
         $indexes_array = $this->getIndexArray();        
         
@@ -63,11 +76,15 @@ class FileRepository implements FileRepositoryInterface
         $files = FileModel::join('set_processes AS T1', function ($join) use ($pids) {
             $join->on('T1.process_id', '=', 'document_files.process_id');
             //$join->whereIn('T2.process_id', $pids);
-        })
+            })
+            ->join('set_systems AS T3', function ($join) use ($sids) {
+                $join->on('T3.system_id', '=', 'document_files.system_id');
+                $join->whereIn('T3.system_id', $sids);
+            })
             ->leftjoin('set_jobs AS T2', function ($join) {
                 $join->on('T2.job_id', '=', 'document_files.job_id');
             })
-            //->orderBy('document_files.name', 'asc')
+            ->whereBetween('document_files.updated_at', [$rangeIn, $rangeOut])
             ->get([
                 'document_files.file_id', 'document_files.system_id', 'document_files.process_id', 'document_files.location_id', 'document_files.department_id', 'document_files.topic_id', 'document_files.subtopic_id', 'document_files.job_id',
                 'document_files.name as name', 'document_files.code', 
@@ -301,26 +318,39 @@ class FileRepository implements FileRepositoryInterface
     {
         $id = $this->tool->getIdHash($hash);        
         try {
-            // Obtener listado de registros afectados
-            $records = FileModel::find($id)->records; 
-            $plucked = $records->pluck('record_id');
-            // Eliminar el archivo
-            //FileModel::destroy($id);
-            // Afectar registros del archivo eliminado
-            $rids = $plucked->all();
-            Log::debug(['RIDS' => $rids]);
-            if(count($rids) > 0) {
-                //RecordModel::whereIn('record_id', $rids)->update(['code' => null]);
-            }
-            
-            
-            // Afectar NUI de registros
+          FileModel::destroy($id);
        } catch (Exception $e) {
             Log::error('FileRepository::delete Exception: '. $e->getMessage());
            return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.file.delete.no-success')];
        }                
        return ['status' => 'success', 'message' =>  trans('document/file.file.delete.success')];  
     } // delete Repository
+
+   /**
+     * Si se elimina el archivo, los registros no aparecen en el listado maestro por no contar con la relación con un archivo
+     */     
+    public function delete2($hash)
+    {
+        $id = $this->tool->getIdHash($hash);        
+        try {
+            // Obtener listado de registros afectados
+            //$records = FileModel::find($id)->records; 
+            $file = FileModel::find($id);
+            $plucked = $file->records->pluck('record_id');
+            $rids = $plucked->all();
+            // Eliminar el archivo
+            $deleted = $file->delete();
+            // Afectar registros del archivo eliminado
+            if( $deleted && (count($rids) > 0) ) {                            
+                Log::debug(['RIDS' => $rids]);
+                RecordModel::whereIn('record_id', $rids)->update(['code' => null, 'year' => null, 'serial' => null]);
+            }
+       } catch (Exception $e) {
+            Log::error('FileRepository::delete Exception: '. $e->getMessage());
+           return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.file.delete.no-success')];
+       }                
+       return ['status' => 'success', 'message' =>  trans('document/file.file.delete.success')];  
+    } // delete Repository    
 
     public function getSystemsList()
     {
@@ -557,7 +587,27 @@ class FileRepository implements FileRepositoryInterface
             $disposal_array[$disposal->disposal_id] = $disposal->name;
         }
         return $disposal_array;        
-    } // getDisposalArray    
+    } // getDisposalArray
+    
+    /**
+     * Obtiene arreglo de los valores del parámetro
+     * @param  string $tag Key del arreglo
+     * @param  array $params arreglo de parámetros
+     * @return array/boolean arreglo de identificadores del parámetro o falso si no hay arreglo
+     */      
+    private function setIds($tag, $params)
+    {   
+        $output = [];
+        if( key_exists($tag, $params) && is_array($params[$tag]) ) {
+            foreach($params[$tag] as $id) {
+                if($id != '') {
+                    $output[] = $id;
+                } // if
+            } // foreach
+        } // if
+        if( count($output) > 0 ) return $output; 
+        return false;
+    } // setIds Service    
  
 
 } // class

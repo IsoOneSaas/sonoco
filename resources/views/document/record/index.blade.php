@@ -44,11 +44,9 @@
                     <div class="intro-y box p-5 mt-5">
                         <div class="p-5" id="striped-rows-table">
                             <div class="preview">
-
                                 <div id="grid-table">
-
+                                    <!-- BEGIN: Filters -->
                                     <div id="faq-accordion-2" class="accordion accordion-boxed">
-
                                         <div class="accordion-item">
                                             <div id="faq-accordion-content-6" class="accordion-header">
                                                 <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en registros</span></button>
@@ -100,8 +98,8 @@
 
                                             </div>
                                         </div>
-                                    </div>                                
-
+                                    </div>
+                                    <!-- END: Filters -->                                
                                     <br />
                                     <!-- BEGIN: DataTables -->
                                     <table id="records-table" class="table table-bordered" style="width:100%">
@@ -279,7 +277,7 @@
         // DATATABLES
         param = {sids: [], pids: [], gid: '', tid: '', din: $dateInDefault, dout: $dateOutDefault};
 
-        console.table(param);
+        //console.table(param);
         //console.dir(columnsDef);
         console.log('Datatables init starts now: ', Date.now() - startTime);
          

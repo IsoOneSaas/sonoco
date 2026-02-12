@@ -135,7 +135,8 @@ class RecordRepository implements RecordRepositoryInterface
                 'T3.topic',
                 'T3.subject',            
             ]);                       
-        Log::debug('Número de registros filtrados 2: '. $records->count()); 
+        Log::debug('Número de registros filtrados 2: '. $records->count()); //
+        //Log::debug(['RECORDS 2' => $records->toArray()]);
 
         // GENERAR GRID
         foreach($records as $record) {
@@ -1364,6 +1365,12 @@ class RecordRepository implements RecordRepositoryInterface
         return ['success' => true,  'message' =>  trans('document/record.chat.delete.success')];              
     } // setChat        
 
+    /**
+     * Obtiene arreglo de los valores del parámetro
+     * @param  string $tag Key del arreglo
+     * @param  array $params arreglo de parámetros
+     * @return array/boolean arreglo de identificadores del parámetro o falso si no hay arreglo
+     */      
     private function setIds($tag, $params)
     {   
         $output = [];
@@ -1371,12 +1378,12 @@ class RecordRepository implements RecordRepositoryInterface
             foreach($params[$tag] as $id) {
                 if($id != '') {
                     $output[] = $id;
-                }
-            }
-        }
+                } // if
+            } // foreach
+        } // if
         if( count($output) > 0 ) return $output; 
         return false;
-    }
+    } // setIds Service
 
     private function onLocal()
     {

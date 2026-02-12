@@ -50,9 +50,47 @@
                     <div class="intro-y box p-5 mt-5">
                         <div class="p-5" id="striped-rows-table">
                             <div class="preview">
-
                                 <div id="grid-table">                              
+                                    <!-- BEGIN: Filters -->
+                                    <div id="faq-accordion-2" class="accordion accordion-boxed">
+                                        <div class="accordion-item">
+                                            <div id="faq-accordion-content-6" class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en registros</span></button>
+                                            </div>
+                                            <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
+                                                <div id="horizontal-form" class="pb-3">
+                                                    <div class="preview ml-auto w-full">
+                                                        <div class="grid grid-cols-3 gap-2">
+                                                            <div class="form-inline">
+                                                                <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
+                                                                <input id="date-selected" type="text" class="form-control w-36 border-slate-500 iso-input" aria-label="Rango">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-inline">
 
+                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
+                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
+                                                                @foreach($systems as $system)   
+                                                                <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
+                                                                @endforeach                                                                                                        
+                                                            </select>
+                                                            <label for="process-selected" class="form-label sm:w-20 text-right">Procesos:</label>
+                                                            <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
+                                                                <option value="">No operativo</option>
+                                                            </select>                                                                                                                                                                                                                                                                         
+                                                        </div>
+
+                                                        <div class="flex mt-3 justify-center">
+                                                            <button id="btn-filter" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
+                                                        </div>                                           
+                                                    </div>
+                                                </div>                                            
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END: Filters -->                                
+                                    <br />
                                     <!-- BEGIN: DataTables -->
                                     <table id="files-table" class="table table-bordered" style="width:100%">
                                         <thead>
@@ -205,29 +243,29 @@
         let lang = {!! $gridLanguage !!};
 
         var startTime = Date.now();                       
-        //var sCol = isoGetStorage('iso_recordReturnCol');
-        //var sDir = isoGetStorage('iso_recordReturnDir');
-        //var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage');        
+        var sCol = isoGetStorage('iso_fileReturnCol');
+        var sDir = isoGetStorage('iso_fileReturnDir');
+        var initPage = ( isoGetStorage('iso_fileReturnPage') === null ) ? 1 : isoGetStorage('iso_fileReturnPage');        
         // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
-        //var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];      
-        var initOrder = [[ col, 'asc']];
+        var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];      
 
 
-        //var initRecords = ( isoGetStorage('iso_recordReturnRows') === null ) ? 10 : isoGetStorage('iso_recordReturnRows');
-        var initRecords = 10;
+        var initFiles = ( isoGetStorage('iso_fileReturnRows') === null ) ? 10 : isoGetStorage('iso_fileReturnRows');
+
+        // Sistema
+        var sidsStoraged = isoGetStorage('iso_fileSystems');
+        var sidsArray = setStorageInteger("system-selected", sidsStoraged);         
 
         // Rango In
-        //var dateIn = isoGetStorage('iso_recordDatein');
-        var dateIn = null;
+        var dateIn = isoGetStorage('iso_fileDatein');
         $dateInDefault = ( dateIn === null ) ? moment().subtract(6, 'days') : dateIn;
         
         // Rango Out
-        //var dateOut = isoGetStorage('iso_recordDateout');
-        var dateOut = null;
+        var dateOut = isoGetStorage('iso_fileDateout');
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;         
 
         // DATATABLES
-        param = {sids: [], pids: [], gid: '', tid: '', din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: [], pids: [], din: $dateInDefault, dout: $dateOutDefault};
         console.table(param);        
 
         $myTable = $('#files-table')
@@ -245,7 +283,7 @@
             sAjaxSource: $route.replace(':slug', JSON.stringify(param)),
             aoColumns: columnsDef,
             retrieve: true,
-            pageLength: parseInt(initRecords),
+            pageLength: parseInt(initFiles),
             order: initOrder[0],
             orderClasses: false,
             responsive: true,
@@ -380,9 +418,58 @@
                     $('#btn-view').addClass('iso-disabled'); 
                 }               
             } // if selected
-        }); // row selects  
+        }); // row selects 
+        
+        // Efectos botón
+        $('#date-selected').on('blur', function() {
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+        });
+
+        $('#system-selected, #process-selected').on('change', function() {
+            $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
+        });        
         
         // BOTONES
+
+        // Filtras lista
+        $("#btn-filter").on("click", function() {
+            var sidsValue = $("#system-selected").val();
+            var pidsArray = $("#process-selected").val();
+
+            var info = $myTable.page.info();            
+            var params = {sids: sidsValue, pids: pidsArray, din: $dateInDefault, dout: $dateOutDefault};
+            var url =  $route.replace(':slug', JSON.stringify(params));
+
+            console.log('Searching...');
+            console.dir(JSON.stringify(params));
+            
+            if( (sidsValue.length > 0) && (pidsArray.length > 0) ) {
+                // Ajustes a cambio
+                $("#filter-typeName").html('');
+                $("#filter-date").html('');
+                $("#loading-image").show();
+                $("#btn-filter").removeClass('btn-success').addClass('btn-primary'); 
+                $('#btn-edit').addClass('iso-disabled');
+                $('#btn-view').addClass('iso-disabled');                           
+                                
+                // Ajax            
+                $myTable.ajax.url(url).load();
+                $myTable.state.clear();
+
+                // Store            
+                isoSetStorage('iso_fileSystems', sidsValue);
+                isoSetStorage('iso_fileProcesses', pidsArray);
+                isoSetStorage('iso_fileDatein', $dateInDefault);
+                isoSetStorage('iso_fileDateout', $dateOutDefault); //
+                isoSetStorage('iso_fileReturnRows', info.length);
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Debe seleccionar al menos una opción de todos los selectores"
+                });
+            } // if
+        }); // btn-filter       
 
         // Editar el archivo existente
         $('#btn-edit').on("click", function()  {
@@ -396,6 +483,7 @@
             }
         }); // btn-edit 
 
+        // Eliminar Archivo // TODO: Decidir si se quita
         $('#btn-delete').on("click", function()  {
             var txt = '';
             var rowdata = $myTable.rows('.selected').data()[0];
@@ -435,9 +523,78 @@
             $(".col-filter").val('');
         }); // btn-refresh               
 
+        // DATERANGE
+        console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
+        $('#date-selected').daterangepicker({
+            locale: {
+                format: 'YYYY/MM/DD',
+                daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                applyLabel: "Aplicar",
+                cancelLabel: "Cancelar",
+                customRangeLabel: "-"
+            },
+            showDropdowns: true,
+            maxDate: moment(),
+            startDate: $dateInDefault,
+            endDate: $dateOutDefault,         
+            ranges: {
+                'Hoy': [moment(), moment()],
+                'Última semana': [moment().subtract(6, 'days'), moment()],
+                'Último mes': [moment().subtract(29, 'days'), moment()],
+                'Este mes': [moment().startOf('month'), moment().endOf('month')],
+                'Pasado mes': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                'Último semestre': [moment().subtract(5, 'months'), moment()],
+                'Todos': [moment("1970-01-01"), moment()]
+            }                     
+        });
+
+        $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
+            $dateInDefault = picker.startDate.format();
+            console.log('DIN : '+$dateInDefault);
+            $dateOutDefault = picker.endDate.format();
+            console.log('DOUT : '+$dateOutDefault);
+        });         
                         
     }); // document
 
+    function setStorageInteger(tag, storaged) {
+        var output = '';
+        //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
+
+        if( (storaged === null) || (storaged == '') ) {
+            var array = $("#"+tag).val();
+        } else {
+            var array = ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        }
+
+        //console.dir(array);
+        $('#'+tag+' option').each(function(i) {
+            
+            if( $.inArray( this.value , array ) !== -1 ) {
+                output += '<option value='+ parseInt(this.value) +' selected>'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, 'Selected');
+            } else {
+                output += '<option value='+ parseInt(this.value) +'>'+ this.text +'</option>';
+                //console.log(i, this.value , this.text, '');
+            }
+        });        
+
+        $("#"+tag).html(output);
+        $("#"+tag).multipleSelect(); 
+        return array;
+    } // setStorageInteger Fx     
+
+    function setStorage() {
+        // Storage
+        var info = $myTable.page.info();
+        var order = $myTable.order();             
+        isoSetStorage('iso_fileReturnUrl', isoGetCurrentURL());
+        isoSetStorage('iso_fileReturnPage', info.page);
+        isoSetStorage('iso_fileReturnCol', order[0][0]);
+        isoSetStorage('iso_fileReturnDir', order[0][1]);
+        isoSetStorage('iso_fileReturnRows', info.length);
+    } // setStorage
  
 </script>
 

@@ -33,11 +33,14 @@ class FileModelController extends Controller
     {
         
         $columnDefinition = $this->dataTableDefinition();
+        $systems = $this->fileRepo->getSystemsList();
+        // TODO: filtro de proceso : obtener los departamentos del usuario y con ello se determina los procesos
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
+            'systems'       => $systems,
         ]);        
     } // index Method
 
@@ -46,13 +49,11 @@ class FileModelController extends Controller
      */    
     public function render($param)
     {
-        // $user = $this->recordRepo->getUserId();
-        // $ridsShared = $this->recordRepo->getRecordsByShare($user);
-        // $systems = $this->recordRepo->getSystemsList();
-        // $processes = $this->recordRepo->getProcessesList($ridsShared);
-        // $groups =  $this->recordRepo->getGroupsList();
+        //$user = $this->recordRepo->getUserId();
+        $systems = $this->fileRepo->getSystemsList();
+        //$processes = $this->recordRepo->getProcessesList($ridsShared);
         // return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
-        return $this->fileRepo->render($param);
+        return $this->fileRepo->render($param, $systems);
     }  // show    
 
     /**
