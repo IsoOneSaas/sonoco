@@ -41,7 +41,7 @@ class FileRepository implements FileRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de archivos
      */
-    public function render($slug, $systems)
+    public function render($slug, $systems, $processes)
     {    
         $data = [];
         $emtpy_array = [];
@@ -64,7 +64,14 @@ class FileRepository implements FileRepositoryInterface
         if( !$sids ) {
             $plucked = $systems->pluck('system_id');
             $sids = $plucked->all();
-        } // if        
+        } // if   
+        
+        // FILTRO POR PROCESOS
+        $pids = $this->setIds('pids', $params);
+        if( !$pids ) {
+            $plucked = $processes->pluck('process_id');
+            $pids = $plucked->all();
+        } // if           
 
         // ARREGLO DE INDICES
         $indexes_array = $this->getIndexArray();        
@@ -74,8 +81,8 @@ class FileRepository implements FileRepositoryInterface
         
         // FILTRADO DE ARHIVOS
         $files = FileModel::join('set_processes AS T1', function ($join) use ($pids) {
-            $join->on('T1.process_id', '=', 'document_files.process_id');
-            //$join->whereIn('T2.process_id', $pids);
+                $join->on('T1.process_id', '=', 'document_files.process_id');
+                $join->whereIn('T1.process_id', $pids);
             })
             ->join('set_systems AS T3', function ($join) use ($sids) {
                 $join->on('T3.system_id', '=', 'document_files.system_id');
@@ -390,6 +397,22 @@ class FileRepository implements FileRepositoryInterface
             'data' => $departments
         ];               
     } // getDepartmentsList Repository
+
+    public function getProcessesList($departments)
+    {
+        $pids = [];
+        $plucked = $departments->pluck('department_id');
+        $dids = $plucked->all();
+        //Log::debug(['DIDS' => $dids]);
+        $processes = ProcessModel::
+            join('set_department_process', function($query) use($dids) {
+                $query->on('set_department_process.process_id', '=', 'set_processes.process_id');
+                $query->whereIn('set_department_process.department_id', $dids);
+            })
+            ->orderBy('name')
+            ->get(['set_processes.process_id', 'name']); // TODO: sortBy                        
+        return $processes;
+    } // getProcessesList Repository
 
     /**
      * Valida si existe el nombre de tema para el respectivo departamento

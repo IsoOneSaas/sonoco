@@ -34,13 +34,16 @@ class FileModelController extends Controller
         
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
-        // TODO: filtro de proceso : obtener los departamentos del usuario y con ello se determina los procesos
+        $departments = $this->fileRepo->getDepartmentsList();
+        $processes = $this->fileRepo->getProcessesList($departments['data']);
+        Log::debug(['PROCESSES' => $processes->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
             'systems'       => $systems,
+            'processes'     => $processes,
         ]);        
     } // index Method
 
@@ -49,11 +52,10 @@ class FileModelController extends Controller
      */    
     public function render($param)
     {
-        //$user = $this->recordRepo->getUserId();
         $systems = $this->fileRepo->getSystemsList();
-        //$processes = $this->recordRepo->getProcessesList($ridsShared);
-        // return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
-        return $this->fileRepo->render($param, $systems);
+        $departments = $this->fileRepo->getDepartmentsList();
+        $processes = $this->fileRepo->getProcessesList($departments['data']);
+        return $this->fileRepo->render($param, $systems, $processes);
     }  // show    
 
     /**
@@ -423,7 +425,7 @@ class FileModelController extends Controller
             ["data" => "datewell", "title" => "Frecuencia de Retención", "filterable" => false, "searchable" => true],
             ['data' => 'datemin', 'title' => 'Tiempo Mínimo Retención', "filterable" => false, "searchable" => true],
             ["data" => "datedead", "title" => "Tiempo Archivo Muerto", "filterable" => false, "searchable" => true],
-            ["data" => "storage", "title" => "Almacenamiento", "filterable" => true, "searchable" => true],
+            ["data" => "storage", "title" => "Almacenamiento", "filterable" => true, "searchable" => true], // 18
             ["data" => "classification", "title" => "Clasificación", "filterable" => true, "searchable" => true],
             ["data" => "txtindex", "title" => "Indexación", "filterable" => true, "searchable" => true],
             ['data' => 'txtdisposal', 'title' => 'Disposición Final', "filterable" => true, "searchable" => true],  // 21 
@@ -431,7 +433,7 @@ class FileModelController extends Controller
 
         $columns_extra = [
             ["data" => "hash", "title" => "H", "visible" => false, "searchable" => false, "orderable" => false],
-            ["data" => "count", "title" => "N", "visible" => true, "searchable" => false, "orderable" => false],
+            ["data" => "count", "title" => "N", "visible" => false, "searchable" => false, "orderable" => false],    // número de registros asociados al archivo
             //["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
             //["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
             //["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 

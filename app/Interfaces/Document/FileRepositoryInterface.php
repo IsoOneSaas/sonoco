@@ -2,7 +2,7 @@
 
 interface FileRepositoryInterface 
 {
-    public function render($slug, $systems);
+    public function render($slug, $systems, $processes);
 
     public function update(array $data);
 
@@ -16,6 +16,8 @@ interface FileRepositoryInterface
     public function getLocationsList();
 
     public function getDepartmentsList($id = null);
+
+    public function getProcessesList($departments);
 
     public function getJobsList($id);
 

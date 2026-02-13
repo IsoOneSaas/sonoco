@@ -55,7 +55,7 @@
                                     <div id="faq-accordion-2" class="accordion accordion-boxed">
                                         <div class="accordion-item">
                                             <div id="faq-accordion-content-6" class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en registros</span></button>
+                                                <button class="accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#faq-accordion-collapse-6" aria-expanded="false" aria-controls="faq-accordion-collapse-6"><img id="loading-image" alt="Cargando..." class="h-8 inline-flex mr-20" src="{{ url('/assets/images/loading_small.gif') }}"><i data-lucide="search" class="w-5 h-5 inline-block"></i><span class="inline-block">&nbsp;Buscar en archivos</span></button>
                                             </div>
                                             <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
                                                 <div id="horizontal-form" class="pb-3">
@@ -68,7 +68,7 @@
                                                         </div>
                                                         <div class="form-inline">
 
-                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisito:</label>
+                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisitos:</label>
                                                             <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
                                                                 @foreach($systems as $system)   
                                                                 <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
@@ -76,7 +76,9 @@
                                                             </select>
                                                             <label for="process-selected" class="form-label sm:w-20 text-right">Procesos:</label>
                                                             <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
-                                                                <option value="">No operativo</option>
+                                                                @foreach($processes as $process)   
+                                                                <option value={{ $process->process_id }} selected>{{ $process->name }}</option>
+                                                                @endforeach  
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>
 
@@ -233,6 +235,7 @@
     let $storageData = [];
     let $dateInDefault;
     let $dateOutDefault;
+    let $initCols;
     let $myTable;
     let $route = "{{ route('files.render', ':slug') }}";
 
@@ -241,20 +244,33 @@
         let col = {{ $gridColOrd }};        
         let columns = {!! $gridColExp !!};
         let lang = {!! $gridLanguage !!};
+        let startTime = Date.now();
+                            
 
-        var startTime = Date.now();                       
+        // Página
+        var initPage = ( isoGetStorage('iso_fileReturnPage') === null ) ? 1 : isoGetStorage('iso_fileReturnPage'); 
+        
+        // Orden
         var sCol = isoGetStorage('iso_fileReturnCol');
-        var sDir = isoGetStorage('iso_fileReturnDir');
-        var initPage = ( isoGetStorage('iso_fileReturnPage') === null ) ? 1 : isoGetStorage('iso_fileReturnPage');        
+        var sDir = isoGetStorage('iso_fileReturnDir');        
         // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
-        var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];      
+        var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
 
+        // Columnas
+        $initCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns');           
+        //$initCols = setColumns(columns);
+        console.dir($initCols);
 
+        // Filas
         var initFiles = ( isoGetStorage('iso_fileReturnRows') === null ) ? 10 : isoGetStorage('iso_fileReturnRows');
 
         // Sistema
         var sidsStoraged = isoGetStorage('iso_fileSystems');
-        var sidsArray = setStorageInteger("system-selected", sidsStoraged);         
+        var sidsArray = setStorageInteger("system-selected", sidsStoraged);  
+        
+        // Proceso
+        var pidsStoraged = isoGetStorage('iso_fileProcesses');
+        var pidsArray = setStorageInteger("process-selected", pidsStoraged);          
 
         // Rango In
         var dateIn = isoGetStorage('iso_fileDatein');
@@ -265,7 +281,7 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;         
 
         // DATATABLES
-        param = {sids: [], pids: [], din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: sidsArray, pids: pidsArray, din: $dateInDefault, dout: $dateOutDefault};
         console.table(param);        
 
         $myTable = $('#files-table')
@@ -299,15 +315,18 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: columns 
+                        columns: columns
                     }
                 }
                 ,
                 {
                     extend: 'colvis',
-                    columns: columns
+                    //postfixButtons: ['colvisRestore'],
+                    columns: columns,
+                    hide: [18]
                 }
-            ],            
+            ],
+            //stateSave: true,            
             rowCallback: function( nRow, data, index, displayIndex ) {
                 // Generar columna índice
                 if(nRow){
@@ -438,6 +457,7 @@
 
             var info = $myTable.page.info();            
             var params = {sids: sidsValue, pids: pidsArray, din: $dateInDefault, dout: $dateOutDefault};
+            var visibleColumns = $myTable.columns().visible().toArray();
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
@@ -462,6 +482,7 @@
                 isoSetStorage('iso_fileDatein', $dateInDefault);
                 isoSetStorage('iso_fileDateout', $dateOutDefault); //
                 isoSetStorage('iso_fileReturnRows', info.length);
+                isoSetStorage('iso_fileColumns', visibleColumns); 
             } else {
                 swal({
                     icon: "error",
@@ -477,7 +498,8 @@
             var url = "{{ route('files.admin.edit', ':id') }}";
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/file.error.grid.row_edit') }}");
-            } else {                                
+            } else { 
+                setStorage();                               
                 url = url.replace(':id', rowdata.hash);
                 location.href = url;                
             }
@@ -488,7 +510,6 @@
             var txt = '';
             var rowdata = $myTable.rows('.selected').data()[0];
             var form = $("#form-delete"); 
-            //var url = '/documentos/archivo/admin/'+rowdata.hash;
             var url = "{{ route('files.admin.destroy', ':hash') }}";
             var msg = "{{ trans('document/file.file.delete.text2', ['N' => ':no']) }} \n \n";
             
@@ -511,6 +532,7 @@
                 })
                 .then((willDelete) => {
                     if (willDelete) {
+                        setStorage();
                         form.submit();
                     }
                 });                 
@@ -518,9 +540,11 @@
         }); // btn-delete          
 
         $('#btn-refresh').on("click", function() {
-            $myTable.state.clear();
             $myTable.search('').columns().search('').draw();
             $(".col-filter").val('');
+            $('#btn-edit').addClass('iso-disabled');
+            $('#btn-view').addClass('iso-disabled'); 
+            // Quitar seleccion de fila
         }); // btn-refresh               
 
         // DATERANGE
@@ -554,7 +578,11 @@
             console.log('DIN : '+$dateInDefault);
             $dateOutDefault = picker.endDate.format();
             console.log('DOUT : '+$dateOutDefault);
-        });         
+        });
+        
+        // setTimeout(function() {
+        //     $('#files-table').DataTable().buttons().container().appendTo('#colvis-container');
+        // }, 100)
                         
     }); // document
 
@@ -594,7 +622,30 @@
         isoSetStorage('iso_fileReturnCol', order[0][0]);
         isoSetStorage('iso_fileReturnDir', order[0][1]);
         isoSetStorage('iso_fileReturnRows', info.length);
+
+        var visibleColumns = $myTable.columns().visible().toArray();
+        //alert(visibleColumns);
+
+        isoSetStorage('iso_fileColumns', visibleColumns);  
     } // setStorage
+
+    function setColumns(columns) {
+        var cut = 6;
+        var width = 1122;
+        var viewportWidth = $(window).width(); 
+
+        console.log('Width: '+ viewportWidth ); 
+        var newCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns'); 
+               
+        if( newCols.length > cut ) {
+            if( viewportWidth < width ) {
+                passCols = newCols.splice(0, cut);
+                newCols = passCols;
+            } // if            
+        } // if
+
+        return newCols;
+    } // setColumns
  
 </script>
 
