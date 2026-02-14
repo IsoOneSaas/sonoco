@@ -35,15 +35,16 @@ class FileModelController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
         $departments = $this->fileRepo->getDepartmentsList();
-        $processes = $this->fileRepo->getProcessesList($departments['data']);
-        Log::debug(['PROCESSES' => $processes->toArray()]);
+        //$processes = $this->fileRepo->getProcessesList($departments['data']);
+        //Log::debug(['PROCESSES' => $processes->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
             'systems'       => $systems,
-            'processes'     => $processes,
+            //'processes'     => $processes,
+            'departments'   => $departments['data'],
         ]);        
     } // index Method
 
@@ -54,8 +55,8 @@ class FileModelController extends Controller
     {
         $systems = $this->fileRepo->getSystemsList();
         $departments = $this->fileRepo->getDepartmentsList();
-        $processes = $this->fileRepo->getProcessesList($departments['data']);
-        return $this->fileRepo->render($param, $systems, $processes);
+        //$processes = $this->fileRepo->getProcessesList($departments['data']);
+        return $this->fileRepo->render($param, $systems, $departments['data']);
     }  // show    
 
     /**

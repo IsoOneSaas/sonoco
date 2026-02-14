@@ -2,7 +2,7 @@
 
 interface FileRepositoryInterface 
 {
-    public function render($slug, $systems, $processes);
+    public function render($slug, $systems, $departments);
 
     public function update(array $data);
 

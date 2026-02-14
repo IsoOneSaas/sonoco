@@ -41,7 +41,7 @@ class FileRepository implements FileRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de archivos
      */
-    public function render($slug, $systems, $processes)
+    public function render($slug, $systems, $departments)
     {    
         $data = [];
         $emtpy_array = [];
@@ -66,11 +66,11 @@ class FileRepository implements FileRepositoryInterface
             $sids = $plucked->all();
         } // if   
         
-        // FILTRO POR PROCESOS
-        $pids = $this->setIds('pids', $params);
-        if( !$pids ) {
-            $plucked = $processes->pluck('process_id');
-            $pids = $plucked->all();
+        // FILTRO POR DEPARTAMENTOS
+        $dids = $this->setIds('dids', $params);
+        if( !$dids ) {
+            $plucked = $departments->pluck('department_id');
+            $dids = $plucked->all();
         } // if           
 
         // ARREGLO DE INDICES
@@ -80,9 +80,9 @@ class FileRepository implements FileRepositoryInterface
         $disposals_array = $this->getDisposalArray();       
         
         // FILTRADO DE ARHIVOS
-        $files = FileModel::join('set_processes AS T1', function ($join) use ($pids) {
-                $join->on('T1.process_id', '=', 'document_files.process_id');
-                $join->whereIn('T1.process_id', $pids);
+        $files = FileModel::join('set_departments AS T1', function ($join) use ($dids) {
+                $join->on('T1.department_id', '=', 'document_files.department_id');
+                $join->whereIn('T1.department_id', $dids);
             })
             ->join('set_systems AS T3', function ($join) use ($sids) {
                 $join->on('T3.system_id', '=', 'document_files.system_id');

@@ -74,10 +74,10 @@
                                                                 <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
                                                             </select>
-                                                            <label for="process-selected" class="form-label sm:w-20 text-right">Procesos:</label>
-                                                            <select multiple id="process-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
-                                                                @foreach($processes as $process)   
-                                                                <option value={{ $process->process_id }} selected>{{ $process->name }}</option>
+                                                            <label for="department-selected" class="form-label sm:w-20 text-right">Procesos:</label>
+                                                            <select multiple id="department-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
+                                                                @foreach($departments as $department)   
+                                                                <option value={{ $department->department_id }} selected>{{ $department->name }}</option>
                                                                 @endforeach  
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>
@@ -240,12 +240,10 @@
         // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
         var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
 
-        // Columnas
-        //$initCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns');  // FIXME: no va columns         
-        console.table(columnsDef);
+        // Columnas       
+        //console.table(columnsDef);
         columnsDef = setColumns(columnsDef);
         console.table(columnsDef);
-
 
         // Filas
         var initFiles = ( isoGetStorage('iso_fileReturnRows') === null ) ? 10 : isoGetStorage('iso_fileReturnRows');
@@ -254,9 +252,9 @@
         var sidsStoraged = isoGetStorage('iso_fileSystems');
         var sidsArray = setStorageInteger("system-selected", sidsStoraged);  
         
-        // Proceso
-        var pidsStoraged = isoGetStorage('iso_fileProcesses');
-        var pidsArray = setStorageInteger("process-selected", pidsStoraged);          
+        // Departamento
+        var didsStoraged = isoGetStorage('iso_fileDepartments');
+        var didsArray = setStorageInteger("department-selected", didsStoraged);         
 
         // Rango In
         var dateIn = isoGetStorage('iso_fileDatein');
@@ -267,7 +265,7 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;         
 
         // DATATABLES
-        param = {sids: sidsArray, pids: pidsArray, din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: sidsArray, dids: didsArray, din: $dateInDefault, dout: $dateOutDefault};
         console.table(param);        
 
         $myTable = $('#files-table')
@@ -438,7 +436,7 @@
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });
 
-        $('#system-selected, #process-selected').on('change', function() {
+        $('#system-selected, #department-selected').on('change', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });        
         
@@ -447,17 +445,17 @@
         // Filtras lista
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
-            var pidsArray = $("#process-selected").val();
+            var didsArray = $("#department-selected").val();
 
             var info = $myTable.page.info();            
-            var params = {sids: sidsValue, pids: pidsArray, din: $dateInDefault, dout: $dateOutDefault};
+            var params = {sids: sidsValue, dids: didsArray, din: $dateInDefault, dout: $dateOutDefault};
             var visibleColumns = $myTable.columns().visible().toArray();
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (pidsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (didsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -472,7 +470,7 @@
 
                 // Store            
                 isoSetStorage('iso_fileSystems', sidsValue);
-                isoSetStorage('iso_fileProcesses', pidsArray);
+                isoSetStorage('iso_fileDepartments', didsArray);
                 isoSetStorage('iso_fileDatein', $dateInDefault);
                 isoSetStorage('iso_fileDateout', $dateOutDefault); //
                 isoSetStorage('iso_fileReturnRows', info.length);
@@ -618,29 +616,23 @@
         isoSetStorage('iso_fileReturnRows', info.length);
 
         var visibleColumns = $myTable.columns().visible().toArray();
-        //alert(visibleColumns);
-
         isoSetStorage('iso_fileColumns', visibleColumns);  
     } // setStorage
-
-    function isNarrow() {
-        var width = 1122;
-        var viewportWidth = $(window).width();
-        console.log('Width: '+ viewportWidth );  
-        return ( viewportWidth < width ) ? true : false;
-    }
 
     function setColumns(columns) {
         var cut = 5;
         var n = 0;
-        var isnarrow = isNarrow();
+        var width = 1122;
+        var viewportWidth = $(window).width();        
+        var isnarrow = ( viewportWidth < width ) ? true : false;
         $initCols = isoGetStorage('iso_fileColumns');
+
         if( $initCols === null ) {
             // Valido ancho
             if( isnarrow ) {
                 $.each(columns, function(i, column) {
                     if( column.searchable === true || column.filterable === true  ) {
-                        console.log('COLUMN: '+column.title);  // typeof item.visible !== 'undefined' && item.visible === false
+                        //console.log('COLUMN: '+column.title);  // typeof item.visible !== 'undefined' && item.visible === false
                         if( (column.visible === true) && (n > cut) ) {
                             column.visible = false;                            
                         } // if
@@ -651,11 +643,11 @@
         } else {
             var visible = $initCols.split(',');            
             $.each(columns, function(i, column) {
-                console.log('Definition: '+column.visible+' cookie: '+visible[i]);
+                //console.log('Definition: '+column.visible+' cookie: '+visible[i]);
                 column.visible = (visible[i] == 'false') ? false : true;
                 if( isnarrow ) {
                     if( column.searchable || column.filterable  ) {
-                        console.log('COLUMN: '+column.title);
+                        //console.log('COLUMN: '+column.title);
                         if( (column.visible != 'false') && (n > cut) ) {
                             column.visible = false;                            
                         } // if
