@@ -99,13 +99,8 @@
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>ID</th>
-                                                <th>XID</th>
-                                                <th>PID</th>
-                                                <th>LID</th>
-                                                <th>DID</th>
-                                                <th>JID</th>
-                                                <th>TID</th>
-                                                <th>SID</th>
+ 
+
                                                 <th>Proceso</th>
                                                 <th>Código</th>
                                                 <th>Tema</th>
@@ -128,13 +123,8 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th class="th-filter">ID</th>
-                                                <th class="th-filter">XID</th>
-                                                <th class="th-filter">PID</th>
-                                                <th class="th-filter">LID</th>
-                                                <th class="th-filter">DID</th>
-                                                <th class="th-filter">JID</th>
-                                                <th class="th-filter">TID</th>
-                                                <th class="th-filter">SID</th>
+                                                
+
                                                 <th class="th-filter">Proceso</th>
                                                 <th class="th-filter">Código</th>
                                                 <th class="th-filter">Tema</th>
@@ -159,13 +149,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>ID</th>
-                                                <th>XID</th>
-                                                <th>PID</th>
-                                                <th>LID</th>
-                                                <th>DID</th>
-                                                <th>JID</th>
-                                                <th>TID</th>
-                                                <th>SID</th>
+
                                                 <th>Proceso</th>
                                                 <th>Código</th>
                                                 <th>Tema</th>
@@ -257,9 +241,11 @@
         var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
 
         // Columnas
-        $initCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns');           
-        //$initCols = setColumns(columns);
-        console.dir($initCols);
+        //$initCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns');  // FIXME: no va columns         
+        console.table(columnsDef);
+        columnsDef = setColumns(columnsDef);
+        console.table(columnsDef);
+
 
         // Filas
         var initFiles = ( isoGetStorage('iso_fileReturnRows') === null ) ? 10 : isoGetStorage('iso_fileReturnRows');
@@ -382,7 +368,13 @@
         // Filtros : generación
         $('#files-table thead tr:eq(1) th').each( function (i) {
             var tag;
-            var item = columnsDef[i+8];
+            //var item = columnsDef[i-1]; // 8
+            var item = columnsDef[i+1];
+            //if( item.searchable === true || item.filterable === true  ) {
+            console.dir(item);
+
+            if( typeof item !== 'undefined' ) {
+
             if( typeof item.visible !== 'undefined' && item.visible === false ) {
                 $(this).html('');
             } else {
@@ -396,7 +388,9 @@
                         $(this).html('');
                     }
                 }
-            }          
+            }
+}
+         
         });
         
         // UTILIDADES        
@@ -629,23 +623,49 @@
         isoSetStorage('iso_fileColumns', visibleColumns);  
     } // setStorage
 
-    function setColumns(columns) {
-        var cut = 6;
+    function isNarrow() {
         var width = 1122;
-        var viewportWidth = $(window).width(); 
+        var viewportWidth = $(window).width();
+        console.log('Width: '+ viewportWidth );  
+        return ( viewportWidth < width ) ? true : false;
+    }
 
-        console.log('Width: '+ viewportWidth ); 
-        var newCols = ( isoGetStorage('iso_fileColumns') === null ) ? columns : isoGetStorage('iso_fileColumns'); 
-               
-        if( newCols.length > cut ) {
-            if( viewportWidth < width ) {
-                passCols = newCols.splice(0, cut);
-                newCols = passCols;
-            } // if            
-        } // if
-
-        return newCols;
-    } // setColumns
+    function setColumns(columns) {
+        var cut = 5;
+        var n = 0;
+        var isnarrow = isNarrow();
+        $initCols = isoGetStorage('iso_fileColumns');
+        if( $initCols === null ) {
+            // Valido ancho
+            if( isnarrow ) {
+                $.each(columns, function(i, column) {
+                    if( column.searchable === true || column.filterable === true  ) {
+                        console.log('COLUMN: '+column.title);  // typeof item.visible !== 'undefined' && item.visible === false
+                        if( (column.visible === true) && (n > cut) ) {
+                            column.visible = false;                            
+                        } // if
+                        n = n + 1;
+                    } // if
+                }); // each
+            } // if                            
+        } else {
+            var visible = $initCols.split(',');            
+            $.each(columns, function(i, column) {
+                console.log('Definition: '+column.visible+' cookie: '+visible[i]);
+                column.visible = (visible[i] == 'false') ? false : true;
+                if( isnarrow ) {
+                    if( column.searchable || column.filterable  ) {
+                        console.log('COLUMN: '+column.title);
+                        if( (column.visible != 'false') && (n > cut) ) {
+                            column.visible = false;                            
+                        } // if
+                        n = n + 1;
+                    } // if
+                } // if
+            }); // each
+        }
+        return columns;
+    } //setColumns
  
 </script>
 
