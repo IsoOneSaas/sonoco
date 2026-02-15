@@ -65,13 +65,20 @@ class FileRepository implements FileRepositoryInterface
             $plucked = $systems->pluck('system_id');
             $sids = $plucked->all();
         } // if   
-        
+              
         // FILTRO POR DEPARTAMENTOS
         $dids = $this->setIds('dids', $params);
         if( !$dids ) {
             $plucked = $departments->pluck('department_id');
             $dids = $plucked->all();
-        } // if           
+        } // if          
+
+        // FILTRO POR TEMAS
+        $tids = $this->setIds('tids', $params);
+        if( !$tids ) {
+            $plucked = FileTopicModel::whereIn('department_id', $dids)->pluck('topic_id');
+            $tids = $plucked->all();
+        } // if          
 
         // ARREGLO DE INDICES
         $indexes_array = $this->getIndexArray();        
@@ -80,18 +87,16 @@ class FileRepository implements FileRepositoryInterface
         $disposals_array = $this->getDisposalArray();       
         
         // FILTRADO DE ARHIVOS
-        $files = FileModel::join('set_departments AS T1', function ($join) use ($dids) {
-                $join->on('T1.department_id', '=', 'document_files.department_id');
-                $join->whereIn('T1.department_id', $dids);
-            })
-            ->join('set_systems AS T3', function ($join) use ($sids) {
-                $join->on('T3.system_id', '=', 'document_files.system_id');
-                $join->whereIn('T3.system_id', $sids);
+        $files = FileModel::join('set_processes AS T1', function ($join) {
+                $join->on('T1.process_id', '=', 'document_files.process_id');
             })
             ->leftjoin('set_jobs AS T2', function ($join) {
                 $join->on('T2.job_id', '=', 'document_files.job_id');
             })
             ->whereBetween('document_files.updated_at', [$rangeIn, $rangeOut])
+            ->whereIn('document_files.system_id', $sids)
+            ->whereIn('document_files.department_id', $dids)
+            ->whereIn('document_files.topic_id', $tids)
             ->get([
                 'document_files.file_id', 'document_files.system_id', 'document_files.process_id', 'document_files.location_id', 'document_files.department_id', 'document_files.topic_id', 'document_files.subtopic_id', 'document_files.job_id',
                 'document_files.name as name', 'document_files.code', 

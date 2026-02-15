@@ -68,13 +68,13 @@
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisitos:</label>
-                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
+                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Requisito">
                                                                 @foreach($systems as $system)   
                                                                 <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
                                                                 @endforeach                                                                                                        
                                                             </select>
-                                                            <label for="department-selected" class="form-label sm:w-20 text-right">Procesos:</label>
-                                                            <select multiple id="department-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso">
+                                                            <label for="department-selected" class="form-label sm:w-20 text-right mx-2">Departamentos:</label>
+                                                            <select multiple id="department-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Departamento">
                                                                 @foreach($departments as $department)   
                                                                 <option value={{ $department->department_id }} selected>{{ $department->name }}</option>
                                                                 @endforeach  
@@ -82,10 +82,10 @@
                                                         </div>
                                                         <div class="form-inline">
                                                             <label for="topic-selected" class="form-label sm:w-20 text-right pt-3">Temas:</label>
-                                                            <select multiple id="topic-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">                                                                                                      
+                                                            <select multiple id="topic-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Tema">                                                                                                      
                                                             </select>
                                                             <label for="subtopic-selected" class="form-label sm:w-20 text-right">Subtemas:</label>
-                                                            <select multiple id="subtopic-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso"> 
+                                                            <select multiple id="subtopic-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Subtema"> 
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>                                                        
 
@@ -245,7 +245,11 @@
         
         // Departamento
         var didsStoraged = isoGetStorage('iso_fileDepartments');
-        var didsArray = setStorageInteger("department-selected", didsStoraged);         
+        var didsArray = setStorageInteger("department-selected", didsStoraged);      
+        
+        // Temas
+        var tidsStoraged = isoGetStorage('iso_fileTopics');  
+        
 
         // Rango In
         var dateIn = isoGetStorage('iso_fileDatein');
@@ -256,7 +260,7 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;         
 
         // DATATABLES
-        param = {sids: sidsArray, dids: didsArray, din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: sidsArray, dids: didsArray, tids: [], din: $dateInDefault, dout: $dateOutDefault};
         console.table(param);        
 
         $myTable = $('#files-table')
@@ -386,6 +390,10 @@
             console.dir(didsArray);
             if( didsArray.length > 0 ) {
                 setTopicAjax(didsArray);
+            } else {
+                //console.log('Clear #topic-selected');
+                $("#topic-selected").val('').multipleSelect('destroy').html('');
+                //$("#topic-selected").html('');
             } // if
         });
         
@@ -445,16 +453,17 @@
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
             var didsArray = $("#department-selected").val();
+            var tidsArray = $("#topic-selected").val();
 
             var info = $myTable.page.info();            
-            var params = {sids: sidsValue, dids: didsArray, din: $dateInDefault, dout: $dateOutDefault};
+            var params = {sids: sidsValue, dids: didsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault};
             var visibleColumns = $myTable.columns().visible().toArray();
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (didsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (didsArray.length > 0) && (tidsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -470,6 +479,7 @@
                 // Store            
                 isoSetStorage('iso_fileSystems', sidsValue);
                 isoSetStorage('iso_fileDepartments', didsArray);
+                isoSetStorage('iso_fileTopics', tidsArray);
                 isoSetStorage('iso_fileDatein', $dateInDefault);
                 isoSetStorage('iso_fileDateout', $dateOutDefault); //
                 isoSetStorage('iso_fileReturnRows', info.length);
@@ -577,6 +587,10 @@
                         
     }); // document
 
+    $(document).ready(function() {
+        $("#department-selected").trigger('change');
+    });    
+
     function setStorageInteger(tag, storaged) {
         var output = '';
         //console.log('TAG: '+ tag + ' | INPUT: ' + storaged);
@@ -671,26 +685,21 @@
             success: function(data) {
                 console.dir(data);
                 if( data.success ) {
-                    // Valor seleccionado
-                    var tid = '';
                     // Generar nuevo select de temas                
-                    generateTopicsSelect(tid, data.topics);
-                    
-                    // Generar nuevo select de subtemas
-                    //generateSubtopicsSelect(0, 0, null);
+                    generateTopicsSelect(data.topics);
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message);
                     // Blanquear select 
-                    $("#topic-selected").html('');
+                    $("#topic-selected").multipleSelect('destroy').html('');
                 }
             } // success
         }); // ajax         
     } // setTopicAjax Fx
 
-    function generateTopicsSelect(id, topics) {
+    function generateTopicsSelect(topics) {
         var previous = '';
-        //var output = '<option value="">{{ trans("document/record.form.topic.default") }}</option>';
         var output = '';
+        $("#topic-selected").multipleSelect('destroy').html('');
         if( topics.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-exist") }}'); 
         } else {
@@ -702,14 +711,13 @@
                     output += '<optgroup id="dpt'+topic.department_id+'" label="'+topic.department+'">';
                     previous = topic.department;
                 } // if
-                output += '<option value="'+topic.topic_id+'"';
-                //output += ( topic.topic_id == id ) ? ' selected' : '';
+                output += '<option style="padding-left:1em" value="'+topic.topic_id+'"';
                 output += ' selected';
                 output += '>'+topic.name+'</option>';            
             });
-        }
-        $("#topic-selected").html(output);
-        $('#topic-selected').multiple('refresh'); 
+            $("#topic-selected").html(output).multipleSelect();
+            //$.fn.multipleSelect.defaults.filter = true;
+        }        
     } // generateTopicsSelect    
  
 </script>
