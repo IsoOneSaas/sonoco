@@ -245,7 +245,7 @@ class FileModelController extends Controller
      */      
     public function getTopics($id)
     {
-        $topics = $this->fileRepo->getTopicsList($id);
+        $topics = $this->fileRepo->getTopicsList([$id]);
         //Log::debug(['TOPICS' => $topics->toArray()]);
         if( $topics->count() == 0 ) {
             $response =  ['success' => false,  'message' => trans('document/file.error.topic.no-exist')];  
@@ -254,6 +254,25 @@ class FileModelController extends Controller
         }
         return response()->json($response); 
     } // getTopics Method
+
+    /**
+     * Obtiene listado de temas para los departamentos dados
+     * @param  integer $id Identificador del departamento
+     * @return json Listado
+     */      
+    public function setTopicsSelect(Request $request)
+    {
+        $input = $request->input();
+        Log::debug(['TOPICS' => $input['dids']]);
+        $topics = $this->fileRepo->getTopicsList($input['dids']);
+        Log::debug(['TOPICS' => $topics->toArray()]);
+        if( $topics->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.topic.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'topics' => $topics, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // setTopicsSelect Method    
 
     /**
      * Obtiene listado de cargos para el departamento dado

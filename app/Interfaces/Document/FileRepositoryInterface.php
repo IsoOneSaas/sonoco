@@ -31,7 +31,7 @@ interface FileRepositoryInterface
     public function existsSubtopicName($id, $txt);
     public function storeSubtopicName($id, $txt);
 
-    public function getTopicsList($id);
+    public function getTopicsList(array $ids);
     public function getSubtopicsList($id);
 
     public function storeIndexName($text);

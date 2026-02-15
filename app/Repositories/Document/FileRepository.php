@@ -472,12 +472,12 @@ class FileRepository implements FileRepositoryInterface
 
     /**
      * Obtiene listado de temas para el departamento dado
-     * @param  integer $id Identificador del departamento
+     * @param  array $ids Identificadores de los departamentos
      * @return json Listado
      */       
-    public function getTopicsList($id)
+    public function getTopicsList(array $ids)
     {
-        return $this->file->getTopicsSelect([$id]);  
+        return $this->file->getTopicsSelect($ids);  
     } // getTopicsList Service      
     
     /**

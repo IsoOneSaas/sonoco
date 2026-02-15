@@ -1277,7 +1277,7 @@
         var previous = '';
         var output = '<option value="">{{ trans("document/record.form.topic.default") }}</option>';
         if( topics.length == 0 ) {
-            setSuccessNotification('error', 'Oops!', '{{ trans("document/error.topic.no-exist") }}'); 
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-exist") }}'); 
             $("#topic-name").focus();
         } else {
             $.each(topics, function(i, topic) {

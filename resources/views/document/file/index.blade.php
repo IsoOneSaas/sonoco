@@ -67,7 +67,6 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-inline">
-
                                                             <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisitos:</label>
                                                             <select multiple id="system-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">
                                                                 @foreach($systems as $system)   
@@ -81,6 +80,14 @@
                                                                 @endforeach  
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>
+                                                        <div class="form-inline">
+                                                            <label for="topic-selected" class="form-label sm:w-20 text-right pt-3">Temas:</label>
+                                                            <select multiple id="topic-selected" class="form-control mt-2 border-slate-500" aria-label="Requisito">                                                                                                      
+                                                            </select>
+                                                            <label for="subtopic-selected" class="form-label sm:w-20 text-right">Subtemas:</label>
+                                                            <select multiple id="subtopic-selected" class="form-control mt-2 border-slate-500" aria-label="Proceso"> 
+                                                            </select>                                                                                                                                                                                                                                                                         
+                                                        </div>                                                        
 
                                                         <div class="flex mt-3 justify-center">
                                                             <button id="btn-filter" class="btn btn-primary shadow-md"><i data-lucide="filter" class="w-4 h-4"></i>&nbsp;Buscar&nbsp;&nbsp;</button> 
@@ -99,8 +106,6 @@
                                             <tr>
                                                 <th class="whitespace-nowrap">#</th>
                                                 <th>ID</th>
- 
-
                                                 <th>Proceso</th>
                                                 <th>Código</th>
                                                 <th>Tema</th>
@@ -116,15 +121,10 @@
                                                 <th>Disposición Final</th>
                                                 <th>H</th>
                                                 <th>N</th>
-<!--                                                 <th>Medio Soporte</th>
-                                                <th>C1</th>
-                                                <th>C2</th> -->
                                             </tr>
                                             <tr>
                                                 <th>#</th>
-                                                <th class="th-filter">ID</th>
-                                                
-
+                                                <th class="th-filter">ID</th>                                                
                                                 <th class="th-filter">Proceso</th>
                                                 <th class="th-filter">Código</th>
                                                 <th class="th-filter">Tema</th>
@@ -140,16 +140,12 @@
                                                 <th class="th-filter">Disposición Final</th>
                                                 <th class="th-filter">H</th>
                                                 <th class="th-filter">N</th>
-<!--                                                 <th class="th-filter">Medio Soporte</th>
-                                                <th class="th-filter">C1</th>
-                                                <th class="th-filter">C2</th> -->
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
                                             <tr>
                                                 <th>#</th>
                                                 <th>ID</th>
-
                                                 <th>Proceso</th>
                                                 <th>Código</th>
                                                 <th>Tema</th>
@@ -165,21 +161,16 @@
                                                 <th>Disposición Final</th>
                                                 <th>H</th>
                                                 <th>N</th>                                                
-<!--                                                 <th>Medio Soporte</th>
-                                                <th>C1</th>
-                                                <th>C2</th> -->
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
                                     <!-- END: DataTables -->
 
                                 </div>
-
                             </div>
                         </div>
                     </div>
                     <!-- END: HTML Table Data -->
-
                 </div>
                 <!-- END: Content -->
 @push('meta')                
@@ -363,33 +354,41 @@
             language: lang                                   
         }); // datatables
 
-        // Filtros : generación
+        // FILTROS
+
+        // Filtros de Columna
         $('#files-table thead tr:eq(1) th').each( function (i) {
             var tag;
-            //var item = columnsDef[i-1]; // 8
             var item = columnsDef[i+1];
-            //if( item.searchable === true || item.filterable === true  ) {
-            console.dir(item);
 
             if( typeof item !== 'undefined' ) {
-
-            if( typeof item.visible !== 'undefined' && item.visible === false ) {
-                $(this).html('');
-            } else {
-                if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
-                    tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
-                    $(this).html(tag);
+                if( typeof item.visible !== 'undefined' && item.visible === false ) {
+                    $(this).html('');
                 } else {
-                    if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
-                        $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                    if( typeof item.filterable !== 'undefined' && item.filterable === true ) {
+                        tag = '<select id="filter-' + item.data + '" class="col-filter select-filter"></select>';
+                        $(this).html(tag);
                     } else {
-                        $(this).html('');
-                    }
-                }
-            }
-}
-         
+                        if( typeof item.searchable !== 'undefined' && item.searchable === true ) {
+                            $(this).html('<input id="filter-' + item.data + '" type="text" class="col-filter input-filter deletable" placeholder="Buscar ' + item.title + '" />');
+                        } else {
+                            $(this).html('');
+                        } // if else
+                    } // if else
+                } // if else
+            } // if        
+        }); // #files-table
+
+        $("#department-selected").on("change", function(e) {
+            e.preventDefault();
+            var didsArray = $("#department-selected").val();
+            console.log(':: Selected DIDS ::');
+            console.dir(didsArray);
+            if( didsArray.length > 0 ) {
+                setTopicAjax(didsArray);
+            } // if
         });
+        
         
         // UTILIDADES        
         $("#btn-download").on("click", function() {
@@ -658,6 +657,60 @@
         }
         return columns;
     } //setColumns
+
+    function setTopicAjax(dids) {        
+        var route = "{{ route('files.select.topics') }}";        
+        console.log('Running setTopicAjax with route: '+route);
+        //console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'dids': dids},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                console.dir(data);
+                if( data.success ) {
+                    // Valor seleccionado
+                    var tid = '';
+                    // Generar nuevo select de temas                
+                    generateTopicsSelect(tid, data.topics);
+                    
+                    // Generar nuevo select de subtemas
+                    //generateSubtopicsSelect(0, 0, null);
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message);
+                    // Blanquear select 
+                    $("#topic-selected").html('');
+                }
+            } // success
+        }); // ajax         
+    } // setTopicAjax Fx
+
+    function generateTopicsSelect(id, topics) {
+        var previous = '';
+        //var output = '<option value="">{{ trans("document/record.form.topic.default") }}</option>';
+        var output = '';
+        if( topics.length == 0 ) {
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.topic.no-exist") }}'); 
+        } else {
+            $.each(topics, function(i, topic) {
+                if( topic.department != previous ) {
+                    if(previous != '') {
+                        output += '</optgroup>';
+                    } // if
+                    output += '<optgroup id="dpt'+topic.department_id+'" label="'+topic.department+'">';
+                    previous = topic.department;
+                } // if
+                output += '<option value="'+topic.topic_id+'"';
+                //output += ( topic.topic_id == id ) ? ' selected' : '';
+                output += ' selected';
+                output += '>'+topic.name+'</option>';            
+            });
+        }
+        $("#topic-selected").html(output);
+        $('#topic-selected').multiple('refresh'); 
+    } // generateTopicsSelect    
  
 </script>
 
