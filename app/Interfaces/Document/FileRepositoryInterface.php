@@ -16,6 +16,7 @@ interface FileRepositoryInterface
     public function getLocationsList();
 
     public function getDepartmentsList($id = null);
+    public function getDepartmentsListFull(array $lids);
 
     public function getProcessesList($departments);
 
@@ -32,7 +33,7 @@ interface FileRepositoryInterface
     public function storeSubtopicName($id, $txt);
 
     public function getTopicsList(array $ids);
-    public function getSubtopicsList($id);
+    public function getSubtopicsList(array $ids);
 
     public function storeIndexName($text);
 

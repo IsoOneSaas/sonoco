@@ -212,7 +212,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group(['prefix' => 'archivo', 'as' => 'files.'], function () {
             Route::resource('admin', \App\Http\Controllers\Document\FileModelController::class);
             Route::get('listado/render/{slug}', [\App\Http\Controllers\Document\FileModelController::class, 'render'])->name('render'); // index.render
+            Route::post('listado/filtro/departamentos', [\App\Http\Controllers\Document\FileModelController::class, 'setDepartmentsSelect'])->name('select.departments');
             Route::post('listado/filtro/temas', [\App\Http\Controllers\Document\FileModelController::class, 'setTopicsSelect'])->name('select.topics');
+            Route::post('listado/filtro/subtemas', [\App\Http\Controllers\Document\FileModelController::class, 'setSubtopicsSelect'])->name('select.subtopics');
 
             Route::get('listar/departamentos/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getDepartments'])->name('list.departments'); 
             Route::get('listar/temas/{id}', [\App\Http\Controllers\Document\FileModelController::class, 'getTopics'])->name('list.topics'); 

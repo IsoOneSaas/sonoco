@@ -60,24 +60,27 @@
                                             <div id="faq-accordion-collapse-6" class="accordion-collapse collapse show" aria-labelledby="faq-accordion-content-6" data-tw-parent="#faq-accordion-2">
                                                 <div id="horizontal-form" class="pb-3">
                                                     <div class="preview ml-auto w-full">
-                                                        <div class="grid grid-cols-3 gap-2">
-                                                            <div class="form-inline">
+
+                                                        <div class="form-inline">
                                                                 <label for="date-selected" class="form-label sm:w-20 text-right">Rango:</label>
                                                                 <input id="date-selected" type="text" class="form-control w-36 border-slate-500 iso-input" aria-label="Rango">
-                                                            </div>
+                                                                <label for="system-selected" class="form-label sm:w-20 text-right">Requisitos:</label>
+                                                                <select multiple id="system-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Requisito">
+                                                                    @foreach($systems as $system)   
+                                                                    <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
+                                                                    @endforeach                                                                                                        
+                                                                </select>                                                                
                                                         </div>
                                                         <div class="form-inline">
-                                                            <label for="system-selected" class="form-label sm:w-20 text-right pt-3">Requisitos:</label>
-                                                            <select multiple id="system-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Requisito">
-                                                                @foreach($systems as $system)   
-                                                                <option value={{ $system->system_id }} selected>{{ $system->name }}</option>
-                                                                @endforeach                                                                                                        
+                                                            <label for="location-selected" class="form-label sm:w-20 text-right pt-3">Localizaciones:</label>
+                                                            <select multiple id="location-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Localizacion">
+                                                                @foreach($locations as $location)   
+                                                                <option value={{ $location->location_id }} selected>{{ $location->name }}</option>
+                                                                @endforeach                                                                                                      
                                                             </select>
-                                                            <label for="department-selected" class="form-label sm:w-20 text-right mx-2">Departamentos:</label>
-                                                            <select multiple id="department-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Departamento">
-                                                                @foreach($departments as $department)   
-                                                                <option value={{ $department->department_id }} selected>{{ $department->name }}</option>
-                                                                @endforeach  
+                                                            <label for="department-selected" class="form-label sm:w-20 text-right ml-2">Departamentos:</label>
+                                                            <select multiple id="department-selected" class="form-control mt-2 border-slate-500 ml-2" size="1" aria-label="Departamento">
+ 
                                                             </select>                                                                                                                                                                                                                                                                         
                                                         </div>
                                                         <div class="form-inline">
@@ -185,7 +188,16 @@
     <link rel="stylesheet" href="{{ url('assets/js/daterangepicker-master/daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
-    
+    <style>
+        .iso-input {
+            padding: 0.15em 0.6em; 
+            font-size: 0.95em; 
+            border-radius: 5px;                
+        }
+        .input-filter {
+            width: 100%
+        }     
+    </style>
 @endpush
 
 @push('scripts-bottom')
@@ -242,13 +254,17 @@
         // Sistema
         var sidsStoraged = isoGetStorage('iso_fileSystems');
         var sidsArray = setStorageInteger("system-selected", sidsStoraged);  
+
+        // Localizaciones
+        var lidsStoraged = isoGetStorage('iso_fileLocations');
+        var lidsArray = setStorageInteger("location-selected", lidsStoraged);          
         
         // Departamento
         var didsStoraged = isoGetStorage('iso_fileDepartments');
         var didsArray = setStorageInteger("department-selected", didsStoraged);      
         
         // Temas
-        var tidsStoraged = isoGetStorage('iso_fileTopics');  
+        //var tidsStoraged = isoGetStorage('iso_fileTopics');  
         
 
         // Rango In
@@ -260,7 +276,7 @@
         $dateOutDefault = ( dateOut === null ) ? moment() : dateOut;         
 
         // DATATABLES
-        param = {sids: sidsArray, dids: didsArray, tids: [], din: $dateInDefault, dout: $dateOutDefault};
+        param = {sids: sidsArray, lids: lidsArray, dids: [], tids: [], xids: [], din: $dateInDefault, dout: $dateOutDefault};
         console.table(param);        
 
         $myTable = $('#files-table')
@@ -383,6 +399,21 @@
             } // if        
         }); // #files-table
 
+        // Filtro de departamentos
+        $("#location-selected").on("change", function(e) {
+            e.preventDefault();
+            var lidsArray = $("#location-selected").val();
+            console.log(':: Selected    LIDS ::');
+            console.dir(lidsArray);
+            if( lidsArray.length > 0 ) {
+                setDepartmentAjax(lidsArray);
+            } else {
+                console.log('Clear #department-selected');
+                $("#department-selected").val('').multipleSelect('destroy').html('');
+            } // if
+        });        
+
+        // Filtro de temas
         $("#department-selected").on("change", function(e) {
             e.preventDefault();
             var didsArray = $("#department-selected").val();
@@ -391,11 +422,24 @@
             if( didsArray.length > 0 ) {
                 setTopicAjax(didsArray);
             } else {
-                //console.log('Clear #topic-selected');
+                console.log('Clear #topic-selected');
                 $("#topic-selected").val('').multipleSelect('destroy').html('');
-                //$("#topic-selected").html('');
             } // if
         });
+
+        // Filtro de subtemas
+        $("#topic-selected").on("change", function(e) {
+            e.preventDefault();
+            var tidsArray = $("#topic-selected").val();
+            console.log(':: Selected TIDS ::');
+            console.dir(tidsArray);
+            if( tidsArray.length > 0 ) {
+                setSubtopicAjax(tidsArray);
+            } else {
+                console.log('Clear #subtopic-selected');
+                $("#subtopic-selected").val('').multipleSelect('destroy').html('');
+            } // if
+        });        
         
         
         // UTILIDADES        
@@ -454,16 +498,17 @@
             var sidsValue = $("#system-selected").val();
             var didsArray = $("#department-selected").val();
             var tidsArray = $("#topic-selected").val();
+            var xidsArray = $("#subtopic-selected").val();
 
-            var info = $myTable.page.info();            
-            var params = {sids: sidsValue, dids: didsArray, tids: tidsArray, din: $dateInDefault, dout: $dateOutDefault};
             var visibleColumns = $myTable.columns().visible().toArray();
+            var info = $myTable.page.info();            
+            var params = {sids: sidsValue, dids: didsArray, tids: tidsArray, xids: xidsArray, din: $dateInDefault, dout: $dateOutDefault};            
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (didsArray.length > 0) && (tidsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (didsArray.length > 0) && (tidsArray.length > 0) && (xidsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -479,7 +524,8 @@
                 // Store            
                 isoSetStorage('iso_fileSystems', sidsValue);
                 isoSetStorage('iso_fileDepartments', didsArray);
-                isoSetStorage('iso_fileTopics', tidsArray);
+                isoSetStorage('iso_fileTopics', tidsArray);         // TODO: Definir si va junto a subtopics
+                isoSetStorage('iso_fileSubtopics', xidsArray);
                 isoSetStorage('iso_fileDatein', $dateInDefault);
                 isoSetStorage('iso_fileDateout', $dateOutDefault); //
                 isoSetStorage('iso_fileReturnRows', info.length);
@@ -588,7 +634,7 @@
     }); // document
 
     $(document).ready(function() {
-        $("#department-selected").trigger('change');
+        $("#location-selected").trigger('change');        
     });    
 
     function setStorageInteger(tag, storaged) {
@@ -672,6 +718,56 @@
         return columns;
     } //setColumns
 
+    function setDepartmentAjax(lids) {        
+        var route = "{{ route('files.select.departments') }}";        
+        console.log('Running setDepartmentAjax with route: '+route);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {lids: lids},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                //console.dir(data);
+                if( data.success ) {
+                    // Generar nuevo select de temas                
+                    generateDepartmentsSelect(data.departments);
+                    // 
+                    $("#department-selected").trigger('change');
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message);
+                    // Blanquear select 
+                    $("#department-selected").multipleSelect('destroy').html('');
+                }
+            } // success
+        }); // ajax         
+    } // setDepartmentAjax Fx
+
+    function generateDepartmentsSelect(departments) {
+        var previous = '';
+        var output = '';
+        $("#department-selected").multipleSelect('destroy').html('');
+        if( departments.length == 0 ) {
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.department.no-exist") }}'); 
+        } else {
+            $.each(departments, function(i, department) {
+                if( department.location != previous ) {
+                    if(previous != '') {
+                        output += '</optgroup>';
+                    } // if
+                    output += '<optgroup id="dpd'+department.location_id+'" label="'+department.location+'">';
+                    previous = department.location;
+                } // if
+                output += '<option value="'+department.department_id+'"';
+                output += ' selected';
+                output += '>'+department.name+'</option>';            
+            });
+            output += '</optgroup>';
+            $("#department-selected").html(output).multipleSelect();
+        }        
+    } // generateDepartmentsSelect  
+
+
     function setTopicAjax(dids) {        
         var route = "{{ route('files.select.topics') }}";        
         console.log('Running setTopicAjax with route: '+route);
@@ -679,14 +775,16 @@
         $.ajax({
             url: route,
             type: 'POST',
-            data: {'dids': dids},
+            data: {dids: dids},
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
             success: function(data) {
-                console.dir(data);
+                //console.dir(data);
                 if( data.success ) {
                     // Generar nuevo select de temas                
                     generateTopicsSelect(data.topics);
+                    // 
+                    $("#topic-selected").trigger('change');
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message);
                     // Blanquear select 
@@ -711,14 +809,65 @@
                     output += '<optgroup id="dpt'+topic.department_id+'" label="'+topic.department+'">';
                     previous = topic.department;
                 } // if
-                output += '<option style="padding-left:1em" value="'+topic.topic_id+'"';
+                output += '<option value="'+topic.topic_id+'"';
                 output += ' selected';
                 output += '>'+topic.name+'</option>';            
             });
+            output += '</optgroup>';
             $("#topic-selected").html(output).multipleSelect();
             //$.fn.multipleSelect.defaults.filter = true;
         }        
-    } // generateTopicsSelect    
+    } // generateTopicsSelect   
+    
+    function setSubtopicAjax(tids) {        
+        var route = "{{ route('files.select.subtopics') }}";        
+        console.log('Running setSubtopicAjax with route: '+route);
+        //console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
+        $.ajax({
+            url: route,
+            type: 'POST',
+            data: {'tids': tids},
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
+            success: function(data) {
+                //console.dir(data);
+                if( data.success ) {
+                    // Generar nuevo select de temas                
+                    generateSubtopicsSelect(data.subtopics);
+                    // 
+                    
+                } else {
+                    setSuccessNotification('error', 'Oops!', data.message);
+                    // Blanquear select 
+                    $("#subtopic-selected").multipleSelect('destroy').html('');
+                }
+            } // success
+        }); // ajax         
+    } // setSubtopicAjax Fx
+
+    function generateSubtopicsSelect(subtopics) {
+        var previous = '';
+        var output = '';
+        $("#subtopic-selected").multipleSelect('destroy').html('');
+        if( subtopics.length == 0 ) {
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.subtopic.no-exist") }}'); 
+        } else {
+            $.each(subtopics, function(i, subtopic) {
+                if( subtopic.topic != previous ) {
+                    if(previous != '') {
+                        output += '</optgroup>';
+                    } // if
+                    output += '<optgroup id="top'+subtopic.topic_id+'" label="'+subtopic.topic+'">';
+                    previous = subtopic.topic;
+                } // if
+                output += '<option value="'+subtopic.subtopic_id+'"';
+                output += ' selected';
+                output += '>'+subtopic.name+'</option>';            
+            });
+            output += '</optgroup>';
+            $("#subtopic-selected").html(output).multipleSelect();
+        }        
+    } // generateSubtopicsSelect       
  
 </script>
 

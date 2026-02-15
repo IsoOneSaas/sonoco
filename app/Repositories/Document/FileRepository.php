@@ -49,7 +49,7 @@ class FileRepository implements FileRepositoryInterface
         $supports_array = config("settings.record_support");
         $dto = Carbon::now();
         $params = json_decode($slug, true);   
-        Log::debug(['PARAMS' => $params]);
+        Log::debug(['PARAMS 2' => $params]);
 
         $pids = [];
 
@@ -78,7 +78,16 @@ class FileRepository implements FileRepositoryInterface
         if( !$tids ) {
             $plucked = FileTopicModel::whereIn('department_id', $dids)->pluck('topic_id');
             $tids = $plucked->all();
-        } // if          
+        } // if   
+        
+        // FILTRO POR SUBTEMAS
+        $xids = $this->setIds('xids', $params);
+        if( !$xids ) {
+            $plucked = FileSubtopicModel::whereIn('topic_id', $tids)->pluck('subtopic_id');
+            $xids = $plucked->all();
+        } // if
+        
+        //Log::debug(['XIDS' => $xids]);
 
         // ARREGLO DE INDICES
         $indexes_array = $this->getIndexArray();        
@@ -97,6 +106,7 @@ class FileRepository implements FileRepositoryInterface
             ->whereIn('document_files.system_id', $sids)
             ->whereIn('document_files.department_id', $dids)
             ->whereIn('document_files.topic_id', $tids)
+            ->whereIn('document_files.subtopic_id', $xids)
             ->get([
                 'document_files.file_id', 'document_files.system_id', 'document_files.process_id', 'document_files.location_id', 'document_files.department_id', 'document_files.topic_id', 'document_files.subtopic_id', 'document_files.job_id',
                 'document_files.name as name', 'document_files.code', 
@@ -403,6 +413,24 @@ class FileRepository implements FileRepositoryInterface
         ];               
     } // getDepartmentsList Repository
 
+    public function getDepartmentsListFull(array $lids)
+    {
+        $dids = $this->tool->setDepartmentsFilter();
+        $departments = DepartmentModel::join('set_location_department', function ($join) use ($dids) {
+                $join->on('set_departments.department_id', '=', 'set_location_department.department_id');
+                $join->whereIn('set_location_department.department_id',  $dids);
+            })
+            ->join('set_locations', function ($join) use ($lids) {
+                $join->on('set_location_department.location_id', '=', 'set_locations.location_id');
+                $join->whereIn('set_locations.location_id',  $lids);
+            })
+            ->orderBy('set_locations.name')
+            ->orderBy('set_departments.name')
+            ->get(['set_locations.location_id', 'set_locations.name as location', 'set_departments.department_id', 'set_departments.name']);
+
+        return $departments;
+    } // getDepartmentsListFull
+
     public function getProcessesList($departments)
     {
         $pids = [];
@@ -490,9 +518,9 @@ class FileRepository implements FileRepositoryInterface
      * @param  integer $id Identificador del tema
      * @return json Listado
      */       
-    public function getSubtopicsList($id)
+    public function getSubtopicsList(array $ids)
     {
-        return $this->file->getSubTopicsSelect($id);  
+        return $this->file->getSubtopicsSelect($ids);  
     } // getSubtopicsList Service    
     
     /**

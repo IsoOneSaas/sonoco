@@ -146,12 +146,20 @@ class FileClass
     
     /**
      * Obtiene los elementos para generar el select de SUBTEMAS seleccionados
-     * @param  integer $id identificador del tema
+     * @param  array $ids identificador del temas
      * @return Collection  Opciones de SUBTEMA
      */        
-    public function getSubtopicsSelect($id)
+    public function getSubtopicsSelect($tids)
     {
-        $subtopics = Subtopic::where('topic_id', $id)->orderBy('name')->get(['subtopic_id', 'code', 'name']);
+        //$subtopics = Subtopic::whereIn('topic_id', $tids)->orderBy('name')->get(['subtopic_id', 'code', 'name']);
+        $subtopics = Subtopic::join('document_file_topics', function ($join) use ($tids) {
+                $join->on('document_file_subtopics.topic_id', '=', 'document_file_topics.topic_id');
+                $join->whereIn('document_file_topics.topic_id',  $tids);
+            })
+            ->orderBy('document_file_topics.name')
+            ->orderBy('document_file_subtopics.name')
+            ->get(['document_file_topics.topic_id', 'document_file_topics.name as topic', 'document_file_subtopics.subtopic_id', 'document_file_subtopics.code', 'document_file_subtopics.name']);        
+            
         foreach($subtopics as $subtopic) {
             $subtopic->newCode = str_pad($subtopic->code, $this->codeStrPad, "0", STR_PAD_LEFT);
         }

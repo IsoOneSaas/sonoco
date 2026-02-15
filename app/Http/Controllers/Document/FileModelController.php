@@ -34,9 +34,10 @@ class FileModelController extends Controller
         
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
-        $departments = $this->fileRepo->getDepartmentsList();
+        $locations = $this->fileRepo->getLocationsList();
+        //$departments = $this->fileRepo->getDepartmentsList();
         //$processes = $this->fileRepo->getProcessesList($departments['data']);
-        //Log::debug(['PROCESSES' => $processes->toArray()]);
+        Log::debug(['LOCATIONS' => $locations['data']->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
@@ -44,7 +45,8 @@ class FileModelController extends Controller
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
             'systems'       => $systems,
             //'processes'     => $processes,
-            'departments'   => $departments['data'],
+            //'departments'   => $departments['data'],
+            'locations'   => $locations['data'],
         ]);        
     } // index Method
 
@@ -53,9 +55,9 @@ class FileModelController extends Controller
      */    
     public function render($param)
     {
+        //Log::debug(['PARAMS 1' => $param]);
         $systems = $this->fileRepo->getSystemsList();
         $departments = $this->fileRepo->getDepartmentsList();
-        //$processes = $this->fileRepo->getProcessesList($departments['data']);
         return $this->fileRepo->render($param, $systems, $departments['data']);
     }  // show    
 
@@ -198,7 +200,7 @@ class FileModelController extends Controller
         $topics = $this->fileRepo->getTopicsList($DATA->department_id);
 
         // Obtener Subtemas
-        $subtopics = $this->fileRepo->getSubtopicsList($DATA->topic_id);
+        $subtopics = $this->fileRepo->getSubtopicsList([$DATA->topic_id]);
         
          // Obtener Responsables
         $jobs = $this->fileRepo->getJobsList($DATA->department_id);
@@ -256,14 +258,33 @@ class FileModelController extends Controller
     } // getTopics Method
 
     /**
+     * Obtiene listado de departamentos para las localizaciones dadas
+     * @param  json Request $request Datos validados del formulario
+     * @return json Listado
+     */      
+    public function setDepartmentsSelect(Request $request)
+    {
+        $input = $request->input();
+        Log::debug(['LOCALIZACIONES IDS' => $input['lids']]);
+        $departments = $this->fileRepo->getDepartmentsListFull($input['lids']);
+        Log::debug(['DEPARTAMENTOS' => $departments->toArray()]);
+        if( $departments->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.department.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'departments' => $departments, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // setDepartmentsSelect Method    
+
+    /**
      * Obtiene listado de temas para los departamentos dados
-     * @param  integer $id Identificador del departamento
+     * @param  json Request $request Datos validados del formulario
      * @return json Listado
      */      
     public function setTopicsSelect(Request $request)
     {
         $input = $request->input();
-        Log::debug(['TOPICS' => $input['dids']]);
+        Log::debug(['DEPARTMENTS IDS' => $input['dids']]);
         $topics = $this->fileRepo->getTopicsList($input['dids']);
         Log::debug(['TOPICS' => $topics->toArray()]);
         if( $topics->count() == 0 ) {
@@ -272,7 +293,26 @@ class FileModelController extends Controller
             $response =  ['success' => true, 'topics' => $topics, 'message' => ''];  
         }
         return response()->json($response); 
-    } // setTopicsSelect Method    
+    } // setTopicsSelect Method
+    
+    /**
+     * Obtiene listado de subtemas para los temas dados
+     * @param  json Request $request Datos validados del formulario
+     * @return json Listado
+     */      
+    public function setSubtopicsSelect(Request $request)
+    {
+        $input = $request->input();
+        Log::debug(['TOPICS IDS' => $input['tids']]);
+        $subtopics = $this->fileRepo->getSubtopicsList($input['tids']);
+        Log::debug(['SUBTOPICS' => $subtopics->toArray()]);
+        if( $subtopics->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.subtopic.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'subtopics' => $subtopics, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // setSubtopicsSelect Method     
 
     /**
      * Obtiene listado de cargos para el departamento dado
@@ -394,7 +434,7 @@ class FileModelController extends Controller
      */    
     public function getSubtopics($id)
     {
-        $subtopics = $this->fileRepo->getSubtopicsList($id);
+        $subtopics = $this->fileRepo->getSubtopicsList([$id]);
         if( $subtopics->count() == 0 ) {
             $response =  ['success' => false,  'message' => trans('document/file.error.subtopic.no-exist')];  
         } else {
