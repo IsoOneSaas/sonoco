@@ -260,12 +260,16 @@
         var lidsArray = setStorageInteger("location-selected", lidsStoraged);          
         
         // Departamento
-        // var didsStoraged = isoGetStorage('iso_fileDepartments');
-        // var didsArray = setStorageInteger("department-selected", didsStoraged);      
+        var didsStoraged = isoGetStorage('iso_fileDepartments');
+        var didsArray = setArray(didsStoraged);   
         
         // Temas
-        //var tidsStoraged = isoGetStorage('iso_fileTopics');  
-        
+        var tidsStoraged = isoGetStorage('iso_fileTopics');
+        var tidsArray = setArray(tidsStoraged);  
+
+        // Subtemas
+        var xidsStoraged = isoGetStorage('iso_fileSubtopics');
+        var xidsArray = setArray(xidsStoraged);        
 
         // Rango In
         var dateIn = isoGetStorage('iso_fileDatein');
@@ -375,6 +379,7 @@
         }); // datatables
 
         // FILTROS
+        $.fn.multipleSelect.defaults.placeholder = "Seleccione al menos una opción";
 
         // Filtros de Columna
         $('#files-table thead tr:eq(1) th').each( function (i) {
@@ -406,7 +411,7 @@
             console.log(':: Selected    LIDS ::');
             console.dir(lidsArray);
             if( lidsArray.length > 0 ) {
-                setDepartmentAjax(lidsArray);
+                setDepartmentAjax(lidsArray, didsArray);
             } else {
                 console.log('Clear #department-selected');
                 $("#department-selected").val('').multipleSelect('destroy').html('');
@@ -420,7 +425,7 @@
             console.log(':: Selected DIDS ::');
             console.dir(didsArray);
             if( didsArray.length > 0 ) {
-                setTopicAjax(didsArray);
+                setTopicAjax(didsArray, tidsArray);
             } else {
                 console.log('Clear #topic-selected');
                 $("#topic-selected").val('').multipleSelect('destroy').html('');
@@ -434,7 +439,7 @@
             console.log(':: Selected TIDS ::');
             console.dir(tidsArray);
             if( tidsArray.length > 0 ) {
-                setSubtopicAjax(tidsArray);
+                setSubtopicAjax(tidsArray, xidsArray);
             } else {
                 console.log('Clear #subtopic-selected');
                 $("#subtopic-selected").val('').multipleSelect('destroy').html('');
@@ -637,7 +642,11 @@
 
     $(document).ready(function() {
         $("#location-selected").trigger('change');        
-    });    
+    });
+    
+    function setArray(storaged) {
+        return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+    }
 
     function setStorageInteger(tag, storaged) {
         var output = '';
@@ -720,7 +729,7 @@
         return columns;
     } //setColumns
 
-    function setDepartmentAjax(lids) {        
+    function setDepartmentAjax(lids, dids) {        
         var route = "{{ route('files.select.departments') }}";        
         console.log('Running setDepartmentAjax with route: '+route);
         $.ajax({
@@ -733,7 +742,7 @@
                 //console.dir(data);
                 if( data.success ) {
                     // Generar nuevo select de temas                
-                    generateDepartmentsSelect(data.departments);
+                    generateDepartmentsSelect(data.departments, dids);
                     // 
                     $("#department-selected").trigger('change');
                 } else {
@@ -745,7 +754,7 @@
         }); // ajax         
     } // setDepartmentAjax Fx
 
-    function generateDepartmentsSelect(departments) {
+    function generateDepartmentsSelect(departments, dids) {
         var previous = '';
         var output = '';
         $("#department-selected").multipleSelect('destroy').html('');
@@ -761,7 +770,7 @@
                     previous = department.location;
                 } // if
                 output += '<option value="'+department.department_id+'"';
-                output += ' selected';
+                output += isSelected(department.department_id, dids);
                 output += '>'+department.name+'</option>';            
             });
             output += '</optgroup>';
@@ -770,10 +779,9 @@
     } // generateDepartmentsSelect  
 
 
-    function setTopicAjax(dids) {        
+    function setTopicAjax(dids, tids) {        
         var route = "{{ route('files.select.topics') }}";        
         console.log('Running setTopicAjax with route: '+route);
-        //console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
         $.ajax({
             url: route,
             type: 'POST',
@@ -784,7 +792,7 @@
                 //console.dir(data);
                 if( data.success ) {
                     // Generar nuevo select de temas                
-                    generateTopicsSelect(data.topics);
+                    generateTopicsSelect(data.topics, tids);
                     // 
                     $("#topic-selected").trigger('change');
                 } else {
@@ -796,7 +804,7 @@
         }); // ajax         
     } // setTopicAjax Fx
 
-    function generateTopicsSelect(topics) {
+    function generateTopicsSelect(topics, tids) {
         var previous = '';
         var output = '';
         $("#topic-selected").multipleSelect('destroy').html('');
@@ -812,7 +820,7 @@
                     previous = topic.department;
                 } // if
                 output += '<option value="'+topic.topic_id+'"';
-                output += ' selected';
+                output += isSelected(topic.topic_id, tids);
                 output += '>'+topic.name+'</option>';            
             });
             output += '</optgroup>';
@@ -821,7 +829,7 @@
         }        
     } // generateTopicsSelect   
     
-    function setSubtopicAjax(tids) {        
+    function setSubtopicAjax(tids, xids) {        
         var route = "{{ route('files.select.subtopics') }}";        
         console.log('Running setSubtopicAjax with route: '+route);
         //console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
@@ -835,7 +843,7 @@
                 //console.dir(data);
                 if( data.success ) {
                     // Generar nuevo select de temas                
-                    generateSubtopicsSelect(data.subtopics);
+                    generateSubtopicsSelect(data.subtopics, xids);
                     // 
                     
                 } else {
@@ -847,7 +855,7 @@
         }); // ajax         
     } // setSubtopicAjax Fx
 
-    function generateSubtopicsSelect(subtopics) {
+    function generateSubtopicsSelect(subtopics, xids) {
         var previous = '';
         var output = '';
         $("#subtopic-selected").multipleSelect('destroy').html('');
@@ -863,13 +871,25 @@
                     previous = subtopic.topic;
                 } // if
                 output += '<option value="'+subtopic.subtopic_id+'"';
-                output += ' selected';
+                output += isSelected(subtopic.subtopic_id, xids);
                 output += '>'+subtopic.name+'</option>';            
             });
             output += '</optgroup>';
             $("#subtopic-selected").html(output).multipleSelect();
         }        
-    } // generateSubtopicsSelect       
+    } // generateSubtopicsSelect  
+    
+    function isSelected(id, array) {
+        if( $.isArray(array) ) {
+            var str = id.toString();
+            if( $.inArray(str, array) != -1 ) {
+                return ' selected';
+            }
+        } else {
+            return ' selected';
+        }
+        return '';
+    } // isSelected Fx
  
 </script>
 
