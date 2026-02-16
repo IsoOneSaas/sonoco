@@ -57,8 +57,9 @@ class FileModelController extends Controller
     {
         //Log::debug(['PARAMS 1' => $param]);
         $systems = $this->fileRepo->getSystemsList();
-        $departments = $this->fileRepo->getDepartmentsList();
-        return $this->fileRepo->render($param, $systems, $departments['data']);
+        //$departments = $this->fileRepo->getDepartmentsList();
+        $locations = $this->fileRepo->getLocationsList();
+        return $this->fileRepo->render($param, $systems, $locations); // , $departments['data']
     }  // show    
 
     /**
@@ -197,7 +198,7 @@ class FileModelController extends Controller
         //Log::debug(['DATA' => $DATA->toArray()]);
         
         // Obtener Temas
-        $topics = $this->fileRepo->getTopicsList($DATA->department_id);
+        $topics = $this->fileRepo->getTopicsList([$DATA->department_id]);
 
         // Obtener Subtemas
         $subtopics = $this->fileRepo->getSubtopicsList([$DATA->topic_id]);

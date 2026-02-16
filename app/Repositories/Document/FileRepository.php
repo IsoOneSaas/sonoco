@@ -41,7 +41,7 @@ class FileRepository implements FileRepositoryInterface
      * @param  json $slug Parametros de filtración 
      * @return array   Arreglo de archivos
      */
-    public function render($slug, $systems, $departments)
+    public function render($slug, $systems, $locations)
     {    
         $data = [];
         $emtpy_array = [];
@@ -64,11 +64,19 @@ class FileRepository implements FileRepositoryInterface
         if( !$sids ) {
             $plucked = $systems->pluck('system_id');
             $sids = $plucked->all();
-        } // if   
+        } // if  
+        
+        // FILTRO POR LOCALIZACIONES
+        $lids = $this->setIds('lids', $params);
+        if( !$lids ) {
+            $plucked = $locations->pluck('location_id');
+            $lids = $plucked->all();
+        } // if         
               
         // FILTRO POR DEPARTAMENTOS
         $dids = $this->setIds('dids', $params);
         if( !$dids ) {
+            $departments = $this->getDepartmentsListFull($lids);
             $plucked = $departments->pluck('department_id');
             $dids = $plucked->all();
         } // if          
@@ -104,6 +112,7 @@ class FileRepository implements FileRepositoryInterface
             })
             ->whereBetween('document_files.updated_at', [$rangeIn, $rangeOut])
             ->whereIn('document_files.system_id', $sids)
+             ->whereIn('document_files.location_id', $lids)
             ->whereIn('document_files.department_id', $dids)
             ->whereIn('document_files.topic_id', $tids)
             ->whereIn('document_files.subtopic_id', $xids)

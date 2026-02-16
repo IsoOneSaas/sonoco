@@ -260,8 +260,8 @@
         var lidsArray = setStorageInteger("location-selected", lidsStoraged);          
         
         // Departamento
-        var didsStoraged = isoGetStorage('iso_fileDepartments');
-        var didsArray = setStorageInteger("department-selected", didsStoraged);      
+        // var didsStoraged = isoGetStorage('iso_fileDepartments');
+        // var didsArray = setStorageInteger("department-selected", didsStoraged);      
         
         // Temas
         //var tidsStoraged = isoGetStorage('iso_fileTopics');  
@@ -496,19 +496,20 @@
         // Filtras lista
         $("#btn-filter").on("click", function() {
             var sidsValue = $("#system-selected").val();
+            var lidsValue = $("#location-selected").val();
             var didsArray = $("#department-selected").val();
             var tidsArray = $("#topic-selected").val();
             var xidsArray = $("#subtopic-selected").val();
 
             var visibleColumns = $myTable.columns().visible().toArray();
             var info = $myTable.page.info();            
-            var params = {sids: sidsValue, dids: didsArray, tids: tidsArray, xids: xidsArray, din: $dateInDefault, dout: $dateOutDefault};            
+            var params = {sids: sidsValue, lids: lidsArray, dids: didsArray, tids: tidsArray, xids: xidsArray, din: $dateInDefault, dout: $dateOutDefault};            
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
             console.dir(JSON.stringify(params));
             
-            if( (sidsValue.length > 0) && (didsArray.length > 0) && (tidsArray.length > 0) && (xidsArray.length > 0) ) {
+            if( (sidsValue.length > 0) && (lidsValue.length > 0) && (didsArray.length > 0) && (tidsArray.length > 0) && (xidsArray.length > 0) ) {
                 // Ajustes a cambio
                 $("#filter-typeName").html('');
                 $("#filter-date").html('');
@@ -523,6 +524,7 @@
 
                 // Store            
                 isoSetStorage('iso_fileSystems', sidsValue);
+                isoSetStorage('iso_fileLocations', lidsValue);
                 isoSetStorage('iso_fileDepartments', didsArray);
                 isoSetStorage('iso_fileTopics', tidsArray);         // TODO: Definir si va junto a subtopics
                 isoSetStorage('iso_fileSubtopics', xidsArray);
