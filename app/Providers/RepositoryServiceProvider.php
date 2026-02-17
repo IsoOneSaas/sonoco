@@ -57,8 +57,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Interfaces\Document\FollowupRepositoryInterface::class, \App\Repositories\Document\FollowupRepository::class);
         $this->app->bind(\App\Interfaces\Document\ValidationRepositoryInterface::class, \App\Repositories\Document\ValidationRepository::class);
         $this->app->bind(\App\Interfaces\Document\AuthorizationRepositoryInterface::class, \App\Repositories\Document\AuthorizationRepository::class);
+        // Registros
         $this->app->bind(\App\Interfaces\Document\RecordRepositoryInterface::class, \App\Repositories\Document\RecordRepository::class);
+        // Files
         $this->app->bind(\App\Interfaces\Document\FileRepositoryInterface::class, \App\Repositories\Document\FileRepository::class);
+        $this->app->bind(\App\Interfaces\Document\FileResponsibleRepositoryInterface::class, \App\Repositories\Document\FileResponsibleRepository::class);
     }
 
     /**

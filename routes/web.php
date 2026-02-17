@@ -227,6 +227,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('salvar/disposicion', [\App\Http\Controllers\Document\FileModelController::class, 'setDisposal'])->name('save.disposal'); 
 
             Route::post('generar/codigo', [\App\Http\Controllers\Document\FileModelController::class, 'setCode'])->name('get.code'); 
+
+            // SETTINGS
+            Route::group(['prefix' => 'ajustes', 'as' => 'settings.'], function () {
+                Route::resource('responsibles', \App\Http\Controllers\Document\FileResponsibleModelController::class); 
+            });                            
              
         });                    
     });  

@@ -497,7 +497,24 @@
                                         <div class="side-menu__icon"> <i data-lucide="archive"></i> </div>
                                         <div class="side-menu__title"> Archivo </div>
                                     </a>
-                                </li>                                
+                                </li>
+                                
+                                
+                                 <li>
+                                    <a href="javascript:;" class="side-menu @if( Str::contains( request()->route()->getName(), 'files.settings') ) side-menu--active @endif ">
+                                        <div class="side-menu__icon"> <i data-lucide="settings-2"></i> </div>
+                                        <div class="side-menu__title"> Ajustes <i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
+                                    </a>
+                                    <ul class=" @if( Str::contains( request()->route()->getName(), 'documents.settings') ) side-menu__sub-open @endif ">
+                                        <li>
+                                            <a href="{{ route('files.settings.responsibles.index') }}" class="side-menu @if( Str::contains( request()->route()->getName(), 'files.settings.responsibles') ) side-menu--active @endif">
+                                                <div class="side-menu__icon"> <i data-lucide="wrench"></i> </div>
+                                                <div class="side-menu__title">Responsables</div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                 </li>
+
                             </ul>
                         </li>                        
 

@@ -37,7 +37,7 @@ class FileModelController extends Controller
         $locations = $this->fileRepo->getLocationsList();
         //$departments = $this->fileRepo->getDepartmentsList();
         //$processes = $this->fileRepo->getProcessesList($departments['data']);
-        Log::debug(['LOCATIONS' => $locations['data']->toArray()]);
+        //Log::debug(['LOCATIONS' => $locations['data']->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
