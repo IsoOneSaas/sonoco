@@ -23,11 +23,8 @@ class FileResponsibleModelController extends Controller
      */
     public function index() : View
     {
-        $result = $this->resRepo->getAdmin();
-        $DATA = $result['departments'];
-        $N = $result['n'];
-       
-        return view('document.file.responsible', compact('DATA', 'N'));
+        $DATA = $this->resRepo->getAdmin();
+        return view('document.file.responsible', compact('DATA'));
     } // index Method
 
     /**
@@ -47,7 +44,14 @@ class FileResponsibleModelController extends Controller
         //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
     } // store Method
  
- 
+    /**
+     * Get Jobs Collection
+     */
+    public function getJobs(Request $request)  // : RedirectResponse 
+    {
+        return $this->resRepo->setJobsList($request->all());
+        //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+    } // store Method 
 
 
 } // class

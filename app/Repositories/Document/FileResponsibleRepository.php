@@ -4,6 +4,7 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Document\FileResponsibleRepositoryInterface;
 
 use App\Models\Set\DepartmentModel;
+use App\Models\Set\JobModel;
 use App\Models\Set\LocationModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -44,16 +45,28 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
             ->orderBy('set_departments.name') 
             ->get(['set_departments.department_id', 'set_departments.name AS dName', 'set_locations.location_id', 'set_locations.name AS lName']);
 
-
-        //$dids = $this->tool->setDepartmentsFilter();
-
         Log::debug(['ROLE' => $admin->role, 'LOCATIONS' => $lids, 'DPTOS' => $departments->toArray()]);
 
-        return [
-            'n' => count($lids),
-            'departments' => $departments
-        ];
+        return  $departments;
     } // getAdmin
+
+    public function setJobsList(array $data)
+    {
+        $did = $data['did'];
+        $jobs = JobModel::
+            join('set_department_job', function($query) {
+                $query->on('set_department_job.job_id', '=', 'set_jobs.job_id');
+            })
+            ->join('set_departments', function($query) use($did) {
+                $query->on('set_departments.department_id', '=', 'set_department_job.department_id');
+                $query->where('set_departments.department_id', '=', $did);
+            })          
+            ->orderBy('set_jobs.name') 
+            ->get(['set_departments.department_id', 'set_jobs.job_id', 'set_jobs.name']);
+
+        return $jobs;
+    } // setJobsList
+
 
     public function getLocations()
     {
