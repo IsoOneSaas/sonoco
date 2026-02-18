@@ -38,20 +38,39 @@ class FileResponsibleModelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)  // : RedirectResponse 
+    public function store(Request $request)  : RedirectResponse 
     {
-        //$response = $this->valRepo->store($request->all());
-        //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+        $response = $this->resRepo->store($request->all());
+        return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
     } // store Method
  
     /**
      * Get Jobs Collection
      */
-    public function getJobs(Request $request)  // : RedirectResponse 
+    public function getJobs(Request $request)
     {
-        return $this->resRepo->setJobsList($request->all());
-        //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
-    } // store Method 
+        $jobs = $this->resRepo->setJobsList($request->all());
+        if( $jobs->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.job.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'jobs' => $jobs, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // getJobs Method 
+
+    /**
+     * Get Users Collection
+     */
+    public function getUsers(Request $request)
+    {
+        $users = $this->resRepo->setUsersList($request->all());
+        if( $users->count() == 0 ) {
+            $response =  ['success' => false,  'message' => trans('document/file.error.user.no-exist')];  
+        } else {
+            $response =  ['success' => true, 'users' => $users, 'message' => ''];  
+        }
+        return response()->json($response); 
+    } // getUsers Method     
 
 
 } // class
