@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 use Carbon\Carbon;
 use Exception;
+use Ramsey\Uuid\Type\Integer;
 
 class FileResponsibleRepository implements FileResponsibleRepositoryInterface 
 {
@@ -46,7 +47,14 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
             ->orderBy('set_departments.name') 
             ->get(['set_departments.department_id', 'set_departments.name AS dName', 'set_locations.location_id', 'set_locations.name AS lName']);
 
-        //Log::debug(['ROLE' => $admin->role, 'LOCATIONS' => $lids, 'DPTOS' => $departments->toArray()]);
+        
+
+        foreach($departments as $department) {
+            $exist = FileResponsibleModel::where('location_id', $department->location_id)->where('department_id', $department->department_id)->where('admin_id', $admin->user_id)->where('auth', 1)->first(); 
+            $department->style = ($exist) ? 'option-gray' : 'option-blank';
+        } // foreach
+        Log::debug(['ROLE' => $admin->role, 'LOCATIONS' => $lids, 'DPTOS' => $departments->toArray()]);
+        //
 
         return  $departments;
     } // getAdmin
@@ -59,8 +67,42 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
     public function store(array $data)
     {
         Log::debug(['STORE RESPONSIBLE DATA' => $data]);
+        $admin = Auth::user();
+        
         try {
-            //
+            // Recorrer la matrix
+            foreach( $data['location'] as $lid ) {
+                $did = $data['department'][$lid];
+                if( (int)$did > 0 ) {
+                    $jid = $data['job'][$lid];
+                    if( (int)$jid > 0 ) {
+                        if( key_exists($lid, $data['user']) ) {
+                            // $plucked = FileResponsibleModel::where(['location_id' => $lid, 'department_id' => $did, 'job_id' => $jid])->pluck('id');
+                            // $ids = $plucked->all();
+                            // $delete_array = [];                            
+                            // foreach($data['user'][$lid] as $uid) {
+                            $users = ( count($data['user'][$lid]) > 0 ) ? $data['user'][$lid] : null;
+                                $mymodel = FileResponsibleModel::updateOrCreate([
+                                    'location_id' => $lid,
+                                    'department_id' => $did,
+                                    'job_id' => $jid,                                    
+                                ],[
+                                    'users' => $users,
+                                    'admin_id' => $admin->user_id, 
+                                    'auth' => 1,
+                                ]);
+                                // $delete_array[] = $mymodel->id;
+                            // } // foreach
+                            // Elimina elementos no modificados
+                            // $ids = array_diff($ids, $delete_array);
+                            // Log::debug(['LID' => $lid, 'DELETE' => $ids]);
+                        }  //if
+                    } // if
+                } // if
+            } // foreach
+
+
+
         } catch (Exception $e) {
             //DB::rollBack();
             Log::error('FileResponsibleRepository::store Exception: '. $e->getMessage());
@@ -72,6 +114,7 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
     public function setJobsList(array $data)
     {
         Log::debug(['DATA' => $data]);
+        $admin = Auth::user();
         $did = $data['did'];
         $jobs = JobModel::
             join('set_department_job', function($query) {
@@ -84,16 +127,14 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
             ->orderBy('set_jobs.name') 
             ->get(['set_jobs.job_id', 'set_jobs.name']);
 
-        Log::debug(['JOBS' => $jobs->toArray()]);
-
-        // Traer valores existentes
-        $plucked = FileResponsibleModel::where('location_id', $data['lid'])->where('department_id', $did)->where('auth', 1)->pluck('job_id');
-        $jids = $plucked->all();
-
+        
         // Recorrer cargos
         foreach($jobs as $job) {
-            $job->selected = ( in_array($job->job_id, $jids) ) ? true : false;
+            $exist = FileResponsibleModel::where('location_id', $data['lid'])->where('department_id', $did)->where('job_id', $job->job_id)->where('admin_id', $admin->user_id)->where('auth', 1)->first();
+            $job->style = ($exist) ? 'option-gray' : 'option-blank';
         } // foreach
+
+        Log::debug(['JOBS' => $jobs->toArray()]);
 
         return $jobs;
     } // setJobsList
@@ -119,15 +160,23 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
             // $plucked = FileResponsibleModel::where('location_id', $data['lid'])->where('department_id', $data['did'])->where('job_id', $user->job_id)->where('auth', 1)->pluck('user_id');
             // $uids = $plucked->all();
 
+        $exist = FileResponsibleModel::where('location_id', $data['lid'])->where('department_id', $data['did'])->where('job_id', $jid)->where('auth', 1)->first();
         // Recorrer usuarios
-        //$all = ( $users->count() == 1 ) ? true : false;
         foreach($users as $user) {
-            // if( $all ) {
-            //     $user->selected = true;
-            // } else {
-                $exist = FileResponsibleModel::where('location_id', $data['lid'])->where('department_id', $data['did'])->where('job_id', $user->job_id)->where('user_id', $user->user_id)->where('auth', 1)->first();
-                $user->selected = ( $exist ) ? true : false;
-            // }
+            if( $exist ) {
+                $array = $exist->users;
+                if( $array === null ) {
+                    $user->selected = true;
+                } else {                    
+                    if( in_array($user->user_id, $array) ) {
+                        $user->selected = true;
+                    } else {
+                        $user->selected = false;
+                    }
+                }
+            } else {
+                $user->selected = true;
+            }
         } // foreach
 
         return $users;

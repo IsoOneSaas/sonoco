@@ -32,23 +32,23 @@
                     <!-- BEGIN: HTML Table Data -->
                     <div class="intro-y box p-5 mt-5">
                         <div>
-                            <form id="responsible-form" action="{{ route('files.settings.responsibles.store') }}" method="POST">
+                            <form id="responsible-form" action="{{ route('files.settings.responsibles.store') }}" method="POST" onSubmit="return false;">
                                 @csrf 
                                 <div class="input-group mt-3">
                                    <table width="100%">
 
                                         @php($previous = 0)                                       
                                         @foreach($DATA as $line)
-                                            @if($previous != $line->location_id)
+                                            @if($previous != $line->location_id )
                                                 @if(!$loop->first)
-                                                </select></td><td><select id="job_{{ $previous }}" name="job[]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple id="user_{{ $previous }}" name="user[{{ $previous }}][]" size="1"></select></td></tr>
+                                                </select></td><td><select id="job_{{ $previous }}" class="job" name="job[{{ $previous }}]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple id="user_{{ $previous }}" name="user[{{ $previous }}][]" size="1"></select></td></tr>
                                                 @endif                                            
-                                                <tr><td>{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" name="department[]"><option value=0>Seleccione Departamento</option>
-                                                @php($previous = $line->location_id)                                                
+                                                <tr><td class="{{ $line->style }}">{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" class="department" name="department[{{ $line->location_id }}]"><option value=0>Seleccione Departamento</option>
+                                                @php($previous = $line->location_id )                                                
                                             @endif   
-                                            <option value={{ $line->department_id }}>{{ $line->dName }}</option>                                            
+                                            <option class="{{ $line->style }}" value={{ $line->department_id }}>{{ $line->dName }}</option>                                            
                                             @if ($loop->last)
-                                             </select></td><td><select id="job_{{ $line->location_id }}" name="job[]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
+                                             </select></td><td><select id="job_{{ $line->location_id }}" class="job" name="job[{{ $line->location_id }}]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
                                             @endif                                            
                                         @endforeach
 
@@ -69,6 +69,15 @@
 @push('styles')
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
+    <style>
+        .option-gray {
+            background-color: #f0f0f0;
+        }
+
+        .option-blank {
+            background-color: transparent;
+        }        
+    </style>
 @endpush
 
 @push('scripts-bottom')
@@ -78,9 +87,35 @@
 <script src="{{ url('assets/js/iso_scripts.js') }}"></script>
 <script document="text/javascript">
     $(function () { 
+
+        $('#responsible-form').submit(function(e) {
+            console.log('Submiting Form...');
+            e.preventDefault();
+            var url = $(this).attr('action');
+            var method = $(this).attr('method');
+            //var postData = $(this).serialize();
+            var formData = new FormData(this);
+            $.ajax({
+                type: method,
+                url: url,
+                data: formData,
+            contentType: false, 
+            processData: false,                 
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }, 
+                success: function(response) {
+                    console.dir(response);
+                    // Display the response from the server
+                    //$('#response').html(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error: " + error);
+                }
+            });
+        });
         
         // Select de departamentos
-        $("select[name='department[]']").on("change", function(e) {
+        //$("select[name='department[]']").on("change", function(e) {
+        $(".department").on("change", function(e) {
             e.preventDefault();
             var did = this.value;
             var id = getId(this.id); 
@@ -91,13 +126,14 @@
             } else {
                 // Cerrar
                 $("#job_"+id).html('<option value=0>Seleccione un cargo</option>'); // .multipleSelect('destroy')
-                //$("#user_"+id).multipleSelect('destroy').html('');
-                $("#user_"+id).html('');
+                $("#user_"+id).multipleSelect('destroy').html('');
+                //$("#user_"+id).html('');
             }
         }); // select-department
 
         // Select de cargos
-        $("select[name='job[]']").on("change", function(e) {
+        //$("select[name='job[]']").on("change", function(e) {
+        $(".job").on("change", function(e) {
             e.preventDefault();
             var id = getId(this.id); 
             //var jidsArray = $("#job_"+id).val();
@@ -110,12 +146,22 @@
                 setUsersAjax(id, did, jid);
             } else {
                 // Cerrar
-                //$("#user_"+id).multipleSelect('destroy').html('');
-                $("#user_"+id).html('');
+                $("#user_"+id).multipleSelect('destroy').html('');
+                //$("#user_"+id).html('');
             }
         }); // select-department        
 
     }); // document
+
+    $(document).ready(function() {
+        //$(".department").trigger('change');        
+    });
+    
+    function store() {
+        console.log('Saving...');
+
+        //$('#responsible-form')[0].submit();
+    } // store Fx
 
     function seJobsAjax(id, did) {        
         var route = "{{ route('files.settings.responsibles.jobs') }}";        
@@ -142,15 +188,15 @@
     } // seJobsAjax Fx
 
     function generateJobsSelect(id, jobs) {
+        console.log('Generate Jobs Select to id='+id);
+        console.dir(jobs);
         var output = '<option value=0>Seleccione un cargo</option>';
         //$("#job_"+id).multipleSelect('destroy').html('');
         if( jobs.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.job.no-exist") }}'); 
         } else {
             $.each(jobs, function(i, job) {
-                output += '<option value='+job.job_id;
-                output += (job.selected) ? ' selected' : '';
-                output += '>'+job.name+'</option>';            
+                output += '<option class="'+job.style+'" value='+job.job_id+'>'+job.name+'</option>';            
             });
             $("#job_"+id).html(output); //.multipleSelect();
         }        
@@ -173,8 +219,8 @@
                 } else {
                     setSuccessNotification('error', 'Oops!', data.message);
                     // Blanquear select 
-                    //$("#user_"+id).multipleSelect('destroy').html('');
-                    $("#user_"+id).html('');
+                    $("#user_"+id).multipleSelect('destroy').html('');
+                    //$("#user_"+id).html('');
                 }
             } // success
         }); // ajax         
@@ -182,7 +228,7 @@
 
     function generateUsersSelect(id, users) {
         var output = '';
-        //$("#user_"+id).multipleSelect('destroy').html('');
+        $("#user_"+id).multipleSelect('destroy').html('');
         if( users.length == 0 ) {
             setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.user.no-exist") }}'); 
         } else {
@@ -191,8 +237,8 @@
                 output += (user.selected) ? ' selected' : '';
                 output += '>'+user.name+'</option>';            
             });
-            //$("#user_"+id).html(output).multipleSelect();
-            $("#user_"+id).html(output);
+            $("#user_"+id).html(output).multipleSelect();
+            //$("#user_"+id).html(output);
         }        
     } // generateUsersSelect   
     

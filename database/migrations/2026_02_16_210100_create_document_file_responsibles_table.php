@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('location_id');
             $table->unsignedInteger('department_id');
             $table->unsignedInteger('job_id');
-            $table->unsignedInteger('user_id')->default(0);
+            $table->json('users')->nullable();
             $table->unsignedInteger('admin_id');
             $table->tinyInteger('auth')->default(1);
             $table->timestamp('created_at')->useCurrent();
