@@ -35,20 +35,20 @@
                             <form id="responsible-form" action="{{ route('files.settings.responsibles.store') }}" method="POST" onSubmit="return false;">
                                 @csrf 
                                 <div class="input-group mt-3">
-                                   <table width="100%">
+                                   <table class="table table-striped table-sm" width="100%">
 
                                         @php($previous = 0)                                       
                                         @foreach($DATA as $line)
                                             @if($previous != $line->location_id )
                                                 @if(!$loop->first)
-                                                </select></td><td><select id="job_{{ $previous }}" class="job" name="job[{{ $previous }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple id="user_{{ $previous }}" class="user" name="user[{{ $previous }}][]" size="1"></select></td></tr>
+                                                </select></td><td><select id="job_{{ $previous }}" class="job form-control" name="job[{{ $previous }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple id="user_{{ $previous }}" class="user form-control" name="user[{{ $previous }}][]" size="1"></select></td></tr>
                                                 @endif                                            
-                                                <tr><td class="{{ $line->style }}">{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" class="department" name="department[{{ $line->location_id }}]"><option value=0>{{ trans("document/responsible.form.department.placeholder") }}</option>
+                                                <tr><td class="{{ $line->style }}">{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" class="department form-control" name="department[{{ $line->location_id }}]"><option value=0>{{ trans("document/responsible.form.department.placeholder") }}</option>
                                                 @php($previous = $line->location_id )                                                
                                             @endif   
                                             <option class="{{ $line->style }}" value={{ $line->department_id }}>{{ $line->dName }}</option>                                            
                                             @if ($loop->last)
-                                             </select></td><td><select id="job_{{ $line->location_id }}" class="job" name="job[{{ $line->location_id }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" class="user" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
+                                             </select></td><td><select id="job_{{ $line->location_id }}" class="job form-control" name="job[{{ $line->location_id }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" class="user form-control" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
                                             @endif                                            
                                         @endforeach
 
@@ -76,7 +76,11 @@
 
         .option-blank {
             background-color: transparent;
-        }        
+        } 
+        
+        .department, .job, .user {
+            padding : 0.2em 0.5em
+        }
     </style>
 @endpush
 
@@ -99,21 +103,21 @@
             $('.department').find('option:selected').each(function() {
                 departmentValues.push($(this).val());
             });
-            console.log(departmentValues);
+            console.dir(departmentValues);
 
             // Validar Cargos
             var jobValues = [];
             $('.job').find('option:selected').each(function() {
                 jobValues.push($(this).val());
             });
-            console.log(jobValues);   
+            console.dir(jobValues);   
             
             // Validar Usuarios
             var userValues = [];
             $('.user').find('option:selected').each(function() {
                 userValues.push($(this).val());
             });
-            console.log(userValues);               
+            console.dir(userValues);               
 
             if( validSelect(departmentValues) ) {
                     if( validSelect(jobValues) ) {
@@ -232,7 +236,7 @@
             $.each(jobs, function(i, job) {
                 output += '<option class="'+job.style+'" value='+job.job_id+'>'+job.name+'</option>';            
             });
-            $("#job_"+id).html(output); //.multipleSelect();
+            $("#job_"+id).html(output).focus(); //.multipleSelect();
         }        
     } // generateJobsSelect     
     
@@ -271,7 +275,7 @@
                 output += (user.selected) ? ' selected' : '';
                 output += '>'+user.name+'</option>';            
             });
-            $("#user_"+id).html(output).multipleSelect();
+            $("#user_"+id).html(output).multipleSelect().focus();
             //$("#user_"+id).html(output);
         }        
     } // generateUsersSelect   
@@ -284,10 +288,7 @@
 
     function validSelect(array) {
         var exist = false;
-        console.log('Validate...');
-        console.dir(array);
         $.each(array, function(i, val) {
-            //console.log('val: '+ val);
             if( val != "0" ) {
                 exist = true;
             }
