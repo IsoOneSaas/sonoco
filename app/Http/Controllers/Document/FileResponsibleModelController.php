@@ -38,10 +38,11 @@ class FileResponsibleModelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)  : RedirectResponse 
+    public function store(Request $request)  //: RedirectResponse 
     {
         $response = $this->resRepo->store($request->all());
-        return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
+        return response()->json($response); 
+        //return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
     } // store Method
  
     /**

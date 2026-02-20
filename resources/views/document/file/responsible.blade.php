@@ -41,14 +41,14 @@
                                         @foreach($DATA as $line)
                                             @if($previous != $line->location_id )
                                                 @if(!$loop->first)
-                                                </select></td><td><select id="job_{{ $previous }}" class="job" name="job[{{ $previous }}]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple id="user_{{ $previous }}" name="user[{{ $previous }}][]" size="1"></select></td></tr>
+                                                </select></td><td><select id="job_{{ $previous }}" class="job" name="job[{{ $previous }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple id="user_{{ $previous }}" class="user" name="user[{{ $previous }}][]" size="1"></select></td></tr>
                                                 @endif                                            
-                                                <tr><td class="{{ $line->style }}">{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" class="department" name="department[{{ $line->location_id }}]"><option value=0>Seleccione Departamento</option>
+                                                <tr><td class="{{ $line->style }}">{{ $line->lName }}<input type="hidden" name="location[]" value={{ $line->location_id }}></td><td><select id="dpto_{{ $line->location_id }}" class="department" name="department[{{ $line->location_id }}]"><option value=0>{{ trans("document/responsible.form.department.placeholder") }}</option>
                                                 @php($previous = $line->location_id )                                                
                                             @endif   
                                             <option class="{{ $line->style }}" value={{ $line->department_id }}>{{ $line->dName }}</option>                                            
                                             @if ($loop->last)
-                                             </select></td><td><select id="job_{{ $line->location_id }}" class="job" name="job[{{ $line->location_id }}]" size="1"><option value=0>Seleccione un cargo</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
+                                             </select></td><td><select id="job_{{ $line->location_id }}" class="job" name="job[{{ $line->location_id }}]" size="1"><option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option></select></td><td><select multiple  id="user_{{ $line->location_id }}" class="user" name="user[{{ $line->location_id }}][]" size="1"></select></td></tr> 
                                             @endif                                            
                                         @endforeach
 
@@ -93,24 +93,63 @@
             e.preventDefault();
             var url = $(this).attr('action');
             var method = $(this).attr('method');
-            //var postData = $(this).serialize();
-            var formData = new FormData(this);
-            $.ajax({
-                type: method,
-                url: url,
-                data: formData,
-            contentType: false, 
-            processData: false,                 
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }, 
-                success: function(response) {
-                    console.dir(response);
-                    // Display the response from the server
-                    //$('#response').html(response);
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error: " + error);
-                }
+            
+            // Validar Departamentos
+            var departmentValues = [];
+            $('.department').find('option:selected').each(function() {
+                departmentValues.push($(this).val());
             });
+            console.log(departmentValues);
+
+            // Validar Cargos
+            var jobValues = [];
+            $('.job').find('option:selected').each(function() {
+                jobValues.push($(this).val());
+            });
+            console.log(jobValues);   
+            
+            // Validar Usuarios
+            var userValues = [];
+            $('.user').find('option:selected').each(function() {
+                userValues.push($(this).val());
+            });
+            console.log(userValues);               
+
+            if( validSelect(departmentValues) ) {
+                    if( validSelect(jobValues) ) {
+                        if( userValues.length != 0 ) {
+                            var formData = new FormData(this);
+                            // Enviar
+                            $.ajax({
+                                type: method,
+                                url: url,
+                                data: formData,
+                                contentType: false, 
+                                processData: false,                 
+                                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }, 
+                                success: function(response) {
+                                    console.dir(response);
+                                    if( response.status == 'success' ) {
+                                        setSuccessNotification('success', '', response.message);
+                                    } else {
+                                        setSuccessNotification('error', 'Oops!', response.message); 
+                                    }                    
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error: " + error);
+                                    setSuccessNotification('error', 'Oops!', error); 
+                                }
+                            }); // ajax
+                        } else {
+                        setSuccessNotification('error', 'Oops!', '{{ trans("document/responsible.request.user.empty") }}'); 
+                    }
+                    } else {
+                        setSuccessNotification('error', 'Oops!', '{{ trans("document/responsible.request.job.empty") }}'); 
+                    }
+            } else {
+                setSuccessNotification('error', 'Oops!', '{{ trans("document/responsible.request.department.empty") }}'); 
+            }
+
         });
         
         // Select de departamentos
@@ -157,11 +196,6 @@
         //$(".department").trigger('change');        
     });
     
-    function store() {
-        console.log('Saving...');
-
-        //$('#responsible-form')[0].submit();
-    } // store Fx
 
     function seJobsAjax(id, did) {        
         var route = "{{ route('files.settings.responsibles.jobs') }}";        
@@ -190,10 +224,10 @@
     function generateJobsSelect(id, jobs) {
         console.log('Generate Jobs Select to id='+id);
         console.dir(jobs);
-        var output = '<option value=0>Seleccione un cargo</option>';
+        var output = '<option value=0>{{ trans("document/responsible.form.job.placeholder") }}</option>';
         //$("#job_"+id).multipleSelect('destroy').html('');
         if( jobs.length == 0 ) {
-            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.job.no-exist") }}'); 
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/responsible.request.job.no-exist") }}'); 
         } else {
             $.each(jobs, function(i, job) {
                 output += '<option class="'+job.style+'" value='+job.job_id+'>'+job.name+'</option>';            
@@ -230,7 +264,7 @@
         var output = '';
         $("#user_"+id).multipleSelect('destroy').html('');
         if( users.length == 0 ) {
-            setSuccessNotification('error', 'Oops!', '{{ trans("document/file.error.user.no-exist") }}'); 
+            setSuccessNotification('error', 'Oops!', '{{ trans("document/responsible.request.user.no-exist") }}'); 
         } else {
             $.each(users, function(i, user) {
                 output += '<option value='+user.user_id;
@@ -248,6 +282,19 @@
     }
 
 
+    function validSelect(array) {
+        var exist = false;
+        console.log('Validate...');
+        console.dir(array);
+        $.each(array, function(i, val) {
+            //console.log('val: '+ val);
+            if( val != "0" ) {
+                exist = true;
+            }
+        });
+        return exist;
+    }
+    
 </script>
 
     @include('components.notification_index')
