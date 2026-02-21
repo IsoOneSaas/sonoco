@@ -243,6 +243,8 @@ class FileClass
      */      
     public function setSubtopic($id, $txt)
     {
+        //Log::debug(['ID' => $id, 'TXT' => $txt]);
+        $id = (int)$id;
         try {
             // Obtener el código
             $existing = Subtopic::where('topic_id', $id)->latest()->first();
@@ -266,7 +268,7 @@ class FileClass
             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/file.subtopic.create.no-success')];
         }   
         // Obtiene el nuevo select de subtemas     
-        $subtopics = $this->getSubtopicsSelect($id);
+        $subtopics = $this->getSubtopicsSelect([$id]);
         return ['success' => true, 'sid' => $subtopic->subtopic_id, 'subtopics' => $subtopics, 'message' => trans('document/file.subtopic.create.success')];            
     } // setSubTopic Method *    
 

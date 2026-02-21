@@ -759,7 +759,13 @@
     });
     
     function setArray(storaged) {
-        return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        console.log(storaged);
+        if( storaged === null ) { // return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+            return [];
+        } else {            
+            return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        }
+        
     }
 
     function setStorageInteger(tag, storaged) {

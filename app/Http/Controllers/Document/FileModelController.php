@@ -35,8 +35,8 @@ class FileModelController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
         $locations = $this->fileRepo->getLocationsList();
-
-        //Log::debug(['LOCATIONS' => $locations['data']->toArray()]);
+        Log::debug(['SYSTEMS 1' => $systems->toArray()]);
+        Log::debug(['LOCATIONS 1' => $locations['data']->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
@@ -52,10 +52,11 @@ class FileModelController extends Controller
      */    
     public function render($param)
     {
-        //Log::debug(['PARAMS 1' => $param]);
+        Log::debug(['PARAMS 1' => $param]);
         $systems = $this->fileRepo->getSystemsList();
-        //$departments = $this->fileRepo->getDepartmentsList();
         $locations = $this->fileRepo->getLocationsList();
+        //Log::debug(['SYSTEMS 2' => $systems->toArray()]);
+        //Log::debug(['LOCATIONS 2' => $locations->toArray()]);        
         return $this->fileRepo->render($param, $systems, $locations); // , $departments['data']
     }  // show    
 
