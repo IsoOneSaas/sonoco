@@ -6,6 +6,7 @@ use App\Classes\ToolsClass;
 use App\Interfaces\Set\ProfileRepositoryInterface;
 use App\Models\Document\SettingModel;
 use App\Models\Set\DepartmentModel;
+use App\Models\Set\JobModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\SystemModel;
 use App\Models\Set\UserModel;
@@ -54,29 +55,41 @@ class ProfileRepository implements ProfileRepositoryInterface
             $user->page = $this->startpageDefault;
         }
 
+        // Cargos 
+        $uid = $user->user_id;
+        $plucked = JobModel::join('set_job_user', function($query) use($uid) {
+            $query->on('set_job_user.job_id', '=', 'set_jobs.job_id');
+            $query->where('set_job_user.user_id', '=', $uid);
+        })->pluck('set_jobs.job_id');
+        $jids =array_unique($plucked->all());         
+        $user->jobs = JobModel::whereIn('job_id', $jids)->orderBy('name')->get(['name']);         
+        //Log::debug(['JIDS' => $jids]);
+
         // Departamentos
-        $array_departments = [];
-        foreach($user->jobs as $job) {
-            $dpto = $job->department;          
-            $array_departments[] = $dpto->toArray();
-        }
-        //Log::debug(['DEPARTMENTS' => $array_departments]);
-        //$user->departments = $array_departments[0];
+        $plucked = DepartmentModel::join('set_department_job', function($query) use($jids) {
+            $query->on('set_department_job.department_id', '=', 'set_departments.department_id');
+            $query->whereIn('set_department_job.job_id', $jids);    
+        })->pluck('set_departments.department_id');        
+        $dids =array_unique($plucked->all());
+        //Log::debug(['DIDS' => $dids]);
 
-        // Localizaciones
-        $array_locations = [];
-        if( in_array(0, $array_departments) ) {
-            foreach($array_departments[0] as $dpto) {
-                $department = DepartmentModel::find($dpto['department_id']);
-                $locations = $department->locations;
-                foreach($locations as $location) {
-                    $array_locations[$dpto['name']][] = $location->name;
-                } // foreach
-            } // foreach
-        } // if
-
-        //Log::debug(['LOCATIONS' => $array_locations]);
-        $user->locations = $array_locations;
+        // Localizaciones        
+        $locations = LocationModel::join('set_location_department', function($query) use($dids) {
+            $query->on('set_location_department.location_id', '=', 'set_locations.location_id');
+            $query->whereIn('set_location_department.department_id', $dids);
+            })
+            ->join('set_departments', function($query) {
+                $query->on('set_departments.department_id', '=', 'set_location_department.department_id');
+            })
+            ->join('set_location_user', function($query) use($uid) {
+                $query->on('set_location_user.location_id', '=', 'set_locations.location_id');
+                $query->where('set_location_user.user_id', '=', $uid);
+            })
+            ->orderBy('set_departments.name')
+            ->get(['set_locations.name as location', 'set_departments.name as department']);
+        $user->locations = ($locations) ? $locations : [] ;
+        //Log::debug(['LOCATIONS' => $locations->toArray()]);
+      
 
         // Como administrador
         if( $user->hasRole('ADMIN') ) {

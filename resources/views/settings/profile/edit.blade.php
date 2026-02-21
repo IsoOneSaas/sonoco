@@ -33,13 +33,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">                                    
-                                    @foreach($profile->locations as $department => $locations) 
-                                        <a class="flex items-center text-primary font-medium" href="javascript:;"> <i data-lucide="at-sign" class="w-4 h-4 mr-2"></i> {{ $department }}</a>
-                                        @foreach($locations as $location)
-                                        <a class="flex items-center text-primary font-medium pl-5" href="javascript:;"> <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> {{ $location }}</a>
-                                        @endforeach
-                                        <br>
+                                <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
+                                    @php($previous = '')                                      
+                                    @foreach($profile->locations as $location) 
+                                        @if($previous != $location->department )
+                                            @if(!$loop->first)
+                                            <br>
+                                            @endif 
+                                        <a class="flex items-center text-primary font-medium" href="javascript:;"> <i data-lucide="at-sign" class="w-4 h-4 mr-2"></i> {{ $location->department }}</a>
+                                        @php($previous = $location->department )
+                                        @endif
+                                        <a class="flex items-center text-primary font-medium pl-5" href="javascript:;"> <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> {{ $location->location }}</a>                                        
                                     @endforeach                                    
                                 </div>
 
