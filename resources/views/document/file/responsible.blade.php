@@ -59,7 +59,7 @@
                         </div>
                     </div>
                     <!-- END: HTML Table Data -->
-                 
+                                     
                 </div>
                 <!-- END: Content -->
 @push('meta')                

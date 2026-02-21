@@ -35,8 +35,7 @@ class FileModelController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
         $locations = $this->fileRepo->getLocationsList();
-        //$departments = $this->fileRepo->getDepartmentsList();
-        //$processes = $this->fileRepo->getProcessesList($departments['data']);
+
         //Log::debug(['LOCATIONS' => $locations['data']->toArray()]);
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
@@ -44,8 +43,6 @@ class FileModelController extends Controller
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
             'systems'       => $systems,
-            //'processes'     => $processes,
-            //'departments'   => $departments['data'],
             'locations'   => $locations['data'],
         ]);        
     } // index Method
@@ -160,12 +157,13 @@ class FileModelController extends Controller
     } // store Method
 
     /**
-     * Display de Grid to Document Control (admins)
+     * Display de Datasheet of the File
      */    
-    public function show($param)
+    public function show($id)
     {
-        //return $this->fileRepo->render($param);
-    }  // show    
+        $response = $this->fileRepo->show($id);
+        return response()->json($response); 
+    }  // show Method
 
     /**
      * Show the form for editing the specified resource.
@@ -496,9 +494,10 @@ class FileModelController extends Controller
         $columns_extra = [
             ["data" => "hash", "title" => "H", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "count", "title" => "N", "visible" => false, "searchable" => false, "orderable" => false],    // número de registros asociados al archivo
+            ["data" => "auth", "title" => "A", "visible" => false, "searchable" => false, "orderable" => false],
             //["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
-            //["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
-            //["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
+            ["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
+            ["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
         ]; 
         
         return $this->tool->buildGrid($columnOrder, null, $columnExport, $columns_basic, $columns_array, $columns_extra);        

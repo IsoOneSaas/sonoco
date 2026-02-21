@@ -6,6 +6,8 @@ interface FileRepositoryInterface
 
     public function update(array $data);
 
+    public function show($hash);
+
     public function delete($hash);
 
     public function getFile($hash);

@@ -152,8 +152,10 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
                 $query->on('set_jobs.job_id', '=', 'set_job_user.job_id');
                 $query->where('set_jobs.job_id', '=', $jid);
             })          
-            ->orderBy('set_users.name') 
+            ->orderBy('set_users.name')             
             ->get(['set_jobs.job_id', 'set_users.user_id', 'set_users.name']);
+
+        $users = $users->unique('user_id');
 
         Log::debug(['USERS' => $users->toArray()]);
 

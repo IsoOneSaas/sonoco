@@ -124,6 +124,9 @@
                                                 <th>Disposición Final</th>
                                                 <th>H</th>
                                                 <th>N</th>
+                                                <th>A</th>
+                                                <th>C1</th>
+                                                <th>C2</th>
                                             </tr>
                                             <tr>
                                                 <th>#</th>
@@ -143,6 +146,9 @@
                                                 <th class="th-filter">Disposición Final</th>
                                                 <th class="th-filter">H</th>
                                                 <th class="th-filter">N</th>
+                                                <th class="th-filter">A</th>
+                                                <th class="th-filter">C1</th>
+                                                <th class="th-filter">C2</th>                                                
                                             </tr>                                            
                                         </thead>
                                         <tfoot>
@@ -163,7 +169,10 @@
                                                 <th>Indexación</th>
                                                 <th>Disposición Final</th>
                                                 <th>H</th>
-                                                <th>N</th>                                                
+                                                <th>N</th>
+                                                <th>A</th>
+                                                <th>C1</th>
+                                                <th>C2</th>                                                                                                
                                             </tr>                                            
                                         </tfoot>
                                     </table>                                    
@@ -174,6 +183,69 @@
                         </div>
                     </div>
                     <!-- END: HTML Table Data -->
+
+                    <!-- BEGIN: Modal Department -->
+                    <div id="modal-view" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xxl">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto">Ficha del Archivo</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" width="100%">                                        
+                                            <tr><td colspan="2">
+                                                <table class="table table-striped" width="100%"> 
+                                                    <tr><td class="title1">Código</td><td id="sheet-code"></td></tr>
+                                                    <tr><td class="title1">Nombre</td><td id="sheet-name"></td></tr>                                                
+                                                </table>
+                                            </td></tr>
+                                            <tr><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">Sistema de Gestión</td><td id="sheet-system"></td></tr>
+                                                    <tr><td class="title">Localización</td><td id="sheet-location"></td></tr>
+                                                    <tr><td class="title">Departamento</td><td id="sheet-department"></td></tr>
+                                                </table>
+                                            </td><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">Tema</td><td id="sheet-topic"></td></tr>
+                                                    <tr><td class="title">Subtema</td><td id="sheet-subtopic"></td></tr>
+                                                    <tr><td class="title">Responsable</td><td id="sheet-job"></td></tr>
+                                                </table>                                            
+                                            </td></tr>
+                                            <tr><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">Medio de Soporte</td><td id="sheet-support">*</td></tr>
+                                                    <tr><td class="title">Almacenamiento</td><td id="sheet-storage"></td></tr>
+                                                    <tr><td class="title">Clasificación</td><td id="sheet-classification"></td></tr>
+                                                    <tr><td class="title">Indexación</td><td id="sheet-index">*</td></tr>
+                                                </table>
+                                            </td><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title2">Disposición Final</td><td id="sheet-disposal">*</td></tr>
+                                                    <tr><td class="title2">Frecuencia de Retención</td><td id="sheet-dwell">*</td></tr>
+                                                    <tr><td class="title2">Tiempo en Archivo Muerto</td><td id="sheet-dead">*</td></tr>
+                                                    <tr><td class="title2">Tiempo Mínimo de Retención</td><td id="sheet-hold">*</td></tr>
+                                                </table>                                            
+                                            </td></tr>                                        
+                                        </table> 
+                                    </div>                                                 
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button>                                  
+                                    <a id="modal-view-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-view" class="">.</a>  
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Topic --> 
+
                 </div>
                 <!-- END: Content -->
 @push('meta')                
@@ -196,7 +268,22 @@
         }
         .input-filter {
             width: 100%
-        }     
+        } 
+        table.td {
+            padding: 0
+        } 
+        table td.title {
+            font-weight: 800;
+            width: 35%;
+        }
+        table td.title1 {
+            font-weight: 800;
+            width: 10%;
+        }          
+        table td.title2 {
+            font-weight: 800;
+            width: 40%;
+        }             
     </style>
 @endpush
 
@@ -320,9 +407,8 @@
                 ,
                 {
                     extend: 'colvis',
-                    //postfixButtons: ['colvisRestore'],
-                    columns: columns,
-                    hide: [18]
+                    columns: columns
+                    //hide: [18]
                 }
             ],
             //stateSave: true,            
@@ -330,9 +416,15 @@
                 // Generar columna índice
                 if(nRow){
                     var ordinal = displayIndex + 1;
-                    if( data.status == 1 ) {
-                        ordinal = '<span class="inline-flex items-baseline">'+ordinal+' <img alt="(o)" class="h-2" src="/assets/images/redled.png"></span>'
+                    if( data.auth == 1 ) {
+                        ordinal = '<span class="inline-flex items-baseline">'+ordinal+' <img alt="(o)" class="h-2" src="/assets/images/greenled.png"></span>'
                     }
+                    if( data.color1 !== '' ) {
+                        $('td', row).eq(8).css('color', data.color1);
+                    }
+                    if( data.color2 !== '' ) {
+                        $('td', row).eq(10).css('color', data.color2);
+                    }                      
                     $('td:eq(0)', nRow).html(ordinal);
                 }
                 return nRow;                
@@ -466,7 +558,7 @@
         
         // Seleccionar fila
         $('#files-table').on('click', 'tr', function () {
-            data = $myTable.row(this).data();
+            data = $myTable.row(this).data();            
             if ( $(this).hasClass('selected') ) {
                 // Deseleccionado
                 $(this).removeClass('selected');
@@ -475,14 +567,16 @@
             } else {
                 // Seleccionado
                 $myTable.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');                
-                if( data.status == 1 ) {
+                $(this).addClass('selected');
+                
+                $('#btn-view').removeClass('iso-disabled');
+                if( data.auth == 0 ) {
                     // Bloqueado
                     $('#btn-edit').addClass('iso-disabled');  
-                    $('#btn-view').removeClass('iso-disabled');
+                    //$('#btn-view').removeClass('iso-disabled');
                 } else {
                     $('#btn-edit').removeClass('iso-disabled');
-                    $('#btn-view').addClass('iso-disabled'); 
+                    //$('#btn-view').addClass('iso-disabled'); 
                 }               
             } // if selected
         }); // row selects 
@@ -559,6 +653,30 @@
             }
         }); // btn-edit 
 
+        // 
+        $('#btn-view').on("click", function() {
+            var route = "{{ route('files.admin.show', ':id') }}";
+            var rowdata = $myTable.rows('.selected').data()[0];                                    
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/file.error.grid.row_edit') }}");
+            } else { 
+                route = route.replace(':id', rowdata.hash);
+                $.ajax({
+                    url: route,
+                    type: 'GET',
+                    dataType: 'json',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
+                    success: function(data) {
+                        //console.dir(data);
+                        $.each(data, function(key, value) {
+                            $("#sheet-"+key).html(value);
+                        })                        
+                        $("#modal-view-open")[0].click();                 
+                    } // success
+                }); // ajax                            
+            } // if/else            
+        }); // btn-view
+
         // Eliminar Archivo // TODO: Decidir si se quita
         $('#btn-delete').on("click", function()  {
             var txt = '';
@@ -602,7 +720,7 @@
         }); // btn-refresh               
 
         // DATERANGE
-        console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
+        //console.log('DIN : '+$dateInDefault+' | DOUT : '+$dateOutDefault);
         $('#date-selected').daterangepicker({
             locale: {
                 format: 'YYYY/MM/DD',
@@ -633,10 +751,6 @@
             $dateOutDefault = picker.endDate.format();
             console.log('DOUT : '+$dateOutDefault);
         });
-        
-        // setTimeout(function() {
-        //     $('#files-table').DataTable().buttons().container().appendTo('#colvis-container');
-        // }, 100)
                         
     }); // document
 

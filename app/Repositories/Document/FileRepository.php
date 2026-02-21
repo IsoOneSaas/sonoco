@@ -7,11 +7,14 @@ use App\Interfaces\Document\FileRepositoryInterface;
 use App\Models\Document\FileModel;
 use App\Models\Document\FileDisposalModel;
 use App\Models\Document\FileIndexModel;
+use App\Models\Document\FileResponsibleModel;
 use App\Models\Document\FileSubTopicModel;
 use App\Models\Document\FileTopicModel;
 use App\Models\Document\RecordModel;
 //use App\Models\Document\SettingModel;
 use App\Models\Set\DepartmentModel;
+use App\Models\Set\JobModel;
+use App\Models\Set\LocationModel;
 use App\Models\Set\ProcessModel;
 use App\Models\Set\SystemModel;
 use Illuminate\Support\Facades\Auth;
@@ -27,13 +30,21 @@ class FileRepository implements FileRepositoryInterface
     private $file;
     private $set;
     private $alarm_time;
+    private $supports_array;
+    private $timeFormatLong;
+    private $timeFormatShort;
+    private $timeFormatSimple;
 
     public function __construct(ToolsClass $Tools, FileClass $Files)
     {
         $this->tool = $Tools;
         $this->file = $Files;
         $this->set = $this->tool->setSettings('document');
-        $this->alarm_time = 7; // TODO: Pasar a config        
+        $this->alarm_time = 7; // TODO: Pasar a config   
+        $this->supports_array = config("settings.record_support");  
+        $this->timeFormatLong = "%d %s (%s)";
+        $this->timeFormatShort = "%d %s";
+        $this->timeFormatSimple = "%d %s";
     }
 
     /**
@@ -46,12 +57,19 @@ class FileRepository implements FileRepositoryInterface
         $data = [];
         $emtpy_array = [];
         $i = 0;
-        $supports_array = config("settings.record_support");
         $dto = Carbon::now();
         $params = json_decode($slug, true);   
         Log::debug(['PARAMS 2' => $params]);
 
-        $pids = [];
+        // USUARIO
+        $user = Auth::user();
+        $uid = $user->user_id;
+        $plucked = JobModel::join('set_job_user', function($query) use($uid) {
+            $query->on('set_job_user.job_id', '=', 'set_jobs.job_id');
+            $query->where('set_job_user.user_id', '=', $uid);
+        })->pluck('set_jobs.job_id');
+        $jids =array_unique($plucked->all());   
+        Log::debug(['JIDS' => $jids]);
 
         // FILTRO POR FECHA
         $range = explode('T', $params['din']);
@@ -141,7 +159,7 @@ class FileRepository implements FileRepositoryInterface
             $subtopicName = ($subtopic) ? $subtopic->name : '';           
 
             // Soporte
-            $txtSupport = ($file->support == 0) ? '' : $supports_array[$file->support];
+            $txtSupport = ($file->support == 0) ? '' : $this->supports_array[$file->support];
 
             // Indexacion  
             if ($file->index_id != 0) {
@@ -211,6 +229,17 @@ class FileRepository implements FileRepositoryInterface
                 }
             } //if
 
+            // Authorización de edición del archivo
+            
+            $responsible = FileResponsibleModel::where('location_id', $file->location_id)->where('department_id', $file->department_id)->whereIn('job_id', $jids)->first();
+            if($responsible) {
+                $users = $responsible->users;
+                //Log::debug(['NAME' => $file->name,'USERS' => $users]);
+                $auth = ( in_array($uid, $users) ) ? 1 : 0;
+            } else {
+                $auth = 0;
+            }
+
             // Contar registros del archivo
             $count = RecordModel::where('code', $file->code)->count();
             
@@ -231,9 +260,9 @@ class FileRepository implements FileRepositoryInterface
             $data[$i]['subtopic'] = $subtopicName;
             $data[$i]['name'] = $file->name;
             $data[$i]['responsable'] = $file->responsable;
-            $data[$i]['datewell'] = $file->dwell_value . ' ' . $file->dwell_frequency;
-            $data[$i]['datemin'] = $file->hold_value . ' ' . $file->hold_frequency; 
-            $data[$i]['datedead'] = $file->dead_value . ' ' . $file->dead_frequency;
+            $data[$i]['datewell'] = ( $file->dwell_value > 0 ) ? sprintf($this->timeFormatSimple, $file->dwell_value, $file->dwell_frequency) : '';
+            $data[$i]['datemin'] = ( $file->hold_value > 0 ) ? sprintf($this->timeFormatSimple, $file->hold_value, $file->hold_frequency) : '';
+            $data[$i]['datedead'] = ( $file->dead_value > 0 ) ? sprintf($this->timeFormatSimple, $file->dead_value, $file->dead_frequency) : '';
             $data[$i]['storage'] = $file->storage;
             $data[$i]['classification'] = $file->classification;
             $data[$i]['txtindex'] = $txtIndex;
@@ -241,9 +270,10 @@ class FileRepository implements FileRepositoryInterface
 
             $data[$i]['hash'] = $this->tool->setIdHash($file->file_id);
             $data[$i]['count'] = $count;
+            $data[$i]['auth'] = $auth;
             //$data[$i]['txtsupport'] = $txtSupport;
-            //$data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
-            //$data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
+            $data[$i]['color1'] = (isset($color1)) ? $color1 : '';  
+            $data[$i]['color2'] = (isset($color2)) ? $color2 : ''; 
 
             $i++;                          
         } // foreach   
@@ -279,8 +309,7 @@ class FileRepository implements FileRepositoryInterface
     public function getFile($hash)
     {
         $id = $this->tool->getIdHash($hash);
-        $file = FileModel::find($id);    
-        return $file; 
+        return FileModel::find($id);    
     } // getFile Repository
 
     /**
@@ -339,6 +368,62 @@ class FileRepository implements FileRepositoryInterface
         }
         return ['status' => 'success', 'hash' => $hash, 'message' => $msg[$action]['success']];
     } // update Repository
+
+    /**
+     * Obtiene los datos del archivo para general la ficha 
+     * @param  string $hash Hash del archivo
+     * @return json    Datos del repositorio
+     */   
+     public function show($hash)
+     {
+        $id = $this->tool->getIdHash($hash);
+        $file = FileModel::find($id);
+        $system = SystemModel::find($file->system_id);
+        $location = LocationModel::find($file->location_id);
+        $department = DepartmentModel::find($file->department_id);
+        $topic = FileTopicModel::find($file->topic_id);
+        $subtopic = FileSubtopicModel::find($file->subtopic_id);
+
+        $file->system = $system->name;
+        $file->location = $location->name;
+        $file->department = $department->name;
+        $file->topic = $topic->name;
+        $file->subtopic = $subtopic->name;        
+
+        if( $file->job_id > 0 ) {
+            $job = JobModel::find($file->job_id);
+            $file->job = $job->name;
+        }  
+        
+        // Soporte
+        $file->support = ($file->support == 0) ? '' : $this->supports_array[$file->support];
+
+        // Indexacion 
+        $indexes_array = $this->getIndexArray();   
+        if ($file->index_id != 0) {
+            if (array_key_exists($file->index_id, $indexes_array)) {
+                $file->index = $indexes_array[$file->index_id];
+            }
+        } // if      
+
+        // Disposal
+        $disposals_array = $this->getDisposalArray();  
+        if ($file->disposal_id != 0) {
+            if (array_key_exists($file->disposal_id, $disposals_array)) {
+                $file->disposal = $disposals_array[$file->disposal_id];
+            }
+        } // if
+
+        $dt = Carbon::createFromTimeStamp(strtotime($file->dwell_date))->format($this->set['date_format']);
+        $file->dwell = ( $file->dwell_value > 0 ) ? sprintf($this->timeFormatLong, $file->dwell_value, $file->dwell_frequency, $dt) : '';
+
+        $dt = Carbon::createFromTimeStamp(strtotime($file->dead_date))->format($this->set['date_format']);
+        $file->dead = ( $file->dead_value > 0 ) ? sprintf($this->timeFormatLong, $file->dead_value, $file->dead_frequency, $dt) : '';        
+
+        $file->hold = ( $file->hold_value > 0 ) ? sprintf($this->timeFormatShort, $file->hold_value, $file->hold_frequency) : '';
+                        
+        return $file;
+     } // show Repository
     
    /**
      * Elimina archivo de la base de datos
