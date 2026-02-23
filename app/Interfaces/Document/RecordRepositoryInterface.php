@@ -22,7 +22,7 @@ interface RecordRepositoryInterface
 
     public function getUserId();
 
-    public function getHashFile($hash);
+    public function getHashFile($id);
 
 
    public function getLocationsList();

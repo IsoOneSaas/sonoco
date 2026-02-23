@@ -4,6 +4,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class FileModel extends Model
 {
     use HasFactory;
@@ -25,6 +26,8 @@ class FileModel extends Model
     public function records() : HasMany 
     {
         return $this->hasMany(RecordModel::class, 'code','code');
-    }     
+    } 
+    
+  
        
 } // class

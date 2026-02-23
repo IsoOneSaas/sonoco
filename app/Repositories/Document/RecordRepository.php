@@ -925,20 +925,17 @@ class RecordRepository implements RecordRepositoryInterface
 
     /**
      * Obtiene el Hash del Archivo a partir del hash del registro
-     * @param  string $hash Hash Id del Registro
+     * @param  integer $id Identificador del Registro
      * @return string    Hash Id del Archivo
      */   
-    public function getHashFile($hash)
+    public function getHashFile($id)
     {
-        $id = $this->tool->getIdHash($hash);
-        // Código común
-        $file = FileModel::join('document_records', function($query) use($id) {
-            $query->on('document_records.code', '=', 'document_files.code');
-            $query->where('document_records.record_id', '=', $id);            
-        })->first('document_files.file_id');
+        $record = RecordModel::find($id);
+        $file = $record->file;
         if( $file ) {
             $hash = $this->tool->setIdHash($file->file_id);
-            return ['status' => 'success', 'hash' => $hash, 'message' => ''];
+            $data = $this->file->showDataSheet($hash);
+            return ['status' => 'success', 'data' => $data, 'message' => ''];
         } else {
              return ['status' => 'error', 'message' => trans('document/file.error.hash.no-exist')];
         }

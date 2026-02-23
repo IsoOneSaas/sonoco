@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class RecordModel extends Model
 {
@@ -13,6 +14,12 @@ class RecordModel extends Model
     ];
     
  
-
+    /**
+    * Obtiene el archivo del registro
+    */ 
+    public function file() : HasOne
+    {
+        return $this->hasOne(FileModel::class, 'code', 'code');
+    }      
 
 } // Class

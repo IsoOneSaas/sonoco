@@ -660,12 +660,12 @@
 
         // Visualizar Ficha del Archivo
         $('#btn-view').on("click", function() {
-            var route = "{{ route('files.admin.show', ':id') }}";
+            var route = "{{ route('files.admin.show', ':hash') }}";
             var rowdata = $myTable.rows('.selected').data()[0];                                    
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/file.error.grid.row_edit') }}");
             } else { 
-                route = route.replace(':id', rowdata.hash);
+                route = route.replace(':hash', rowdata.hash);
                 $.ajax({
                     url: route,
                     type: 'GET',

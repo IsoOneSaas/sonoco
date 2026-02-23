@@ -523,27 +523,12 @@
         }); // btn-view 
         
         // Visualizar Ficha del Archivo
-        $('#btn-file').on("click", function() {
-            var route = "{{ route('records.show', ':id') }}";
-            //var route = "{{ route('records.edit.tag') }}";
+        $('#btn-file').on("click", function() {           
             var rowdata = $myTable.rows('.selected').data()[0];                                    
             if (rowdata === undefined || rowdata === null) {
                 setSimpleNotification("{{ trans('document/file.error.grid.row_show') }}");
             } else { 
-                route = route.replace(':id', rowdata.hash);
-                $.ajax({
-                    url: route,
-                    type: 'GET',
-                    dataType: 'json',
-                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
-                    success: function(data) {
-                        console.dir(data);
-                        // $.each(data, function(key, value) {
-                        //     $("#sheet-"+key).html(value);
-                        // })                        
-                        // $("#modal-view-open")[0].click();                 
-                    } // success
-                }); // ajax                            
+                setFile(rowdata.record_id);      
             } // if/else            
         }); // btn-file       
 
@@ -776,7 +761,30 @@
                 location.href = uri;   
             } // success
         }); // ajax 
-    } // setView Fx    
+    } // setView Fx 
+    
+    function setFile(id) {
+         var route = "{{ route('records.show', ':id') }}";
+         route = route.replace(':id', id);
+         console.log('URL '+route);
+        $.ajax({
+            url: route,
+            type: 'GET',
+            dataType: 'json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
+            success: function(json) {
+                console.dir(json);
+                if( json.status == 'success' ) {
+                    $.each(json.data, function(key, value) {
+                        $("#sheet-"+key).html(value);
+                    })                        
+                    $("#modal-view-open")[0].click();   
+                } else {
+                    setSuccessNotification('error', 'Oops!', json.message);
+                }              
+            } // success
+        }); // ajax  
+    } // setfile FX
 
 </script>
 

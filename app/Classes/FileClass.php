@@ -1,12 +1,16 @@
 <?php namespace App\Classes;
 
 use App\Classes\ToolsClass;
+use App\Models\Document\FileDisposalModel as Disposal;
 use App\Models\Document\FileModel as File;
 use App\Models\Document\FileTopicModel as Topic;
 use App\Models\Document\FileSubtopicModel as Subtopic;
 use App\Models\Document\RecordModel as Record;
 use App\Models\Set\DepartmentModel as Department;
+use App\Models\Set\JobModel as Job;
 use App\Models\Set\LocationModel as Location;
+use App\Models\Set\SystemModel as System;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,6 +20,9 @@ class FileClass
     private $codeStrPad;
     private $tool;
     protected $set;
+    private $supports_array;
+    private $timeFormatLong;
+    private $timeFormatShort;    
 
     public function __construct(ToolsClass $Tools)
     {      
@@ -24,6 +31,9 @@ class FileClass
         //Log::debug(['SETTINGS' => $this->set]);
         $this->codeStrPad = $this->set['file_code_pad'];
         $this->nuiStrPad = $this->set['record_nui_pad'];
+        $this->supports_array = config("settings.record_support");  
+        $this->timeFormatLong = "%d %s (%s)";
+        $this->timeFormatShort = "%d %s";
     }
     
     /**
@@ -374,6 +384,82 @@ class FileClass
     {
         return File::where('code', $code)->first(['system_id', 'location_id', 'department_id', 'process_id', 'topic_id', 'subtopic_id']);
     } // getFileDataByCode *
+
+    /**
+     * Obtiene los datos del archivo para general la ficha 
+     * @param  string $hash Hash del archivo
+     * @return json    Datos del repositorio
+     */   
+     public function showDataSheet($hash)
+     {
+        $id = $this->tool->getIdHash($hash);
+        $file = File::find($id);
+        $system = System::find($file->system_id);
+        $location = Location::find($file->location_id);
+        $department = Department::find($file->department_id);
+        $topic = Topic::find($file->topic_id);
+        $subtopic = Subtopic::find($file->subtopic_id);
+
+        $file->system = $system->name;
+        $file->location = $location->name;
+        $file->department = $department->name;
+        $file->topic = $topic->name;
+        $file->subtopic = $subtopic->name;        
+
+        if( $file->job_id > 0 ) {
+            $job = Job::find($file->job_id);
+            $file->job = $job->name;
+        }  
+        
+        // Soporte
+        $file->support = ($file->support == 0) ? '' : $this->supports_array[$file->support];
+
+        // Indexacion 
+        $indexes_array = $this->getIndexArray();   
+        if ($file->index_id != 0) {
+            if (array_key_exists($file->index_id, $indexes_array)) {
+                $file->index = $indexes_array[$file->index_id];
+            }
+        } // if      
+
+        // Disposal
+        $disposals_array = $this->getDisposalArray();  
+        if ($file->disposal_id != 0) {
+            if (array_key_exists($file->disposal_id, $disposals_array)) {
+                $file->disposal = $disposals_array[$file->disposal_id];
+            }
+        } // if
+
+        $dt = Carbon::createFromTimeStamp(strtotime($file->dwell_date))->format($this->set['date_format']);
+        $file->dwell = ( $file->dwell_value > 0 ) ? sprintf($this->timeFormatLong, $file->dwell_value, $file->dwell_frequency, $dt) : '';
+
+        $dt = Carbon::createFromTimeStamp(strtotime($file->dead_date))->format($this->set['date_format']);
+        $file->dead = ( $file->dead_value > 0 ) ? sprintf($this->timeFormatLong, $file->dead_value, $file->dead_frequency, $dt) : '';        
+
+        $file->hold = ( $file->hold_value > 0 ) ? sprintf($this->timeFormatShort, $file->hold_value, $file->hold_frequency) : '';
+                        
+        return $file;
+     } // show Method * 
+     
+    public function getIndexArray()
+    {
+        $index_array = [];
+        $indexes = File::get(['index_id', 'name']);        
+        foreach($indexes as $index) {
+            $index_array[$index->index_id] = $index->name;
+        }
+        return $index_array;        
+    } // getIndexArray   
+    
+    public function getDisposalArray()
+    {
+        $disposal_array = [];
+        $disposals = Disposal::get(['disposal_id', 'name']);        
+        foreach($disposals as $disposal) {
+            $disposal_array[$disposal->disposal_id] = $disposal->name;
+        }
+        return $disposal_array;        
+    } // getDisposalArray    
 
     
     /**

@@ -31,8 +31,6 @@ class FileRepository implements FileRepositoryInterface
     private $set;
     private $alarm_time;
     private $supports_array;
-    private $timeFormatLong;
-    private $timeFormatShort;
     private $timeFormatSimple;
 
     public function __construct(ToolsClass $Tools, FileClass $Files)
@@ -42,8 +40,6 @@ class FileRepository implements FileRepositoryInterface
         $this->set = $this->tool->setSettings('document');
         $this->alarm_time = 7; // TODO: Pasar a config   
         $this->supports_array = config("settings.record_support");  
-        $this->timeFormatLong = "%d %s (%s)";
-        $this->timeFormatShort = "%d %s";
         $this->timeFormatSimple = "%d %s";
     }
 
@@ -117,10 +113,10 @@ class FileRepository implements FileRepositoryInterface
         Log::debug(['PARAMS 3 DATE' => $rangeIn.' | '.$rangeOut, 'SIDS' => $sids, 'LIDS' => $lids, 'DIDS' => $dids, 'TIDS' => $tids, 'XISD' => $xids]);
 
         // ARREGLO DE INDICES
-        $indexes_array = $this->getIndexArray();        
+        $indexes_array = $this->file->getIndexArray();        
         
         // ARREGLO DE DISPOSICIONES
-        $disposals_array = $this->getDisposalArray();       
+        $disposals_array = $this->file->getDisposalArray();       
         
         // FILTRADO DE ARHIVOS
         $files = FileModel::join('set_processes AS T1', function ($join) {
@@ -372,61 +368,10 @@ class FileRepository implements FileRepositoryInterface
         return ['status' => 'success', 'hash' => $hash, 'message' => $msg[$action]['success']];
     } // update Repository
 
-    /**
-     * Obtiene los datos del archivo para general la ficha 
-     * @param  string $hash Hash del archivo
-     * @return json    Datos del repositorio
-     */   
-     public function show($hash)
-     {
-        $id = $this->tool->getIdHash($hash);
-        $file = FileModel::find($id);
-        $system = SystemModel::find($file->system_id);
-        $location = LocationModel::find($file->location_id);
-        $department = DepartmentModel::find($file->department_id);
-        $topic = FileTopicModel::find($file->topic_id);
-        $subtopic = FileSubtopicModel::find($file->subtopic_id);
-
-        $file->system = $system->name;
-        $file->location = $location->name;
-        $file->department = $department->name;
-        $file->topic = $topic->name;
-        $file->subtopic = $subtopic->name;        
-
-        if( $file->job_id > 0 ) {
-            $job = JobModel::find($file->job_id);
-            $file->job = $job->name;
-        }  
-        
-        // Soporte
-        $file->support = ($file->support == 0) ? '' : $this->supports_array[$file->support];
-
-        // Indexacion 
-        $indexes_array = $this->getIndexArray();   
-        if ($file->index_id != 0) {
-            if (array_key_exists($file->index_id, $indexes_array)) {
-                $file->index = $indexes_array[$file->index_id];
-            }
-        } // if      
-
-        // Disposal
-        $disposals_array = $this->getDisposalArray();  
-        if ($file->disposal_id != 0) {
-            if (array_key_exists($file->disposal_id, $disposals_array)) {
-                $file->disposal = $disposals_array[$file->disposal_id];
-            }
-        } // if
-
-        $dt = Carbon::createFromTimeStamp(strtotime($file->dwell_date))->format($this->set['date_format']);
-        $file->dwell = ( $file->dwell_value > 0 ) ? sprintf($this->timeFormatLong, $file->dwell_value, $file->dwell_frequency, $dt) : '';
-
-        $dt = Carbon::createFromTimeStamp(strtotime($file->dead_date))->format($this->set['date_format']);
-        $file->dead = ( $file->dead_value > 0 ) ? sprintf($this->timeFormatLong, $file->dead_value, $file->dead_frequency, $dt) : '';        
-
-        $file->hold = ( $file->hold_value > 0 ) ? sprintf($this->timeFormatShort, $file->hold_value, $file->hold_frequency) : '';
-                        
-        return $file;
-     } // show Repository
+    public function show($hash)
+    {
+        return $this->file->showDataSheet($hash);
+    } // show repository
     
    /**
      * Elimina archivo de la base de datos
@@ -722,25 +667,9 @@ class FileRepository implements FileRepositoryInterface
         return ($process) ? $process->process_id : 0;
     }
     
-    private function getIndexArray()
-    {
-        $index_array = [];
-        $indexes = FileIndexModel::get(['index_id', 'name']);        
-        foreach($indexes as $index) {
-            $index_array[$index->index_id] = $index->name;
-        }
-        return $index_array;        
-    } // getIndexArray 
 
-    private function getDisposalArray()
-    {
-        $disposal_array = [];
-        $disposals = FileDisposalModel::get(['disposal_id', 'name']);        
-        foreach($disposals as $disposal) {
-            $disposal_array[$disposal->disposal_id] = $disposal->name;
-        }
-        return $disposal_array;        
-    } // getDisposalArray
+
+
     
     /**
      * Obtiene arreglo de los valores del parámetro

@@ -161,9 +161,9 @@ class FileModelController extends Controller
     /**
      * Display de Datasheet of the File
      */    
-    public function show($id)
+    public function show($hash)
     {
-        $response = $this->fileRepo->show($id);
+        $response = $this->fileRepo->show($hash);
         return response()->json($response); 
     }  // show Method
 

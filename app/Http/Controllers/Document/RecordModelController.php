@@ -266,14 +266,13 @@ class RecordModelController extends Controller
     
     /**
      * Obtiene los datos del archivo para general la ficha 
-     * @param  string $hash Hash del registro
+     * @param  integer $id Identificador del registro
      * @return json    Datos del repositorio
      */      
-    public function showFile($hash)
+    public function showFile($id)
     {
-        $hashFile = $this->recordRepo->getHashFile($hash);
-        //$response = $this->fileRepo->show($id);
-        return response()->json($hashFile); // $response
+        $response = $this->recordRepo->getHashFile($id);        
+        return response()->json($response); // $response
     } // show Mehtod
     
     /**
