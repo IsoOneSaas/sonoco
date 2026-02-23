@@ -924,6 +924,27 @@ class RecordRepository implements RecordRepositoryInterface
     } // store Method
 
     /**
+     * Obtiene el Hash del Archivo a partir del hash del registro
+     * @param  string $hash Hash Id del Registro
+     * @return string    Hash Id del Archivo
+     */   
+    public function getHashFile($hash)
+    {
+        $id = $this->tool->getIdHash($hash);
+        // Código común
+        $file = FileModel::join('document_records', function($query) use($id) {
+            $query->on('document_records.code', '=', 'document_files.code');
+            $query->where('document_records.record_id', '=', $id);            
+        })->first('document_files.file_id');
+        if( $file ) {
+            $hash = $this->tool->setIdHash($file->file_id);
+            return ['status' => 'success', 'hash' => $hash, 'message' => ''];
+        } else {
+             return ['status' => 'error', 'message' => trans('document/file.error.hash.no-exist')];
+        }
+    } // getHashFile Repository
+
+    /**
      * Listado de requisitos para el select del filtro en Listado de Documentos de proceso (autorizados para el administrador)
      * @return collection    Listado
      */

@@ -74,9 +74,14 @@
                                                         <div class="form-inline">
                                                             <label for="location-selected" class="form-label sm:w-20 text-right pt-3">Localizaciones:</label>
                                                             <select multiple id="location-selected" class="form-control mt-2 border-slate-500" size="1" aria-label="Localizacion">
-                                                                @foreach($locations as $location)   
-                                                                <option value={{ $location->location_id }} selected>{{ $location->name }}</option>
-                                                                @endforeach                                                                                                      
+                                                               @if( $countLocations > 1 )
+                                                                    @foreach($locations as $location)   
+                                                                    <option value={{ $location->location_id }} selected>{{ $location->name }}</option>
+                                                                    @endforeach                                                                                                                                    
+                                                                @else
+                                                                    <option value={{ $locations->location_id }} selected>{{ $locations->name }}</option>
+                                                                @endif
+                                                                                                    
                                                             </select>
                                                             <label for="department-selected" class="form-label sm:w-20 text-right ml-2">Departamentos:</label>
                                                             <select multiple id="department-selected" class="form-control mt-2 border-slate-500 ml-2" size="1" aria-label="Departamento">
@@ -184,51 +189,51 @@
                     </div>
                     <!-- END: HTML Table Data -->
 
-                    <!-- BEGIN: Modal Department -->
+                    <!-- BEGIN: Modal View -->
                     <div id="modal-view" class="modal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-xxl">
+                        <div class="{{ trans('document/file.form.modal-file.class') }}">
                             <div class="modal-content">
                                 <!-- BEGIN: Modal Header -->
                                 <div class="modal-header">
-                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto">Ficha del Archivo</h2>
+                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto"><i data-lucide="{{ trans('document/file.form.modal-file.icon') }}" class="w-6 h-6 mr-1"></i> {{ trans('document/file.form.modal-file.title') }}</h2>
                                 </div>
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->
                                 <div class="modal-body intro-y box p-5 mt-5">
                                     <div class="table-responsive">
-                                        <table class="table table-bordered" width="100%">                                        
+                                        <table id="table-file" class="table table-bordered" width="100%">                                        
                                             <tr><td colspan="2">
                                                 <table class="table table-striped" width="100%"> 
-                                                    <tr><td class="title1">Código</td><td id="sheet-code"></td></tr>
-                                                    <tr><td class="title1">Nombre</td><td id="sheet-name"></td></tr>                                                
+                                                    <tr><td class="title1">{{ trans('document/file.form.code.title') }}</td><td id="sheet-code"></td></tr>
+                                                    <tr><td class="title1">{{ trans('document/file.form.name.title') }}</td><td id="sheet-name"></td></tr>                                                
                                                 </table>
                                             </td></tr>
                                             <tr><td>
                                                 <table class="table table-striped" width="100%">
-                                                    <tr><td class="title">Sistema de Gestión</td><td id="sheet-system"></td></tr>
-                                                    <tr><td class="title">Localización</td><td id="sheet-location"></td></tr>
-                                                    <tr><td class="title">Departamento</td><td id="sheet-department"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.system.title') }}</td><td id="sheet-system"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.location.title') }}</td><td id="sheet-location"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.department.title') }}</td><td id="sheet-department"></td></tr>
                                                 </table>
                                             </td><td>
                                                 <table class="table table-striped" width="100%">
-                                                    <tr><td class="title">Tema</td><td id="sheet-topic"></td></tr>
-                                                    <tr><td class="title">Subtema</td><td id="sheet-subtopic"></td></tr>
-                                                    <tr><td class="title">Responsable</td><td id="sheet-job"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.topic.title') }}</td><td id="sheet-topic"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.subtopic.title') }}</td><td id="sheet-subtopic"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.job.title') }}</td><td id="sheet-job"></td></tr>
                                                 </table>                                            
                                             </td></tr>
                                             <tr><td>
                                                 <table class="table table-striped" width="100%">
-                                                    <tr><td class="title">Medio de Soporte</td><td id="sheet-support">*</td></tr>
-                                                    <tr><td class="title">Almacenamiento</td><td id="sheet-storage"></td></tr>
-                                                    <tr><td class="title">Clasificación</td><td id="sheet-classification"></td></tr>
-                                                    <tr><td class="title">Indexación</td><td id="sheet-index">*</td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.support.title') }}</td><td id="sheet-support"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.storage.title') }}</td><td id="sheet-storage"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.classification.title') }}</td><td id="sheet-classification"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.index.title') }}</td><td id="sheet-index"></td></tr>
                                                 </table>
                                             </td><td>
                                                 <table class="table table-striped" width="100%">
-                                                    <tr><td class="title2">Disposición Final</td><td id="sheet-disposal">*</td></tr>
-                                                    <tr><td class="title2">Frecuencia de Retención</td><td id="sheet-dwell">*</td></tr>
-                                                    <tr><td class="title2">Tiempo en Archivo Muerto</td><td id="sheet-dead">*</td></tr>
-                                                    <tr><td class="title2">Tiempo Mínimo de Retención</td><td id="sheet-hold">*</td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.disposal.title') }}</td><td id="sheet-disposal"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.dwell.title') }}</td><td id="sheet-dwell"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.dead.title') }}</td><td id="sheet-dead"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.hold.title') }}</td><td id="sheet-hold"></td></tr>
                                                 </table>                                            
                                             </td></tr>                                        
                                         </table> 
@@ -237,14 +242,14 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
-                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cerrar</button>                                  
+                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">{{ trans('document/file.form.modal-file.button-ko') }}</button>                                  
                                     <a id="modal-view-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-view" class="">.</a>  
                                 </div>
                                 <!-- END: Modal Footer -->
                             </div>
                         </div>
                     </div>
-                    <!-- END: Modal Topic --> 
+                    <!-- END: Modal View --> 
 
                 </div>
                 <!-- END: Content -->
@@ -269,18 +274,18 @@
         .input-filter {
             width: 100%
         } 
-        table.td {
-            padding: 0
+        table#table-file td {
+            padding: 0.2 0.5;
         } 
-        table td.title {
+        table#table-file td.title {
             font-weight: 800;
             width: 35%;
         }
-        table td.title1 {
+        table#table-file td.title1 {
             font-weight: 800;
             width: 10%;
         }          
-        table td.title2 {
+        table#table-file td.title2 {
             font-weight: 800;
             width: 40%;
         }             
@@ -653,7 +658,7 @@
             }
         }); // btn-edit 
 
-        // 
+        // Visualizar Ficha del Archivo
         $('#btn-view').on("click", function() {
             var route = "{{ route('files.admin.show', ':id') }}";
             var rowdata = $myTable.rows('.selected').data()[0];                                    

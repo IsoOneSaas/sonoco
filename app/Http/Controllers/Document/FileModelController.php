@@ -35,14 +35,15 @@ class FileModelController extends Controller
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
         $locations = $this->fileRepo->getLocationsList();
-        Log::debug(['SYSTEMS 1' => $systems->toArray()]);
-        Log::debug(['LOCATIONS 1' => $locations['data']->toArray()]);
+        // Log::debug(['SYSTEMS 1' => $systems->toArray()]);
+        // Log::debug(['LOCATIONS 1 n' => $locations['n'], 'DATA' => $locations['data']->toArray()]); //
         return view('document.file.index', [
             'gridColOrd'  => $columnDefinition['column_order'],
             'gridColDef'  => $columnDefinition['column_json'], 
             'gridColExp'  => $columnDefinition['column_export'],
             'gridLanguage' => json_encode(trans('document/file.datatable_master')),
             'systems'       => $systems,
+            'countLocations' => $locations['n'],
             'locations'   => $locations['data'],
         ]);        
     } // index Method
@@ -70,7 +71,7 @@ class FileModelController extends Controller
 
         // Obtener localiciones
         $locations = $this->fileRepo->getLocationsList();
-        //Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
+        Log::debug(['LOCATIONS' => $locations['data']->toArray()]); 
 
         // Obtener medios de soporte
         $supports = config('settings.record_support');

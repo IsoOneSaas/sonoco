@@ -162,9 +162,15 @@ return [
                                     'placeholder1'   => 'Valor',
                                     'placeholder2'   => 'Seleccione la frecuencia',
                                     'tooltip'       => 'Opcional. Digite un valor numérico y seleccione una frecuencia para el tiempo mínimo de retención.',
-                ],                                                                                                                                                       
+                ],
                 
-        
+                'modal-file'    => [
+                                    'icon' => 'archive',
+                                    'title' => 'Ficha del Archivo',
+                                    'button-ko' => 'Cerrar',
+                                    'class' => 'modal-dialog modal-xxl',
+                ],                 
+                        
                 'topic_department'    => [
                                     'icon' => 'at-sign',
                                     'title' => 'Departamento',
@@ -272,7 +278,10 @@ return [
             'grid' => [
                 'row_edit'  => 'No ha seleccionado un archivo para editar',
                 'row_delete'  => 'No ha seleccionado un archivo para eliminar',
-            ],          
+            ],
+            'hash' =>  [
+                'no-exist'  => 'El registro seleccionado no se ha archivado'
+            ],                      
     ], 
          
     'datatable_master' => [

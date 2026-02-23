@@ -114,6 +114,7 @@ class FileRepository implements FileRepositoryInterface
         } // if
         
         //Log::debug(['XIDS' => $xids]);
+        Log::debug(['PARAMS 3 DATE' => $rangeIn.' | '.$rangeOut, 'SIDS' => $sids, 'LIDS' => $lids, 'DIDS' => $dids, 'TIDS' => $tids, 'XISD' => $xids]);
 
         // ARREGLO DE INDICES
         $indexes_array = $this->getIndexArray();        
@@ -145,6 +146,8 @@ class FileRepository implements FileRepositoryInterface
                 'T1.name as process',
                 'T2.name as responsable',
             ]);
+
+        Log::debug('Número de registros filtrados 2: '. $files->count());            
                      
         // GENERAR GRID
         foreach($files as $file) {          

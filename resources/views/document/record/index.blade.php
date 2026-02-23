@@ -20,6 +20,7 @@
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el documento"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-file" title="Ver el archivo"><i data-lucide="archive" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -152,6 +153,68 @@
                         </div>
                     </div>
                     <!-- END: HTML Table Data -->
+
+                    <!-- BEGIN: Modal View -->
+                    <div id="modal-view" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="{{ trans('document/file.form.modal-file.class') }}">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto"><i data-lucide="{{ trans('document/file.form.modal-file.icon') }}" class="w-6 h-6 mr-1"></i> {{ trans('document/file.form.modal-file.title') }}</h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">
+                                    <div class="table-responsive">
+                                        <table id="table-file" class="table table-bordered" width="100%">                                        
+                                            <tr><td colspan="2">
+                                                <table class="table table-striped" width="100%"> 
+                                                    <tr><td class="title1">{{ trans('document/file.form.code.title') }}</td><td id="sheet-code"></td></tr>
+                                                    <tr><td class="title1">{{ trans('document/file.form.name.title') }}</td><td id="sheet-name"></td></tr>                                                
+                                                </table>
+                                            </td></tr>
+                                            <tr><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">{{ trans('document/file.form.system.title') }}</td><td id="sheet-system"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.location.title') }}</td><td id="sheet-location"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.department.title') }}</td><td id="sheet-department"></td></tr>
+                                                </table>
+                                            </td><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">{{ trans('document/file.form.topic.title') }}</td><td id="sheet-topic"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.subtopic.title') }}</td><td id="sheet-subtopic"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.job.title') }}</td><td id="sheet-job"></td></tr>
+                                                </table>                                            
+                                            </td></tr>
+                                            <tr><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title">{{ trans('document/file.form.support.title') }}</td><td id="sheet-support"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.storage.title') }}</td><td id="sheet-storage"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.classification.title') }}</td><td id="sheet-classification"></td></tr>
+                                                    <tr><td class="title">{{ trans('document/file.form.index.title') }}</td><td id="sheet-index"></td></tr>
+                                                </table>
+                                            </td><td>
+                                                <table class="table table-striped" width="100%">
+                                                    <tr><td class="title2">{{ trans('document/file.form.disposal.title') }}</td><td id="sheet-disposal"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.dwell.title') }}</td><td id="sheet-dwell"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.dead.title') }}</td><td id="sheet-dead"></td></tr>
+                                                    <tr><td class="title2">{{ trans('document/file.form.hold.title') }}</td><td id="sheet-hold"></td></tr>
+                                                </table>                                            
+                                            </td></tr>                                        
+                                        </table> 
+                                    </div>                                                 
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">{{ trans('document/file.form.modal-file.button-ko') }}</button>                                  
+                                    <a id="modal-view-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-view" class="">.</a>  
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal View -->                    
 
                 </div>
                 <!-- END: Content -->
@@ -457,7 +520,32 @@
                 var id = rowdata.record_id;
                 setEdit(id);
             }
-        }); // btn-view        
+        }); // btn-view 
+        
+        // Visualizar Ficha del Archivo
+        $('#btn-file').on("click", function() {
+            var route = "{{ route('records.show', ':id') }}";
+            //var route = "{{ route('records.edit.tag') }}";
+            var rowdata = $myTable.rows('.selected').data()[0];                                    
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/file.error.grid.row_show') }}");
+            } else { 
+                route = route.replace(':id', rowdata.hash);
+                $.ajax({
+                    url: route,
+                    type: 'GET',
+                    dataType: 'json',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
+                    success: function(data) {
+                        console.dir(data);
+                        // $.each(data, function(key, value) {
+                        //     $("#sheet-"+key).html(value);
+                        // })                        
+                        // $("#modal-view-open")[0].click();                 
+                    } // success
+                }); // ajax                            
+            } // if/else            
+        }); // btn-file       
 
         // UTILIDADES        
         $("#btn-download").on("click", function() {
@@ -484,14 +572,16 @@
                 $(this).removeClass('selected');
                 $('#btn-edit').addClass('iso-disabled');
                 $('#btn-view').addClass('iso-disabled');
+                $('#btn-file').addClass('iso-disabled');
             } else {
                 // Seleccionado
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');                
+                $('#btn-file').removeClass('iso-disabled');
                 if( data.status == 1 ) {
                     // Bloqueado
                     $('#btn-edit').addClass('iso-disabled');  
-                    $('#btn-view').removeClass('iso-disabled');
+                    $('#btn-view').removeClass('iso-disabled');                    
                 } else {
                     $('#btn-edit').removeClass('iso-disabled');
                     $('#btn-view').addClass('iso-disabled'); 

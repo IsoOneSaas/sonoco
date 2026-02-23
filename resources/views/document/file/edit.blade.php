@@ -220,6 +220,12 @@
 <script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
 
     @include('document.file.javascript')
+
+<script>
+    $(document).ready(function() {
+        $("#loading-image").hide();      
+    });    
+</script>
                
     @include('components.notification_index')
 

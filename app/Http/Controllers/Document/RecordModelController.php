@@ -262,7 +262,19 @@ class RecordModelController extends Controller
             return redirect()->back()->withInput($input)->with($response['status'], $response['message']);
         }
         
-    } // create Method 
+    } // create Method
+    
+    /**
+     * Obtiene los datos del archivo para general la ficha 
+     * @param  string $hash Hash del registro
+     * @return json    Datos del repositorio
+     */      
+    public function showFile($hash)
+    {
+        $hashFile = $this->recordRepo->getHashFile($hash);
+        //$response = $this->fileRepo->show($id);
+        return response()->json($hashFile); // $response
+    } // show Mehtod
     
     /**
      * Obtiene el listado de subtemas para el tema especificado

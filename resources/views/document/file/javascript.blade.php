@@ -137,9 +137,7 @@
 
     }); // document
     
-    $(document).ready(function() {
-        $("#loading-image").hide();      
-    });
+
 
     function setDepartmentsAjax(id) {
         var url = "{{ route('files.list.departments', ':id') }}";
@@ -383,6 +381,8 @@
                     $("#input-new-topic").val('');
                     // Generar select de temas
                     generateTopicsSelect(json.tid, json.topics);
+                    // Enfocar
+                    $("#topic-select").focus();                    
                     // Resetea select de subtemas
                     generateSubtopicsSelect(0, []);
                 } else {
@@ -411,6 +411,8 @@
                     $("#input-new-subtopic").val('');
                     // Generar select de subtemas
                     generateSubtopicsSelect(json.sid, json.subtopics);
+                    // Enfocar
+                    $("#subtopic-select").focus();
                     // Generar código
                     setCode(); 
                 } else {

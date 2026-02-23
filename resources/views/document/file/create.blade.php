@@ -203,6 +203,25 @@
 <script src="{{ url('assets/js/daterangepicker-master/daterangepicker.js') }}"></script>
 
     @include('document.file.javascript')
+
+<script>
+    $(document).ready(function() {        
+        var numberOfOptions = $('#location-select option').length;
+        console.log('lNo: '+ numberOfOptions);
+        if( numberOfOptions == 1 ) {
+            $("#loading-image").show();
+            $("#location-select").trigger("change");
+            setTimeout(function() {
+                var numberOfOptions = $('#department-select option').length;
+                console.log('dNo: '+ numberOfOptions);
+                if( numberOfOptions == 1 ) {                
+                    $("#department-select").trigger("change");                    
+                } // if                    
+                $("#loading-image").hide();
+            }, 3000);                                        
+        } // if                
+    });    
+</script>    
                
     @include('components.notification_index')
 
