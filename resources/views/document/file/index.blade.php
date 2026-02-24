@@ -195,7 +195,7 @@
                             <div class="modal-content">
                                 <!-- BEGIN: Modal Header -->
                                 <div class="modal-header">
-                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto"><i data-lucide="{{ trans('document/file.form.modal-file.icon') }}" class="w-6 h-6 mr-1"></i> {{ trans('document/file.form.modal-file.title') }}</h2>
+                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto flex"><i data-lucide="{{ trans('document/file.form.modal-file.icon') }}" class="w-6 h-6 mr-1"></i> {{ trans('document/file.form.modal-file.title') }}</h2>
                                 </div>
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->

@@ -231,6 +231,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // SETTINGS
             Route::group(['prefix' => 'ajustes', 'as' => 'settings.'], function () {
+                Route::resource('personalizar', \App\Http\Controllers\Document\FileCustomizeController::class);
                 Route::resource('responsibles', \App\Http\Controllers\Document\FileResponsibleModelController::class); 
                 Route::post('responsables/cargos', [\App\Http\Controllers\Document\FileResponsibleModelController::class, 'getJobs'])->name('responsibles.jobs'); 
                 Route::post('responsables/usuarios', [\App\Http\Controllers\Document\FileResponsibleModelController::class, 'getUsers'])->name('responsibles.users'); 

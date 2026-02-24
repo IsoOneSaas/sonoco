@@ -107,7 +107,32 @@ return [
                             'title'         => 'Texto Gestión Documental',
                             'placeholder'   => 'Texto para el cuerpo del email en gestión documental',
                             'tooltip'       => 'Escriba el contenido del cuerpo que será enviado en el email para la notificación de gestión documental.',
-            ],           
+            ],
+            
+            'file_format'                   =>  [
+                            'icon'          => 'code',
+                            'title'         => 'Formato de código archivistico',
+                            'placeholder'   => 'Indique el formato de código',
+                            'tooltip'       => 'Requerido. Genere un modelo válido de código archivístico',
+            ], 
+            'nui_format'                   =>  [
+                            'icon'          => 'code',
+                            'title'         => 'Formato de NUI',
+                            'placeholder'   => 'Indique el formato MUI',
+                            'tooltip'       => 'Requerido. Genere un modelo válido de código NUI',
+            ], 
+            'file_pad'                   =>  [
+                            'icon'          => 'hash',
+                            'title'         => 'Número de dígitos código archivístico',
+                            'placeholder'   => 'Indique el número de dígitos de relleno',
+                            'tooltip'       => 'Requerido. Digige el número de dígitos de relleno (ceros) que contendrá cada código numérico que compone el código archivistico',
+            ], 
+            'nui_pad'                   =>  [
+                            'icon'          => 'hash',
+                            'title'         => 'Número de dígitos código NUI',
+                            'placeholder'   => 'Indique el número de dígitos de relleno',
+                            'tooltip'       => 'Requerido. Digige el número de dígitos de relleno (ceros) que tendrá el consecutivo del código NUI',
+            ],                                        
                                                                         
         ],    
 
@@ -143,7 +168,24 @@ return [
                 'reply_to_edit'                  =>  [
                                     'required'      => 'Indique el correo electrónico que recibirá confirmación de lectura del mensaje',
 
-                ],                                                             
+                ], 
+                
+                'record_nui_format'                  =>  [
+                                    'required'      => 'Indique un formato de  código NUI para los registros',
+
+                ], 
+                'file_code_format'                  =>  [
+                                    'required'      => 'Indique un formato de código archivistico',
+
+                ],                 
+                'record_nui_pad'                  =>  [
+                                    'required'      => 'Indique el número de ceros de relleno para el consecutivo del NUI',
+
+                ], 
+                'file_code_pad'                  =>  [
+                                    'required'      => 'Indique el número de ceros de relleno para los códigos numericos utilizados en el código archivistico',
+
+                ],                                                 
     ],
 
 
