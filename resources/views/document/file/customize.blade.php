@@ -44,7 +44,7 @@
                                         <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#example-tab-5" type="button" role="tab" aria-controls="example-tab-4" aria-selected="false" > Ar </button>
                                     </li>                                    
                                 </ul>
-                                <form id="customize-form" action="{{ route('documents.settings.personalizar.store') }}" method="POST">
+                                <form id="customize-form" action="{{ route('files.settings.personalizar.store') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="tab_active" value="{{ old('tab_active', '') }}">
                                 <div class="tab-content mt-5">

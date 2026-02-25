@@ -14,6 +14,9 @@ return [
     'store' => [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'success'       => 'Configuración para documentos salvada correctamente',
+
+                'bad-code'      => 'Formado de código archivistico incorrecto',
+                'bad-nui'       => 'Formado de código NUI incorrecto',
     ],
 
 

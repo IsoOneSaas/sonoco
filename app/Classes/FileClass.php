@@ -88,10 +88,22 @@ class FileClass
     public function getLocationsList($user)
     {        
         if( $user->hasAnyRole('MASTER','SUPER') ) {
+            // As Super+Master
             $locations = Location::all();
+        } elseif( $user->hasAnyRole('ADMIN') ) {
+            // As Admin
+            $plucked = $user->adminLocations->pluck('location_id');
+            $lids = $plucked->all();
+            if( count($lids) > 0 ) {
+                $locations = Location::findMany($lids);
+            } else {
+                $locations = $user->locations;
+            }            
         } else {
+            // As User
             $locations = $user->locations;
         }
+
         if( $locations->count() == 1 ) {
             $result = $locations->first();
             //$result->newCode = ( is_int($result->code) ) ? str_pad($result->code, $this->codeStrPad, "0", STR_PAD_LEFT) : $result->code;
@@ -186,7 +198,7 @@ class FileClass
      */     
     public function setFile($data, $code, $sid, $pid)   
     {
-        Log::debug(['DATA' => $data, 'CODE' => $code, 'SID' => $sid, 'PID' => $pid]);
+        //Log::debug(['DATA' => $data, 'CODE' => $code, 'SID' => $sid, 'PID' => $pid]);
         try {
             DB::beginTransaction();
             $file = New File;
@@ -318,7 +330,7 @@ class FileClass
      */       
     public function getCode(array $data)
     {
-        Log::debug(['GETCODE' => $data]);
+        //Log::debug(['GETCODE' => $data]);
 
         // pattern 
         $arreglo =  ['@','#','%','&'];
@@ -354,7 +366,7 @@ class FileClass
                 $pattern = str_replace($key, $replace2[$key], $pattern);
             }
         }
-        Log::debug(':: CODE: '. $pattern);
+        //Log::debug(':: CODE: '. $pattern);
         return $pattern; 
     } // getCode Method *
 

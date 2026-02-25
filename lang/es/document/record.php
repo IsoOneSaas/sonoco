@@ -73,6 +73,12 @@ return [
                             'placeholder'   => 'Digite un nuevo nombre de registro',
                             'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos y máximo 255 caracteres',
         ],
+        'origin'         =>  [
+                            'icon'          => 'file',
+                            'title'         => 'Origen',
+                            'placeholder'   => '',
+                            'tooltip'       => '',
+        ],        
         'topic'         =>  [
                             'icon'          => 'box',
                             'title'         => 'Tema',

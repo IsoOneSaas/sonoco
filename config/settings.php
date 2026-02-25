@@ -199,7 +199,9 @@ return [
                                 //'P',    // Código de proceso
                                 'T',    // Código de tema
                                 'S',    // Código subteman
-    ],     
+    ],
+    
+    'file_format_sign' => ['/', ':', '(', ')', '[', ']', '|', '-', '_', '.'],
     
     'document_status' => [              // NO CAMBIAR ORDER Important!
         'create'    =>  'CREATED',      // Documento creado en blanco

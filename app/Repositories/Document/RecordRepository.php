@@ -175,135 +175,6 @@ class RecordRepository implements RecordRepositoryInterface
         //Log::debug(['DATA*' => $data]);
         return json_encode($results);          
     } // render Repository
-
-    public function render2($slug, $systems, $processes, $groups, $setting)
-    {
-        $data = [];
-        $i = 0;
-        $params = json_decode($slug, true);
-
-        Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray(), 'GROUPS' => $groups->toArray()]); //
-
-        ini_set('max_execution_time', 3600);
-        set_time_limit(3600);
-
-        // Range Date
-        //
-        $range = explode('T', $params['din']);
-        $rangeIn = $range[0] .' 00:00:00';
-        $range = explode('T', $params['dout']);
-        $rangeOut = $range[0] .' 23:59:59';
-        
-        // Requisitos
-        $sids = $this->setIds('sids', $params);
-        if( !$sids ) {
-            $plucked = $systems->pluck('system_id');
-            $sids = $plucked->all();
-        }
-        
-        // Procesos
-        $pids = $this->setIds('pids', $params);
-        if( !$pids ) {
-            $plucked = $processes->pluck('process_id');
-            $pids = $plucked->all();
-        }
-        
-        // Grupo
-        $groupArray = [];
-        if( $params['gid'] == '' ) {
-            foreach($groups as $j => $obj) {
-                $groupArray[] = $obj->group;
-            }
-        } else {
-            $groupArray  = [$params['gid']];
-        }
-
-        // Etiqueta
-        $tagArray = [];
-        if( $params['tid'] == '' ) {
-            $tagsCollection  = DB::table('document_record_tags')->select('tag')->whereIn('group', $groupArray)->orderBy('tag')->groupBy('tag')->get(); 
-            foreach($tagsCollection as $j => $obj) {
-                $tagArray[] = $obj->tag;
-            }
-        } else {
-            $tagArray  = [$params['tid']];
-        }
-        
-        
-        Log::debug(['DATE IN' => $rangeIn, 'DATE OUT' => $rangeOut, 'SIDS' => $sids, 'PIDS' => $pids, 'GROUPS' => $groupArray, 'ETIQUETAS' => $tagArray ]);
-
-        // OBTENER LOS REGISTROS FILTRADOS
-        $records = RecordModel:: //whereIn('document-records.document-record_id', $rids)
-            join('documents AS T1', function($join){
-                $join->on('T1.document_id', '=', 'document_records.document_id');
-            })            
-            ->join('document_record_topics AS T4', function($join) {
-                $join->on('T4.record_id', '=', 'document_records.record_id');
-            })              
-            ->join('set_processes AS T2', function($join) use($pids)  { // 
-                $join->on('T2.process_id', '=', 'T1.process_id');
-                $join->whereIn('T2.process_id', $pids);
-            })
-            ->join('set_systems AS T3', function($join) use($sids) {
-                $join->on('T3.system_id', '=', 'T1.system_id');
-                $join->whereIn('T3.system_id', $sids);
-            })                                  
-            ->whereBetween('document_records.updated_at', [$rangeIn, $rangeOut])
-            ->get([
-                'document_records.record_id', 
-                'document_records.name AS recordName', 
-                'document_records.author_name AS authorName', 
-                'document_records.status',
-                'document_records.code',
-                'document_records.year',
-                'document_records.serial',
-                'document_records.created_at as date',
-                'T1.name as documentName',
-                'T4.topic',
-                'T4.subject',            
-            ]);
-
-        Log::debug('Número de registros filtrados 1: '. $records->count());            
-
-           
-        foreach($records as $record) {
-            // Filtro de Etiqueta
-            if( $params['gid'] == '' ) {
-                $result = true;
-                //$tagArray = 'ALL';
-            } else {
-                $result =  DB::table('document_record_tags')->where('record_id', $record->record_id)->whereIn('tag', $tagArray)->first();
-            }            
-            Log::debug(['RID' => $record->record_id, 'TAGS' => $tagArray]);
-            if($result) {
-                $dt = Carbon::createFromTimeStamp(strtotime($record->date));
-                $data[$i]['DT_RowIndex'] = $i+1;
-                $data[$i]['record_id'] = $record->record_id;
-                $data[$i]['nui'] =  $this->file->setNui($record->code, $record->year, $record->serial);
-                $data[$i]['name'] = $record->recordName;
-                $data[$i]['author'] = $record->authorName;
-                $data[$i]['topic'] = $this->file->getTopic($record->topic);
-                $data[$i]['subject']  = $this->file->getSubtopic($record->subject);
-                $data[$i]['date']  = $dt->diffForHumans();
-                $data[$i]['document'] = ($record->documentName === NULL) ? '' : $record->documentName;
-                $data[$i]['status'] = $record->status;
-                $i++;  
-            }                          
-        } // foreach
-        
-       Log::debug('Número de registros filtrados 2: '. count($data));
-
-        $results = [
-            "sEcho" => 1,
-            "iTotalRecords" => count($data),
-            "iTotalDisplayRecords" => count($data),
-            "aaData" => $data
-        ];
-        Log::debug(['DATA*' => $data]);
-        return json_encode($results);          
-
-    } // render
-    
     
     /**
      * Establece los datos del registro a crear
@@ -330,7 +201,6 @@ class RecordRepository implements RecordRepositoryInterface
             'subject' => '',
             'tags' => [],
             'document' => $document->name,
-            //'sid'   => $document->system_id,
             'status_id' => 0,
             'records' => [],
             'hash' => $hash,
@@ -501,6 +371,7 @@ class RecordRepository implements RecordRepositoryInterface
         }
         // Recuperar settings (desde el documento master)
         $document = DocumentModel::find($record->document_id);
+        $output_array['document'] = $document->name;
         $sizeDefault = config('settings.document_print_format')['size'];
         $dirDefault = config('settings.document_print_format')['orientation']; 
         $json_array = $document->settings;         
@@ -511,6 +382,7 @@ class RecordRepository implements RecordRepositoryInterface
                 $dirDefault = $format['orientation'];
             } // if
         } // if
+
         // Generar selects de settings
         $textArray = trans('document/record.layout');
         $printLayout =  config('settings.print_layout_default');
@@ -891,37 +763,6 @@ class RecordRepository implements RecordRepositoryInterface
         return ['status' => 'success', 'hash' => $hash, 'tab' => $data['tab_active'], 'message' => $msg];
     } // update Repository
 
-    /**
-     * Almacenar el registro en el archivo
-     * @param  object $record colección de datos del registro
-     * @return boolean    Resultado del método
-     */      
-    public function store($record) // FIXME:Se elimina
-    {
-        $result = false;
-        // Obtener documento y proceso fuente
-        $document = DocumentModel::find($record->document_id);
-        $process = ProcessModel::find($document->process_id);
-
-        // Validars si no está archivado ya este código de documento
-        $file = FileModel::where('code', $document->code)->first();
-        if(!$file) {
-                // creación del registor archivado
-                $file = new FileModel;
-                $file->system_id = $document->system_id;
-                $file->department_id = $document->department_id;
-                $file->document_id = $record->document_id;
-                $file->record_id = $record->record_id;  
-                $file->job_id = $process->job_id;
-                $file->name = $document->name;
-                $file->code = $document->code;                                                   
-                $file->support = 4; // 'Electrónico Iso-One'
-                $file->storage = config('settings.record_storage_default');
-                $file->settings = ['method' => 'auto'];
-                $result = $file->save() ? true : false;            
-        } // if
-        return $result;
-    } // store Method
 
     /**
      * Obtiene el Hash del Archivo a partir del hash del registro

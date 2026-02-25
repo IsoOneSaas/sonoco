@@ -25,10 +25,9 @@ class CustomizeController extends Controller
     public function index() : View
     {
         $data = $this->custoRepo->select();
-        //$docs = $this->custoRepo->get();
         return view('document.customize.index', [
             'data'  => $data,
-        ]); //  compact('categories','templates')
+        ]);
     } // index Method
 
 
@@ -43,16 +42,4 @@ class CustomizeController extends Controller
         return redirect()->back()->withInput($request->input())->with($response['status'], $response['message']);
     } // store Method
  
-
-    // public function setTypes(Request $request) 
-    // {
-    //     return $this->custoRepo->getTypes($request->all());
-    // } // setTypes
-
-    // public function setDocuments(Request $request) 
-    // {
-    //     return $this->custoRepo->getDocuments($request->all());
-    // } // setDocumnents   
-
-
 } // class

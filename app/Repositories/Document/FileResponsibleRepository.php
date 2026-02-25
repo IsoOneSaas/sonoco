@@ -48,7 +48,6 @@ class FileResponsibleRepository implements FileResponsibleRepositoryInterface
             ->get(['set_departments.department_id', 'set_departments.name AS dName', 'set_locations.location_id', 'set_locations.name AS lName']);
 
         
-
         foreach($departments as $department) {
             $exist = FileResponsibleModel::where('location_id', $department->location_id)->where('department_id', $department->department_id)->where('admin_id', $admin->user_id)->where('auth', 1)->first(); 
             $department->style = ($exist) ? 'option-gray' : 'option-blank';

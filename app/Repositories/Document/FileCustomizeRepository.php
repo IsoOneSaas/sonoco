@@ -2,14 +2,9 @@
 
 use App\Classes\ToolsClass;
 use App\Interfaces\Document\FileCustomizeRepositoryInterface;
-
-use App\Models\Document\DocumentModel;
 use App\Models\Document\SettingModel;
-
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
 use Carbon\Carbon;
 use Exception;
 
@@ -21,9 +16,7 @@ class FileCustomizeRepository implements FileCustomizeRepositoryInterface
     public function __construct(ToolsClass $Tools)
     {
         $this->tool = $Tools;
-        $this->set = $this->tool->setSettings('document');
-
-        
+        $this->set = $this->tool->setSettings('document');        
     }
 
     /**
@@ -33,7 +26,6 @@ class FileCustomizeRepository implements FileCustomizeRepositoryInterface
     public function select() 
     {
         $set = SettingModel::find(1);
-        //return $this->tool->getDocumentSettings('customize', $set->settings);
         return $set->settings;
     }
 
@@ -51,15 +43,12 @@ class FileCustomizeRepository implements FileCustomizeRepositoryInterface
 
             $set = SettingModel::find(1);
             $new = $this->tool->updateSettings($set->settings, $data);
-            $new['confirm_reading_edit'] = (  key_exists('confirm_reading_edit', $data) ) ? true : false;
-            $new['notice_new_suggestion'] = (  key_exists('notice_new_suggestion', $data) ) ? true : false;
-            $new['notice_new_sighting'] = (  key_exists('notice_new_sighting', $data) ) ? true : false;
-            $new['notice_new_document'] = (  key_exists('notice_new_document', $data) ) ? true : false;
-            $new['notice_master']['text'] = $data['master_text'];
-            $new['notice_master']['alert'] = $data['master_text'];
-            $new['due_email']['subject'] = $data['due_subject'];
-            $new['due_email']['text'] = $data['due_text'];
-            unset($new['master_text'], $new['master_alert'], $new['due_text'], $new['due_subject']);
+
+            $new['file_code_format'] = $data['file_code_format'];
+            $new['record_nui_format'] = $data['record_nui_format'];
+            $new['file_code_pad'] = $data['file_code_pad'];
+            $new['record_nui_pad'] = $data['record_nui_pad'];
+            //unset($new['master_text'], $new['master_alert'], $new['due_text'], $new['due_subject']);
             Log::debug(['TO SAVE' => $new]);
 
             DB::beginTransaction();

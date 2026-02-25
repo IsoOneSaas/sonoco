@@ -318,7 +318,7 @@ class FileRepository implements FileRepositoryInterface
      */      
     public function update(array $data)
     {
-        Log::debug(['UPDATE DATA' => $data]);
+        //Log::debug(['UPDATE DATA' => $data]);
         $hash = '';
         $msg = trans('document/file.file');
 
@@ -406,7 +406,7 @@ class FileRepository implements FileRepositoryInterface
             $deleted = $file->delete();
             // Afectar registros del archivo eliminado
             if( $deleted && (count($rids) > 0) ) {                            
-                Log::debug(['RIDS' => $rids]);
+                //Log::debug(['RIDS' => $rids]);
                 RecordModel::whereIn('record_id', $rids)->update(['code' => null, 'year' => null, 'serial' => null]);
             }
        } catch (Exception $e) {

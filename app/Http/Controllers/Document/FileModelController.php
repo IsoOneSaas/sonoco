@@ -30,8 +30,7 @@ class FileModelController extends Controller
      * Display a listing of the resource.
      */
     public function index() : View
-    {
-        
+    {        
         $columnDefinition = $this->dataTableDefinition();
         $systems = $this->fileRepo->getSystemsList();
         $locations = $this->fileRepo->getLocationsList();
@@ -450,7 +449,8 @@ class FileModelController extends Controller
      * @param  json Request $request parámetros
      * @return json Resultado de la actualización
      */
-    public function setCode(Request $request) {
+    public function setCode(Request $request)
+    {
         $input = $request->input();
         $response = $this->fileRepo->getCode($input);
         return response()->json($response); 

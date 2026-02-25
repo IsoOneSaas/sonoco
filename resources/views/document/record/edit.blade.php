@@ -12,11 +12,11 @@
                             Editar Registro
                         </h2>
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-                            <button id="btn-save" type="button" form="record-form" class="btn btn-primary shadow-md mr-2" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
+                            <button id="btn-save" type="button" form="record-form" class="btn btn-primary shadow-md mr-2" title="Salvar el registro" onClick="setStatus(0)" > <i data-lucide="save" class="w-5 h-5"></i> </button>
                             @if( $DATA['author'] )
-                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" onClick="setStatus(1)" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
+                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" title="Archivar el registro" onClick="setStatus(1)" > <i data-lucide="archive" class="w-5 h-5"></i> </button>
                             @else
-                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" title="Sin autorización" disabled > <i data-lucide="archive" class="w-5 h-5"></i> </button>
+                            <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" title="Sin autorización para archivar el registro" disabled > <i data-lucide="archive" class="w-5 h-5"></i> </button>
                             @endif
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}" alt="Regresar a la tabla"><i data-lucide="menu" class="w-5 h-5"></i></a>    
                         </div>
@@ -76,6 +76,10 @@
                                                     <input type="text" name="name" value="{{ old('name', isset($DATA) ? $DATA['name'] : '') }}" class="form-control w-full input-status" aria-describedby="name" placeholder="{{ trans('document/record.form.name.placeholder') }}" minlength="2" maxlength="255" required>
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.name.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                                 </div>
+                                                <div class="input-group mt-3">
+                                                    <div id="origin" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.origin.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.origin.title') }}</div>
+                                                    <input type="text" value="{{ $DATA['document'] }}" class="form-control w-full input-status" readonly>                                                    
+                                                </div>                                                
                                                 <div class="input-group mt-3">                                                
                                                     <textarea id="editor" name="content">{{ old('content', isset($DATA) ? $DATA['txt'] : '') }}</textarea> 
                                                 </div>
@@ -1044,14 +1048,10 @@
                 .then((willDelete) => {
                     if (willDelete) {
                         $("input[name='status_id']").val(status);
-                        //var form = $("#record-form");
-                        //form.submit();
                         $('#record-form')[0].submit();
                     }
                 });  
             } else {
-                //var form = $("#record-form");
-                //form.submit();
                 $('#record-form')[0].submit();
             }
         }                
