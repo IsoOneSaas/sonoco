@@ -18,7 +18,7 @@
                             @else
                             <button id="btn-store" type="button" form="record-form" class="btn btn-success shadow-md mr-2" title="Sin autorización para archivar el registro" disabled > <i data-lucide="archive" class="w-5 h-5"></i> </button>
                             @endif
-                            <a class="btn btn-primary shadow-md mr-2" href="{{ route('records.index') }}" alt="Regresar a la tabla"><i data-lucide="menu" class="w-5 h-5"></i></a>    
+                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" data-href="{{ route('records.index') }}" title="Regresar a la tabla" id="btn-exit"><i data-lucide="menu" class="w-5 h-5"></i></a>                                 
                         </div>
                     </div>
                     <!-- BEGIN: Boxed Tab -->
@@ -591,11 +591,12 @@
 <script src="{{ url('assets/js/datatables/Select-1.6.2/js/dataTables.select.min.js') }}"></script> 
 <script document="text/javascript">
     var $n = {{ count($DATA['tags']) }};
+    var $isSaved = true;
     var $userTable;
     $(function () {      
         var status = {{ $DATA['status_id'] }};
         var tab = $("input[name='tab_active']").val();
-        var id = ( tab == '') ? 'btn-1-tab' : tab;
+        var id = ( tab == '') ? 'btn-1-tab' : tab;         
         //var lang = { !! $gridLanguage !! };
         // SIGNATURE
         const signaturePad = new SignaturePad(document.getElementById('signature-pad'));        
@@ -631,6 +632,11 @@
         } catch (err) {
             setSuccessNotification('error', 'Oops!', "{{ trans('document/document.editor.error.load') }}" + err);
         }
+
+        // BTN SALIR
+        $('#btn-exit').on("click", function() {
+            editExit();
+        }); // btn-exit        
         
         // EVENTOS
 
@@ -838,6 +844,8 @@
                             output += '<div class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="'+msg+'" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>';
                             output += '</div>';
                             $("#messages-list").prepend(output);
+                            // Estado de no salvado
+                            $isSaved = false;
                         } else {
                             setSuccessNotification('error', 'Oops!', json.message);
                         } 
@@ -873,6 +881,8 @@
                                 setSuccessNotification('success', '', json.message);
                                 // Remover el mensaje
                                 $("#msg_"+id).remove();
+                                // Estado de no salvado
+                                $isSaved = false;
                             } else {
                                 setSuccessNotification('error', 'Oops!', json.message);
                             }
@@ -882,6 +892,23 @@
             });            
             
         }); // btn-feedback-delete
+
+        // Saved
+        $("input, select").on("change", function() {
+            $isSaved = false;
+            console.log('Save1:'+$isSaved);
+        });
+
+        $("textarea").on("click", function() {
+            $isSaved = false;
+            console.log('Save2:'+$isSaved);
+        });  
+        
+        // $(window).on('beforeunload', function() {
+        //     if( !$isSaved ) {
+        //         return "{{ trans('document/record.message.exit.text') }}";
+        //     }
+        // });        
 
         // MODAL PARA TEMPLATE
         $('body').on('click', '#btn-template-ok', function (e) {
@@ -1335,7 +1362,42 @@
             });
         }
         $("#subject-select").html(output);
-    } // generateSubtopicsSelect    
+    } // generateSubtopicsSelect
+    
+    function editExit() {
+        var referrer =  document.referrer;
+        var url = $(this).data('href');
+
+        if( !$isSaved ) {
+            swal({ 
+                title: "{{ trans('document/record.message.exit.title') }}",
+                text: "{{ trans('document/record.message.exit.text') }}",
+                icon: "warning",
+                buttons: {
+                    confirm: 'Si',
+                    cancel: 'No',
+                },
+                dangerMode: true,
+            })
+            .then((willSend) => {
+                if (willSend) {
+                    if( referrer.indexOf('registro/listado') >= 0 ) {
+                        history.back();
+                    } else {
+                        location.href = url;  
+                    } // if/else                                                
+                } else {
+                    return false;
+                } // if/else
+            });
+        } else {
+            if( referrer.indexOf('registro/listado') >= 0 ) {
+                history.back();
+            } else {
+                location.href = url;  
+            } // if/else
+        }  // if/else
+    } // editExist
      
 
 </script>

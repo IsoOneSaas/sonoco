@@ -212,6 +212,10 @@ return [
                         'delete_title'   => 'Eliminar mensaje',
                         'delete_text'   => 'Realmente quiere eliminar este mensaje del registro.',
             ],
+            'exit' => [
+                        'title'   => 'Salir de edición',
+                        'text'   => 'Los cambios no han sido salvados, realmente desea salir de la edición?',
+            ],            
     ],     
 
 

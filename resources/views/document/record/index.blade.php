@@ -563,7 +563,7 @@
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');                
                 $('#btn-file').removeClass('iso-disabled');
-                if( data.status == 1 ) {
+                if( typeof data.status !== 'undefined' && data.status == 1 ) {
                     // Bloqueado
                     $('#btn-edit').addClass('iso-disabled');  
                     $('#btn-view').removeClass('iso-disabled');                    
