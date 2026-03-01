@@ -56,7 +56,7 @@ class RecordRepository implements RecordRepositoryInterface
         $params = json_decode($slug, true);
 
         //Log::debug(['PARAMS' => $params, 'SYSTEMS' => $systems->toArray(), 'PROCESSES' => $processes->toArray(), 'GROUPS' => $groups->toArray()]);    
-        //Log::debug(['PARAMS' => $params]);
+        //Log::debug(['PARAMS 1' => $params]);
 
         // Range Date
         $range = explode('T', $params['din']);
@@ -102,11 +102,31 @@ class RecordRepository implements RecordRepositoryInterface
         
         // OBTENER REGISTROS PROPIOS
         $rids1 = $this->getRecordsByOwn($user);
+        Log::debug('Número de registros filtrados 1: '. count($rids1));  
 
-        // CONCATENAR ARREGLOS DE REGISTROS
-        $records_array = array_unique(array_merge($rids1, $rids2)); 
-
-        Log::debug('Número de registros filtrados 1: '. count($records_array));        
+        // DETERMINAR ESPECTRO DE REGISTROS RESPECTO A SU ROL
+        if( $user->hasAnyRole('MASTER','SUPER') ) {
+            // As Super+Master
+            $plucked = RecordModel::pluck('record_id');
+            $records_array = $plucked->all();
+        } elseif( $user->hasAnyRole('ADMIN') ) {
+            // As Admin
+            $plucked = $user->adminLocations->pluck('location_id');
+            $lids = $plucked->all();
+            if( count($lids) > 0 ) {
+                $plucked = DocumentModel::join('document_records', function($join) use($lids) {
+                    $join->on('document_records.document_id', '=', 'documents.document_id');
+                    $join->whereIn('documents.location_id', $lids);
+                })->pluck('document_records.record_id');
+                $records_array = $plucked->all();
+            } else {
+                $records_array = array_unique(array_merge($rids1, $rids2)); 
+            }            
+        } else {
+            // As User
+            $records_array = array_unique(array_merge($rids1, $rids2)); 
+        }                        
+        Log::debug('Número de registros filtrados 2: '. count($records_array));        
 
         // OBTENER REGISTROS FILTRADOS
         $records = RecordModel::whereIn('document_records.record_id', $records_array)
@@ -135,7 +155,7 @@ class RecordRepository implements RecordRepositoryInterface
                 'T3.topic',
                 'T3.subject',            
             ]);                       
-        Log::debug('Número de registros filtrados 2: '. $records->count()); //
+        Log::debug('Número de registros filtrados 3: '. $records->count()); //
         //Log::debug(['RECORDS 2' => $records->toArray()]);
 
         // GENERAR GRID
@@ -164,7 +184,7 @@ class RecordRepository implements RecordRepositoryInterface
             }                          
         } // foreach
             
-        Log::debug('Número de registros filtrados 3: '. count($data));
+        Log::debug('Número de registros filtrados 4: '. count($data));
                     
         $results = [
             "sEcho" => 1,

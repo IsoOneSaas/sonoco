@@ -19,7 +19,7 @@
                         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                             <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-refresh" title="Refrescar la tabla"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el documento"><i data-lucide="edit" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el documento"><i data-lucide="eye" class="w-5 h-5"></i></a>                            
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-file" title="Ver el archivo"><i data-lucide="archive" class="w-5 h-5"></i></a>
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
@@ -207,7 +207,8 @@
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
                                 <div class="modal-footer">
-                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">{{ trans('document/file.form.modal-file.button-ko') }}</button>                                  
+                                    <button id="btn-forward" type="button" class="btn btn-primary w-20">Archivo</button>
+                                    <button id="btn-view-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">{{ trans('document/file.form.modal-file.button-ko') }}</button>                                                                      
                                     <a id="modal-view-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-view" class="">.</a>  
                                 </div>
                                 <!-- END: Modal Footer -->
@@ -294,6 +295,7 @@
     let $dateInDefault;
     let $dateOutDefault;
     let $myTable;
+    let $nuiIndex;
     let $route = "{{ route('records.index.render', ':slug') }}";
 
     $(function () {
@@ -399,10 +401,11 @@
                 var api = this.api();
                 api.columns().every( function (i) {
                     var column = this;
-                    if( columnsDef[i].filterable == true ) {                     
-                        var id =  columnsDef[i].data;
+                    var id =  columnsDef[i].data; // afuera para determinar el index de columna "nui"
+                    if( columnsDef[i].filterable == true ) {                                             
                         var output = '<option value="">Todos</option>';
                         var val = $("#filter-"+id).val();
+                        //console.log("#filter-"+id);
                         column.data().unique().sort().each( function ( d, j ) { 
                             if( (d !== null) && (d != '') ) {
                                 output +=  '<option value="' + d + '">' + d + '</option>';
@@ -410,14 +413,18 @@
                         });
                         $("#filter-"+id).html(output).val(val);                                             
                     }
+                    if( id == 'nui' ) {
+                        $nuiIndex = i;
+                    }                    
                 });
+                
             },
             initComplete: function() {
                 console.log('DT init complete in ', Date.now() - startTime + ' milliseconds.');
                 console.log('Total Rows: ' + this.api().data().count());
                 $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
                 this.api().columns().every( function (i) {
-                    var column = this;
+                    var column = this;                                        
                     var id =  columnsDef[i].data;                    
                     if( columnsDef[i].filterable == true ) {
                         $("#filter-"+id).on( 'change', function () {
@@ -431,7 +438,7 @@
                             }
                         });
                     }                        
-                });
+                });                 
             },
             language: lang                                   
         }); // datatables
@@ -530,7 +537,12 @@
             } else { 
                 setFile(rowdata.record_id);      
             } // if/else            
-        }); // btn-file       
+        }); // btn-file 
+        
+        $('#btn-forward').on("click", function() {
+            var uri = "{{ route('files.admin.index') }}";
+            location.href = uri;
+        }); // btn-forward 
 
         // UTILIDADES        
         $("#btn-download").on("click", function() {
@@ -563,7 +575,8 @@
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');                
                 $('#btn-file').removeClass('iso-disabled');
-                if( typeof data.status !== 'undefined' && data.status == 1 ) {
+                //console.dir(data);
+                if( (typeof data !== 'undefined') && (data.status == 1) ) {
                     // Bloqueado
                     $('#btn-edit').addClass('iso-disabled');  
                     $('#btn-view').removeClass('iso-disabled');                    
@@ -627,7 +640,7 @@
                 $("#tag-selected-f").html('<option value="" selected>Todos seleccionados</option>');
             }
         });
-               
+                       
         // Efectos Botón
         $('#date-selected, #text-input, #tag-input').on('blur', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
@@ -636,9 +649,24 @@
         $('#system-selected, #process-selected, #group-selected-f, #tag-selected-f').on('change', function() {
             $("#btn-filter").removeClass('btn-success').addClass('btn-primary');
         });
-        
-                        
+                                
     }); // document
+
+    $(document).ready(function() {
+        // FILTRAR COLUMNA SI EXISTE CONDICIONES
+        var target = 'archivo/admin';
+        var referrer = document.referrer;
+        //console.log("Referrer:", referrer);
+        if( referrer.indexOf(target) !== - 1 ) {
+            var nuiCookie = isoGetStorage('iso_recordNui');
+            //console.log("Cookie:", nuiCookie);
+            if( typeof nuiCookie !== 'undefined' || nuiCookie !== null ) {
+                $("#filter-nui").val(nuiCookie+'.'); 
+                //console.log('index: '+$nuiIndex);
+                $myTable.column($nuiIndex).search(nuiCookie+'.').draw();                 
+            } // if
+        } // if
+    });    // ready
 
     function tagAjax(group) {
         var route = "{{ route('records.edit.tag') }}";
@@ -766,14 +794,14 @@
     function setFile(id) {
          var route = "{{ route('records.show', ':id') }}";
          route = route.replace(':id', id);
-         console.log('URL '+route);
+         //console.log('URL '+route);
         $.ajax({
             url: route,
             type: 'GET',
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },            
             success: function(json) {
-                console.dir(json);
+                //console.dir(json);
                 if( json.status == 'success' ) {
                     $.each(json.data, function(key, value) {
                         $("#sheet-"+key).html(value);

@@ -21,11 +21,14 @@
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('files.admin.create') }}" id="btn-new" title="Nuevo archivo"><i data-lucide="plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el archivo"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el archivo"><i data-lucide="eye" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2" href="javascript:;" id="btn-delete"><i data-lucide="trash" class="w-5 h-5"></i></a>
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-show" title="Ver los registros"><i data-lucide="library" class="w-5 h-5"></i></a>
+@if( in_array(Auth::user()->role, config('settings.roles_admin')) )                            
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-delete" title="Eliminar registro"><i data-lucide="trash" class="w-5 h-5"></i></a>
                             <form method="POST" id="form-delete" action="">
                                 @method('DELETE')
                                 @csrf                                
                             </form>                            
+@endif
                             <div class="dropdown ml-auto sm:ml-0">
                                 <button class="dropdown-toggle btn px-2 box" aria-expanded="false" data-tw-toggle="dropdown">
                                     <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-lucide="more-vertical"></i> </span>
@@ -266,6 +269,30 @@
     <link rel="stylesheet" href="{{ url('assets/js/multiple-select-1.6.0/dist/multiple-select.min.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/iso.css') }}" />
     <style>
+        span.deleteicon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;                
+        }
+        span.deleteicon span {
+            position: absolute;
+            display: block;
+            right: 3px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            color: #fff;
+            background-color: #ccc;
+            font: 13px monospace;
+            text-align: center;
+            line-height: 1em;
+            cursor: pointer;
+            
+        }
+        span.deleteicon input {
+            padding-right: 18px;
+            box-sizing: border-box;
+        }        
         .iso-input {
             padding: 0.15em 0.6em; 
             font-size: 0.95em; 
@@ -569,18 +596,23 @@
                 $(this).removeClass('selected');
                 $('#btn-edit').addClass('iso-disabled');
                 $('#btn-view').addClass('iso-disabled');
+                $('#btn-show').addClass('iso-disabled');
+                $('#btn-delete').addClass('iso-disabled');
             } else {
                 // Seleccionado
                 $myTable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
                 
                 $('#btn-view').removeClass('iso-disabled');
+                $('#btn-show').removeClass('iso-disabled');  // TODO: Va con AUTH?
                 if( data.auth == 0 ) {
                     // Bloqueado
                     $('#btn-edit').addClass('iso-disabled');  
+                    $('#btn-delete').addClass('iso-disabled'); 
                     //$('#btn-view').removeClass('iso-disabled');
                 } else {
                     $('#btn-edit').removeClass('iso-disabled');
+                    $('#btn-delete').removeClass('iso-disabled');
                     //$('#btn-view').addClass('iso-disabled'); 
                 }               
             } // if selected
@@ -636,6 +668,7 @@
                 isoSetStorage('iso_fileDateout', $dateOutDefault); //
                 isoSetStorage('iso_fileReturnRows', info.length);
                 isoSetStorage('iso_fileColumns', visibleColumns); 
+                isoSetStorage('iso_recordNui', ''); 
             } else {
                 swal({
                     icon: "error",
@@ -681,6 +714,22 @@
                 }); // ajax                            
             } // if/else            
         }); // btn-view
+
+        // Ir a mostrar los registros del archivo seleccionado
+        $('#btn-show').on("click", function() {
+            var uri = "{{ route('records.index') }}";
+            var rowdata = $myTable.rows('.selected').data()[0];                                    
+            if (rowdata === undefined || rowdata === null) {
+                setSimpleNotification("{{ trans('document/file.error.grid.row_edit') }}");
+            } else { 
+                // Salvar Cookies
+                setStorage(); 
+                // Salvar cookie para filtro de columna
+                isoSetStorage('iso_recordNui', rowdata.code);
+                // Redireccionar
+                location.href = uri;                          
+            } // if/else            
+        }); // btn-show        
 
         // Eliminar Archivo // TODO: Decidir si se quita
         $('#btn-delete').on("click", function()  {
