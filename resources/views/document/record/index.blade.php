@@ -160,7 +160,7 @@
                             <div class="modal-content">
                                 <!-- BEGIN: Modal Header -->
                                 <div class="modal-header">
-                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto"><i data-lucide="{{ trans('document/file.form.modal-file.icon') }}" class="w-6 h-6 mr-1"></i> {{ trans('document/file.form.modal-file.title') }}</h2>
+                                    <h2 id="modal-view-title" class="font-medium text-base mr-auto">{{ trans('document/file.form.modal-file.title') }}</h2>
                                 </div>
                                 <!-- END: Modal Header -->
                                 <!-- BEGIN: Modal Body -->
@@ -200,7 +200,8 @@
                                                     <tr><td class="title2">{{ trans('document/file.form.dead.title') }}</td><td id="sheet-dead"></td></tr>
                                                     <tr><td class="title2">{{ trans('document/file.form.hold.title') }}</td><td id="sheet-hold"></td></tr>
                                                 </table>                                            
-                                            </td></tr>                                        
+                                            </td></tr>
+                                            <tr style="display: none"><td colspan="2" id="sheet-hash"></td></tr>                                        
                                         </table> 
                                     </div>                                                 
                                 </div>
@@ -539,9 +540,13 @@
             } // if/else            
         }); // btn-file 
         
-        $('#btn-forward').on("click", function() {
-            var uri = "{{ route('files.admin.index') }}";
-            location.href = uri;
+        // Redirigir a la ficha técnica
+        $('#btn-forward').on("click", function() {           
+            var url = "{{ route('files.admin.edit', ':hash') }}";
+            var hash = $("#sheet-hash").html();
+            url = url.replace(':hash', hash);
+            //console.log(url);
+            location.href = url;
         }); // btn-forward 
 
         // UTILIDADES        
@@ -793,6 +798,7 @@
     
     function setFile(id) {
          var route = "{{ route('records.show', ':id') }}";
+         var auth = '';
          route = route.replace(':id', id);
          //console.log('URL '+route);
         $.ajax({
@@ -805,6 +811,13 @@
                 if( json.status == 'success' ) {
                     $.each(json.data, function(key, value) {
                         $("#sheet-"+key).html(value);
+                        if( key == 'authEdit' ) {
+                            if( value ) {
+                                $('#btn-forward').addClass('iso-disabled');
+                            } else {
+                                $('#btn-forward').removeClass('iso-disabled');
+                            }                            
+                        } //if                       
                     })                        
                     $("#modal-view-open")[0].click();   
                 } else {

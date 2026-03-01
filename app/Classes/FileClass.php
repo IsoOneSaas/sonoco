@@ -3,6 +3,7 @@
 use App\Classes\ToolsClass;
 use App\Models\Document\FileDisposalModel as Disposal;
 use App\Models\Document\FileModel as File;
+use App\Models\Document\FileResponsibleModel as Responsible;
 use App\Models\Document\FileTopicModel as Topic;
 use App\Models\Document\FileSubtopicModel as Subtopic;
 use App\Models\Document\RecordModel as Record;
@@ -12,6 +13,7 @@ use App\Models\Set\LocationModel as Location;
 use App\Models\Set\SystemModel as System;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class FileClass
@@ -406,6 +408,7 @@ class FileClass
      {
         $id = $this->tool->getIdHash($hash);
         $file = File::find($id);
+        $file->hash = $hash;
         $system = System::find($file->system_id);
         $location = Location::find($file->location_id);
         $department = Department::find($file->department_id);
@@ -422,6 +425,16 @@ class FileClass
             $job = Job::find($file->job_id);
             $file->job = $job->name;
         }  
+
+        // Autorización de edicion
+        $user = Auth::user();
+        $uid = $user->user_id;
+        $plucked = Job::join('set_job_user', function($query) use($uid) {
+            $query->on('set_job_user.job_id', '=', 'set_jobs.job_id');
+            $query->where('set_job_user.user_id', '=', $uid);
+        })->pluck('set_jobs.job_id');
+        $jids =array_unique($plucked->all());          
+        $file->authEdit = $this->authUserEdit($uid, $file->location_id, $file->department_id, $jids);
         
         // Soporte
         $file->support = ($file->support == 0) ? '' : $this->supports_array[$file->support];
@@ -471,7 +484,30 @@ class FileClass
             $disposal_array[$disposal->disposal_id] = $disposal->name;
         }
         return $disposal_array;        
-    } // getDisposalArray    
+    } // getDisposalArray
+
+    /**
+     * Valida si el usuario tiene autorización de editar el archivo
+     * @param integer $uid identificador del usuario
+     * @param integer $lid identificado de la localización
+     * @param integer $did identificado del departamento
+     * @param array $jids identificadores de cargo
+     * 
+     * @return boolean  
+     */     
+    public function authUserEdit($uid, $lid, $did, $jids)
+    {
+        $auth = false;
+        $responsible = Responsible::where('location_id', $lid)->where('department_id', $did)->whereIn('job_id', $jids)->first();
+        if($responsible) {
+            $users = $responsible->users;
+            //Log::debug(['NAME' => $file->name,'USERS' => $users]);
+            $auth = ( in_array($uid, $users) ) ? true : false;
+        } else {
+            $auth = false;
+        }
+        return $auth;
+    } //authUserEdit *
 
     
     /**

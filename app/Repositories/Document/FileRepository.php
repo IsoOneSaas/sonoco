@@ -229,16 +229,8 @@ class FileRepository implements FileRepositoryInterface
             } //if
 
             // Authorización de edición del archivo
+            $auth = ( $this->file->authUserEdit($uid, $file->location_id, $file->department_id, $jids) ) ? 1 : 0;
             
-            $responsible = FileResponsibleModel::where('location_id', $file->location_id)->where('department_id', $file->department_id)->whereIn('job_id', $jids)->first();
-            if($responsible) {
-                $users = $responsible->users;
-                //Log::debug(['NAME' => $file->name,'USERS' => $users]);
-                $auth = ( in_array($uid, $users) ) ? 1 : 0;
-            } else {
-                $auth = 0;
-            }
-
             // Contar registros del archivo
             $count = RecordModel::where('code', $file->code)->count();
             
