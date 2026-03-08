@@ -24,6 +24,7 @@ class StoreFileCustomizeRequest extends FormRequest
             'record_nui_pad'          => 'required',
             'record_nui_format'       => 'required',
             'file_code_format'       => 'required',
+            'alarm_time'            => 'required',
         ];
     }
 
@@ -39,6 +40,7 @@ class StoreFileCustomizeRequest extends FormRequest
              'record_nui_pad.required'         => trans('document/customize.request.record_nui_pad.required'),
              'record_nui_format.required'      => trans('document/customize.request.record_nui_format.required'),
              'file_code_format.required'      => trans('document/customize.request.file_code_format.required'),
+             'alarm_time.required'              => trans('document/customize.request.alarm_time.required'),
          ];
      }    
 } // class

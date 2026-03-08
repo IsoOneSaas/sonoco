@@ -29,7 +29,6 @@ class FileRepository implements FileRepositoryInterface
     private $tool;
     private $file;
     private $set;
-    private $alarm_time;
     private $supports_array;
     private $timeFormatSimple;
 
@@ -38,7 +37,6 @@ class FileRepository implements FileRepositoryInterface
         $this->tool = $Tools;
         $this->file = $Files;
         $this->set = $this->tool->setSettings('document');
-        $this->alarm_time = 7; // TODO: Pasar a config   
         $this->supports_array = config("settings.record_support");  
         $this->timeFormatSimple = "%d %s";
     }
@@ -51,11 +49,10 @@ class FileRepository implements FileRepositoryInterface
     public function render($slug, $systems, $locations)
     {    
         $data = [];
-        $emtpy_array = [];
         $i = 0;
         $dto = Carbon::now();
         $params = json_decode($slug, true);   
-        Log::debug(['PARAMS 2' => $params]);
+       //Log::debug(['PARAMS 2' => $params]);
 
         // USUARIO
         $user = Auth::user();
@@ -65,7 +62,7 @@ class FileRepository implements FileRepositoryInterface
             $query->where('set_job_user.user_id', '=', $uid);
         })->pluck('set_jobs.job_id');
         $jids =array_unique($plucked->all());   
-        Log::debug(['JIDS' => $jids]);
+       //Log::debug(['JIDS' => $jids]);
 
         // FILTRO POR FECHA
         $range = explode('T', $params['din']);
@@ -110,7 +107,7 @@ class FileRepository implements FileRepositoryInterface
         } // if
         
         //Log::debug(['XIDS' => $xids]);
-        Log::debug(['PARAMS 3 DATE' => $rangeIn.' | '.$rangeOut, 'SIDS' => $sids, 'LIDS' => $lids, 'DIDS' => $dids, 'TIDS' => $tids, 'XISD' => $xids]);
+       //Log::debug(['PARAMS 3 DATE' => $rangeIn.' | '.$rangeOut, 'SIDS' => $sids, 'LIDS' => $lids, 'DIDS' => $dids, 'TIDS' => $tids, 'XISD' => $xids]);
 
         // ARREGLO DE INDICES
         $indexes_array = $this->file->getIndexArray();        
@@ -184,7 +181,7 @@ class FileRepository implements FileRepositoryInterface
                 } else {
                     $dtf = $dti;
                 }
-                $dta = $dtf->subDays($this->alarm_time);
+                $dta = $dtf->subDays($this->set['alarm_time']);
                 
                 if( $dto > $dtf ) {
                     $color1 = config('settings.color_pallete_2')['red'];
@@ -218,7 +215,7 @@ class FileRepository implements FileRepositoryInterface
                 } else {
                     $dtf = $dti;
                 }
-                $dta = $dtf->subDays($this->alarm_time);
+                $dta = $dtf->subDays($this->set['alarm_time']);
 
                 if( $dto > $dtf ) {
                     $color2 = config('settings.color_pallete_2')['red'];

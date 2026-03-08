@@ -9,8 +9,6 @@ class SettingModel extends Model
     use HasFactory;
     protected $table = 'document_settings';
     protected $fillable = ['settings'];
-    //protected $casts = ['settings' => 'array',];
-    
     
     /**
      * Get the user's options

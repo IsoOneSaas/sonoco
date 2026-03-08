@@ -75,7 +75,10 @@ class HomeController extends Controller
         $documents_array = $this->homeRepo->getDocuments($user->user_uid);
         //Log::debug(['DOCS' => $documents_array]);
         // Registros creados recientemente
-        $records_array = $this->homeRepo->getRecords($user->user_uid);        
+        $records_array = $this->homeRepo->getRecords($user->user_uid); 
+        
+        // Registros sin aprobar
+        $pendings_array = $this->homeRepo->getOpenRecords($user->user_id);
 
         return view('dashboard.user', [
             'week' => $days_array,
@@ -83,6 +86,7 @@ class HomeController extends Controller
             'range' => $week_array,
             'docs' => $documents_array,
             'recs' => $records_array,
+            'auths' => $pendings_array,
         ]);
     }    
 

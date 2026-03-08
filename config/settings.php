@@ -271,6 +271,7 @@ return [
         'record_nui_format' => '%s.%s-%s',
         'file_code_pad' => 2,
         'record_nui_pad' => 3,
+        'alarm_time' => 7,
     ],
 
     'document_validity_texts' => [

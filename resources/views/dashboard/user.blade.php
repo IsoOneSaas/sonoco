@@ -115,7 +115,7 @@
                                                     <div class="text-right"><a href="{{ $rec['link'] }}" class="btn py-1 px-2  text-xs">@if( $rec['status'] == 0) Editar @else Ver @endif</a></div>                                                    
                                                     <span class="text-gray-700">{{ $rec['name'] }}</span><br>
                                                     <div class="flex justify-between">                                                                    
-                                                        <span class="font-semibold">{{ $rec['document'] }}</span>
+                                                        <span class="font-semibold text-lg">{{ $rec['nui'] }}</span>
                                                     </div>                                                    
                                                     <span class="text-gray-500 text-xs">{{ $rec['date'] }}</span>
                                                 </li>                                            
@@ -124,6 +124,30 @@
 
                                         </div>
                                     </div>
+                                    <div class="intro-y box mt-5">
+                                        <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                            <h2 class="font-medium text-base mr-auto">
+                                                Registros por aprobar
+                                            </h2>
+                                        </div>
+                                        <div class="p-5">
+
+                                            <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
+                                                @foreach($auths as $auth)                                            
+                                                <li class="px-6 py-2  border-2">
+
+                                                    <div class="text-right"><a href="{{ $auth['link'] }}" class="btn py-1 px-2  text-xs"> Editar</a></div>                                                    
+                                                    <span class="text-gray-700">{{ $auth['name'] }}</span><br>
+                                                    <div class="flex justify-between">                                                                    
+                                                        <span class="font-semibold text-lg">{{ $auth['nui'] }}</span>
+                                                    </div>                                                    
+                                                    <span class="text-gray-500 text-xs">{{ $auth['date'] }}</span>
+                                                </li>                                            
+                                                @endforeach
+                                            </ul>   
+
+                                        </div>
+                                    </div>                                    
                                 </div>                                
                             </div>
                         </div>

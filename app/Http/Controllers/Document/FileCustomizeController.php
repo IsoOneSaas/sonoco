@@ -26,6 +26,7 @@ class FileCustomizeController extends Controller
     {
         $data = $this->custoRepo->select();
         return view('document.file.customize', [
+            'initTab'   => 'btn-3-tab',
             'data'  => $data,
         ]);
     } // index Method

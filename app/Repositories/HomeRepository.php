@@ -1,8 +1,10 @@
 <?php   namespace App\Repositories;
 
 use App\Classes\ToolsClass;
+use App\Classes\FileClass;
 use App\Interfaces\HomeRepositoryInterface;
 use App\Models\Document\ForwardModel;
+use App\Models\Document\RecordModel;
 use App\Models\Document\TracingModel;
 use App\Models\Document\TracingRecordModel;
 use App\Models\Set\DepartmentModel;
@@ -12,21 +14,25 @@ use Illuminate\Support\Facades\Log;
 class HomeRepository implements HomeRepositoryInterface 
 {
     private $tool;
+    private $file;
     protected $adminTag;
     protected $editLink;
     protected $openDocumentLink;
     protected $docsTake;
+    protected $recsTake;
     protected $openEditRecordLink;
     protected $openViewRecordLink;
 
-    public function __construct(ToolsClass $Tools)
+    public function __construct(ToolsClass $Tools, FileClass $File)
     {
         $this->tool = $Tools;
+        $this->file = $File;
         $this->editLink = '/documentos/control/gestion/editar/user/';
         $this->openDocumentLink = '/documentos/master/publicado/';
         $this->openEditRecordLink = '/documentos/registro/editar/';
         $this->openViewRecordLink = '/documentos/registro/ver/';
         $this->docsTake = 10;
+        $this->recsTake = 4;
     }
 
     /**
@@ -133,39 +139,86 @@ class HomeRepository implements HomeRepositoryInterface
         $records = TracingRecordModel::where('user_uid', $uid)
             ->join('document_records', function($query) {
                 $query->on('document_records.record_id', '=', 'document_record_tracing.record_id');              
+                //$query->where('document_records.status', '=', 0);
             })
-            ->join('documents', function($query) {
-                $query->on('documents.document_id', '=', 'document_records.document_id');               
-            })            
+            // ->join('documents', function($query) {
+            //     $query->on('documents.document_id', '=', 'document_records.document_id');               
+            // })            
             ->where('document_record_tracing.trace', 'LIKE', '%CREATED%')
             ->orderBy('document_record_tracing.created_at', 'desc') 
-            //->take($this->docsTake)
+            ->take($this->recsTake)
             ->get([
                 'document_records.record_id',
                 'document_records.name as recordName',
-                'documents.name as documentName',
+                //'documents.name as documentName',
                 'document_records.status',
+                'document_records.code',
+                'document_records.year',
+                'document_records.serial',
                 'document_record_tracing.created_at as date',
             ]);
+
+        //Log::debug(['UID' => $uid, 'No' => $records->count()]);
             
         if($records) {
             foreach($records as $record) {
                 $hash = $this->tool->setIdHash($record->record_id);
                 $dt = Carbon::createFromFormat('Y-m-d H:i:s', $record->date);
-                if( !key_exists($record->document_id, $recs_array) ) {
+                if( !key_exists($record->record_id, $recs_array) ) {
                     $link = ( $record->status == 0 ) ? $this->openEditRecordLink.$hash : $this->openViewRecordLink.$hash;
-                    $recs_array[$record->document_id] = [
+                    $recs_array[$record->record_id] = [
                         'name' => $record->recordName,
-                        'document' => $record->documentName,
+                        'nui' => $this->file->setNui($record->code, $record->year, $record->serial),
                         'status' => $record->status,
                         'date' => $dt->diffForHumans(Carbon::now()),
                         'link' => $link,
                     ];
-                    if( count($recs_array) == $this->docsTake ) break;
+                    if( count($recs_array) == $this->recsTake ) break;
                 }                
             } // foreach
         } // if
         return $recs_array;
-    } // getRecords Repository    
+    } // getRecords Repository  
+    
+    public function getOpenRecords($uid)
+    {
+        $recs_array = [];
+        $records = RecordModel::where('document_records.status', 0)
+            ->join('document_record_users', function($query) use($uid) {
+                $query->on('document_record_users.record_id', '=', 'document_records.record_id');              
+                $query->where('document_record_users.user_id', '=', $uid);
+                $query->where('document_record_users.status', '=', 0);
+            })
+            ->orderBy('document_records.created_at', 'desc') 
+            ->take($this->recsTake)                      
+            ->get([
+                'document_records.record_id',
+                'document_records.name',
+                'document_records.code',
+                'document_records.year',
+                'document_records.serial',
+                'document_records.created_at'
+            ]);
+
+        //Log::debug(['UID' => $uid, 'No' => $records->count()]);
+
+        if($records) {
+            foreach($records as $record) {
+                $hash = $this->tool->setIdHash($record->record_id);
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $record->created_at);
+                if( !key_exists($record->record_id, $recs_array) ) {
+                    $link = ( $record->status == 0 ) ? $this->openEditRecordLink.$hash : $this->openViewRecordLink.$hash;
+                    $recs_array[$record->record_id] = [
+                        'name' => $record->name,
+                        'nui' => $this->file->setNui($record->code, $record->year, $record->serial),
+                        'date' => $dt->diffForHumans(Carbon::now()),
+                        'link' => $link,
+                    ];
+                    if( count($recs_array) == $this->recsTake ) break;
+                }                
+            } // foreach
+        } // if        
+        return $recs_array;
+    } // getOpenRecords Repository
 
 } // class

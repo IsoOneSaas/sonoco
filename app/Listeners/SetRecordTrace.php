@@ -2,7 +2,7 @@
 
 use App\Events\RecordTracing;
 use App\Models\Document\TracingRecordModel;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class SetRecordTrace
 {

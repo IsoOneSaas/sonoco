@@ -8,7 +8,7 @@ class TracingRecordModel extends Model
 {
     use HasFactory;
     protected $table = 'document_record_tracing';
-    protected $fillable = ['record_id','user_id','trace'];
+    protected $fillable = ['record_id','user_uid','trace'];
     
     /**
     * Obtiene la relación con el documento

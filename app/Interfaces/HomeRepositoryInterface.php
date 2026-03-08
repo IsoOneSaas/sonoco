@@ -9,4 +9,6 @@ interface HomeRepositoryInterface
     public function getDocuments($uid);
 
     public function getRecords($uid);
+
+    public function getOpenRecords($uid);
 }

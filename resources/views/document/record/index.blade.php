@@ -303,16 +303,16 @@
         let columnsDef = {!! $gridColDef !!};
         let col = {{ $gridColOrd }};        
         let columns = {!! $gridColExp !!};
-        let lang = {!! $gridLanguage !!};
+        let lang = {!! $gridLanguage !!};        
 
         var startTime = Date.now();                       
         var sCol = isoGetStorage('iso_recordReturnCol');
         var sDir = isoGetStorage('iso_recordReturnDir');
         var initPage = ( isoGetStorage('iso_recordReturnPage') === null ) ? 1 : isoGetStorage('iso_recordReturnPage');
-        // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
+        //console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
         var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
-        // console.log('iNITORDER:');
-        // console.dir(initOrder);        
+        //console.log('iNITORDER:');
+        //console.dir(initOrder);        
         var initRecords = ( isoGetStorage('iso_recordReturnRows') === null ) ? 10 : isoGetStorage('iso_recordReturnRows');
 
         // Sistema
@@ -378,7 +378,7 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: columns 
+                        columns: ':visible' 
                     }
                 }
                 ,
@@ -493,9 +493,9 @@
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
             $dateInDefault = picker.startDate.format();
-            console.log('DIN : '+$dateInDefault);
+           //console.log('DIN : '+$dateInDefault);
             $dateOutDefault = picker.endDate.format();
-            console.log('DOUT : '+$dateOutDefault);
+           //console.log('DOUT : '+$dateOutDefault);
         }); 
 
 
@@ -604,7 +604,7 @@
             var url =  $route.replace(':slug', JSON.stringify(params));
 
             console.log('Searching...');
-            console.dir(JSON.stringify(params));
+            console.table(JSON.stringify(params));
             
             if( (sidsValue.length > 0) && (pidsArray.length > 0) ) {
                 // Ajustes a cambio
@@ -675,7 +675,7 @@
 
     function tagAjax(group) {
         var route = "{{ route('records.edit.tag') }}";
-        console.log('Running tagAjax with route: '+route+' and Group: '+group);
+        //console.log('Running tagAjax with route: '+route+' and Group: '+group);
         $.ajax({
             url: route,
             type: 'POST',
@@ -683,7 +683,7 @@
             dataType: 'json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },    
             success: function(data) {
-                console.dir(data);                                                                
+                //console.dir(data);                                                                
                 var output  = '<option value="">Todos</option>';                                
                 $.each(data, function(i, value) {
                     output += '<option value="'+value.tag+'">'+value.tag+'</option>';
@@ -775,7 +775,7 @@
             success: function(json) {
                 setStorage();
                 uri = uri.replace(':hash', json.hash);
-                console.log('URI: '+uri);
+                //console.log('URI: '+uri);
                 location.href = uri;   
             } // success
         }); // ajax 
@@ -790,7 +790,7 @@
             success: function(json) {
                 setStorage();
                 uri = uri.replace(':hash', json.hash);
-                console.log('URI: '+uri);
+                //console.log('URI: '+uri);
                 location.href = uri;   
             } // success
         }); // ajax 

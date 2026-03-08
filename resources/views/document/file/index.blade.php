@@ -21,8 +21,8 @@
                             <a class="btn btn-primary shadow-md mr-2" href="{{ route('files.admin.create') }}" id="btn-new" title="Nuevo archivo"><i data-lucide="plus" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-edit" title="Editar el archivo"><i data-lucide="edit" class="w-5 h-5"></i></a>
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-view" title="Ver el archivo"><i data-lucide="eye" class="w-5 h-5"></i></a>
-                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-show" title="Ver los registros"><i data-lucide="library" class="w-5 h-5"></i></a>
-@if( in_array(Auth::user()->role, config('settings.roles_admin')) )                            
+@if( in_array(Auth::user()->role, config('settings.roles_admin')) )                              
+                            <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-show" title="Ver los registros"><i data-lucide="library" class="w-5 h-5"></i></a>                          
                             <a class="btn btn-primary shadow-md mr-2 iso-disabled" href="javascript:;" id="btn-delete" title="Eliminar registro"><i data-lucide="trash" class="w-5 h-5"></i></a>
                             <form method="POST" id="form-delete" action="">
                                 @method('DELETE')
@@ -351,6 +351,8 @@
         let columns = {!! $gridColExp !!};
         let lang = {!! $gridLanguage !!};
         let startTime = Date.now();
+        let colDwell = 7;
+        let colDead = 9;
                             
 
         // Página
@@ -359,11 +361,11 @@
         // Orden
         var sCol = isoGetStorage('iso_fileReturnCol');
         var sDir = isoGetStorage('iso_fileReturnDir');        
-        // console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
+        //console.log('sCol:'+sCol+' col:'+col+' sDir:'+sDir); 
         var initOrder = ( sCol !== 'undefined' && sCol ) ? [[ sCol, sDir]] : [[ col, 'asc']];
 
         // Columnas       
-        //console.table(columnsDef);
+        console.table(columnsDef);
         columnsDef = setColumns(columnsDef);
         console.table(columnsDef);
 
@@ -400,7 +402,7 @@
 
         // DATATABLES
         param = {sids: sidsArray, lids: lidsArray, dids: [], tids: [], xids: [], din: $dateInDefault, dout: $dateOutDefault};
-        console.table(param);        
+        //console.table(param);        
 
         $myTable = $('#files-table')
         .on('preXhr.dt', function () {
@@ -433,14 +435,13 @@
                 {
                     extend: 'pdfHtml5',
                     exportOptions: {
-                        columns: columns
+                        columns: ':visible'
                     }
                 }
                 ,
                 {
                     extend: 'colvis',
                     columns: columns
-                    //hide: [18]
                 }
             ],
             //stateSave: true,            
@@ -452,10 +453,10 @@
                         ordinal = '<span class="inline-flex items-baseline">'+ordinal+' <img alt="(o)" class="h-2" src="/assets/images/greenled.png"></span>'
                     }
                     if( data.color1 !== '' ) {
-                        $('td', row).eq(8).css('color', data.color1);
+                        $('td', nRow).eq(colDwell).css('color', data.color1);
                     }
                     if( data.color2 !== '' ) {
-                        $('td', row).eq(10).css('color', data.color2);
+                        $('td', nRow).eq(colDead).css('color', data.color2);
                     }                      
                     $('td:eq(0)', nRow).html(ordinal);
                 }
@@ -532,12 +533,12 @@
         $("#location-selected").on("change", function(e) {
             e.preventDefault();
             var lidsArray = $("#location-selected").val();
-            console.log(':: Selected    LIDS ::');
-            console.dir(lidsArray);
+            //console.log(':: Selected    LIDS ::');
+            //console.dir(lidsArray);
             if( lidsArray.length > 0 ) {
                 setDepartmentAjax(lidsArray, didsArray);
             } else {
-                console.log('Clear #department-selected');
+                //console.log('Clear #department-selected');
                 $("#department-selected").val('').multipleSelect('destroy').html('');
             } // if
         });        
@@ -546,12 +547,12 @@
         $("#department-selected").on("change", function(e) {
             e.preventDefault();
             var didsArray = $("#department-selected").val();
-            console.log(':: Selected DIDS ::');
-            console.dir(didsArray);
+            //console.log(':: Selected DIDS ::');
+            //console.dir(didsArray);
             if( didsArray.length > 0 ) {
                 setTopicAjax(didsArray, tidsArray);
             } else {
-                console.log('Clear #topic-selected');
+                //console.log('Clear #topic-selected');
                 $("#topic-selected").val('').multipleSelect('destroy').html('');
             } // if
         });
@@ -560,17 +561,16 @@
         $("#topic-selected").on("change", function(e) {
             e.preventDefault();
             var tidsArray = $("#topic-selected").val();
-            console.log(':: Selected TIDS ::');
-            console.dir(tidsArray);
+            //console.log(':: Selected TIDS ::');
+            //console.dir(tidsArray);
             if( tidsArray.length > 0 ) {
                 setSubtopicAjax(tidsArray, xidsArray);
             } else {
-                console.log('Clear #subtopic-selected');
+                //console.log('Clear #subtopic-selected');
                 $("#subtopic-selected").val('').multipleSelect('destroy').html('');
             } // if
         });        
-        
-        
+                
         // UTILIDADES        
         $("#btn-download").on("click", function() {
             $myTable.button('.buttons-excel').trigger();
@@ -744,7 +744,7 @@
             } else {            
                if ( rowdata.count > 0 ) {
                     txt = msg.replace(':no', rowdata.count);
-                    console.log(rowdata.count);
+                    //console.log(rowdata.count);
                 }
                 txt += "{{ trans('document/file.file.delete.text1') }}";
                 action = url.replace(':hash', rowdata.hash);
@@ -801,9 +801,9 @@
 
         $('#date-selected').on('apply.daterangepicker', function(ev, picker) {
             $dateInDefault = picker.startDate.format();
-            console.log('DIN : '+$dateInDefault);
+            //console.log('DIN : '+$dateInDefault);
             $dateOutDefault = picker.endDate.format();
-            console.log('DOUT : '+$dateOutDefault);
+            //console.log('DOUT : '+$dateOutDefault);
         });
                         
     }); // document
@@ -813,8 +813,8 @@
     });
     
     function setArray(storaged) {
-        console.log(storaged);
-        if( storaged === null ) { // return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
+        //console.log(storaged);
+        if( storaged === null ) {
             return [];
         } else {            
             return ( storaged.indexOf(",") == -1 ) ? [storaged] : storaged.split(',');
@@ -866,17 +866,20 @@
     function setColumns(columns) {
         var cut = 5;
         var n = 0;
-        var width = 1122;
+        var width = 1265; // 1122
         var viewportWidth = $(window).width();        
         var isnarrow = ( viewportWidth < width ) ? true : false;
         $initCols = isoGetStorage('iso_fileColumns');
+        console.log(':: setColumns');
+        console.log('WIDTH: '+viewportWidth+' | isNarrow: '+isnarrow);
+        console.dir($initCols);
 
         if( $initCols === null ) {
             // Valido ancho
             if( isnarrow ) {
                 $.each(columns, function(i, column) {
                     if( column.searchable === true || column.filterable === true  ) {
-                        //console.log('COLUMN: '+column.title);  // typeof item.visible !== 'undefined' && item.visible === false
+                        console.log('COLUMN: '+column.title);  // typeof item.visible !== 'undefined' && item.visible === false
                         if( (column.visible === true) && (n > cut) ) {
                             column.visible = false;                            
                         } // if
@@ -887,11 +890,11 @@
         } else {
             var visible = $initCols.split(',');            
             $.each(columns, function(i, column) {
-                //console.log('Definition: '+column.visible+' cookie: '+visible[i]);
+                console.log('Definition: '+column.visible+' cookie: '+visible[i]);
                 column.visible = (visible[i] == 'false') ? false : true;
                 if( isnarrow ) {
                     if( column.searchable || column.filterable  ) {
-                        //console.log('COLUMN: '+column.title);
+                        console.log('COLUMN: '+column.title);
                         if( (column.visible != 'false') && (n > cut) ) {
                             column.visible = false;                            
                         } // if
@@ -905,7 +908,7 @@
 
     function setDepartmentAjax(lids, dids) {        
         var route = "{{ route('files.select.departments') }}";        
-        console.log('Running setDepartmentAjax with route: '+route);
+        //console.log('Running setDepartmentAjax with route: '+route);
         $.ajax({
             url: route,
             type: 'POST',
@@ -955,7 +958,7 @@
 
     function setTopicAjax(dids, tids) {        
         var route = "{{ route('files.select.topics') }}";        
-        console.log('Running setTopicAjax with route: '+route);
+        //console.log('Running setTopicAjax with route: '+route);
         $.ajax({
             url: route,
             type: 'POST',
@@ -1005,7 +1008,7 @@
     
     function setSubtopicAjax(tids, xids) {        
         var route = "{{ route('files.select.subtopics') }}";        
-        console.log('Running setSubtopicAjax with route: '+route);
+        //console.log('Running setSubtopicAjax with route: '+route);
         //console.log('Voy a crear Tema con nombre '+txt+' para el departamento '+no);
         $.ajax({
             url: route,

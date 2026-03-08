@@ -12,7 +12,6 @@ use App\Models\Document\DocumentModel;
 use App\Models\Document\FileModel;
 use App\Models\Document\LinkModel;
 use App\Models\Document\RecordModel;
-//use App\Models\Document\SettingModel;
 use App\Models\Document\TypeModel;
 use App\Models\Document\FileTopicModel;
 use App\Models\Set\LocationModel;
@@ -27,7 +26,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 
-use App\Models\Document\ForwardModel; // Eliminar
 
 class RecordRepository implements RecordRepositoryInterface 
 {
@@ -258,7 +256,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record = RecordModel::find($rid);  
             if( $record ) {
                 //$rid = $record->getAttribute('document-record_id');
-                Log::debug('Recuperado el registro : '. $rid);
+               //Log::debug('Recuperado el registro : '. $rid);
                 $output_array['name'] = $record->name;
                 $output_array['txt'] = ($record->content != null && $record->content != '') ? $record->content : false;
                 $output_array['file'] = ($record->filename != null) ? $record->filename : false;
@@ -501,7 +499,9 @@ class RecordRepository implements RecordRepositoryInterface
      */      
     public function update(array $data)
     {
-        //Log::debug(['UPDATE DATA' => $data]);        
+        //Log::debug(['UPDATE DATA' => $data]);
+        $trace_user = '';
+        $trace_ok = '';        
 
         try { 
             // USER PARAMETERS
@@ -634,10 +634,11 @@ class RecordRepository implements RecordRepositoryInterface
                                 'record_id' => $record->record_id,
                                 'name' => $liable->name,
                                 'job' => $jobName,
-                            ]);                        
+                            ]);
+                            $trace_user .= ' | ADD USER : '. $uid;                        
                             if($result) {
                                 $existing_array[] = $uid;
-                                Log::debug(['INSERTED' => $uid]);
+                                //Log::debug(['INSERTED' => $uid]);
                                 // Enviar mensaje
                                 if ( $this->onLocal() && ($n == 5) ) break;
                                 // = $this->sendEmail($user, $record, $liable); // FIXME: Inhabilitado para debugging en local
@@ -645,14 +646,15 @@ class RecordRepository implements RecordRepositoryInterface
                             }                                                     
                         } else {
                             // existente
-                            Log::debug(['KEEP' => $uid]);
+                            //Log::debug(['KEEP' => $uid]);
                             $existing_array[] = $uid;
                         }
                     } // foreach
 
                     foreach($current_array as $uid) {
                         if( !in_array($uid, $existing_array) ) {
-                            Log::debug(['DELETED' => $uid]);
+                            //Log::debug(['DELETED' => $uid]);
+                            $trace_user .= ' | DEL USER : '. $uid;
                             $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $uid)->delete();
                         } // if
                     } // foreach
@@ -687,8 +689,10 @@ class RecordRepository implements RecordRepositoryInterface
             // SAVE USER STATUS
             if( key_exists('user_check', $data) ) {
                 $result = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $user->user_id)->update(['status' => 1]);
+                $trace_ok =  ( $data['record_id'] > 0 ) ? ' | STS ON' : '';
             } else {
                 $result = DB::table('document_record_users')->where('record_id', $record->record_id)->where('user_id', $user->user_id)->update(['status' => 0]);
+                //$trace_ok = ( $data['record_id'] > 0 ) ? ' | STS OFF' : ''; // No es necesario
             }
 
             
@@ -701,7 +705,7 @@ class RecordRepository implements RecordRepositoryInterface
                     $join->where('T1.department_id', $did);
                 })->first();
             $pid = ($process) ? $process->process_id : 0;
-            Log::debug(['PROCESS' => $process->toArray()]);
+           //Log::debug(['PROCESS' => $process->toArray()]);
 
             // Generar input->Código archivistico
             $input = [
@@ -717,7 +721,7 @@ class RecordRepository implements RecordRepositoryInterface
                 // Se crea nuevo archivo
                 $result = $this->file->setFile($input, $code, $sid, $pid);
                 if( !$result['success'] ) {
-                    Log::error($result['message']);
+                   //Log::error($result['message']);
                 } // if                
             } // if
 
@@ -735,8 +739,10 @@ class RecordRepository implements RecordRepositoryInterface
             if( isset($user->user_uid) ) {
                 $record->action = ( $data['record_id'] > 0 ) ? 'edit' : 'create';                
                 $record->trace = ( $data['status_id'] == 1 ) ? 'LOCK' : '';  
+                $record->trace .= $trace_user;
+                $record->trace .= $trace_ok;
                 $record->user_uid = $user->user_uid;
-                Log::debug(['RECORD' => $record->toArray()]);
+                //Log::debug(['RECORD' => $record->toArray()]);
                 Event::dispatch(new RecordTracing($record));
             }
 
@@ -768,7 +774,7 @@ class RecordRepository implements RecordRepositoryInterface
                 // Verificar existencia de archivo
                 if( file_exists($this->recordUrl . $fileName) ) {
                     // Actualizar la base de datos
-                    Log::debug('==> Archivo PDF Salvado: '. $this->recordUrl . $fileName);                
+                   //Log::debug('==> Archivo PDF Salvado: '. $this->recordUrl . $fileName);                
 
                 } else {
                     Log::error('recordRepository::update @ (1) File not found: '. $this->recordUrl . $fileName);
@@ -833,7 +839,7 @@ class RecordRepository implements RecordRepositoryInterface
     {
         $plucked = RecordModel::where('author_id', $user->user_id)->pluck('record_id');
         $rids = $plucked->all();
-        Log::debug(['OWNER :: UID' => $user->user_id, 'RIDS' => $rids]); 
+       //Log::debug(['OWNER :: UID' => $user->user_id, 'RIDS' => $rids]); 
         return $rids;        
     } // getRecordsByoWN Respository    
 
@@ -846,7 +852,7 @@ class RecordRepository implements RecordRepositoryInterface
     {
         $plucked = $user->records->pluck('record_id');
         $rids = $plucked->all();
-        Log::debug(['SHARED :: UID' => $user->user_id, 'RIDS' => $rids]); 
+       //Log::debug(['SHARED :: UID' => $user->user_id, 'RIDS' => $rids]); 
         return $rids;        
     } // getRecordsByShare Respository
 
@@ -863,7 +869,7 @@ class RecordRepository implements RecordRepositoryInterface
             $join->whereIn('set_department_process.department_id', $dids); 
         })->pluck('set_processes.process_id');
         $pids1 = $plucked->all();
-        Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
+       //Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
 
 
         // Códigos de proceso
@@ -876,7 +882,7 @@ class RecordRepository implements RecordRepositoryInterface
         } else {
             $pids2 = [];
         }
-        Log::debug(['SHARE PROCESSES IDS' =>  array_unique($pids2)]); 
+       //Log::debug(['SHARE PROCESSES IDS' =>  array_unique($pids2)]); 
 
         // Concatenar
         $process_array = array_unique(array_merge($pids1, $pids2));           
@@ -901,10 +907,10 @@ class RecordRepository implements RecordRepositoryInterface
         } else {        
             // Obtener procesos pertenecientes
             $pids1 = $this->tool->getOwnProcessesByJob($user);
-            Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
+           //Log::debug(['OWN PROCESSES IDS' =>  array_unique($pids1)]); 
             // Procesos de la tabla de relaciones con cargos                  
             $pids2 = $this->tool->setProcessesFromJobs($user);
-            Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
+           //Log::debug(['JOBS PROCESSES IDS' =>  array_unique($pids2)]); 
 
             // Procesos de autorizados
             $plucked = AuthorizationModel::where('user_id', $user->user_id)->where('auth', 1)->where('permissions', 'LIKE', '%"view":1%')
@@ -913,11 +919,11 @@ class RecordRepository implements RecordRepositoryInterface
                 })            
                 ->pluck('documents.process_id');
             $pids3 = $plucked->all();
-            Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
+           //Log::debug(['AUTH PROCESSES IDS' =>  array_unique($pids3)]);
 
             // Concatenar
             $process_array = array_unique(array_merge($pids1, $pids2, $pids3));      
-            Log::debug(['PIDS' =>  $process_array]);      
+           //Log::debug(['PIDS' =>  $process_array]);      
         }
 
         // Obtener el listado para el filtro
@@ -1142,7 +1148,7 @@ class RecordRepository implements RecordRepositoryInterface
                 $document->dir = $format['orientation'];
             }
         }        
-        Log::debug(['DOCUMENT' => $document->toArray()]);
+       //Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
     }
 
@@ -1152,7 +1158,7 @@ class RecordRepository implements RecordRepositoryInterface
             $record->link = route('records.edit', ['hash' => $this->tool->setIdHash($record->record_id)]);
             $record->sign = $author->name;
             $record->from = $author->email;
-            Log::debug(['NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);            
+           //Log::debug(['NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);            
             if( $this->onLocal() ) {
                 Event::dispatch(new RecordSent($record, $user, $this->set));
                 sleep(3);
@@ -1186,7 +1192,7 @@ class RecordRepository implements RecordRepositoryInterface
         foreach($plucked->all() as $uid) {
             $user = UserModel::where('user_id', $uid)->first();            
             if($user) {
-                Log::debug(['*NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);
+               //Log::debug(['*NOTICE NEW RECORD TO USER' => $user->email, 'FROM: ' => $record->sign, 'ENV' => env('APP_URL')]);
                 Event::dispatch(new RecordSent($record, $user, $this->set));
                 //TODO: ** temporal para modo desarrollo x limitación de MailTrap  */
                 if( $this->onLocal() ) {
@@ -1208,7 +1214,7 @@ class RecordRepository implements RecordRepositoryInterface
      */     
     public function setChat(array $data)
     {
-        Log::debug(['SET CHAT DATA' => $data]);                   
+       //Log::debug(['SET CHAT DATA' => $data]);                   
         try {
             $user = Auth::user();
             DB::beginTransaction(); 

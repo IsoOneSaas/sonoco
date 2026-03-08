@@ -505,9 +505,9 @@ class MasterRepository implements MasterRepositoryInterface
         $user = Auth::user();
 
         if( $user->hasAnyRole('MASTER','SUPER') ) {
-            //$plucked = LocationModel::all()->pluck('location_id');
-            //$location_array = $plucked->all();
             $locations = LocationModel::all();
+            $plucked = $locations->pluck('location_id');
+            $lids1 = $plucked->all();
         } else {
             // Obtener locatlizaciones pertenecientes
             $lids1 = $this->tool->getOwnLocationsByUser($user);        

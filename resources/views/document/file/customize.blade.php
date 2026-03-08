@@ -38,15 +38,16 @@
                                         <button id="btn-3-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#example-tab-3" type="button" role="tab" aria-controls="example-tab-3" aria-selected="true" > Formatos </button>
                                     </li>
                                     <li id="example-4-tab" class="nav-item flex-1" role="presentation">
-                                        <button id="btn-3-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#example-tab-4" type="button" role="tab" aria-controls="example-tab-4" aria-selected="false" > Archivo </button>
+                                        <button id="btn-4-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#example-tab-4" type="button" role="tab" aria-controls="example-tab-4" aria-selected="false" > Archivo </button>
                                     </li>
-                                    <li id="example-5-tab" class="nav-item flex-1" role="presentation">
+<!--                                     <li id="example-5-tab" class="nav-item flex-1" role="presentation">
                                         <button id="btn-5-tab" class="nav-link w-full py-2" data-tw-toggle="pill" data-tw-target="#example-tab-5" type="button" role="tab" aria-controls="example-tab-4" aria-selected="false" > Ar </button>
-                                    </li>                                    
+                                    </li>   -->                                  
                                 </ul>
                                 <form id="customize-form" action="{{ route('files.settings.personalizar.store') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="tab_active" value="{{ old('tab_active', '') }}">
+                                <input type="hidden" name="tab_active" value="{{ old('tab_active', isset($initTab) ? $initTab : '') }}">
                                 <div class="tab-content mt-5">
                                     <div id="example-tab-3" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="example-3-tab">
                                         <div class="input-group mt-3">
@@ -96,12 +97,16 @@
                                         </div>                                        
                                     </div>
                                     <div id="example-tab-4" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="example-4-tab">
-                                                                                                                                                              
+                                        <div class="input-group mt-3">
+                                            <div id="alarm-time" class="input-group-text flex w-full"><i data-lucide="{{ trans('document/customize.form.alarm_time.icon') }}" class="w-5 h-5 mr-1"></i>{{ trans('document/customize.form.alarm_time.title') }}</div>
+                                            <input type="number"  name="alarm_time" value="{{ old('alarm_time', $data['alarm_time']) }}" class="form-control  w-full" aria-describedby="alarm_time" placeholder="{{ trans('document/customize.form.alarm_time.placeholder') }}" min="1"  required>
+                                            <div id="input-group-11" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/customize.form.alarm_time.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                        </div>                                                                                                                                                              
                                     </div>
 
-                                    <div id="example-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="example-5-tab">
+<!--                                     <div id="example-tab-5" class="tab-pane leading-relaxed" role="tabpanel" aria-labelledby="example-5-tab">
                                                                                                                                                                                                   
-                                    </div>
+                                    </div> -->
                                 </div>
                                 </form>
                             </div>
@@ -131,7 +136,7 @@
     $(function () {
 
         var tab = $("input[name='tab_active']").val();
-        var id = ( tab == '') ? 'btn-3-tab' : tab;
+        var id = ( tab == '') ? '{{ $initTab }}' : tab;
         $("#"+id).addClass('active');
         $("#"+id).attr('aria-selected', true);
         $("#"+id).trigger("click");

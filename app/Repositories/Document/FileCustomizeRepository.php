@@ -37,7 +37,7 @@ class FileCustomizeRepository implements FileCustomizeRepositoryInterface
      */    
     public function store(array $data) 
     {
-        Log::debug(['STORE CUSTOMIZE DATA' => $data]);
+        //Log::debug(['STORE CUSTOMIZE DATA' => $data]);
         try {
 
 
@@ -48,8 +48,9 @@ class FileCustomizeRepository implements FileCustomizeRepositoryInterface
             $new['record_nui_format'] = $data['record_nui_format'];
             $new['file_code_pad'] = $data['file_code_pad'];
             $new['record_nui_pad'] = $data['record_nui_pad'];
+            $new['alarm_time'] = $data['alarm_time'];
             //unset($new['master_text'], $new['master_alert'], $new['due_text'], $new['due_subject']);
-            Log::debug(['TO SAVE' => $new]);
+            //Log::debug(['TO SAVE' => $new]);
 
             DB::beginTransaction();
             $set->settings = $new;

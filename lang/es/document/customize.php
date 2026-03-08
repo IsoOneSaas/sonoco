@@ -128,15 +128,20 @@ return [
                             'icon'          => 'hash',
                             'title'         => 'Número de dígitos código archivístico',
                             'placeholder'   => 'Indique el número de dígitos de relleno',
-                            'tooltip'       => 'Requerido. Digige el número de dígitos de relleno (ceros) que contendrá cada código numérico que compone el código archivistico',
+                            'tooltip'       => 'Requerido. Digite el número de dígitos de relleno (ceros) que contendrá cada código numérico que compone el código archivistico',
             ], 
             'nui_pad'                   =>  [
                             'icon'          => 'hash',
                             'title'         => 'Número de dígitos código NUI',
                             'placeholder'   => 'Indique el número de dígitos de relleno',
-                            'tooltip'       => 'Requerido. Digige el número de dígitos de relleno (ceros) que tendrá el consecutivo del código NUI',
+                            'tooltip'       => 'Requerido. Digite el número de dígitos de relleno (ceros) que tendrá el consecutivo del código NUI',
             ],                                        
-                                                                        
+            'alarm_time'                   =>  [
+                            'icon'          => 'calendar',
+                            'title'         => 'Alarma Validez',
+                            'placeholder'   => 'Indique el número de días de anticipo para ser alertado',
+                            'tooltip'       => 'Requerido. Digite el número de días de anticipo para que sea alertado de finalización de una validez',
+            ],                                                                         
         ],    
 
     'request' => [
@@ -188,7 +193,11 @@ return [
                 'file_code_pad'                  =>  [
                                     'required'      => 'Indique el número de ceros de relleno para los códigos numericos utilizados en el código archivistico',
 
-                ],                                                 
+                ], 
+                'alarm_time'                  =>  [
+                                    'required'      => 'Indique el número de días de anticipación para alertar fin de vigencia',
+
+                ],                                                                 
     ],
 
 

@@ -463,18 +463,10 @@ class FileModelController extends Controller
     private function dataTableDefinition()
     {
         $columnOrder = 6;
-        //$columnExport = [9,10,11,12,13,14,15,16,17,18,19,20,21];
         $columnExport = [2,3,4,5,6,7,8,9,10,11,12,13,14];
         $columns_basic = [
              ["data" => "DT_RowIndex", "title" => "No", "visible" => true, "orderable" => false, "searchable" => false, "filterable" => false, "width" => "20px", "className" => "dt-body-right"],
             ["data" => "file_id", "title" => "ID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "system_id", "title" => "XID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "process_id", "title" => "PID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "location_id", "title" => "LID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "department_id", "title" => "DID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "job_id", "title" => "JID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "topic_id", "title" => "TID", "visible" => false, "searchable" => false, "orderable" => false],
-            // ["data" => "subtopic_id", "title" => "SID", "visible" => false, "searchable" => false, "orderable" => false],
         ];
 
         $columns_array = [
@@ -484,9 +476,9 @@ class FileModelController extends Controller
             ["data" => "subtopic", "title" => "Subtema", "filterable" => true, "searchable" => true],
             ["data" => "name", "title" => "Nombre", "filterable" => false, "searchable" => true],        // Order => 6
             ["data" => "responsable", "title" => "Responsable", "filterable" => true, "searchable" => false],
-            ["data" => "datewell", "title" => "Frecuencia de Retención", "filterable" => false, "searchable" => true],
+            ["data" => "datewell", "title" => "Frecuencia de Retención", "filterable" => false, "searchable" => true], // 8
             ['data' => 'datemin', 'title' => 'Tiempo Mínimo Retención', "filterable" => false, "searchable" => true],
-            ["data" => "datedead", "title" => "Tiempo Archivo Muerto", "filterable" => false, "searchable" => true],
+            ["data" => "datedead", "title" => "Tiempo Archivo Muerto", "filterable" => false, "searchable" => true], // 10
             ["data" => "storage", "title" => "Almacenamiento", "filterable" => true, "searchable" => true], // 11
             ["data" => "classification", "title" => "Clasificación", "filterable" => true, "searchable" => true],
             ["data" => "txtindex", "title" => "Indexación", "filterable" => true, "searchable" => true],
@@ -497,7 +489,6 @@ class FileModelController extends Controller
             ["data" => "hash", "title" => "H", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "count", "title" => "N", "visible" => false, "searchable" => false, "orderable" => false],    // número de registros asociados al archivo
             ["data" => "auth", "title" => "A", "visible" => false, "searchable" => false, "orderable" => false],
-            //["data" => "txtsupport", "title" => "Medio Soporte", "visible" => false, "searchable" => false, "orderable" => false],
             ["data" => "color1", "title" => "C1", "visible" => false, "searchable" => false, "orderable" => false], 
             ["data" => "color2", "title" => "C2", "visible" => false, "searchable" => false, "orderable" => false], 
         ]; 
