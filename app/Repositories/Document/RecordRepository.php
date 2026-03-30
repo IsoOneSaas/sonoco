@@ -116,7 +116,8 @@ class RecordRepository implements RecordRepositoryInterface
                     $join->on('document_records.document_id', '=', 'documents.document_id');
                     $join->whereIn('documents.location_id', $lids);
                 })->pluck('document_records.record_id');
-                $records_array = $plucked->all();
+                $rids3 = $plucked->all();
+				$records_array = array_unique(array_merge($rids1, $rids2, $rids3)); 
             } else {
                 $records_array = array_unique(array_merge($rids1, $rids2)); 
             }            

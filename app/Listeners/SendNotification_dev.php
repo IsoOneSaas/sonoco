@@ -21,7 +21,6 @@ class SendNotification
     public function handle(EmailSent $event): void
     {
         //Log::debug(['OUTPUT USER' => $event->user->toArray(), 'DOC' => $event->document->toArray()]);
-		//Log::debug(['EMAIL TO USER' => $event->user->name]);
         Mail::to($event->user->email)->queue(
             new Responsible($event->user->name, $event->document->name, $event->document->action, $event->document->date, $event->document->link, $event->document->event)
         );

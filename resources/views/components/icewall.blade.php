@@ -339,25 +339,12 @@
                                 <div class="side-menu__title"> Documentos <i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
                             </a>                            
                             <ul class=" @if( Str::contains( request()->route()->getName(), 'documents.') ) side-menu__sub-open @endif ">
-                                <!-- <li>
-                                    <a href="{{ route('documents.dashboard') }}" class="side-menu @if( request()->route()->getName() == 'documents.dashboard') side-menu--active @endif ">
-                                        <div class="side-menu__icon"> <i data-lucide="trello"></i> </div>
-                                        <div class="side-menu__title"> Dashboard </div>
-                                    </a>
-                                </li> -->
                                 <li>
-                                    <a href="{{ route('documents.master.index') }}" class="side-menu @if( request()->route()->getName() == 'documents.master') side-menu--active @endif ">
-                                        
+                                    <a href="{{ route('documents.master.index') }}" class="side-menu @if( request()->route()->getName() == 'documents.master.index') side-menu--active @endif ">                                        
                                         <div class="side-menu__icon"> <i data-lucide="list-ordered"></i> </div>
                                         <div class="side-menu__title"> Listado Maestro </div>
                                     </a>
-                                </li>
-                                <!--                                 <li>
-                                                                    <a href="javascript:;" class="side-menu @if( request()->route()->getName() == 'documents.records') side-menu--active @endif ">
-                                                                        <div class="side-menu__icon"> <i data-lucide="book"></i> </div>
-                                                                        <div class="side-menu__title"> Registros </div>
-                                                                    </a>
-                                                                </li>  -->                                                                                                                            
+                                </li>                                                                                                                          
                                 <li>
                                     <a href="javascript:;" class="side-menu @if( Str::contains( request()->route()->getName(), 'documents.control') ) side-menu--active @endif">
                                         <div class="side-menu__icon"> <i data-lucide="file-input"></i> </div>
@@ -453,47 +440,25 @@
                                             </li>
                                         </ul>                                                                    
                                     </li>
-    <!--                                 <li>
-                                        <a href="javascript:;" class="side-menu">
-                                            <div class="side-menu__icon"> <i data-lucide="crosshair"></i> </div>
-                                            <div class="side-menu__title"> Administrar<i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
-                                        </a>
-                                        <ul class="">
-                                            <li>
-                                                <a href="javascript:;" class="side-menu">
-                                                    <div class="side-menu__icon"> <i data-lucide="zap"></i> </div>
-                                                    <div class="side-menu__title">Mantenimiento</div>
-                                                </a>
-                                            </li>
-                                            <li>                                            
-                                                <a href="javascript:;" class="side-menu">
-                                                    <div class="side-menu__icon"> <i data-lucide="zap"></i> </div>
-                                                    <div class="side-menu__title">Reportes</div>
-                                                </a>                                            
-                                            </li>
-                                        </ul>                                    
-                                    </li> -->
                                     @endcan
                                 @endif
                             </ul>
                         </li>
 
                         <li>
-                            <a href="javascript:;" class="side-menu @if( Str::contains( request()->route()->getName(), 'records.') ) side-menu--active @endif ">
+                            <a href="javascript:;" class="side-menu @if( Str::contains( request()->route()->getName(), ['records.', 'files.']) ) side-menu--active @endif ">
                                 <div class="side-menu__icon"> <i data-lucide="library"></i> </div>
                                 <div class="side-menu__title"> Registros <i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
                             </a>                            
-                            <ul class=" @if( Str::contains( request()->route()->getName(), 'records.') ) side-menu__sub-open @endif ">
+                            <ul class=" @if( Str::contains( request()->route()->getName(), ['records.', 'files.']) ) side-menu__sub-open @endif ">
                                 <li>
-                                    <a href="{{ route('records.index') }}" class="side-menu @if( request()->route()->getName() == 'documents.master') side-menu--active @endif ">
-                                        
+                                    <a href="{{ route('records.index') }}" class="side-menu @if( request()->route()->getName() == 'records.index') side-menu--active @endif ">                                        
                                         <div class="side-menu__icon"> <i data-lucide="table"></i> </div>
                                         <div class="side-menu__title"> Listado Maestro </div>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('files.admin.index') }}" class="side-menu @if( request()->route()->getName() == 'files') side-menu--active @endif ">
-                                        
+                                    <a href="{{ route('files.admin.index') }}" class="side-menu @if( request()->route()->getName() == 'files.admin.index') side-menu--active @endif "> 
                                         <div class="side-menu__icon"> <i data-lucide="archive"></i> </div>
                                         <div class="side-menu__title"> Archivo </div>
                                     </a>
@@ -506,7 +471,7 @@
                                             <div class="side-menu__icon"> <i data-lucide="settings-2"></i> </div>
                                             <div class="side-menu__title"> Ajustes <i data-lucide="chevron-down" class="side-menu__sub-icon "></i> </div>
                                         </a>
-                                        <ul class=" @if( Str::contains( request()->route()->getName(), 'documents.settings') ) side-menu__sub-open @endif ">
+                                        <ul class=" @if( Str::contains( request()->route()->getName(), 'files.settings') ) side-menu__sub-open @endif ">
                                             <li>
                                                 <a href="{{ route('files.settings.personalizar.index') }}" class="side-menu @if( Str::contains( request()->route()->getName(), 'files.settings.personalizar') ) side-menu--active @endif">
                                                     <div class="side-menu__icon"> <i data-lucide="wrench"></i> </div>
