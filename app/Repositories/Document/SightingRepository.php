@@ -66,7 +66,7 @@ class SightingRepository implements SightingRepositoryInterface
                     $query->on('documents.document_id', '=', 'document_sightings.document_id');
                 })
                 ->orderBy('document_sightings.date', 'desc')
-                ->get();
+                ->get(['documents.document_id', 'documents.name', 'documents.code', 'document_sightings.sighting_id', 'document_sightings.user_uid', 'document_sightings.type', 'document_sightings.date', 'document_sightings.page', 'document_sightings.section', 'document_sightings.content', 'document_sightings.status']);
         } else {
             $items = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
                 ->join('documents', function($query) {
@@ -76,9 +76,6 @@ class SightingRepository implements SightingRepositoryInterface
                 ->orderBy('document_sightings.date', 'desc')
                 ->get(['documents.document_id', 'documents.name', 'documents.code', 'document_sightings.sighting_id', 'document_sightings.user_uid', 'document_sightings.type', 'document_sightings.date', 'document_sightings.page', 'document_sightings.section', 'document_sightings.content', 'document_sightings.status']);
         }
-
-
-
         
         //Log::debug(['ITEMS' => $items->toArray()]);
 
@@ -86,9 +83,8 @@ class SightingRepository implements SightingRepositoryInterface
             $user = UserModel::where('user_uid', $item->user_uid)->withTrashed()->first();
             $dateString = Carbon::createFromTimeStamp(strtotime($item->date))->format($this->set['date_format']);
             $checked = ($item->status == 1 ) ? ' checked' : '';
+            //Log::debug(['ID' => $item->document_id, 'CHECKED' => $checked]);
             $array_output[] = [
-                
-                //"sighting_id" => $item->sighting_id,
                 'empty' => '',
                 "DT_RowIndex" => $n,
                 'date' => $dateString,
@@ -99,15 +95,13 @@ class SightingRepository implements SightingRepositoryInterface
                 'page' => $item->page,
                 'section' => $item->section,
                 'checked' => '<input type="checkbox" title="Cambiar de estado" style="margin-top:-10px" onClick="checkSighting('. $item->sighting_id .')"'. $checked .' />&nbsp;&nbsp;<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'" title="ver documento '. $item->name .'"><img alt="file" style="width:1.2em" src="/assets/images/fileopen.png"></button>',
-                //'control' => '<a href="javascript:;" class="tooltip inline" title="'. $item->content .'"><img alt="Ver" class="rounded-full" src="/assets/images/viewmag.png"></a><button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
-                //'control' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
                 'content' => $item->content .'. ',
-                'order' => $item->date,
-                //'file' => '<button class="btn-sheet" data-hash="'. $this->tool->setIdHash($item->document_id) .'"><img alt="Ver" class="rounded-full inline" src="/assets/images/fileopen.png"></button>',
+                'order' => $item->date
             ];
             $n++;            
+        } // foreach
 
-        }
+        //Log::debug(['OUTPUT' => $array_output]);
 
         return json_encode([
             "draw" => 1,
