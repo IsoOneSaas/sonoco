@@ -4,7 +4,7 @@ interface HomeRepositoryInterface
 {
     public function getSettingsAlerts();
     
-    public function getEvents($uid, $start, $end, $today);
+    public function getEvents($uid, $role, $start, $end, $today);
 
     public function getDocuments($uid);
 

@@ -171,7 +171,7 @@
                                 <div class="input-group mt-3">
                                     <div id="switch" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.switch.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.switch.title') }}</div>
                                     <div class="form-switch mt-2 ml-4 mr-2  w-fit">
-                                        Administrador&nbsp;&nbsp;<input type="checkbox" class="form-check-input" name="switch" @if( old('switch', $document->switch) ) checked @endif >&nbsp;&nbsp;Usuario
+                                        Administrador&nbsp;&nbsp;<input type="checkbox" class="form-check-input" name="switch" @if( old('switch', isset($document) ? $document->switch : '') ) checked @endif >&nbsp;&nbsp;Usuario
                                     </div>                                             
                                     <div id="input-group-27" class="input-group-text mr-1"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.switch.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                               
                                 </div>                                 

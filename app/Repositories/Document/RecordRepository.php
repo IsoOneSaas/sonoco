@@ -423,11 +423,28 @@ class RecordRepository implements RecordRepositoryInterface
             ];
         } // foreach
 
-        // Recuperar Archivos anexos
+        // Recuperar Archivos anexos        
+        $links = [];
         $files = DB::table('document_record_links')->where('record_id', $id)->get(); 
         if($files) {
-            $output_array['files'] = $files->toArray();
-        }
+            $output_array['files'] = $files->toArray();            
+            foreach( $files->toArray() as $i => $file ) {
+                $links[$i]['id'] = $file->link_id;
+                $links[$i]['name'] = $file->name;
+                $links[$i]['file'] = $file->link;
+                $links[$i]['size'] = $file->size;
+                $links[$i]['type'] = $file->type;
+                $url = $this->recordUrl . $file->link;
+                if(file_exists($url)) {
+                    $path = pathinfo($url);
+                    $mime = $this->tool->getFileMimeName($path['extension']);
+                } else {
+                    $mime =  'other';
+                }
+                $links[$i]['url'] = 'assets/images/mimes/'. $mime .'.png';
+            } // foreach            
+        } // if
+        $output_array['files'] = $links;
 
         // Recuperar Tema y Subtema si existe (added 2024.09.05)
         $output_array['topic'] = '';
@@ -489,7 +506,7 @@ class RecordRepository implements RecordRepositoryInterface
             } // foreach
         } // if
 
-       //Log::debug(['RECORD EXISTING' => $output_array]);
+       Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     
@@ -1126,7 +1143,7 @@ class RecordRepository implements RecordRepositoryInterface
         $groups =  DB::table('document_record_tags')->select('group')->orderBy('group')->groupBy('group')->get();
         if( $groups ) return $groups;
         else return true;            
-    } // getGroups Method 
+    } // getGroups Repository 
     
     public function getDocument($id, $dateFormat)
     {
@@ -1139,9 +1156,11 @@ class RecordRepository implements RecordRepositoryInterface
         $document->process = $process->name;
         $status = $document->status()->where('action', $action)->first(['return_date']);
         $document->date = Carbon::createFromTimeStamp(strtotime($status->return_date))->format($this->set['date_format']);
+        
+        // FORMAT
         $json_array = $document->settings;
         $document->size = config('settings.document_print_format')['size'];
-        $document->dir = config('settings.document_print_format')['orientation'];            
+        $document->dir = config('settings.document_print_format')['orientation'];        
         if( is_array($json_array) ) {
             if(key_exists('print_format', $json_array)) {
                 $format = $json_array['print_format'];
@@ -1149,9 +1168,9 @@ class RecordRepository implements RecordRepositoryInterface
                 $document->dir = $format['orientation'];
             }
         }        
-       //Log::debug(['DOCUMENT' => $document->toArray()]);
+        //Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
-    }
+    } // get Document Repository
 
     private function sendEmail($author, $record, $user)
     {

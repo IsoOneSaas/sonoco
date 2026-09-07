@@ -10,6 +10,7 @@ use App\Models\Document\TracingRecordModel;
 use App\Models\Set\DepartmentModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class HomeRepository implements HomeRepositoryInterface 
 {
@@ -27,7 +28,7 @@ class HomeRepository implements HomeRepositoryInterface
     {
         $this->tool = $Tools;
         $this->file = $File;
-        $this->editLink = '/documentos/control/gestion/editar/user/';
+        $this->editLink = '/documentos/control/gestion/editar/?/?';
         $this->openDocumentLink = '/documentos/master/publicado/';
         $this->openEditRecordLink = '/documentos/registro/editar/';
         $this->openViewRecordLink = '/documentos/registro/ver/';
@@ -60,11 +61,19 @@ class HomeRepository implements HomeRepositoryInterface
         return $alerts_array;
     } // getSettingsAlerts()
 
-    public function getEvents($uid, $start, $end, $today)
+    public function getEvents($uid, $role, $start, $end, $today)
     {
         //Log::debug(['USER' =>  $uid, 'START' => $start .' 00:00:00', 'END' => $end .' 23:59:59']);
         $events_array = [];
         $icon_array = config('settings.document_status_texts');
+		$slug = [
+			'EXT'   => 'user',       // usuario 3ra parte del inquilino - 
+			'GUEST' => 'user',      // usuario que solo requiere visualizar un dashboard o agregar información
+			'USER' => 'user',        // usuario común
+			'ADMIN' => 'admin', // usuario con privilegios de administrador
+			'MASTER' => 'admin',    // usuario con completo acceso
+			'SUPER' => 'admin',       // funcionario iso-one			
+		];        
 
         $events = ForwardModel::where('user_uid', $uid)
             ->join('documents', function($query) {
@@ -89,7 +98,7 @@ class HomeRepository implements HomeRepositoryInterface
                     'icon' => $icon_array[$event->action]['icon'],
                     'color' => ( $day < $today ) ? 'warning' : 'primary',
                     'action' => 'edit',
-                    'link' => $this->editLink.$hash,
+                    'link' => Str::replaceArray('?', [ $slug[$role], $hash], $this->editLink),
                 ];
             } // foreach
         } // if

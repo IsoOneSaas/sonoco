@@ -141,7 +141,9 @@
                                                 </ul>
                                             @endif
                                         </div>
-                                        @include('document/document/footer_default')
+										@if($document->class != 'formato')
+											@include('document/document/footer_default')
+										@endif	
                                     </div>
                                 </div>
                             </div>

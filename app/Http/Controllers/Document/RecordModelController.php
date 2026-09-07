@@ -156,7 +156,7 @@ class RecordModelController extends Controller
 
         // Obtener datos del documento original
         $data = $this->recordRepo->setRecord($hash);
-        //Log::debug(['DATA' => $data]);
+        Log::debug(['DATA' => $data]);
 
         // Obtener datos de archivo
         $file = $this->recordRepo->getFileData($data['code']);
@@ -171,7 +171,6 @@ class RecordModelController extends Controller
             'departments' => $departments,
             'countDepartments'     => $countDepartments,
             'countLocations'     => $locations['n'],
-            'departments' => $departments,
             'topics'    => $topics,
             'groups'    => $groups,
             'origin'    => 'records',

@@ -119,6 +119,7 @@ class ControlRepository implements ControlRepositoryInterface
                     // Obtener el tipo de documento
                     $type = TypeModel::find($document->type_id);
                     $document->type = ($type) ? $type->name : '';
+                    $document->class = ($type) ? $type->category : '';
 
                     // Obtener el proceso del documento
                     $process = ProcessModel::find($document->process_id);

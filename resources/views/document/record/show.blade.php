@@ -58,6 +58,19 @@
 
 
                                 </div>
+                                @if( count($DATA['files']) > 0 )
+                                <div id="iso-links" class="mx-2">
+                                    <hr />
+                                    <h2 class="my-4">Archivos Anexos</h2>
+                                    @foreach( $DATA['files'] as $i => $link )
+                                        <div class="flex items-center gap-2 ml-2 mb-4">
+                                            <img src="{{ url($link['url']) }}" class="6 h-6" alt="icon" />
+                                            <a href="javascript:void(0)" data-file="{{ $link['file'] }}" onClick="showFile($(this).data('file')); return false;" class="underline">{{ $link['name'] }} [{{ $link['size'] }}kB]</a>
+                                        </div>
+                                    @endforeach
+                                    <br />
+                                </div>
+                                @endif
                             </div>
                         </div>
 
@@ -89,7 +102,8 @@
        }
        p, li {
         margin-bottom: 0.2em
-       }            
+       } 
+         
     </style>
 @endpush
 
@@ -102,6 +116,13 @@
                 location.href = uri; 
             });
         }); // document
+
+        function showFile(file) {
+            var url = "{{ route('records.edit.show', ':file') }}"; 
+            url = url.replace(':file', file);
+            var win = window.open(url, '_blank');
+            win.focus();        
+        } // showFile Fx        
     </script>
 @endpush
 </x-icewall> 

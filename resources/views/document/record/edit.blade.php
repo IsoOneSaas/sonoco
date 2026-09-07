@@ -280,16 +280,16 @@
                                                 <p class="inline-flex items-baseline"><i data-lucide="alert-circle" class="w-4 h-4"></i>&nbsp;Ingrese tanto archivos adjuntos sea necesario. Pulse el botón para cargar uno nuevo.</p>  
                                                 <button id="btn-attachments-modal" type="button" class='btn btn-primary ml-4'><i data-lucide="upload" class="w-8 h-8"></i></button>
                                                 <div id="div-attachments">
-                                                    @foreach( $DATA['files'] as $file )
-                                                    <div class="input-group mt-5" id="link-{{ $file->link_id }}">
+                                                    @foreach( $DATA['files'] as $i =>  $file )
+                                                    <div class="input-group mt-5" id="link-{{ $file['id'] }}">
                                                         <div class="input-group-text flex"><i data-lucide="file" class="w-4 h-4 mr-1"></i> Archivo</div>
-                                                        <input type="text" name="attachname[]" value="{{ $file->name }}" class="form-control w-full input-status" readonly>
-                                                        <input type="text" name="attachsize[]" value="{{ $file->size }}" class="form-control w-full input-status" readonly>
-                                                        <input type="text" name="attachmime[]" value="{{ $file->type }}" class="form-control w-full input-status" readonly>
-                                                        <input type="hidden" name="attachfile[]" value="{{ $file->link }}" class="form-control w-full">
-                                                        <button type="button" class="btn btn-primary input-status ml-5" onClick="showFile('{{ $file->link }}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                                        <button type="button" class="btn btn-danger input-status ml-5" onClick="deleteFile({{ $file->link_id }})"><i data-lucide="minus" class="w-4 h-4"></i></button>
-                                                    </div>    
+                                                        <input type="text" name="attachname[]" value="{{ $file['name'] }}" class="form-control w-full input-status" readonly>
+                                                        <input type="text" name="attachsize[]" value="{{ $file['size'] }}" class="form-control w-full input-status" readonly>
+                                                        <input type="text" name="attachmime[]" value="{{ $file['type'] }}" class="form-control w-full input-status" readonly>
+                                                        <input type="hidden" name="attachfile[]" value="{{ $file['file'] }}" class="form-control w-full">
+                                                        <button type="button" class="btn btn-primary input-status ml-5" data-file="{{ $file['file'] }}" onClick="showFile($(this).data('file')); return false;"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                                        <button type="button" class="btn btn-danger input-status ml-5" onClick="deleteFile({{ $file['id'] }})"><i data-lucide="minus" class="w-4 h-4"></i></button>                                                        
+                                                    </div>
                                                     @endforeach
                                                 </div>
                                             </div>
@@ -635,7 +635,8 @@
 
         // BTN SALIR
         $('#btn-exit').on("click", function() {
-            editExit();
+            var url = $(this).data('href');
+            editExit(url);
         }); // btn-exit        
         
         // EVENTOS
@@ -1364,9 +1365,8 @@
         $("#subject-select").html(output);
     } // generateSubtopicsSelect
     
-    function editExit() {
-        var referrer =  document.referrer;
-        var url = $(this).data('href');
+    function editExit(url) {
+        var referrer =  document.referrer;        
 
         if( !$isSaved ) {
             swal({ 
@@ -1382,18 +1382,23 @@
             .then((willSend) => {
                 if (willSend) {
                     if( referrer.indexOf('registro/listado') >= 0 ) {
+                        alert('1 history->back');
                         history.back();
                     } else {
+                        alert('1 href='+url);
                         location.href = url;  
                     } // if/else                                                
                 } else {
+                    alert('1 return');
                     return false;
                 } // if/else
             });
         } else {
             if( referrer.indexOf('registro/listado') >= 0 ) {
+                alert('2 history->back');
                 history.back();
             } else {
+                alert('2 href='+url);
                 location.href = url;  
             } // if/else
         }  // if/else

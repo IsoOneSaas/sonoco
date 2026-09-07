@@ -59,7 +59,7 @@ class HomeController extends Controller
         //Log::debug(['D1' => $actualDay, 'D0' => $startDay, 'WEEK' => $week, 'WEEKS ARRAY' => $week_array, 'CURRENT WEEKS' => $now->weeksInYear, 'PAST WEEKS' => $now->copy()->subYear()->weeksInYear]);
         
         // Eventos de Documentos
-        $events = $this->homeRepo->getEvents($user->user_uid, $startDay, $endDay, $actualDay);
+        $events = $this->homeRepo->getEvents($user->user_uid, $user->role, $startDay, $endDay, $actualDay);
         foreach ($period as $date) {
             $n = $date->format('d');            
             $days_array[] = [
