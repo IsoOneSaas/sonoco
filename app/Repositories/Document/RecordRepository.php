@@ -506,7 +506,7 @@ class RecordRepository implements RecordRepositoryInterface
             } // foreach
         } // if
 
-       Log::debug(['RECORD EXISTING' => $output_array]);
+       //Log::debug(['RECORD EXISTING' => $output_array]);
        return $output_array; 
     }  // setRecord     
     

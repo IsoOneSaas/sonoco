@@ -23,6 +23,17 @@
                                         </h2>
                                         <!-- <a href="" class="ml-auto flex items-center text-primary"> <i data-lucide="refresh-ccw" class="w-4 h-4 mr-3"></i> Recargar Datos </a> -->
                                     </div>
+
+                                    <!-- Agenda -->
+                                    <div class="">
+                                        <div class="intro-y box mt-5">                                    
+
+                                        <h1>Agenda va aquí</h1>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado de documentos -->
                                     <div class="grid grid-cols-12 gap-6 mt-5">
                                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                                             <div class="report-box zoom-in">
@@ -82,6 +93,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- Documentos frecuentes -->
                                     <div class="col-span-12">
                                         <!-- BEGIN: View Documents -->
                                         <div class="intro-y box mt-5">

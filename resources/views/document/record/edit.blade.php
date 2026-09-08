@@ -1382,23 +1382,23 @@
             .then((willSend) => {
                 if (willSend) {
                     if( referrer.indexOf('registro/listado') >= 0 ) {
-                        alert('1 history->back');
+                        //alert('1 history->back');
                         history.back();
                     } else {
-                        alert('1 href='+url);
+                        //alert('1 href='+url);
                         location.href = url;  
                     } // if/else                                                
                 } else {
-                    alert('1 return');
+                    //alert('1 return');
                     return false;
                 } // if/else
             });
         } else {
             if( referrer.indexOf('registro/listado') >= 0 ) {
-                alert('2 history->back');
+                //alert('2 history->back');
                 history.back();
             } else {
-                alert('2 href='+url);
+                //alert('2 href='+url);
                 location.href = url;  
             } // if/else
         }  // if/else

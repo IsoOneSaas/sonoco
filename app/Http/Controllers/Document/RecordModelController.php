@@ -156,7 +156,7 @@ class RecordModelController extends Controller
 
         // Obtener datos del documento original
         $data = $this->recordRepo->setRecord($hash);
-        Log::debug(['DATA' => $data]);
+        //Log::debug(['DATA' => $data]);
 
         // Obtener datos de archivo
         $file = $this->recordRepo->getFileData($data['code']);
@@ -200,7 +200,7 @@ class RecordModelController extends Controller
         $response = ['status' => 'success', 'message' => 'Testing...'];
         $msgs = '';
         $input = $request->input();
-        Log::debug(['STORE DATA' => $request->all()]);
+        //Log::debug(['STORE DATA' => $request->all()]);
                 
         // VALIDAR FORMULARIO
         $validator = Validator::make($request->all(), [     // FIXME: No falta más validaciones?
