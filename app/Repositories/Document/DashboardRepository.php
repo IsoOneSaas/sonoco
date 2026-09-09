@@ -2,6 +2,7 @@
 
 use App\Classes\ToolsClass;
 use App\Interfaces\Document\DashboardRepositoryInterface;
+use App\Models\Document\ForwardModel;
 use App\Models\Set\DepartmentModel;
 use App\Models\Set\LocationModel;
 use App\Models\Set\userModel;
@@ -14,14 +15,17 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class DashboardRepository implements DashboardRepositoryInterface 
 {
     private $tool;
+    protected $editLink;
 
     public function __construct(ToolsClass $Tools)
     {
         $this->tool = $Tools;
+        $this->editLink = '/documentos/control/gestion/editar/?/?';
     }
 
     public function getSettingsStatus()
@@ -138,6 +142,51 @@ class DashboardRepository implements DashboardRepositoryInterface
         //Log::debug(['UID' => $uid, 'NAME' => $document->name, 'FREQUENCY' => $tracing_array]);
         return $tracing_array;
     }
+
+    public function getEvents($uid, $role, $start, $end, $today)
+    {
+        //Log::debug(['USER' =>  $uid, 'START' => $start .' 00:00:00', 'END' => $end .' 23:59:59']);
+        $events_array = [];
+        $icon_array = config('settings.document_status_texts');
+		$slug = [
+			'EXT'   => 'user',      // usuario 3ra parte del inquilino - 
+			'GUEST' => 'user',      // usuario que solo requiere visualizar un dashboard o agregar información
+			'USER' => 'user',       // usuario común
+			'ADMIN' => 'admin',     // usuario con privilegios de administrador
+			'MASTER' => 'admin',    // usuario con completo acceso
+			'SUPER' => 'admin',     // funcionario iso-one			
+		];        
+
+        $events = ForwardModel::where('user_uid', $uid)
+            ->join('documents', function($query) {
+                $query->on('documents.document_id', '=', 'document_forwards.document_id');
+                //FIXME: $query->where('documents.status', '=', 'document_forwards.action');                
+            })
+            ->where('checked', 0)
+            ->whereBetween('deadline', [$start .' 00:00:00', $end .' 23:59:59'])
+            ->get([
+                'documents.document_id',
+                'documents.code',
+                'document_forwards.action',
+                'document_forwards.deadline',
+            ]);
+
+        // FIXME: VALIDAR QUE EL DOCUMENTO ESTÁ EN E/R/A
+        if($events) {
+            foreach($events as $event) {
+                $day = Carbon::createFromFormat('Y-m-d H:i:s', $event->deadline)->format('d');
+                $hash = $this->tool->setIdHash($event->document_id);
+                $events_array[$day][] = [
+                    'code' => $event->code,
+                    'icon' => $icon_array[$event->action]['icon'],
+                    'color' => ( $day < $today ) ? 'warning' : 'primary',
+                    'action' => 'edit',
+                    'link' => Str::replaceArray('?', [ $slug[$role], $hash], $this->editLink),
+                ];
+            } // foreach
+        } // if
+        return $events_array;
+    } // getEvents Repository    
 
     private function isLocation($user, $adminLids)
     {

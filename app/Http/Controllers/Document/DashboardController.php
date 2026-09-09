@@ -3,8 +3,9 @@
 use App\Classes\ToolsClass;
 use App\Interfaces\Document\DashboardRepositoryInterface;
 use App\Http\Controllers\Controller;
-//use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+//use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -16,9 +17,9 @@ use App\Models\Document\TagModel;
 use App\Models\Set\UserModel;
 use Illuminate\Support\Facades\DB;
 
-use App\Events\DocumentTracing;
-use App\Events\DocumentSwitch;
-use Illuminate\Support\Facades\Event;
+//use App\Events\DocumentTracing;
+//use App\Events\DocumentSwitch;
+//use Illuminate\Support\Facades\Event;
 
 class DashboardController extends Controller
 {
@@ -43,6 +44,48 @@ class DashboardController extends Controller
 
             ini_set('max_execution_time', 3600);
             set_time_limit(3600);
+
+            // AGENDA (todos los roles)
+            $days_array = [];
+            $now = Carbon::now();
+            $actualDay = $now->format('d');
+            $startDay = $now->startOfWeek()->format('Y-m-d');
+            $endDay = $now->endOfWeek()->format('Y-m-d');
+            $period = CarbonPeriod::create($startDay, $endDay);
+            $week = $now->weekOfYear;
+            $total = $now->weeksInYear;
+            // Rango de semanas
+            $week_array = [];
+            $w = $week - 4;
+            $y = (int)$now->format('Y');
+            if ( $w < 1 ) {
+                $past = $now->copy()->subYear()->weeksInYear;
+                $w = $past + $week - 4;
+                $y--;
+            } // if
+            for( $i = 1; $i < 10; $i++ ) {
+                if( $w > $total ) {
+                    $w = 1;
+                    $y++;
+                } 
+                $week_array[] = [
+                    'w' => $w,
+                    'y' => $y,
+                ];
+                $w++;
+            } // for 
+            // Eventos de Documentos
+            $events = $this->dashRepo->getEvents($user->user_uid, $user->role, $startDay, $endDay, $actualDay);
+            foreach ($period as $date) {
+                $n = $date->format('d');            
+                $days_array[] = [
+                    'name' => $date->dayName,
+                    'number' => $n, 
+                    'today' => ( $n == $actualDay ) ? true : false,
+                    'events' => ( key_exists($n, $events) ) ? $events[$n] : [],
+                ];
+            } // foreach                                   
+
 
             if( $user->hasAnyRole('MASTER','SUPER') ) {
                 $template = 'document.dashboard_master';
@@ -92,7 +135,10 @@ class DashboardController extends Controller
             'badgeMaster' => $badge['master'],
             'status' => $admin,
             'documents' => $docs_object,
-            
+            // Agenda
+            'week' => $days_array,
+            'current' => $week,
+            'range' => $week_array,
         ]);
     } // index method
 
