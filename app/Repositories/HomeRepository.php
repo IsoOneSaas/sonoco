@@ -85,21 +85,24 @@ class HomeRepository implements HomeRepositoryInterface
             ->get([
                 'documents.document_id',
                 'documents.code',
+                'documents.status',
                 'document_forwards.action',
                 'document_forwards.deadline',
             ]);
 
         if($events) {
             foreach($events as $event) {
-                $day = Carbon::createFromFormat('Y-m-d H:i:s', $event->deadline)->format('d');
-                $hash = $this->tool->setIdHash($event->document_id);
-                $events_array[$day][] = [
-                    'code' => $event->code,
-                    'icon' => $icon_array[$event->action]['icon'],
-                    'color' => ( $day < $today ) ? 'warning' : 'primary',
-                    'action' => 'edit',
-                    'link' => Str::replaceArray('?', [ $slug[$role], $hash], $this->editLink),
-                ];
+                if( in_array($event->status, config('settings.document_status_users')) ) {
+                    $day = Carbon::createFromFormat('Y-m-d H:i:s', $event->deadline)->format('d');
+                    $hash = $this->tool->setIdHash($event->document_id);
+                    $events_array[$day][] = [
+                        'code' => $event->code,
+                        'icon' => $icon_array[$event->action]['icon'],
+                        'color' => ( $day < $today ) ? 'warning' : 'primary',
+                        'action' => 'edit',
+                        'link' => Str::replaceArray('?', [ $slug[$role], $hash], $this->editLink),
+                    ];
+                } // if
             } // foreach
         } // if
         // {{ route('documents.control.manage.index', ['slug' => $event['action']]) }}

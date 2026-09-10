@@ -46,47 +46,17 @@ class DashboardController extends Controller
             set_time_limit(3600);
 
             // AGENDA (todos los roles)
-            $days_array = [];
-            $now = Carbon::now();
-            $actualDay = $now->format('d');
-            $startDay = $now->startOfWeek()->format('Y-m-d');
-            $endDay = $now->endOfWeek()->format('Y-m-d');
-            $period = CarbonPeriod::create($startDay, $endDay);
+            $now = Carbon::now();        
             $week = $now->weekOfYear;
-            $total = $now->weeksInYear;
+            
             // Rango de semanas
-            $week_array = [];
-            $w = $week - 4;
-            $y = (int)$now->format('Y');
-            if ( $w < 1 ) {
-                $past = $now->copy()->subYear()->weeksInYear;
-                $w = $past + $week - 4;
-                $y--;
-            } // if
-            for( $i = 1; $i < 10; $i++ ) {
-                if( $w > $total ) {
-                    $w = 1;
-                    $y++;
-                } 
-                $week_array[] = [
-                    'w' => $w,
-                    'y' => $y,
-                ];
-                $w++;
-            } // for 
-            // Eventos de Documentos
-            $events = $this->dashRepo->getEvents($user->user_uid, $user->role, $startDay, $endDay, $actualDay);
-            foreach ($period as $date) {
-                $n = $date->format('d');            
-                $days_array[] = [
-                    'name' => $date->dayName,
-                    'number' => $n, 
-                    'today' => ( $n == $actualDay ) ? true : false,
-                    'events' => ( key_exists($n, $events) ) ? $events[$n] : [],
-                ];
-            } // foreach                                   
+            $week_array = $this->documentsWeek($now, $week);
+
+            // Eventos de Documentos            
+            $days_array = $this->documentsEvents($now, $user->user_uid, $user->role);
 
 
+            // DOCUMENTOS
             if( $user->hasAnyRole('MASTER','SUPER') ) {
                 $template = 'document.dashboard_master';
                 $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];                
@@ -112,7 +82,7 @@ class DashboardController extends Controller
                     'OPR'   => $this->dashRepo->getSightingsStatus(),
                     //'OPR'   => 0,
                 ];
-                $docs_object = $this->dashRepo->getFavorityDocuments();
+                //$docs_object = $this->dashRepo->getFavorityDocuments();
             } else {
                 $template = 'document.dashboard_user';
                 $badge = [
@@ -122,10 +92,29 @@ class DashboardController extends Controller
                     'approve' => $this->setControlBadge('approve'),
                 ];                
                 $admin = [];
-                $docs_object = $this->dashRepo->getFavorityDocuments();
+                //$docs_object = $this->dashRepo->getFavorityDocuments();
             }
         } else {
             return redirect('login')->with(Auth::logout());
+        }
+
+        // FOLLOW UP
+        if( $user->hasAnyRole('ADMIN','USER') ) {
+            $follow = true;
+
+            // Documentos abiertos recientes
+            $documents_array = $this->dashRepo->getDocuments($user->user_uid);
+
+            // Registros creados recientemente
+            $records_array = $this->dashRepo->getRecords($user->user_uid); 
+            
+            // Registros sin aprobar
+            $pendings_array = $this->dashRepo->getOpenRecords($user->user_id);            
+        } else {
+            $follow = false;
+            $documents_array = [];
+            $records_array = [];
+            $pendings_array = [];
         }
 
         return view($template, [
@@ -134,11 +123,16 @@ class DashboardController extends Controller
             'badgeApprove' => $badge['approve'],
             'badgeMaster' => $badge['master'],
             'status' => $admin,
-            'documents' => $docs_object,
+            //'documents' => $docs_object,
             // Agenda
             'week' => $days_array,
             'current' => $week,
             'range' => $week_array,
+            // Seguimiento
+            'followup' => $follow,
+            'docs' => $documents_array,
+            'recs' => $records_array,
+            'auths' => $pendings_array,            
         ]);
     } // index method
 
@@ -146,6 +140,51 @@ class DashboardController extends Controller
     {
         return $this->tool->getBadgeControlCount($action);
     }
+
+    private function documentsEvents($now, $uid, $role)
+    {
+        $days_array = [];
+        $aDay = $now->format('d');
+        $sDay = $now->startOfWeek()->format('Y-m-d');
+        $eDay = $now->endOfWeek()->format('Y-m-d');           
+        $period = CarbonPeriod::create($sDay, $eDay);
+        $events = $this->dashRepo->getEvents($uid, $role, $sDay, $eDay, $aDay);
+        foreach ($period as $date) {
+            $n = $date->format('d');            
+            $days_array[] = [
+                'name' => $date->dayName,
+                'number' => $n, 
+                'today' => ( $n == $aDay ) ? true : false,
+                'events' => ( key_exists($n, $events) ) ? $events[$n] : [],
+            ];
+        } // foreach  
+        return $days_array;
+    } // documentsEvents Method
+
+    private function documentsWeek($now, $week)
+    {
+        $week_array = [];
+        $total = $now->weeksInYear;        
+        $w = $week - 4;
+        $y = (int)$now->format('Y');
+        if ( $w < 1 ) {
+            $past = $now->copy()->subYear()->weeksInYear;
+            $w = $past + $week - 4;
+            $y--;
+        } // if
+        for( $i = 1; $i < 10; $i++ ) {
+            if( $w > $total ) {
+                $w = 1;
+                $y++;
+            } 
+            $week_array[] = [
+                'w' => $w,
+                'y' => $y,
+            ];
+            $w++;
+        } // for 
+        return $week_array;
+    } // documentsWeek
 
 
     /** =================================================
