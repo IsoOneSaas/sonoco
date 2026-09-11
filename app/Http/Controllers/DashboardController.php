@@ -91,9 +91,10 @@ class DashboardController extends Controller
         $array = config('settings.user.pages');
         $key = array_search($page, array_column($array, 'id'));
         if( $key ) {
-            return $array[$key]['link'];
+            if( $key == 0 ) $key = 1;              // AGREGADO al eliminar la página home por defecto                       
+            return $array[$key]['link'];        
         }
-        return $array[0]['link'];
+        return $array[1]['link'];       // AGREGADO al eliminar la página home por defecto (cambio 0 por 1)
     } // setPageLink
 
 

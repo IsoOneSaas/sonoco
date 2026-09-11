@@ -129,30 +129,6 @@
                                             <div class="intro-y box mt-5">
                                                 <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                                                     <h2 class="font-medium text-base mr-auto">
-                                                        Documentos vistos
-                                                    </h2>
-                                                </div>
-                                                <div class="p-5">
-                                                    <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
-                                                        @foreach($docs as $doc)                                            
-                                                        <li class="px-6 py-2  border-2">
-                                                            <div class="text-right"><a href="{{ $doc['link'] }}" class="btn py-1 px-2  text-xs">Ver</a></div> 
-                                                            <span class="text-gray-700">{{ $doc['name'] }}</span><br>                                                   
-                                                            <div class="flex justify-between">                                                                    
-                                                                <span class="font-semibold text-lg">{{ $doc['code'] }}</span>
-                                                            </div>
-                                                            
-                                                            <span class="text-gray-500 text-xs">{{ $doc['date'] }}</span>
-                                                        </li>                                            
-                                                        @endforeach
-                                                    </ul>                                        
-                                                </div>
-                                            </div>                                            
-                                        </div>
-                                        <div class="col-span-12 sm:col-span-6 xl:col-span-6 intro-y">
-                                            <div class="intro-y box mt-5">
-                                                <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                                                    <h2 class="font-medium text-base mr-auto">
                                                         Registros creados
                                                     </h2>
                                                 </div>
@@ -168,9 +144,11 @@
                                                             <span class="text-gray-500 text-xs">{{ $rec['date'] }}</span>
                                                         </li>                                            
                                                         @endforeach
-                                                    </ul>   
+                                                    </ul>                                       
                                                 </div>
-                                            </div>
+                                            </div>                                            
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6 xl:col-span-6 intro-y">
                                             <div class="intro-y box mt-5">
                                                 <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                                                     <h2 class="font-medium text-base mr-auto">
@@ -194,7 +172,7 @@
                                             </div>                                              
                                         </div>
                                     </div>
-@endif                   
+@endif                
                                 </div>
                                 <!-- END: General Report -->
 

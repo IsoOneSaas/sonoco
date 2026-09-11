@@ -65,7 +65,7 @@ class DashboardController extends Controller
                     'SPR'   => $this->dashRepo->getSuggestionStatus(),
                     'OPR'   => $this->dashRepo->getSightingsStatus(),
                 ];
-                $docs_object = '';
+                //$docs_object = '';
             } elseif( $user->hasRole('ADMIN') ) {
                 $template = 'document.dashboard_admin';
                 $badge = [
@@ -103,7 +103,7 @@ class DashboardController extends Controller
             $follow = true;
 
             // Documentos abiertos recientes
-            $documents_array = $this->dashRepo->getDocuments($user->user_uid);
+            //$documents_array = $this->dashRepo->getDocuments($user->user_uid);
 
             // Registros creados recientemente
             $records_array = $this->dashRepo->getRecords($user->user_uid); 
@@ -130,7 +130,7 @@ class DashboardController extends Controller
             'range' => $week_array,
             // Seguimiento
             'followup' => $follow,
-            'docs' => $documents_array,
+            //'docs' => $documents_array,
             'recs' => $records_array,
             'auths' => $pendings_array,            
         ]);

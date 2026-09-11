@@ -13,8 +13,8 @@ return [
     'user' => [
         'startpage' => 0,
         'pages' => [
-            0 => ['id' => 0, 'name' => 'Home', 'link' => '/home'],
-            //0 => ['id' => 1, 'name' => 'Dashboard', 'link' => '/dashboard'],
+            //0 => ['id' => 0, 'name' => 'Home', 'link' => '/home'],      //  Se suspende home, pasa directo a dashboard (11/09/2026)
+            //0 => ['id' => 0, 'name' => 'Dashboard', 'link' => '/documentos/dashboard'], // Reemplazar Home x defecto
             1 => ['id' => 11, 'name' => 'Dashboard documentos', 'link' => '/documentos/dashboard'],
             2 => ['id' => 12, 'name' => 'Maestro de documentos', 'link' => '/documentos/master/listado'],
             3 => ['id' => 13, 'name' => 'Procesamiento documentos', 'link' => '/documentos/control/documento'],

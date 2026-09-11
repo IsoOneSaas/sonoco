@@ -23,6 +23,59 @@
                                         </h2>
                                         <!-- <a href="" class="ml-auto flex items-center text-primary"> <i data-lucide="refresh-ccw" class="w-4 h-4 mr-3"></i> Recargar Datos </a> -->
                                     </div>
+
+                                    <!-- Agenda -->
+                                    <div class="">
+                                        <div class="intro-y box mt-5">
+                                            <select id="week-select" class="form-control w-40">
+                                                @foreach( $range as $now )                                                
+                                                <option value={{ $now['w'] }} label="Semana {{ $now['w'] }}" @if($now['w'] == $current) selected @endif>{{ $now['y'] }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div  class='flex bg-white shadow-md justify-start md:justify-center rounded-lg overflow-x-scroll mx-auto py-4 px-2  md:mx-12 w-full'>
+        
+                                                @foreach($week as $day)
+                                                    @if( $day['today'] )
+                                                    <div class='flex group bg-purple-600 shadow-lg dark-shadow rounded-lg mx-1 cursor-pointer justify-center relative  w-full'>
+                                                        <span class="flex h-3 w-3 absolute -top-1 -right-1">
+                                                            <span class="animate-ping absolute group-hover:opacity-75 opacity-0 inline-flex h-full w-full rounded-full bg-purple-400 "></span>
+                                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-100"></span>
+                                                        </span>
+                                                        <div class='flex items-center px-4 py-4'>
+                                                            <div class='text-center'>
+                                                                <p class='text-gray-100 text-lg'> {{ $day['name'] }} </p>
+                                                                <p class='text-gray-100 text-xl  mt-1 mb-3 font-bold'> {{ $day['number'] }} </p>                                                                
+                                                                @foreach( $day['events'] as $event )
+                                                                <div class="flex justify-center">
+                                                                    <a href="{{ $event['link'] }}" class="btn btn-{{ $event['color'] }} w-50 mr-2 mb-2"> <i data-lucide="{{ $event['icon'] }}" class="w-8 h-8 mr-2"></i> <span class="text-sm">{{ $event['code'] }}</span> </a>
+                                                                </div>                                                                     
+                                                                @endforeach                                                               
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                    
+                                                    @else
+                                                    <div class='flex group hover:bg-purple-500 hover:shadow-lg hover-dark-shadow rounded-lg mx-1 transition-all	duration-300 justify-center w-full'>
+                                                        <div class='flex items-center px-4 py-4'>
+                                                            <div class='text-center'>
+                                                                <p class='text-gray-900 group-hover:text-gray-100 text-lg transition-all duration-300'>{{ $day['name'] }} </p>
+                                                                <p class='text-gray-900 group-hover:text-gray-100 text-xl mt-1 mb-3 group-hover:font-bold transition-all  duration-300'> {{ $day['number'] }} </p>
+                                                                @foreach( $day['events'] as $event )
+                                                                <div class="flex justify-center">
+                                                                    <a href="{{ $event['link'] }}" class="btn btn-{{ $event['color'] }} w-50 mr-2 mb-2"> <i data-lucide="{{ $event['icon'] }}" class="w-8 h-8 mr-2"></i> <span class="text-sm">{{ $event['code'] }}</span> </a>
+                                                                </div>                                                                     
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                    
+                                                    @endif
+                                                @endforeach
+                                                                                    
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado de documentos -->
                                     <div class="grid grid-cols-12 gap-6 mt-5">
                                         <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">
                                             <a href="{{ route('documents.master.index') }}" >
@@ -77,90 +130,109 @@
                                             </a> 
                                         </div>
                                     </div>
-                                </div>
-                                <!-- END: General Report -->
 
-                                <div class="col-span-6">
-                                    <!-- BEGIN: Pie Chart -->
-                                    <div class="intro-y box mt-5">
-                                        <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                                            <h2 class="font-medium text-base mr-auto">
-                                                Estado de Documentos
-                                            </h2>
-                                        </div>
-                                        <div id="pie-chart" class="p-5">
-                                            <div class="preview">
-                                                <div class="h-[600px]">
-                                                    <canvas id="myChart"></canvas>
+                                    <!-- Estado de actividad general -->
+                                    <div class="grid grid-cols-12 gap-6 mt-5">
+                                        <div class="col-span-6">
+                                            <!-- BEGIN: Pie Chart -->
+                                            <div class="intro-y box mt-5">
+                                                <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                                    <h2 class="font-medium text-base mr-auto">
+                                                        Estado de Documentos
+                                                    </h2>
+                                                </div>
+                                                <div id="pie-chart" class="p-5">
+                                                    <div class="preview">
+                                                        <div class="h-[600px]">
+                                                            <canvas id="myChart"></canvas>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <!-- END: Pie Chart -->                                
+                                        </div>
+                                        <div class="col-span-6">
+                                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y mt-5">
+                                                <a class="m-0 p-0" href="{{ route('documents.control.solicitud.index') }}">
+                                                    <div class="report-box zoom-in">
+                                                        <div class="box p-5">
+                                                            <div class="flex">
+                                                                <i data-lucide="list-checks" class="report-box__icon text-warning"></i>                                                
+                                                            </div>
+                                                            <div class="text-3xl font-medium leading-8 mt-6">{{ $status['SPR'] ?? 0 }}</div>
+                                                            <div class="text-base text-slate-500 mt-1">Solicitudes por revisar</div>
+                                                        </div>
+                                                    </div>
+                                                </a> 
+                                            </div>
+                                            <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y mt-10">
+                                                <a class="m-0 p-0" href="{{ route('documents.control.observacion.index') }}">
+                                                    <div class="report-box zoom-in">
+                                                        <div class="box p-5">
+                                                            <div class="flex">
+                                                                <i data-lucide="view" class="report-box__icon text-warning"></i>                                                                                                         
+                                                            </div>
+                                                            <div class="text-3xl font-medium leading-8 mt-6">{{ $status['OPR'] ?? 0 }}</div>
+                                                            <div class="text-base text-slate-500 mt-1">Observaciones por revisar</div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>                                    
                                         </div>
                                     </div>
-                                    <!-- END: Pie Chart -->                                
-                                </div>
-
-                                <div class="col-span-6">
-                                    <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y mt-5">
-                                        <a class="m-0 p-0" href="{{ route('documents.control.solicitud.index') }}">
-                                            <div class="report-box zoom-in">
-                                                <div class="box p-5">
-                                                    <div class="flex">
-                                                        <i data-lucide="list-checks" class="report-box__icon text-warning"></i>                                                
-                                                    </div>
-                                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $status['SPR'] ?? 0 }}</div>
-                                                    <div class="text-base text-slate-500 mt-1">Solicitudes por revisar</div>
+@if($followup)                      
+                                    <!-- Actividad del usuario -->               
+                                    <div class="grid grid-cols-12 gap-6 mt-5">
+                                        <div class="col-span-12 sm:col-span-6 xl:col-span-6 intro-y">
+                                            <div class="intro-y box mt-5">
+                                                <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                                    <h2 class="font-medium text-base mr-auto">
+                                                        Registros creados
+                                                    </h2>
                                                 </div>
-                                            </div>
-                                        </a> 
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y mt-10">
-                                        <a class="m-0 p-0" href="{{ route('documents.control.observacion.index') }}">
-                                            <div class="report-box zoom-in">
-                                                <div class="box p-5">
-                                                    <div class="flex">
-                                                        <i data-lucide="view" class="report-box__icon text-warning"></i>                                                                                                         
-                                                    </div>
-                                                    <div class="text-3xl font-medium leading-8 mt-6">{{ $status['OPR'] ?? 0 }}</div>
-                                                    <div class="text-base text-slate-500 mt-1">Observaciones por revisar</div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>                                    
-                                </div>
-
-                                <div class="col-span-12">
-                                    <!-- BEGIN: View Documents -->
-                                    <div class="intro-y box mt-5">
-                                        <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                                            <h2 class="font-medium text-base mr-auto">
-                                                Documentos Frecuentes
-                                            </h2>
-                                        </div>
-                                        <div  class="p-5">
-                                            <table id="frequency-table" class="display" style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Código</th>
-                                                        <th>Nombre</th>
-                                                        <th>Versión</th>
-                                                        <th>Publicado</th>
-                                                        <th>Frecuencia</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($documents as $document)
-                                                    <tr>
-                                                        @foreach($document as $item)
-                                                        <td>{!! $item !!}</td>
+                                                <div class="p-5">
+                                                    <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
+                                                        @foreach($recs as $rec)                                            
+                                                        <li class="px-6 py-2  border-2">
+                                                            <div class="text-right"><a href="{{ $rec['link'] }}" class="btn py-1 px-2  text-xs">@if( $rec['status'] == 0) Editar @else Ver @endif</a></div>                                                    
+                                                            <span class="text-gray-700">{{ $rec['name'] }}</span><br>
+                                                            <div class="flex justify-between">                                                                    
+                                                                <span class="font-semibold text-lg">{{ $rec['nui'] }}</span>
+                                                            </div>                                                    
+                                                            <span class="text-gray-500 text-xs">{{ $rec['date'] }}</span>
+                                                        </li>                                            
                                                         @endforeach
-                                                    </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
+                                                    </ul>                                       
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6 xl:col-span-6 intro-y">
+                                            <div class="intro-y box mt-5">
+                                                <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                                    <h2 class="font-medium text-base mr-auto">
+                                                        Registros por aprobar
+                                                    </h2>
+                                                </div>
+                                                <div class="p-5">
+                                                    <ul class="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm">
+                                                        @foreach($auths as $auth)                                            
+                                                        <li class="px-6 py-2  border-2">
+                                                            <div class="text-right"><a href="{{ $auth['link'] }}" class="btn py-1 px-2  text-xs"> Editar</a></div>                                                    
+                                                            <span class="text-gray-700">{{ $auth['name'] }}</span><br>
+                                                            <div class="flex justify-between">                                                                    
+                                                                <span class="font-semibold text-lg">{{ $auth['nui'] }}</span>
+                                                            </div>                                                    
+                                                            <span class="text-gray-500 text-xs">{{ $auth['date'] }}</span>
+                                                        </li>                                            
+                                                        @endforeach
+                                                    </ul>   
+                                                </div>
+                                            </div>                                              
                                         </div>
                                     </div>
-                                    <!-- END: View Documents --> 
+@endif
                                 </div>
+                                <!-- END: General Report --> 
 
                             </div>
                         </div>
@@ -168,21 +240,10 @@
                 </div>
                 <!-- END: Content -->
 
-@push('styles')
-    <link rel="stylesheet" href="{{ url('assets/js/datatables/DataTables-1.13.4/css/jquery.dataTables.min.css') }}" />
-    <style>
-        table#frequency-table td {
-            font-size: 0.8em;
-        }
-        table#frequency-table th {
-            font-size: 0.9em;
-        }          
-    </style>
-@endpush
 
 @push('scripts-bottom')
 <script src="{{ url('assets/js/chart-2.9.4/2.9.4/chart.js') }}"></script>
-<script src="{{ url('assets/js/datatables/DataTables-1.13.4/js/jquery.dataTables.min.js') }}"></script>
+
 <script type="text/javascript">
     $(function () {
         
@@ -206,27 +267,7 @@
             options: {}
         });
 
-        new DataTable("#frequency-table", {
-            columnDefs: [
-                { targets: [0], className: 'dt-nowrap' },
-                { targets: [2,4], className: 'dt-body-center' },
-                { targets: [4], searchable: false },
-            ],
-            order: [[4, 'desc']],
-            language: {
-                lengthMenu: 'Mostrar _MENU_ documentos por página',
-                zeroRecords: '<h4>No hay documentos encontrados</h4>',
-                info: 'Mostrando página _PAGE_ de _PAGES_',
-                infoEmpty: '*',
-                infoFiltered: '(_TOTAL_ filtrados de _MAX_ documentos totales)',
-                loadingRecords: 'Cargando...',
-                search: 'Buscar: ',
-                paginate: {
-                    next: '>>',
-                    previous: '<<'
-                }
-            }
-        });
+
 
     }); // document
 </script>
