@@ -114,13 +114,13 @@ class ProfileController extends Controller
     {      
         $response = ['success' => false, 'message' => trans('profile.image.no-success')];
         $input = $request->all();
-        Log::debug(['UPLOAD IMAGE ' => $input]);
+        //Log::debug(['UPLOAD IMAGE ' => $input]);
         
         if ($file = $request->hasFile('image')) {
             $file = $request->file('image');
             $ext = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
             if( $ext == 'png' || $ext == 'PNG' ) {
-                $fileName = 'signature_'. $input['uid'] .'.'. $ext;   
+                $fileName = 'signature_'. $input['uid'] .'.png';   
                //Log::debug(['FILENAME ' => $fileName, 'PATH' => $this->imagePath . $fileName]);
                 if ($file->move($this->imagePath, $fileName)) {
                     $path = $this->imagePath . $fileName;
@@ -152,7 +152,22 @@ class ProfileController extends Controller
             }                   
         }        
         return response()->json($response);
-    } // image Method            
+    } // image Method 
+    
+    public function destroy($id)
+    {        
+        $uid =  $this->profileRepo->getUid($id);
+        $fileName =  'signature_'. $uid .'.png';
+        //Log::debug(['FILE TO DELETE :'=> $fileName]);
+        $path = $this->imagePath . $fileName;
+        if( File::exists($path) ) {
+            File::delete($path);
+            Log::info('Delete Signature File: '. $fileName);
+        } else {
+            return response()->json(['success' => false, 'message' => trans('profile.delete.no-success')]);
+        }
+        return response()->json(['success' => true, 'message' => trans('profile.delete.success')]);
+    } // delete Method
 
     public function password(Request $request)
     {

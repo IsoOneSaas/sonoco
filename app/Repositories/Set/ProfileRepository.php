@@ -166,7 +166,7 @@ class ProfileRepository implements ProfileRepositoryInterface
  
     public function setPassword(array $data)
     {
-        Log::debug(['SET PASSWORD ' => $data]);
+        //Log::debug(['SET PASSWORD ' => $data]);
         $date = now()->format('Y-m-d H:i:s');
         try {
             DB::beginTransaction();
@@ -189,6 +189,11 @@ class ProfileRepository implements ProfileRepositoryInterface
         }                
         return ['success' => true, 'message' => trans('profile.password.success')];                   
     } // setPassword
+
+    public function getUid($id)
+    {
+        return UserModel::find($id)->user_uid;
+    }
     
 
 } // class

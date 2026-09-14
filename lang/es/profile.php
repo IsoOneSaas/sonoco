@@ -33,15 +33,16 @@ return [
                 'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                 'no-mime'       => 'La extensión del archivo imagen debe ser PNG',
                 'no-move'       => 'No se pudo mover el archivo de su firma a la carperta respectiva',
-                'no-exists'     => 'el archivo de firma no se ha encontrado en el servidor',
+                'no-exists'     => 'El archivo de firma no se ha encontrado en el servidor',
+                'directions'    => 'Se requiere un archivo PNG con un ancho no mayor a 250 pixels',
                 'success'       => 'Se ha cargado el archivo de firma correctamente',
     ],    
     
     'delete' => [
-                'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
-                'success'       => 'Archivo anexo eliminado correctamente',
-                'title'         =>  'Está seguro de eliminar el anexo con nombre ',
-                'text'          =>  'Si es eliminado, no lo podrá volver a ver.',                
+                'no-success'    => 'No ha sido posible eliminar la firma. ¡inténtelo más tarde!',
+                'success'       => 'Firma eliminada correctamente',
+                'title'         =>  'Está seguro de eliminar la firma permanentemente',
+                'text'          =>  'Si es eliminada, no la podrá utilizar al ser requerida en otra instancia de la plataforma.',
     ],
     
     'password' => [
