@@ -85,7 +85,7 @@
                                                             <i data-lucide="list" class="report-box__icon text-primary"></i>
                                                         </div>
                                                         <div class="text-3xl font-medium leading-8 mt-6">{{ $badgeMaster ?? 0 }}</div>
-                                                        <div class="text-base text-slate-500 mt-1">Documentos para ver</div>
+                                                        <div class="text-base text-slate-500 mt-1">Documentos vistos</div>
                                                     </div>
                                                 </div>
                                             </a>
@@ -267,7 +267,12 @@
             options: {}
         });
 
-
+        $('body').on('change', "#week-select", function (e) {        
+            var week = $(this).val();
+            var year = $('#week-select option:selected').text();
+            //console.log('YEAR: '+year+' WEEK: '+week);
+            location.href = '/documentos/dashboard/'+year+'/'+week; 
+        });
 
     }); // document
 </script>

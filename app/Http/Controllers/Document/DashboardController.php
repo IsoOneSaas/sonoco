@@ -35,7 +35,7 @@ class DashboardController extends Controller
     /**
      * Show the general docboard
      */
-    public function index()
+    public function index($slug = null, $id = null)
     {
         $user = Auth::user();
         // TODO: dasboard to GUEST / SUPER
@@ -46,7 +46,10 @@ class DashboardController extends Controller
             set_time_limit(3600);
 
             // AGENDA (todos los roles)
-            $now = Carbon::now();        
+            $now = Carbon::now();                    
+            if( ($slug !== null) && ($id !== null) ) {
+                $now->setISODate($slug, $id);
+            }            
             $week = $now->weekOfYear;
             
             // Rango de semanas
@@ -70,7 +73,7 @@ class DashboardController extends Controller
                 $template = 'document.dashboard_admin';
                 $badge = [
                     //'master' => $this->tool->getBadgeMasterCount(),
-                    'master' => '_',
+                    'master' => $this->dashRepo->setDocumentsSaw($user->user_uid),
                     'edit' => $this->setControlBadge('edit'),
                     'review' => $this->setControlBadge('review'),
                     'approve' => $this->setControlBadge('approve'),
@@ -86,7 +89,7 @@ class DashboardController extends Controller
             } else {
                 $template = 'document.dashboard_user';
                 $badge = [
-                    'master' => $this->tool->getBadgeMasterCount(),
+                    'master' => $this->dashRepo->setDocumentsSaw($user->user_uid),
                     'edit' => $this->setControlBadge('edit'),
                     'review' => $this->setControlBadge('review'),
                     'approve' => $this->setControlBadge('approve'),

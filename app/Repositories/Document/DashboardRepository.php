@@ -5,8 +5,10 @@ use App\Classes\FileClass;
 use App\Interfaces\Document\DashboardRepositoryInterface;
 use App\Models\Document\ForwardModel;
 use App\Models\Set\DepartmentModel;
-use App\Models\Set\LocationModel;
+//use App\Models\Set\LocationModel;
 use App\Models\Document\RecordModel;
+use App\Models\Document\SightingModel;
+use App\Models\Document\TypeModel;
 use App\Models\Document\TracingModel;
 use App\Models\Document\TracingRecordModel;
 use App\Models\Set\userModel;
@@ -90,45 +92,58 @@ class DashboardRepository implements DashboardRepositoryInterface
 
     public function getSuggestionStatus()
     {
-        $n = 0;
         $admin = Auth::user();
         if( $admin->can('setup_admins') ) {
-            $plucked = LocationModel::all()->pluck('location_id');
-            $adminLids = $plucked->all();
+            $plucked = UserModel::all()->pluck('user_uid');
         } else {
-            $adminLids = $this->tool->getAdminAuthorizedLocations($admin);
-        }
-        $hints = SuggestionModel::where('status', 0)->orderBy('created_at', 'desc')->get();
-        foreach($hints as $hint) {
-            $user = UserModel::where('user_uid', $hint->user_uid)->first();
-            if($user) {
-                if( $this->isLocation($user, $adminLids) ) {
-                    $n++;
-                } // if   
-            }  // if           
-        } // foreach;
-        return $n;
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            $plucked = UserModel::join('set_location_user', function($query) use($lids) {
+                $query->on('set_location_user.user_id', '=', 'set_users.user_id');
+                $query->whereIn('set_location_user.location_id', $lids);
+            })
+            ->pluck('set_users.user_uid');
+        } // if
+
+        $uids = array_unique($plucked->all());
+        $numberOfItems = SuggestionModel::whereIn('user_uid', $uids)->where('status', 0)->count();
+        return $numberOfItems;
     } // getSuggestionStatus()
 
     public function getSightingsStatus()
-    {   
+    {  
         ini_set('max_execution_time', 3600);
         set_time_limit(3600);
-        $n = 0;
-        $documents = $this->tool->setPublishedDocumentsCollection('admin', false);
 
-        foreach($documents as $document) {
-            $sightings = $document->sightings()->orderBy('date', 'desc')->get();
-            if( $sightings ) {
-                foreach($sightings as $sighting) {
-                    if( $sighting->status == 0 ) {
-                        $n++;
-                    }
-                } // foreach
-            } // if
-        } // foreach
+        $admin = Auth::user();
 
-        return $n;
+        // Documentos permitidos para el administrador
+        if( $admin->can('setup_admins') ) {
+            $plucked = DocumentModel::all()->pluck('document_id');
+            $adminDocs = $plucked->all();
+        } else {
+            $dt0 =  Carbon::today()->toDateString();
+            $din = '1970-01-01T_';
+            $dout = $dt0 .'T_';
+            $sids = $this->tool->getAdminAuthorizedSystems($admin);
+            $lids = $this->tool->getAdminAuthorizedLocations($admin);
+            $plucked = TypeModel::all()->pluck('type_id');
+            $tids = $plucked->all();
+            $params = ['status' => 1, 'sids' => $sids, 'lids' => $lids, 'tids' => $tids, 'din' => $din, 'dout' => $dout];            
+            $documents = $this->tool->setDocumentsToControl($params);
+            $plucked = $documents->pluck('document_id');
+            $adminDocs = $plucked->all();
+        } // if
+
+        $numberOfItems = SightingModel::whereIn('document_sightings.document_id', $adminDocs)
+            ->join('documents', function($query) {
+                $query->on('documents.document_id', '=', 'document_sightings.document_id');
+            })
+            ->where('document_sightings.status', 0)
+            ->count();
+
+        //Log::debug(['COUNT' => $numberOfItems]);
+
+        return $numberOfItems;
     } // getSightingsStatus()
 
     public function getFavorityDocuments()
@@ -159,23 +174,24 @@ class DashboardRepository implements DashboardRepositoryInterface
         return $tracing_array;
     }
 
-    public function getEvents($uid, $role, $start, $end, $today)
+   public function getEvents($uid, $role, $start, $end, $today)
     {
         //Log::debug(['USER' =>  $uid, 'START' => $start .' 00:00:00', 'END' => $end .' 23:59:59']);
         $events_array = [];
         $icon_array = config('settings.document_status_texts');
-		$slug = [
-			'EXT'   => 'user',      // usuario 3ra parte del inquilino - 
-			'GUEST' => 'user',      // usuario que solo requiere visualizar un dashboard o agregar información
-			'USER' => 'user',       // usuario común
-			'ADMIN' => 'admin',     // usuario con privilegios de administrador
-			'MASTER' => 'admin',    // usuario con completo acceso
-			'SUPER' => 'admin',     // funcionario iso-one			
-		];        
+        $slug = [
+            'EXT'   => 'user',      // usuario 3ra parte del inquilino -
+            'GUEST' => 'user',      // usuario que solo requiere visualizar un dashboard o agregar información
+            'USER' => 'user',       // usuario común
+            'ADMIN' => 'admin',     // usuario con privilegios de administrador
+            'MASTER' => 'admin',    // usuario con completo acceso
+            'SUPER' => 'admin',     // funcionario iso-one
+        ];
+        $now = Carbon::today();        
 
         $events = ForwardModel::where('user_uid', $uid)
             ->join('documents', function($query) {
-                $query->on('documents.document_id', '=', 'document_forwards.document_id');             
+                $query->on('documents.document_id', '=', 'document_forwards.document_id');            
             })
             ->where('checked', 0)
             ->whereBetween('deadline', [$start .' 00:00:00', $end .' 23:59:59'])
@@ -187,16 +203,19 @@ class DashboardRepository implements DashboardRepositoryInterface
                 'document_forwards.deadline',
             ]);
 
-        // FIXME: VALIDAR QUE EL DOCUMENTO ESTÁ EN E/R/A  
+        //Log::debug(['EVENTS' => $events->toArray()]);
+ 
         if($events) {
             foreach($events as $event) {
-                if( in_array($event->status, config('settings.document_status_users')) ) {
+                if( in_array($event->status, config('settings.document_status_users')) && ( $event->status == $event->action ) ) {
                     $day = Carbon::createFromFormat('Y-m-d H:i:s', $event->deadline)->format('d');
+                    $dead = Carbon::parse($event->deadline);
                     $hash = $this->tool->setIdHash($event->document_id);
+                    //Log::debug(['DAY' => $day, 'TODAY' => $today]);
                     $events_array[$day][] = [
                         'code' => $event->code,
                         'icon' => $icon_array[$event->action]['icon'],
-                        'color' => ( $day < $today ) ? 'warning' : 'primary',
+                        'color' => ( $now->gt($dead) ) ? 'warning' : 'primary',
                         'action' => 'edit',
                         'link' => Str::replaceArray('?', [ $slug[$role], $hash], $this->editLink),
                     ];
@@ -204,7 +223,23 @@ class DashboardRepository implements DashboardRepositoryInterface
             } // foreach
         } // if
         return $events_array;
-    } // getEvents Repository 
+    } // getEvents Repository
+
+    public function setDocumentsSaw($uid)
+    {
+        $n = 0;
+        $did = '';
+        $saws = TracingModel::where('user_uid', $uid)->where('trace', 'LIKE', "%OPEN%")->orderBy('document_id')->get();
+        foreach($saws as $saw) {
+            if( $saw->document_id != $did ) {
+                $n++;
+                $did = $saw->document_id;
+                //Log::debug(['DID' => $did]);
+            } // if
+        } // foreach
+        //Log::debug(['UID' => $uid, 'COUNT' => $n]);
+        return $n;
+    } // setDocumentsSaw Repository    
     
     public function getDocuments($uid)
     {

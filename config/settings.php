@@ -219,7 +219,8 @@ return [
     'document_status_users' => ['EDITING','REVISING','APPROVING'], // confirmCheckIn important!
     'document_status_inprocess' => ['CREATED','EDITING','REVISING','APPROVING'],
     'document_status_grid' => ['CREATED' => 'Nuevo', 'EDITING' => 'En edición','REVISING' => 'En revisión', 'APPROVING' => 'En aprobación', 'RELEASING' => 'En Publicación', 'PUBLISHED' => 'Publicado', 'REVISING' => 'En revisión', 'DELETED' => 'Eliminado', 'CANCELED' => 'Cancelado', 'OBSOLETED' => 'Obsoleto'],
-
+    'document_status_control' => ['CREATED','EDITING','REVISING','APPROVING','PUBLISHED'], // New
+    
     'document_format_pattern' => [
         'HTML' => 'Formato ISO-ONE',    // blade: edit_html
         'FILE' => 'Documento Soporte',  // blade: edit_file

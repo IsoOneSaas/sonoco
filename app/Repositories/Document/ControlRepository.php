@@ -105,7 +105,7 @@ class ControlRepository implements ControlRepositoryInterface
 
                     $action = ''; // default to admin                    
                     //Log::debug(['DOCUMENT STATUS' => $document->status]);
-                    if( in_array($document->status, config('settings.document_status_users')) ) {
+                    if( in_array($document->status, config('settings.document_status_control')) ) {
                         
                         $action = array_search($document->status, config('settings.document_status')); // important!
 
