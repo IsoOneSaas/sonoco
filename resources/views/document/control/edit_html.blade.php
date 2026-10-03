@@ -44,7 +44,9 @@
                                         <li>
                                             <a id="btn-modal-attach" href="javascript:;" class="dropdown-item"> <i data-lucide="paperclip" class="w-4 h-4 mr-2"></i> Anexos </a>
                                         </li>
-                                        
+                                        <li>
+                                            <a id="btn-modal-format" href="javascript:;" class="dropdown-item"> <i data-lucide="baseline" class="w-4 h-4 mr-2"></i> Formato </a>
+                                        </li>                                        
                                         <li>
                                             <a id="btn-modal-change" href="javascript:;" class="dropdown-item"> <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> Cambios </a>
                                         </li>                                                                                                                     
@@ -232,6 +234,43 @@
                         </div>
                     </div>
                     <!-- END: Modal Attachcment -->
+
+                    <!-- BEGIN: Modal Format -->
+                    <div id="modal-format" class="modal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <!-- BEGIN: Modal Header -->
+                                <div class="modal-header">
+                                    <h2 id="modal-format-title" class="font-medium text-base mr-auto">Formato del Documento </h2>
+                                </div>
+                                <!-- END: Modal Header -->
+                                <!-- BEGIN: Modal Body -->
+                                <div class="modal-body intro-y box p-5 mt-5">                                 
+                                    <div>
+                                        <form id="format-form" action="{{ route('documents.settings.tipos.store') }}" method="POST">
+                                            @csrf                            
+                                            <div class="input-group">
+                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/format.form.code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/format.form.code.title') }}</div>
+                                                <select  name="orientation" class="form-control tom-select w-full" required>
+
+                                                </select>                                                  
+                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/format.form.code.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                            </div>
+                                        </form>
+                                    </div>                                                    
+                                </div>
+                                <!-- END: Modal Body -->
+                                <!-- BEGIN: Modal Footer -->
+                                <div class="modal-footer">
+                                    <button id="btn-format-ko" type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancelar</button>
+                                    <button id="btn-format-ok" type="button" class="btn btn-primary w-20">Aceptar</button>
+                                    <a id="modal-format-open" href="javascript:;" data-tw-toggle="modal" data-tw-target="#modal-format" class="">.</a>
+                                </div>
+                                <!-- END: Modal Footer -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: Modal Format -->                     
 
                     <!-- BEGIN: Modal Changes -->
                     @include('components/modal_document_history')
@@ -739,7 +778,13 @@
                 $("input[name='name']").val('');
                 $("#btn-attachments-clear").trigger("click");
                 $("#modal-attachments-open")[0].click();
-            });
+            }); // btn-modal-attach Modal
+
+            // GENERA EL MODAL PARA EL FORMATO
+            $('body').on('click', '#btn-modal-format', function (e) {
+                e.preventDefault();
+                $("#modal-format-open")[0].click();
+            }); // btn-modal-format Modal            
 
             // GENERA EL MODAL PARA CAMBIOS
             $('body').on('click', '#btn-modal-change', function (e) {

@@ -22,6 +22,11 @@ return [
         ],
     ],
 
+    'printing_layout_text' => [
+        'orientations' => ['portrait' => 'Vertical', 'landscape' => 'Horizontal'],
+        'sizes' => ['letter' => 'Carta', 'folio' => 'Folio', 'Oficio' => 'legal', 'A4' => 'A4'],
+    ],
+
     'print_layout_default' => [
         'portrait' => [
             'letter' => [
@@ -40,6 +45,14 @@ return [
                 'pdfsize' => 'folio', 
                 'orientation' => 'portrait',                      
             ],
+            'legal' => [
+                'size' => '216mm 356mm',
+                'margin' => '15mm 15mm 12mm 25mm',
+                'marginspecial' => '15mm 15mm -12mm 25mm',  
+                'pdfwidth' => '176mm',
+                'pdfsize' => 'legal', 
+                'orientation' => 'portrait',                      
+            ],            
             'A4' => [
                 'size' => '210mm 297mm',
                 'margin' => '15mm 15mm 12mm 25mm',
@@ -64,8 +77,16 @@ return [
                 'marginspecial' => '25mm 15mm -15mm 15mm',  
                 'pdfwidth' => '300mm',
                 'pdfsize' => 'folio', 
-                'orientation' => 'landscape',                     
+                'orientation' => 'landscape',      
             ],
+            'legal' => [
+                'size' => '356mm 216mm',
+                'margin' => '25mm 15mm 15mm 15mm',
+                'marginspecial' => '25mm 15mm -15mm 15mm',  
+                'pdfwidth' => '324mm',
+                'pdfsize' => 'legal', 
+                'orientation' => 'landscape',                     
+            ],            
             'A4' => [
                 'size' => '297mm 210mm',
                 'margin' => '25mm 15mm 15mm 15mm',

@@ -96,12 +96,16 @@ class ControlController extends Controller
     
             //Log::debug(['CONTENT:' => $document->content]);
             
+            $format_array = $this->formatSplit(config('settings.print_layout_default'));
+            Log::debug(['FORMAT:' => $format_array]);
+            
             $set = [
                 'signUrl' => $path,
                 'disabled' => str_contains($path, 'blank'),
                 'templatesLang' => $gridTemplatesLanguage,
                 'referencesLang' => $gridReferencesLanguage,
                 'disclaimerLang'  => $gridDisclaimersLanguage,
+                'docFormat'     => $format_array,
                 'dateFormat'    => 'YYYY-MM-DD',    // FIXME: Debe ser generado a partir de la configuración general
             ];
             //Log::debug(['SET' => $set]);
@@ -437,6 +441,20 @@ class ControlController extends Controller
         $response = $this->tool->setPublishedUsers(10, 13);
         return response()->json($response);
     }
+
+    private function formatSplit($formatting)
+    {
+        $format = [];
+
+        foreach($formatting as $key => $value) {
+            $format['orientation'][] = $key;
+            foreach($value as $k => $v) {
+                $format['size'][] = $k;
+            } // foreach
+        } // foreaech
+
+        return $format;
+    } // formatSplit Method
 
 
     
