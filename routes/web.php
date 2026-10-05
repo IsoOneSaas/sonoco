@@ -115,7 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Observaciones de documento
             Route::resource('observacion', \App\Http\Controllers\Document\SightingModelController::class);
             Route::get('observacion/abrir/{slug}', [\App\Http\Controllers\Document\SightingModelController::class, 'open'])->name('observacion.open');            
-            
+           
             // Ruta para editar
             Route::get('gestion/editar/{slug}/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'edit'])->name('manage.edit'); // Display de edición
             Route::get('gestion/publicar/{hash}', [\App\Http\Controllers\Document\ControlController::class, 'publish'])->name('manage.post'); // Display de edición
@@ -151,6 +151,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('anexos', \App\Http\Controllers\Document\LinkModelController::class);
             Route::get('anexos/recuperar/{id}', [\App\Http\Controllers\Document\LinkModelController::class, 'get'])->name('attach.get');
             Route::get('anexos/mostrar/{filename}', [\App\Http\Controllers\Document\LinkModelController::class, 'show'])->name('attach.show');
+
+            // Formato del Documento
+            Route::post('formato/salvar', [\App\Http\Controllers\Document\ControlController::class, 'storeFormat'])->name('formato.store');            
 
             // Test
             Route::get('test', [\App\Http\Controllers\Document\ControlController::class, 'test'])->name('test');

@@ -22,9 +22,9 @@ return [
         ],
     ],
 
-    'printing_layout_text' => [
+    'print_layout_text' => [
         'orientations' => ['portrait' => 'Vertical', 'landscape' => 'Horizontal'],
-        'sizes' => ['letter' => 'Carta', 'folio' => 'Folio', 'Oficio' => 'legal', 'A4' => 'A4'],
+        'sizes' => ['letter' => 'Carta', 'folio' => 'Folio', 'legal' => 'Oficio', 'A4' => 'A4'],
     ],
 
     'print_layout_default' => [

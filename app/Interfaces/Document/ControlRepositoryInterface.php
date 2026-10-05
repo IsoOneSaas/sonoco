@@ -30,4 +30,5 @@ interface ControlRepositoryInterface
     public function getApprovingStatus($hash);
 
     public function setComment($id, array $data);
+    public function setFormat(array $data);
 } // Interface

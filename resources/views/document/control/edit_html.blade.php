@@ -45,7 +45,7 @@
                                             <a id="btn-modal-attach" href="javascript:;" class="dropdown-item"> <i data-lucide="paperclip" class="w-4 h-4 mr-2"></i> Anexos </a>
                                         </li>
                                         <li>
-                                            <a id="btn-modal-format" href="javascript:;" class="dropdown-item"> <i data-lucide="baseline" class="w-4 h-4 mr-2"></i> Formato </a>
+                                            <a id="btn-modal-format" href="javascript:;" class="dropdown-item"> <i data-lucide="type" class="w-4 h-4 mr-2"></i> Formato </a>
                                         </li>                                        
                                         <li>
                                             <a id="btn-modal-change" href="javascript:;" class="dropdown-item"> <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> Cambios </a>
@@ -95,8 +95,7 @@
                                                 <th>No</th>
                                                 <th>Nombre</th>
                                             </tr>
-                                        </thead>
-                                                                              
+                                        </thead>                                                                              
                                     </table>                       
                                 </div>
                                 <!-- END: Modal Body -->
@@ -164,9 +163,7 @@
                                         <div><input type="radio" id="radio-signature-origin-file" name="signature_origin" value="file" @if( $set['disabled'] ) disabled @else checked @endif ></div>
                                         <div><canvas id="signature-pad" class="signature-pad" width="400px" height="300px" style='border:2px solid #000'></canvas></div>                                        
                                         <div class="border-solid border-2 border-black p-4"><img id="sign-img" src="{{ $set['signUrl'] }}" ></div>
-                                    </div>
-
-                                    
+                                    </div>                                    
                                 </div>
                                 <!-- END: Modal Body -->
                                 <!-- BEGIN: Modal Footer -->
@@ -247,15 +244,27 @@
                                 <!-- BEGIN: Modal Body -->
                                 <div class="modal-body intro-y box p-5 mt-5">                                 
                                     <div>
-                                        <form id="format-form" action="{{ route('documents.settings.tipos.store') }}" method="POST">
-                                            @csrf                            
+                                        <form id="format-form" action="{{ route('documents.control.formato.store') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="did" value={{ $document->document_id }} />
                                             <div class="input-group">
-                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/format.form.code.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/format.form.code.title') }}</div>
+                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.orientation.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.orientation.title') }}</div>
                                                 <select  name="orientation" class="form-control tom-select w-full" required>
-
+                                                    @foreach($set['docFormat']['orientations'] as $value => $txt)   
+                                                        <option value="{{ $value }}" {{ old('orientation', $document->orientation) == $value ? 'selected' : '' }}>{{ $txt }}</option>
+                                                    @endforeach
                                                 </select>                                                  
-                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/format.form.code.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.orientation.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                             </div>
+                                            <div class="input-group mt-3">
+                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.size.title') }}</div>
+                                                <select  name="size" class="form-control tom-select w-full" required>
+                                                    @foreach($set['docFormat']['sizes'] as $value => $txt)   
+                                                        <option value="{{ $value }}" {{ old('size', $document->size) == $value ? 'selected' : '' }}>{{ $txt }}</option>
+                                                    @endforeach
+                                                </select>                                                  
+                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                            </div>                                            
                                         </form>
                                     </div>                                                    
                                 </div>
@@ -784,7 +793,35 @@
             $('body').on('click', '#btn-modal-format', function (e) {
                 e.preventDefault();
                 $("#modal-format-open")[0].click();
-            }); // btn-modal-format Modal            
+            }); // btn-modal-format Modal
+
+            $('body').on('click', '#btn-format-ok', function (e) {
+                e.preventDefault();                 
+                var data = $("#format-form").serializeArray();
+                var uri =  $("#format-form").attr('action');
+                $.ajax({
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    url: uri,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    async: false,
+                    success: function(json) {
+                        console.log('=== AJAX CODE');
+                        console.dir(json);
+                        if( json.status === 'success' ) {
+                            $("#btn-format-ko")[0].click();
+                            setSuccessNotification('success', '', json.message);
+                        } else {
+                            setSuccessNotification('error', 'Oops!', json.message);
+                        }
+                    }, // success
+                    error: function(jqXHR, exception) {
+                        setAjaxError(jqXHR, exception, 'document.control.edit_html.blade@btn-format-ok');
+                    } 
+                }); // Ajax
+ 
+            }); //btn-format-ok                        
 
             // GENERA EL MODAL PARA CAMBIOS
             $('body').on('click', '#btn-modal-change', function (e) {

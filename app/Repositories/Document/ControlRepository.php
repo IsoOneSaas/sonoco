@@ -143,6 +143,16 @@ class ControlRepository implements ControlRepositoryInterface
                         }
                         $document->tags = $tags_array;
 
+                        // Obtener el formato del documento
+                        $settings = $document->settings;
+                        if( !is_null($settings) && key_exists('print_format', $settings) ) {
+                            $document->size = $settings['print_format']['size'];
+                            $document->orientation = $settings['print_format']['orientation'];
+                        } else {
+                            $document->size = array_key_first(config('settings.print_layout_text.sizes'));
+                            $document->orientation = array_key_first(config('settings.print_layout_text.orientations'));
+                        } // if/else
+
                         // Obtener los responsables : edicion
                         $document->usersEdit = $this->getFooterSigns('edit', $id, $urlImg);            
 
@@ -983,6 +993,53 @@ class ControlRepository implements ControlRepositoryInterface
 
         return $found;
     } // getApprovingStatus
+
+    /**
+     * Salva los datos del formato del archivo
+     * @param  array $data Datos del Formulario
+     * @return json   Resultado de la actualización
+     */      
+    public function setFormat(array $data)
+    {
+        Log::debug(['SET FORMAT DATA' => $data]);
+        try {
+            DB::beginTransaction();
+
+            $document = DocumentModel::find($data['did']);
+            $settings = $document->settings; // print_format
+            if( is_null($settings) ) {
+                $settings = ['print_format' => [
+                    'size' => $data['size'],
+                    'orientation' => $data['orientation'],
+                ] ];
+            } else {
+                if( key_exists('print_format', $settings) ) {
+                    $settings['print_format']['size'] = $data['size'];
+                    $settings['print_format']['orientation'] = $data['orientation'];
+                } else {
+                    $settings['print_format'] = [
+                        'size' => $data['size'],
+                        'orientation' => $data['orientation'],
+                    ];
+                } // if/else
+            } // if/else
+
+             $document->settings = $settings;
+             if( $document->save() ) {                
+                 DB::commit();  
+             } else {
+                DB::rollBack();
+                return ['status' => 'error', 'message' => trans('document/document.store.format.no-success')];
+            }
+                   
+         } catch (Exception $e) {
+             DB::rollBack();
+             Log::error('ControlRepository::setFormat Exception: '. $e->getMessage());
+             return ['status' => 'error', 'error' => $e->getMessage(), 'message' => trans('document/document.store.format.no-success')];
+         }                
+         return ['status' => 'success', 'message' => trans('document/document.store.format.success')];
+
+    } // setFormat Repository
 
 
     public function confirm2($hash) // FIXME : pasado al Trait ControlDocumentsTrait

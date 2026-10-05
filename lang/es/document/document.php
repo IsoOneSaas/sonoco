@@ -106,6 +106,10 @@ return [
                             'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
                             'success'       => 'Se ha actualizado los responsables correctamente',
                 ],
+                'format' => [
+                            'no-success'    => 'Se ha presentado un error. ¡inténtelo más tarde!',
+                            'success'       => 'Se ha actualizado el formato del documento correctamente',
+                ],                
     ],    
 
     'form' => [
@@ -159,12 +163,6 @@ return [
                             'tooltip'       => 'Requerido. Texto alfanumérico con mínimo dos  y máximo doce caracteres',
                             'error'         => 'Se ha presentado un error al generar el código',
         ],                
-        'version'  =>  [
-                            'icon'          => 'hash',
-                            'title'         => 'Versión',
-                            'placeholder'   => 'Digite el número de versión del documento',
-                            'tooltip'       => 'Requerido. Número entero positivo',
-        ],
         'job_edit'  =>  [
                             'icon'          => 'file-code',
                             'title'         => 'Responsable Editar',
@@ -241,7 +239,18 @@ return [
                             'placeholder'   => 'Digite la nueva versión del documento',
                             'tooltip'       => 'Requerido. Número entero correspondiente a la nueva versión',
         ],
-    
+        'orientation'  =>  [
+                            'icon'          => 'compass',
+                            'title'         => 'Orientación',
+                            'placeholder'   => 'Seleccione la orientación de la hoja para el documento',
+                            'tooltip'       => 'Requerido. Seleccionar una de las opciones de orientación de hoja para el documento',
+        ],        
+        'size'  =>  [
+                            'icon'          => 'ruler',
+                            'title'         => 'Tamaño',
+                            'placeholder'   => 'Seleccione un tamaño de hoja para el documento',
+                            'tooltip'       => 'Requerido. Seleccionar una de las opciones de tamaño de hoja para el documento',
+        ],      
         
     ],    
 

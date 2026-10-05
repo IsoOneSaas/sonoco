@@ -96,8 +96,8 @@ class ControlController extends Controller
     
             //Log::debug(['CONTENT:' => $document->content]);
             
-            $format_array = $this->formatSplit(config('settings.print_layout_default'));
-            Log::debug(['FORMAT:' => $format_array]);
+            $format_array = config('settings.print_layout_text');
+            //Log::debug(['FORMAT:' => $format_array]);
             
             $set = [
                 'signUrl' => $path,
@@ -442,20 +442,14 @@ class ControlController extends Controller
         return response()->json($response);
     }
 
-    private function formatSplit($formatting)
+    /**
+     * Almacena la información del formato del documento
+     */      
+    public function storeFormat(Request $request)
     {
-        $format = [];
-
-        foreach($formatting as $key => $value) {
-            $format['orientation'][] = $key;
-            foreach($value as $k => $v) {
-                $format['size'][] = $k;
-            } // foreach
-        } // foreaech
-
-        return $format;
-    } // formatSplit Method
-
+        $response = $this->documentRepo->setFormat($request->all());
+        return response()->json($response);   
+    }
 
     
     /**
