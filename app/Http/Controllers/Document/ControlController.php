@@ -451,6 +451,15 @@ class ControlController extends Controller
         return response()->json($response);   
     }
 
+    /**
+     * Recupera la información del formato del documento
+     */       
+    public function getFormat($id)
+    {
+        $response = $this->documentRepo->getFormat($id);
+        return response()->json($response);   
+    }
+
     
     /**
      * Se definite la estructura de la tabla a generar con DataTables

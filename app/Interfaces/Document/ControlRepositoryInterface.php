@@ -31,4 +31,5 @@ interface ControlRepositoryInterface
 
     public function setComment($id, array $data);
     public function setFormat(array $data);
+    public function getFormat($id);
 } // Interface

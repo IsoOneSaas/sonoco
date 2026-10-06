@@ -143,7 +143,7 @@ class ControlRepository implements ControlRepositoryInterface
                         }
                         $document->tags = $tags_array;
 
-                        // Obtener el formato del documento
+                        // FIXME: Obtener el formato del documento
                         $settings = $document->settings;
                         if( !is_null($settings) && key_exists('print_format', $settings) ) {
                             $document->size = $settings['print_format']['size'];
@@ -1040,6 +1040,30 @@ class ControlRepository implements ControlRepositoryInterface
          return ['status' => 'success', 'message' => trans('document/document.store.format.success')];
 
     } // setFormat Repository
+
+    /**
+     * Obtiene información para generar los selectores de tamaño y orientación del documento
+     * @param  integer $id Identificador del documento
+     * @return json   Información para generar los selectores
+     */      
+    public function getFormat($id)
+    {
+        $document = DocumentModel::find($id);
+        $settings = $document->settings;
+        if( !is_null($settings) && key_exists('print_format', $settings) ) {
+            $document->size = $settings['print_format']['size'];
+            $document->orientation = $settings['print_format']['orientation'];
+        } else {
+            $document->size = array_key_first(config('settings.print_layout_text.sizes'));
+            $document->orientation = array_key_first(config('settings.print_layout_text.orientations'));
+        } // if/else
+        $document->orientations = config('settings.print_layout_text.orientations');
+        $document->sizes = config('settings.print_layout_text.sizes');
+        return json_encode([
+            'success' => true,
+            'data' => $document,              
+        ]);
+    } // getFormat Repository
 
 
     public function confirm2($hash) // FIXME : pasado al Trait ControlDocumentsTrait

@@ -153,6 +153,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('anexos/mostrar/{filename}', [\App\Http\Controllers\Document\LinkModelController::class, 'show'])->name('attach.show');
 
             // Formato del Documento
+            Route::get('formato/listado/{id}', [\App\Http\Controllers\Document\ControlController::class, 'getFormat']);
             Route::post('formato/salvar', [\App\Http\Controllers\Document\ControlController::class, 'storeFormat'])->name('formato.store');            
 
             // Test

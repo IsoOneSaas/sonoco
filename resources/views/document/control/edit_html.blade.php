@@ -248,22 +248,14 @@
                                             @csrf
                                             <input type="hidden" name="did" value={{ $document->document_id }} />
                                             <div class="input-group">
-                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.orientation.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.orientation.title') }}</div>
-                                                <select  name="orientation" class="form-control tom-select w-full" required>
-                                                    @foreach($set['docFormat']['orientations'] as $value => $txt)   
-                                                        <option value="{{ $value }}" {{ old('orientation', $document->orientation) == $value ? 'selected' : '' }}>{{ $txt }}</option>
-                                                    @endforeach
-                                                </select>                                                  
-                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.orientation.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                <div class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.orientation.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.orientation.title') }}</div>
+                                                <select id="format-orientation" name="orientation" class="form-control tom-select w-full" required></select>                                                  
+                                                <div id="input-group-21" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.orientation.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                             </div>
                                             <div class="input-group mt-3">
-                                                <div id="code" class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.size.title') }}</div>
-                                                <select  name="size" class="form-control tom-select w-full" required>
-                                                    @foreach($set['docFormat']['sizes'] as $value => $txt)   
-                                                        <option value="{{ $value }}" {{ old('size', $document->size) == $value ? 'selected' : '' }}>{{ $txt }}</option>
-                                                    @endforeach
-                                                </select>                                                  
-                                                <div id="input-group-2" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                <div class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.size.title') }}</div>
+                                                <select id="format-size"  name="size" class="form-control tom-select w-full" required></select>                                                  
+                                                <div id="input-group-22" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                             </div>                                            
                                         </form>
                                     </div>                                                    
@@ -792,7 +784,41 @@
             // GENERA EL MODAL PARA EL FORMATO
             $('body').on('click', '#btn-modal-format', function (e) {
                 e.preventDefault();
-                $("#modal-format-open")[0].click();
+                // FIXME: Crear ajax para traer la información asyncrónica 
+                var did = $("input[name='did']").val();
+                $.ajax({
+                    url: '/documentos/control/formato/listado/'+did,
+                    type: 'GET',
+                    dataType: 'json',                
+                    success: function(json) {  
+                        dataSet = $.parseJSON(json);
+                        console.dir(dataSet);                                   
+                        if( dataSet.success) {
+                            console.dir(dataSet.data.orientations);
+                            var output = '';
+                            $.each(dataSet.data.orientations, function(key, value) {
+                                console.log('key: '+key+' | value: '+value);
+                                output += '<option value="'+key+'"';
+                                output += (key == dataSet.data.orientation) ? ' selected' : '';
+                                output += '>'+value+'</option>';                                
+                            });
+                            console.log(output);
+                            $("#format-orientation").html(output);
+                            output = '';
+                            $.each(dataSet.data.sizes, function(key, value) {
+                                console.log('key: '+key+' | value: '+value);
+                                output += '<option value="'+key+'"';
+                                output += (key == dataSet.data.size) ? ' selected' : '';
+                                output += '>'+value+'</option>';                                
+                            });
+                            console.log(output);
+                            $("#format-size").html(output);
+                            $("#modal-format-open")[0].click();                            
+                        } else {
+                            setSuccessNotification('error', dataSet.message);
+                        }
+                    } // success
+                }); // ajax                                                      
             }); // btn-modal-format Modal
 
             $('body').on('click', '#btn-format-ok', function (e) {
