@@ -95,17 +95,13 @@ class ControlController extends Controller
             $path = $this->getSignature();
     
             //Log::debug(['CONTENT:' => $document->content]);
-            
-            $format_array = config('settings.print_layout_text');
-            //Log::debug(['FORMAT:' => $format_array]);
-            
+                        
             $set = [
                 'signUrl' => $path,
                 'disabled' => str_contains($path, 'blank'),
                 'templatesLang' => $gridTemplatesLanguage,
                 'referencesLang' => $gridReferencesLanguage,
                 'disclaimerLang'  => $gridDisclaimersLanguage,
-                'docFormat'     => $format_array,
                 'dateFormat'    => 'YYYY-MM-DD',    // FIXME: Debe ser generado a partir de la configuración general
             ];
             //Log::debug(['SET' => $set]);
@@ -142,10 +138,14 @@ class ControlController extends Controller
 		//Log::debug(['ATTACHMENTS' => $attachment->toArray()]);
         
         // Configuración de la hoja
-        $setup = $this->tool->getPaperSetup($data->settings);       
+        $setup = $this->tool->getPaperSetup($data->settings);  
+        $layout = config('settings.print_layout_default')[$setup['orientation']][$setup['size']];
+
+        //Log::debug(['DATA' => $data->settings, 'SETUP' => $setup, 'LAYOUT' => $layout]);
 
         return view('document.control.preview', [
-            'size' => $setup['size'] .'-'. $setup['orientation'],
+            //'size' => $setup['size'] .'-'. $setup['orientation'],
+            'layout' => $layout,
             'document' => $data,
             'attachment' => $attachment,
         ]);         

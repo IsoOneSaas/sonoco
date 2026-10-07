@@ -1411,10 +1411,13 @@ class ToolsClass
      */      
     public function getPaperSetup($settings)
     {
-        if( is_array($settings) && in_array('print_format', $settings) ) {
+        if( !is_null($settings) && key_exists('print_format', $settings) ) {
             return $settings['print_format'];                
         } else {
-            return config('settings.document_print_format');
+            return [
+                'size' => array_key_first(config('settings.print_layout_text.sizes')),
+                'orientation' => array_key_first(config('settings.print_layout_text.orientations')),
+            ];          
         }
     } // getPaperSetup 
     

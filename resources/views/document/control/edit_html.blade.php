@@ -248,13 +248,13 @@
                                             @csrf
                                             <input type="hidden" name="did" value={{ $document->document_id }} />
                                             <div class="input-group">
-                                                <div class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.orientation.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.orientation.title') }}</div>
-                                                <select id="format-orientation" name="orientation" class="form-control tom-select w-full" required></select>                                                  
-                                                <div id="input-group-21" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.orientation.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
+                                                <div class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.orientation.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.orientation.title') }}</div>                                                
+                                                <div id="modal-format-orientation" class="w-full"></div>
+                                                <div id="input-group-21" class="input-group-text overflow-visible"><a href="javascript:;" class="tooltip tooltip-right z-[9999]" title="{{ trans('document/document.form.orientation.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                             </div>
                                             <div class="input-group mt-3">
                                                 <div class="input-group-text flex"><i data-lucide="{{ trans('document/document.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/document.form.size.title') }}</div>
-                                                <select id="format-size"  name="size" class="form-control tom-select w-full" required></select>                                                  
+                                                <div id="modal-format-size" class="w-full"></div>                                                                                                 
                                                 <div id="input-group-22" class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/document.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
                                             </div>                                            
                                         </form>
@@ -296,6 +296,11 @@
     <link rel="stylesheet" href="{{ url('assets/js/dropzone-5.9.3/dropzone.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('assets/css/head.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/css/document_edit.css') }}" />
+    <style>
+        #input-group-21 {
+            z-index: 999999999999;
+        }
+    </style>
 @endpush
 
 @push('scripts-bottom')
@@ -784,7 +789,6 @@
             // GENERA EL MODAL PARA EL FORMATO
             $('body').on('click', '#btn-modal-format', function (e) {
                 e.preventDefault();
-                // FIXME: Crear ajax para traer la información asyncrónica 
                 var did = $("input[name='did']").val();
                 $.ajax({
                     url: '/documentos/control/formato/listado/'+did,
@@ -792,27 +796,26 @@
                     dataType: 'json',                
                     success: function(json) {  
                         dataSet = $.parseJSON(json);
-                        console.dir(dataSet);                                   
+                        //console.dir(dataSet);                                                    
                         if( dataSet.success) {
-                            console.dir(dataSet.data.orientations);
-                            var output = '';
+                            var output = '<select name="orientation" class="form-control tom-select w-full" required>';
                             $.each(dataSet.data.orientations, function(key, value) {
-                                console.log('key: '+key+' | value: '+value);
                                 output += '<option value="'+key+'"';
                                 output += (key == dataSet.data.orientation) ? ' selected' : '';
                                 output += '>'+value+'</option>';                                
                             });
-                            console.log(output);
-                            $("#format-orientation").html(output);
-                            output = '';
+                            output += '</select>';
+                            $("#modal-format-orientation").html(output); 
+
+                            output = '<select name="size" class="form-control tom-select w-full" required>';
                             $.each(dataSet.data.sizes, function(key, value) {
-                                console.log('key: '+key+' | value: '+value);
                                 output += '<option value="'+key+'"';
                                 output += (key == dataSet.data.size) ? ' selected' : '';
                                 output += '>'+value+'</option>';                                
-                            });
-                            console.log(output);
-                            $("#format-size").html(output);
+                            });                            
+                            output += '</select>';
+                            $("#modal-format-size").html(output);
+                            
                             $("#modal-format-open")[0].click();                            
                         } else {
                             setSuccessNotification('error', dataSet.message);

@@ -5,9 +5,20 @@
         <title>{{ $document->name }}</title>
         <link rel="stylesheet" href="{{ url('assets/css/head.css') }}" />
         <link rel="stylesheet" href="{{ url('assets/css/preview.css') }}" />
+        <style>
+            @media print {
+                @page {
+                    size: {{ $layout['size'] }};
+                    margin: {{ $layout['margin'] }};
+                }
+            }               
+            body { 
+                width: {{ $layout['pdfwidth'] }};
+            } 
+        </style>        
     </head>
-    <body class="iso-body iso-{{ $size ?? 'emtpy' }}">
-        <div class="iso-page iso-{{ $size ?? 'emtpy' }}">
+    <body class="iso-body">
+        <div class="iso-page">
             <div class="content">            
                 <div class="intro-y box p-5 mt-5 w-full">
                     @include('document/document/head_default')

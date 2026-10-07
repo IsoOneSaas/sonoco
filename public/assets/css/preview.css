@@ -8,6 +8,16 @@
 
 }
 
+.iso-folio-portrait {
+  width: 8.5in;
+
+}
+
+.iso-folio-landscape {
+  width: 13in;
+
+}
+
 .iso-legal-portrait {
   width: 8.5in;
 
@@ -15,6 +25,16 @@
 
 .iso-legal-landscape {
   width: 14in;
+
+}
+
+.iso-A4-portrait {
+  width: 21cm;
+
+}
+
+.iso-A4-landscape {
+  width: 29.7cm;
 
 }
 

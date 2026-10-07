@@ -117,10 +117,10 @@ return [
         ],
         'direction'         =>  [
                             'icon'          => 'move',
-                            'title'         => 'Dirección',
-                            'placeholder'   => 'Seleccione la dirección de la hoja',
-                            'tooltip'       => 'Requerido. Seleccione una opción de dirección de la hoja',
-                            'default'       => 'Seleccione la dirección de la hoja',
+                            'title'         => 'Orientación',
+                            'placeholder'   => 'Seleccione la orientación de la hoja',
+                            'tooltip'       => 'Requerido. Seleccione una opción de orientación de la hoja',
+                            'default'       => 'Seleccione la orientación de la hoja',
         ],
         'size'         =>  [
                             'icon'          => 'ruler',

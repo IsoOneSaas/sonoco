@@ -240,7 +240,7 @@ return [
                             'tooltip'       => 'Requerido. Número entero correspondiente a la nueva versión',
         ],
         'orientation'  =>  [
-                            'icon'          => 'compass',
+                            'icon'          => 'move',
                             'title'         => 'Orientación',
                             'placeholder'   => 'Seleccione la orientación de la hoja para el documento',
                             'tooltip'       => 'Requerido. Seleccionar una de las opciones de orientación de hoja para el documento',

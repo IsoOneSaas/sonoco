@@ -144,14 +144,14 @@ class ControlRepository implements ControlRepositoryInterface
                         $document->tags = $tags_array;
 
                         // FIXME: Obtener el formato del documento
-                        $settings = $document->settings;
-                        if( !is_null($settings) && key_exists('print_format', $settings) ) {
-                            $document->size = $settings['print_format']['size'];
-                            $document->orientation = $settings['print_format']['orientation'];
-                        } else {
-                            $document->size = array_key_first(config('settings.print_layout_text.sizes'));
-                            $document->orientation = array_key_first(config('settings.print_layout_text.orientations'));
-                        } // if/else
+                        // $settings = $document->settings;
+                        // if( !is_null($settings) && key_exists('print_format', $settings) ) {
+                        //     $document->size = $settings['print_format']['size'];
+                        //     $document->orientation = $settings['print_format']['orientation'];
+                        // } else {
+                        //     $document->size = array_key_first(config('settings.print_layout_text.sizes'));
+                        //     $document->orientation = array_key_first(config('settings.print_layout_text.orientations'));
+                        // } // if/else
 
                         // Obtener los responsables : edicion
                         $document->usersEdit = $this->getFooterSigns('edit', $id, $urlImg);            
@@ -1001,7 +1001,7 @@ class ControlRepository implements ControlRepositoryInterface
      */      
     public function setFormat(array $data)
     {
-        Log::debug(['SET FORMAT DATA' => $data]);
+        //Log::debug(['SET FORMAT DATA' => $data]);
         try {
             DB::beginTransaction();
 
