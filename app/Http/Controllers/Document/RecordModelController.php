@@ -67,9 +67,8 @@ class RecordModelController extends Controller
         $processes = $this->recordRepo->getProcessesList($ridsShared);
         $groups =  $this->recordRepo->getGroupsList();
         return $this->recordRepo->render($param, $systems, $processes, $groups, $ridsShared, $user, $this->set);
-    }  // show
+    }  // render Method
     
-
     /**
      * Establece la base del registro a ser creado : /documentos/registro/crear/$hash
      * @param  string $hash Id encriptado del documento base
@@ -297,7 +296,7 @@ class RecordModelController extends Controller
     public function setUsers(Request $request) 
     {
         return $this->recordRepo->getUsers($request->all());
-    } // setUsers    
+    } // setUsers Method 
     
     /**
      * Store a newly created resource in storage.
@@ -371,22 +370,24 @@ class RecordModelController extends Controller
     {
         $response['hash'] = $this->tool->setIdHash($id);
         return response()->json($response);
-    } // setHash
+    } // setHash Method
     
       /**
      * show document in HTML format (visualizar documento)
      */
     public function show($hash) : View
     {  
-        // Obtener datos del documento original
+        // Obtener datos del registro existente
         $data = $this->recordRepo->setRecord($hash);
         
         if($data) {
+            // Documento origen
             $document = $this->recordRepo->getDocument($data['document_id'], $this->set['date_format']);
-            //$attachment = $this->controlRepo->getAttachment($hash, $this->recordUrl);
-            // Configuración de la hoja
-            $setup = $this->tool->getPaperSetup($document->settings);     
 
+            // Configuración de la hoja    
+            $setup = $this->tool->setRecordpage($document->settings, $data['uid'], $data['settings']); 
+
+            // Generar vista
             return view('document.record.show', [
                 'size' => $setup['size'] .'-'. $setup['orientation'],
                 'document' => $document,

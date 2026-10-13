@@ -303,16 +303,16 @@
 
                                                     <div id="direction" class="input-group-text flex"><i data-lucide="{{ trans('document/record.form.direction.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.direction.title') }}</div>
                                                     <select name="direction" class="form-control w-full input-status ml-2">
-                                                        @foreach( $DATA['dir_select'] as $item )
-                                                        <option value="{{ $item['value'] }}" @if($item['selected']) selected @endif >{{ $item['text'] }}</option>
+                                                        @foreach( $DATA['dir_select'] as $key => $value )
+                                                        <option value="{{ $key }}" @if( $key == $DATA['dir_selected'] ) selected @endif >{{ $value }}</option>
                                                         @endforeach
                                                     </select>
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.direction.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>
 
                                                     <div id="size" class="input-group-text flex ml-3"><i data-lucide="{{ trans('document/record.form.size.icon') }}" class="w-4 h-4 mr-1"></i>{{ trans('document/record.form.size.title') }}</div>
                                                     <select name="size" class="form-control w-full input-status ml-2">
-                                                        @foreach( $DATA['size_select'] as $item )
-                                                        <option value="{{ $item['value'] }}" @if($item['selected']) selected @endif >{{ $item['text'] }}</option>
+                                                        @foreach( $DATA['size_select'] as $key => $value)
+                                                        <option value="{{ $key }}" @if( $key == $DATA['size_selected'] ) selected @endif >{{ $value }}</option>
                                                         @endforeach
                                                     </select>
                                                     <div class="input-group-text"><a href="javascript:;" class="tooltip" title="{{ trans('document/record.form.size.tooltip') }}" tabindex="-1"><i data-lucide="help-circle" class="w-4 h-4"></i></a> </div>                                                     

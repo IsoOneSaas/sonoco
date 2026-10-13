@@ -230,6 +230,8 @@ class RecordRepository implements RecordRepositoryInterface
             'author' => true,
             'auth' => false,
             'messages' => [],
+            'uid' => Auth::user()->user_id,
+            'settings' => null,
         ];  
 
         if( $slug1 === 'planificacion' ) {
@@ -310,38 +312,13 @@ class RecordRepository implements RecordRepositoryInterface
             }            
         } // if/else
 
-        // Recuperar settings (desde el documento master)        
-        $sizeDefault = config('settings.document_print_format')['size'];
-        $dirDefault = config('settings.document_print_format')['orientation']; 
-        $json_array = $document->settings;
-        //LOG::DEBUG(['VALIDACION ARRAY' => $json_array]);         
-        if( is_array($json_array) ) {
-            if(key_exists('print_format', $json_array)) {
-                $format = $json_array['print_format'];
-                $sizeDefault = $format['size'];
-                $dirDefault = $format['orientation'];
-            }
-        }
-        // Generar selects de settings
-        $textArray = trans('document/record.layout'); 
-        $printLayout =  config('settings.print_layout_default');
-        foreach($printLayout as $dir => $sizeArray) {            
-            $output_array['dir_select'][] = [
-                'text' => ( isset($textArray[$dir]) ) ? $textArray[$dir] : 'Otra dirección', 
-                'value' => $dir,
-                'selected' => ( $dir == $dirDefault ) ? true : false,
-            ];
-        }
-        
-        $sizeArray = $printLayout[$dirDefault];
 
-        foreach($sizeArray as $size => $value) {
-            $output_array['size_select'][] = [
-                'text' => ( isset($textArray[$size]) ) ? $textArray[$size] : 'Otro tamaño', 
-                'value' => $size,
-                'selected' => ( $size == $sizeDefault ) ? true : false,
-            ];
-        } // foreach
+        // GENERAR SELECTS DE SETTINGS
+        $page = $this->tool->setRecordPage($document->settings);
+        $output_array['dir_select'] = config('settings.print_layout_text.orientations');
+        $output_array['size_select'] = config('settings.print_layout_text.sizes');
+        $output_array['dir_selected'] = $page['orientation'];
+        $output_array['size_selected'] = $page['size'];        
         
         // Recuperar usuarios
         $output_array['users'] = [];
@@ -378,7 +355,9 @@ class RecordRepository implements RecordRepositoryInterface
             'files' => [],
             'spt' => false,
             'author' => ( $record->author_id == $player->user_id ) ? true : false,
-            'auth' => false
+            'auth' => false,
+            'uid' => $player->user_id,
+            'settings' => $record->settings,
         ];
         //Log::debug(['SET RECORD' => $output_array]);
 
@@ -391,8 +370,8 @@ class RecordRepository implements RecordRepositoryInterface
         // Recuperar settings (desde el documento master)
         $document = DocumentModel::find($record->document_id);
         $output_array['document'] = $document->name;
-        $sizeDefault = config('settings.document_print_format')['size'];
-        $dirDefault = config('settings.document_print_format')['orientation']; 
+        // $sizeDefault = config('settings.document_print_format')['size'];
+        // $dirDefault = config('settings.document_print_format')['orientation']; 
         $json_array = $document->settings;         
         if( is_array($json_array) ) {
             if(key_exists('print_format', $json_array)) {
@@ -402,26 +381,12 @@ class RecordRepository implements RecordRepositoryInterface
             } // if
         } // if
 
-        // Generar selects de settings
-        $textArray = trans('document/record.layout');
-        $printLayout =  config('settings.print_layout_default');
-        foreach($printLayout as $dir => $sizeArray) {
-            $output_array['dir_select'][] = [
-                'text' => ( isset($textArray[$dir]) ) ? $textArray[$dir] : 'Otra dirección', 
-                'value' => $dir,
-                'selected' => ( $dir == $dirDefault ) ? true : false,
-            ];
-        } // foreach
-        
-        $sizeArray = $printLayout[$dirDefault];
-
-        foreach($sizeArray as $size => $value) {
-            $output_array['size_select'][] = [
-                'text' => ( isset($textArray[$size]) ) ? $textArray[$size] : 'Otro tamaño', 
-                'value' => $size,
-                'selected' => ( $size == $sizeDefault ) ? true : false,
-            ];
-        } // foreach
+        // GENERAR SELECTS DE SETTINGS
+        $page = $this->tool->setRecordPage($document->settings, $player->user_id, $record->settings);
+        $output_array['dir_select'] = config('settings.print_layout_text.orientations');
+        $output_array['size_select'] = config('settings.print_layout_text.sizes');
+        $output_array['dir_selected'] = $page['orientation'];
+        $output_array['size_selected'] = $page['size'];
 
         // Recuperar Archivos anexos        
         $links = [];
@@ -522,8 +487,10 @@ class RecordRepository implements RecordRepositoryInterface
         $trace_ok = '';        
 
         try { 
-            // USER PARAMETERS
+            // PARAMETERS
             $user = Auth::user();
+            $document = DocumentModel::find($data['document_id']);
+            $sid = ($document) ? $document->system_id : 0;
                       
             // FIRST OR NEW RECORD
             $record = RecordModel::firstOrNew([
@@ -552,6 +519,26 @@ class RecordRepository implements RecordRepositoryInterface
                 $record->author_job = $jobName;
             } // if
 
+            // SAVE SETTINGS NEW VERSION 12.10.2026
+            $settings = $record->settings;
+            if( is_null($settings) ) {
+                $settings['print_format'][$user->user_id] = [
+                    'size' => $data['size'],
+                    'orientation' => $data['direction'],
+                ];
+            } else {
+                if( key_exists('print_format', $settings) && key_exists($user->user_id, $settings['print_format']) ) {
+                    $settings['print_format'][$user->user_id]['size'] = $data['size'];
+                    $settings['print_format'][$user->user_id]['orientation'] = $data['direction'];
+                } else {
+                    $settings['print_format'][$user->user_id] = [
+                        'size' => $data['size'],
+                        'orientation' => $data['direction'],
+                    ];
+                } // if/else
+            } // if/else
+            $record->settings = $settings;
+
             DB::beginTransaction();
             $record->save();
 
@@ -560,26 +547,6 @@ class RecordRepository implements RecordRepositoryInterface
                 $record->update(['filename' => $data['fileName']]);
             }            
 
-            // SAVE SETTINGS
-            $document = DocumentModel::find($data['document_id']);
-            if($document) {
-                $sid = $document->system_id;
-                $json_array = $document->settings;         
-                if( is_array($json_array) ) {
-                    $json_array['print_format']['size'] = $data['size'];  
-                    $json_array['print_format']['orientation'] = $data['direction'];  
-                    $document->settings = $json_array;                    
-                } else {
-                    $new_array['print_format'] = [
-                        'size' => $data['size'],
-                        'orientation' => $data['direction'],
-                    ];
-                    $document->settings = $new_array;
-                } // if/else
-                $document->save();
-            } else {
-                $sid = 0;
-            }
 
             // SAVE TOPIC/SUBJECT
             if( key_exists('topic_id', $data) ) {
@@ -679,29 +646,6 @@ class RecordRepository implements RecordRepositoryInterface
 
                 } // if
 
-
-                // $deleted = DB::table('document_record_users')->where('record_id', $record->record_id)->delete();
-                // if( count($data['user_ids']) > 0 ) {                
-                //     $insert_array = [];
-                //     foreach($data['user_ids'] as $uid) {
-                //         $jobs_array = [];
-                //         $liable = UserModel::find($uid);
-                //         $jobs = $liable->jobs;
-                //         foreach($jobs as $job) {
-                //             $jobs_array[] = $job->name;
-                //         }
-                //         $jobName = implode(', ', $jobs_array);                        
-                //         $insert_array[] = [
-                //             'user_id' => $uid,
-                //             'record_id' => $record->record_id,
-                //             'name' => $liable->name,
-                //             'job' => $jobName,
-                //         ];
-                //     } // foreach
-                //     if(count($insert_array) > 0) {
-                //         DB::table('document_record_users')->insert($insert_array);
-                //     } // if                  
-                // } // if
             } //if
 
             // SAVE USER STATUS
@@ -1158,16 +1102,16 @@ class RecordRepository implements RecordRepositoryInterface
         $document->date = Carbon::createFromTimeStamp(strtotime($status->return_date))->format($this->set['date_format']);
         
         // FORMAT
-        $json_array = $document->settings;
-        $document->size = config('settings.document_print_format')['size'];
-        $document->dir = config('settings.document_print_format')['orientation'];        
-        if( is_array($json_array) ) {
-            if(key_exists('print_format', $json_array)) {
-                $format = $json_array['print_format'];
-                $document->size = $format['size'];
-                $document->dir = $format['orientation'];
-            }
-        }        
+        // $json_array = $document->settings;
+        // $document->size = config('settings.document_print_format')['size'];         
+        // $document->dir = config('settings.document_print_format')['orientation'];   
+        // if( is_array($json_array) ) {
+        //     if(key_exists('print_format', $json_array)) {
+        //         $format = $json_array['print_format'];
+        //         $document->size = $format['size'];
+        //         $document->dir = $format['orientation'];
+        //     }
+        // }        
         //Log::debug(['DOCUMENT' => $document->toArray()]);
         return $document;
     } // get Document Repository

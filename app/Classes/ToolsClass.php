@@ -1490,6 +1490,34 @@ class ToolsClass
             }
         } // for
         return $output;
-    } // setSettings    
+    } // setSettings   
+    
+    /**
+     * Obtener dimensión y tamaño de página configurada para el registro
+     * @param  array/null $rec parámetros del registro
+     * @param  integer/null $uid Identificador del usuario
+     * @param  array/null $doc parámetros del documento
+     * @return array    datos de la configuración de página
+     */      
+    public function setRecordpage($doc, $uid = null, $rec = null)
+    {
+        $page = [];
+        // Validar si existe la información
+        if( !is_null($rec) && key_exists('print_format', $rec) && key_exists($uid, $rec['print_format']) ) {
+            $page['size'] = $rec['print_format'][$uid]['size'];
+            $page['orientation'] = $rec['print_format'][$uid]['orientation'];
+        } else {
+            // No existe parámetros, tomar del documento
+            if( !is_null($doc) && key_exists('print_format', $doc) ) {
+                $page['size'] = $doc['print_format']['size'];
+                $page['orientation'] = $doc['print_format']['orientation'];
+            } else {
+                // Tomar de la configuración por defecto
+                $page['size'] = array_key_first(config('settings.print_layout_text.sizes'));
+                $page['orientation'] = array_key_first(config('settings.print_layout_text.orientations'));
+            }
+        }
+        return $page;
+    } // setRecordpage Procedure
 
 } // class
