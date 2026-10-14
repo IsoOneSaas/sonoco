@@ -67,6 +67,9 @@ class DashboardController extends Controller
                     'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
                     'SPR'   => $this->dashRepo->getSuggestionStatus(),
                     'OPR'   => $this->dashRepo->getSightingsStatus(),
+                    'REC'   => $this->dashRepo->getRecordsStatus(),
+                    'PUB'   => $this->dashRepo->getPublishedStatus(),
+                    'BAR'   => $this->dashRepo->getPublishedDocumentsChart(),
                 ];
                 //$docs_object = '';
             } elseif( $user->hasRole('ADMIN') ) {

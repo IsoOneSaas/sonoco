@@ -6,6 +6,9 @@ interface DashboardRepositoryInterface
     public function getSuggestionStatus();
     public function getSightingsStatus();
     public function getFavorityDocuments();
+    public function getRecordsStatus();
+    public function getPublishedStatus();
+    public function getPublishedDocumentsChart();
     public function getEvents($uid, $role, $start, $end, $today);
     public function getDocuments($uid);
     public function getRecords($uid);

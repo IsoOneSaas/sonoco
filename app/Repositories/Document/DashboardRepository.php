@@ -146,6 +146,25 @@ class DashboardRepository implements DashboardRepositoryInterface
         return $numberOfItems;
     } // getSightingsStatus()
 
+    /**
+     * Obtiene el número de registros abiertos para los usuarios
+     * @return integer    número de registros
+     */      
+    public function getRecordsStatus()
+    {
+        return RecordModel::where('status', 0)->count();
+    } // getRecordsStatus Repository
+
+    /**
+     * Obtiene el número de documentos publicado
+     * @return integer    número de documentos
+     */      
+    public function getPublishedStatus()
+    {
+        $docs = DocumentModel::where('status', config('settings.document_status.publish'))->get()->unique('code');
+        return $docs->count();
+    } // getPublishedStatus Repository    
+
     public function getFavorityDocuments()
     {
         $tracing_array = [];
@@ -173,6 +192,21 @@ class DashboardRepository implements DashboardRepositoryInterface
         //Log::debug(['UID' => $uid, 'NAME' => $document->name, 'FREQUENCY' => $tracing_array]);
         return $tracing_array;
     }
+    public function getPublishedDocumentsChart()
+    {
+        //$published = TracingModel::where('trace', 'LIKE', "%Publica%")->orderBy('created_at', 'desc')->get();
+
+        $resultados = TracingModel::selectRaw('YEAR(created_at) as ano, MONTH(created_at) as mes, COUNT(*) as total')
+            ->where('trace', 'LIKE', "%STATUS-PUBLISHED%")
+            ->where('created_at', '>=', Carbon::now()->subYear())
+            ->groupBy('ano', 'mes')
+            ->orderBy('ano', 'asc')
+            ->orderBy('mes', 'asc')
+            ->get();
+
+        Log::debug(['RESULTADOS' => $resultados->toArray()]);
+        return 0;
+    } // getPublishedDocuments Repository
 
    public function getEvents($uid, $role, $start, $end, $today)
     {
