@@ -100,7 +100,22 @@
                                 </div>
 
                                 <div class="col-span-6">
-                                   
+                                    <!-- BEGIN: Bar Chart -->
+                                    <div class="intro-y box mt-5">
+                                        <div class="flex flex-col sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                                            <h2 class="font-medium text-base mr-auto">
+                                                Documentos Publicados
+                                            </h2>
+                                        </div>
+                                        <div id="bar-chart" class="p-5">
+                                            <div class="preview">
+                                                <div class="h-[600px]">
+                                                    <canvas id="yourChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END: Bar Chart -->                                       
                                 </div>
 
                                 <div class="col-span-12">
@@ -150,6 +165,33 @@
             },
             options: {}
         });
+
+        const yourChart = new Chart("yourChart", {
+            type: "bar",
+            data: {
+  labels: ['October','November','December','January','February','March','April','May','June','July','August','September'],
+  datasets: [{
+    label: 'Número de documentos',
+    data: {{ $status['BARD'] }},
+    backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)',
+        "rgb(0, 255, 0)",
+        "rgb(0, 0, 255)",
+        "rgb(255, 0, 0)",
+        "rgb(132, 99, 255)",
+        "rgb(235, 162, 54)",
+        "rgb(86, 205, 255)",
+        "rgb(99, 0, 0)",
+        "rgb(0, 99, 0)",
+        "rgb(0, 0, 99)",
+    ],
+    borderWidth: 1
+  }]
+},
+options: {}
+});        
 
         new DataTable("#frequency-table", {
             columnDefs: [

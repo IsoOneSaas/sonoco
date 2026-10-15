@@ -205,7 +205,12 @@ class DashboardRepository implements DashboardRepositoryInterface
             ->get();
 
         Log::debug(['RESULTADOS' => $resultados->toArray()]);
-        return 0;
+        return [
+            'labels' => $resultados->pluck('mes')->map(function ($mes) {
+                return Carbon::createFromFormat('!m', $mes)->format('F');
+            })->toArray(),
+            'data' => $resultados->pluck('total')->toArray(),
+        ];
     } // getPublishedDocuments Repository
 
    public function getEvents($uid, $role, $start, $end, $today)

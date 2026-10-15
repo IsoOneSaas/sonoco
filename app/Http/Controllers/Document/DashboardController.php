@@ -62,14 +62,17 @@ class DashboardController extends Controller
             // DOCUMENTOS
             if( $user->hasAnyRole('MASTER','SUPER') ) {
                 $template = 'document.dashboard_master';
-                $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];                
+                $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];   
+                $bar = $this->dashRepo->getPublishedDocumentsChart();  
+                Log::debug(['BAR' => $bar]);
                 $admin = [
                     'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
                     'SPR'   => $this->dashRepo->getSuggestionStatus(),
                     'OPR'   => $this->dashRepo->getSightingsStatus(),
                     'REC'   => $this->dashRepo->getRecordsStatus(),
                     'PUB'   => $this->dashRepo->getPublishedStatus(),
-                    'BAR'   => $this->dashRepo->getPublishedDocumentsChart(),
+                    'BARD'   => json_encode($bar['data']),
+                    'BARL'   => json_encode($bar['labels']),
                 ];
                 //$docs_object = '';
             } elseif( $user->hasRole('ADMIN') ) {
