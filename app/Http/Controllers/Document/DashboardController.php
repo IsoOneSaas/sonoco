@@ -64,7 +64,7 @@ class DashboardController extends Controller
                 $template = 'document.dashboard_master';
                 $badge = ['master' => 0, 'edit' => 0, 'review' => 0, 'approve' => 0];   
                 $bar = $this->dashRepo->getPublishedDocumentsChart();  
-                Log::debug(['BAR' => $bar]);
+                //Log::debug(['BAR' => $bar]);
                 $admin = [
                     'PIE'   => json_encode($this->dashRepo->getSettingsStatus()),
                     'SPR'   => $this->dashRepo->getSuggestionStatus(),

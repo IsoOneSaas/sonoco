@@ -169,29 +169,16 @@
         const yourChart = new Chart("yourChart", {
             type: "bar",
             data: {
-  labels: ['October','November','December','January','February','March','April','May','June','July','August','September'],
-  datasets: [{
-    label: 'Número de documentos',
-    data: {{ $status['BARD'] }},
-    backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(255, 205, 86)',
-        "rgb(0, 255, 0)",
-        "rgb(0, 0, 255)",
-        "rgb(255, 0, 0)",
-        "rgb(132, 99, 255)",
-        "rgb(235, 162, 54)",
-        "rgb(86, 205, 255)",
-        "rgb(99, 0, 0)",
-        "rgb(0, 99, 0)",
-        "rgb(0, 0, 99)",
-    ],
-    borderWidth: 1
-  }]
-},
-options: {}
-});        
+                labels: {!! $status['BARL'] !!},
+                datasets: [{
+                    label: 'Número de documentos',
+                    data: {{ $status['BARD'] }},
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 1
+                }]
+            }         
+        });        
 
         new DataTable("#frequency-table", {
             columnDefs: [

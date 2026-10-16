@@ -194,20 +194,19 @@ class DashboardRepository implements DashboardRepositoryInterface
     }
     public function getPublishedDocumentsChart()
     {
-        //$published = TracingModel::where('trace', 'LIKE', "%Publica%")->orderBy('created_at', 'desc')->get();
-
         $resultados = TracingModel::selectRaw('YEAR(created_at) as ano, MONTH(created_at) as mes, COUNT(*) as total')
             ->where('trace', 'LIKE', "%STATUS-PUBLISHED%")
-            ->where('created_at', '>=', Carbon::now()->subYear())
+            ->where('created_at', '>=', Carbon::now()->addMonthNoOverflow()->subYear()) // startOfMonth()->
             ->groupBy('ano', 'mes')
             ->orderBy('ano', 'asc')
             ->orderBy('mes', 'asc')
             ->get();
 
-        Log::debug(['RESULTADOS' => $resultados->toArray()]);
+        //Log::debug(['RESULTADOS' => $resultados->toArray()]);
+
         return [
             'labels' => $resultados->pluck('mes')->map(function ($mes) {
-                return Carbon::createFromFormat('!m', $mes)->format('F');
+                return Carbon::createFromFormat('!m', $mes)->locale('es')->translatedFormat('F');
             })->toArray(),
             'data' => $resultados->pluck('total')->toArray(),
         ];

@@ -126,6 +126,8 @@ class ProfileController extends Controller
                     $path = $this->imagePath . $fileName;
                     if( File::exists($path) ) {
                         Log::info('Archivo de imagen encontrado: '.$path);
+                        
+                        // Tratamiento de la imagen 
                         $image = Image::read($path);
                         $height = $image->height();
                         $width = $image->width();
