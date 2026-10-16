@@ -508,6 +508,7 @@ class RecordRepository implements RecordRepositoryInterface
                 if( $user->role == config('settings.roles.master') ) {
                     $jobName = 'Webmaster';
                 } else {
+                    $jobs_array = [];
                     $jobs = $user->jobs;
                     foreach($jobs as $job) {
                         $jobs_array[] = $job->name;
@@ -726,18 +727,36 @@ class RecordRepository implements RecordRepositoryInterface
                 // Generar HTML
                 //Log::debug(['DATA' => $rec]);  
                 $doc = $this->getDocument($data['document_id'], $this->set['date_format']);
-                $setup = $this->tool->getPaperSetup($doc->settings);
+
+                //$setup = $this->tool->getPaperSetup($doc->settings);
+                //Log::debug(['DOC PAPER SETUP:  SIZE' => $setup['size'], 'DIR' => $setup['orientation']]);
+                $setup = $this->tool->setRecordpage($document->settings, $user->user_id, $record->settings); 
+                //Log::debug(['REC PAPER SETUP:  SIZE' => $setup['size'], 'DIR' => $setup['orientation']]);
+
                 $print = new PdfClass('document.record.render');
                 $html = $print->renderRecord($rec, $doc, $setup);
                 $fileName = uniqid('PDF') .'.pdf';
                 // Salvar el archivo PDF
                 Log::info('To Save PDF...'); 
-                Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->recordUrl . $fileName);
-                // Verificar existencia de archivo
-                if( file_exists($this->recordUrl . $fileName) ) {
-                    // Actualizar la base de datos
-                   //Log::debug('==> Archivo PDF Salvado: '. $this->recordUrl . $fileName);                
+                $pdf = Pdf::loadHTML($html)->setPaper($setup['size'], $setup['orientation'])->setWarnings(false)->save($this->recordUrl . $fileName);
 
+                // Verificar existencia de archivo
+                if( $pdf && file_exists($this->recordUrl . $fileName) ) {
+                    // Actualizar la base de datos
+                    $rec = RecordModel::find($record->record_id);
+                    $settings = $rec->settings;
+                    if( !is_null($settings) ) {
+                        if(  key_exists('file', $settings)  ) {
+                            $settings['file'] = $fileName;
+                        } else {
+                            $settings['file'] = $fileName;
+                        }                        
+                    } else {
+                        $settings = ['file' => $fileName];
+                    }
+                    $rec->settings = $settings;
+                    $rec->save();
+                    Log::info('==> Archivo PDF Salvado: '. $fileName);
                 } else {
                     Log::error('recordRepository::update @ (1) File not found: '. $this->recordUrl . $fileName);
                     //$response = json_encode(['success' => false, 'message' => trans('document/document.publish.no-file')]);
